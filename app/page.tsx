@@ -4,6 +4,12 @@ import Link from "next/link";
 import styles from "./ui/home.module.css";
 import { inter } from "@/app/ui/fonts";
 import Image from "next/image";
+import { Metadata } from "next";
+
+// Set title for metadata
+export const metadata: Metadata = {
+  title: "RecetApp",
+};
 
 export default function Page() {
   return (
