@@ -11,7 +11,7 @@ import { Metadata } from "next";
 
 // Set title for metadata
 export const metadata: Metadata = {
-  title: "Invoices",
+  title: "Recipes",
 };
 
 export default async function Page(props: {
