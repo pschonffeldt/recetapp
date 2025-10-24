@@ -1,8 +1,8 @@
-import Image from 'next/image';
-import { UpdateInvoice, DeleteInvoice } from '@/app/ui/invoices/buttons';
-import InvoiceStatus from '@/app/ui/invoices/status';
-import { formatDateToLocal, formatCurrency } from '@/app/lib/utils';
-import { fetchFilteredInvoices } from '@/app/lib/data';
+import Image from "next/image";
+import { UpdateInvoice, DeleteInvoice } from "@/app/ui/invoices/buttons";
+import InvoiceStatus from "@/app/ui/invoices/status";
+import { formatDateToLocal, formatCurrency } from "@/app/lib/utils";
+import { fetchFilteredInvoices } from "@/app/lib/data";
 
 export default async function InvoicesTable({
   query,
@@ -58,19 +58,22 @@ export default async function InvoicesTable({
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                  Customer
+                  Recepie
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Email
+                  Servings
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Amount
+                  Ingredients
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Date
+                  Cost per serving
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Status
+                  Creation date
+                </th>
+                <th scope="col" className="px-3 py-5 font-medium">
+                  Type
                 </th>
                 <th scope="col" className="relative py-3 pl-6 pr-3">
                   <span className="sr-only">Edit</span>
@@ -97,6 +100,9 @@ export default async function InvoicesTable({
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {invoice.email}
+                  </td>
+                  <td className="whitespace-nowrap px-3 py-3">
+                    {invoice.ingredients}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {formatCurrency(invoice.amount)}

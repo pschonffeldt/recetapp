@@ -22,6 +22,7 @@ export type Invoice = {
   amount: number; // Stored in cents
   status: "pending" | "paid";
   date: string;
+  ingredients: string;
 };
 
 export type Revenue = {
@@ -49,6 +50,7 @@ export type InvoicesTable = {
   email: string;
   image_url: string;
   date: string;
+  ingredients: string;
   amount: number;
   status: "pending" | "paid";
 };

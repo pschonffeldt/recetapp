@@ -86,7 +86,7 @@ export async function fetchCardData() {
   }
 }
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 12;
 export async function fetchFilteredInvoices(
   query: string,
   currentPage: number
@@ -101,6 +101,7 @@ export async function fetchFilteredInvoices(
         invoices.date,
         invoices.status,
         customers.name,
+        customers.ingredients,
         customers.email,
         customers.image_url
       FROM invoices
