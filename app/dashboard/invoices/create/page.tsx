@@ -5,7 +5,7 @@ import { Metadata } from "next";
 
 // Set title for metadata
 export const metadata: Metadata = {
-  title: "Create Invoice",
+  title: "Create Recipe",
 };
 
 export default async function Page() {
@@ -15,9 +15,9 @@ export default async function Page() {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: "Invoices", href: "/dashboard/invoices" },
+          { label: "Recipes", href: "/dashboard/invoices" },
           {
-            label: "Create Invoice",
+            label: "Create Recipe",
             href: "/dashboard/invoices/create",
             active: true,
           },
