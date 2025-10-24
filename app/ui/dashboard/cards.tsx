@@ -29,7 +29,7 @@ export default async function CardWrapper() {
         type="collected"
       />
       <Card
-        title="Avg. Recepi cost"
+        title="Avg. Recepie cost"
         value={totalPendingInvoices}
         type="pending"
       />
