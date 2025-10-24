@@ -3,15 +3,24 @@ import NavLinks from "@/app/ui/dashboard/nav-links";
 import Logo from "@/app/ui/recetapp-logo";
 import { PowerIcon } from "@heroicons/react/24/outline";
 import { signOut } from "@/auth";
+import { brand } from "../branding";
 
 export default function SideNav() {
   return (
     <div className="flex h-full flex-col px-3 py-4 md:px-2">
       {/* Box containing the logo + link to home when click */}
       <Link
-        className="mb-2 flex h-20 items-end justify-start rounded-md bg-blue-600 p-4 md:h-40"
+        // Original class, before testing centralized colors
+        // className="mb-2 flex h-20 items-end justify-start rounded-md  p-4 md:h-40"
+
+        // Testing centralized colors
+        className={`${brand(
+          "brand",
+          "bg"
+        )} mb-2 flex h-20 items-end justify-start rounded-md p-4 md:h-40`}
         href="/"
       >
+        {/* Brand logo */}
         <div className="w-32 text-white md:w-40">
           <Logo />
         </div>
