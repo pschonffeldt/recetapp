@@ -55,6 +55,16 @@ export type InvoicesTable = {
   status: "pending" | "paid";
 };
 
+// Recipe table type
+export type RecipesTable = {
+  id: string;
+  recipe_name: string;
+  recipe_ingredients: string[];
+  recipe_steps: string[];
+  recipe_created_at: string;
+  recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
+};
+
 export type CustomersTableType = {
   id: string;
   name: string;

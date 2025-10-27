@@ -4,6 +4,7 @@ import {
   CustomersTableType,
   InvoiceForm,
   InvoicesTable,
+  RecipesTable,
   LatestInvoiceRaw,
   Revenue,
 } from "./definitions";
@@ -51,6 +52,7 @@ export async function fetchLatestInvoices() {
   }
 }
 
+// Dashboard indicators fetch
 export async function fetchCardData() {
   try {
     // You can probably combine these into a single SQL query
@@ -86,6 +88,7 @@ export async function fetchCardData() {
   }
 }
 
+// Invoices data fetch
 const ITEMS_PER_PAGE = 12;
 export async function fetchFilteredInvoices(
   query: string,
@@ -121,6 +124,58 @@ export async function fetchFilteredInvoices(
     console.error("Database Error:", error);
     throw new Error("Failed to fetch invoices.");
   }
+}
+
+// Recipes data fetch
+export async function fetchFilteredRecipes(query: string, currentPage: number) {
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+  const q = `%${query}%`;
+
+  const where = query
+    ? sql`
+        WHERE
+          recipes.recipe_name ILIKE ${q} OR
+          recipes.recipe_type::text ILIKE ${q} OR
+          EXISTS (SELECT 1 FROM unnest(recipes.recipe_ingredients) ing WHERE ing ILIKE ${q}) OR
+          EXISTS (SELECT 1 FROM unnest(recipes.recipe_steps) st WHERE st ILIKE ${q})
+      `
+    : sql``;
+
+  const rows = await sql<RecipesTable[]>`
+    SELECT
+      recipes.id,
+      recipes.recipe_name,
+      recipes.recipe_ingredients,
+      recipes.recipe_steps,
+      recipes.recipe_created_at,
+      recipes.recipe_type
+    FROM recipes
+    ${where}
+    ORDER BY recipes.recipe_created_at DESC
+    LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
+  `;
+
+  return rows;
+}
+
+export async function fetchRecipesPages(query: string) {
+  if (!query) {
+    const [{ count }] = await sql<{ count: number }[]>`
+      SELECT COUNT(*)::int AS count FROM recipes;
+    `;
+    return Math.ceil(count / ITEMS_PER_PAGE);
+  }
+  const q = `%${query}%`;
+  const [{ count }] = await sql<{ count: number }[]>`
+    SELECT COUNT(*)::int AS count
+    FROM recipes
+    WHERE
+      recipes.recipe_name ILIKE ${q} OR
+      recipes.recipe_type::text ILIKE ${q} OR
+      EXISTS (SELECT 1 FROM unnest(recipes.recipe_ingredients) ing WHERE ing ILIKE ${q}) OR
+      EXISTS (SELECT 1 FROM unnest(recipes.recipe_steps) st WHERE st ILIKE ${q});
+  `;
+  return Math.ceil(count / ITEMS_PER_PAGE);
 }
 
 export async function fetchInvoicesPages(query: string) {
