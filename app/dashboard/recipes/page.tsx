@@ -1,12 +1,12 @@
 import Pagination from "@/app/ui/invoices/pagination";
 import Search from "@/app/ui/search";
 import RecipesTable from "@/app/ui/recipes/recipes-table";
-import { CreateInvoice } from "@/app/ui/invoices/buttons";
 import { inter } from "@/app/ui/fonts";
 import { Suspense } from "react";
 import { InvoicesTableSkeleton } from "@/app/ui/skeletons";
 import { fetchRecipesPages } from "@/app/lib/data";
 import { Metadata } from "next";
+import { CreateRecipe } from "@/app/ui/recipes/recipes-buttons";
 
 // Set title for metadata
 export const metadata: Metadata = {
@@ -31,7 +31,7 @@ export default async function Page(props: {
       </div>
       <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
         <Search placeholder="Search recipes..." />
-        <CreateInvoice />
+        <CreateRecipe />
       </div>
       <Suspense key={query + currentPage} fallback={<InvoicesTableSkeleton />}>
         <RecipesTable query={query} currentPage={currentPage} />

@@ -97,6 +97,17 @@ export async function deleteInvoice(id: string) {
   revalidatePath("/dashboard/invoices");
 }
 
+export async function deleteRecipe(id: string) {
+  await sql`DELETE FROM recipes WHERE id = ${id}`;
+  revalidatePath("/dashboard/recipes");
+}
+
+// Still need to create this!
+export async function reviewRecipe(id: string) {
+  await sql`DELETE FROM recipes WHERE id = ${id}`;
+  revalidatePath(`/dashboard/recipes/${id}/review`);
+}
+
 // Use Zod to update the expected types
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
