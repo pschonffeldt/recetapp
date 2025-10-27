@@ -58,22 +58,19 @@ export default async function InvoicesTable({
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                  Recepie
+                  Customer
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Servings
+                  Email
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Ingredients
-                </th>
-                <th scope="col" className="px-3 py-5 font-medium">
-                  Cost per serving
+                  Amount
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
                   Creation date
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Type
+                  Status
                 </th>
                 <th scope="col" className="relative py-3 pl-6 pr-3">
                   <span className="sr-only">Edit</span>
@@ -100,9 +97,6 @@ export default async function InvoicesTable({
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {invoice.email}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-3">
-                    {invoice.ingredients}
                   </td>
                   <td className="whitespace-nowrap px-3 py-3">
                     {formatCurrency(invoice.amount)}

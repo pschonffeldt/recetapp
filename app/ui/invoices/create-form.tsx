@@ -139,7 +139,7 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
         >
           Discard
         </Link>
-        <Button type="submit">Create Recipe</Button>
+        <Button type="submit">Create Invoice</Button>
       </div>
     </form>
   );
