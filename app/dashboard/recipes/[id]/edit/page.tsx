@@ -9,19 +9,23 @@ export const metadata: Metadata = {
   title: "Edit Recipe",
 };
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const id = params.id;
-  const recipe = await fetchRecipeById(params.id);
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const recipe = await fetchRecipeById(id);
   if (!recipe) notFound();
 
   return (
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: "Recipes", href: "/dashboard/recipe" },
+          { label: "Recipes", href: "/dashboard/recipes" },
           {
             label: "Edit Recipe",
-            href: `/dashboard/recipe/${id}/edit`,
+            href: `/dashboard/recipes/${id}/edit`,
             active: true,
           },
         ]}
