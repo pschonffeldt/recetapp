@@ -10,19 +10,21 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import { DocumentPlusIcon } from "@heroicons/react/20/solid";
 
 // Map of links to display in the side navigation.
 // Depending on the size of the application, this would be stored in a database.
 const links = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
   {
-    name: "Recipes",
+    name: "Invoices",
     href: "/dashboard/invoices",
     icon: DocumentDuplicateIcon,
   },
-  { name: "Ingredients", href: "/dashboard/customers", icon: UserGroupIcon },
-  { name: "Shopping", href: "/dashboard/shopping", icon: ShoppingCartIcon },
-  { name: "Discover", href: "/dashboard/discover", icon: GlobeAltIcon },
+  { name: "Recipes", href: "/dashboard/recipes", icon: DocumentPlusIcon },
+  // { name: "Ingredients", href: "/dashboard/customers", icon: UserGroupIcon },
+  // { name: "Shopping", href: "/dashboard/shopping", icon: ShoppingCartIcon },
+  // { name: "Discover", href: "/dashboard/discover", icon: GlobeAltIcon },
 ];
 
 export default function NavLinks() {
