@@ -7,11 +7,11 @@ import { createRecipe, RecipeFormState } from "@/app/lib/actions";
 
 // Dropdown of meal type:
 const RECIPE_TYPES = [
-  "breakfast",
-  "lunch",
-  "dinner",
-  "dessert",
-  "snack",
+  "Breakfast",
+  "Lunch",
+  "Dinner",
+  "Dessert",
+  "Snack",
 ] as const;
 
 export default function RecipeForm() {

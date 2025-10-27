@@ -3,13 +3,14 @@
 import { useActionState } from "react";
 import { updateRecipe, type RecipeFormState } from "@/app/lib/actions";
 import { Button } from "@/app/ui/button";
+import Link from "next/link";
 
 const RECIPE_TYPES = [
-  "breakfast",
-  "lunch",
-  "dinner",
-  "dessert",
-  "snack",
+  "Breakfast",
+  "Lunch",
+  "Dinner",
+  "Dessert",
+  "Snack",
 ] as const;
 
 type Props = {
@@ -30,112 +31,125 @@ export default function EditRecipeForm({ recipe }: Props) {
     <form action={formAction}>
       {/* keep the id so the action knows what to update */}
       <input type="hidden" name="id" value={recipe.id} />
+      <div className="rounded-md bg-gray-50 p-4 md:p-6">
+        {/* Name */}
+        <div className="mb-4">
+          <label
+            htmlFor="recipe_name"
+            className="mb-2 block text-sm font-medium"
+          >
+            Recipe name
+          </label>
+          <input
+            id="recipe_name"
+            name="recipe_name"
+            type="text"
+            defaultValue={recipe.recipe_name}
+            className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm"
+            aria-describedby="recipe_name-error"
+          />
+          <div id="recipe_name-error" aria-live="polite" aria-atomic="true">
+            {state.errors.recipe_name?.map((e) => (
+              <p className="mt-2 text-sm text-red-500" key={e}>
+                {e}
+              </p>
+            ))}
+          </div>
+        </div>
 
-      {/* Name */}
-      <div className="mb-4">
-        <label htmlFor="recipe_name" className="mb-2 block text-sm font-medium">
-          Recipe name
-        </label>
-        <input
-          id="recipe_name"
-          name="recipe_name"
-          type="text"
-          defaultValue={recipe.recipe_name}
-          className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm"
-          aria-describedby="recipe_name-error"
-        />
-        <div id="recipe_name-error" aria-live="polite" aria-atomic="true">
-          {state.errors.recipe_name?.map((e) => (
-            <p className="mt-2 text-sm text-red-500" key={e}>
-              {e}
-            </p>
-          ))}
+        {/* Type */}
+        <div className="mb-4">
+          <label
+            htmlFor="recipe_type"
+            className="mb-2 block text-sm font-medium"
+          >
+            Type
+          </label>
+          <select
+            id="recipe_type"
+            name="recipe_type"
+            defaultValue={recipe.recipe_type}
+            className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm"
+            aria-describedby="recipe_type-error"
+          >
+            {RECIPE_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+          <div id="recipe_type-error" aria-live="polite" aria-atomic="true">
+            {state.errors.recipe_type?.map((e) => (
+              <p className="mt-2 text-sm text-red-500" key={e}>
+                {e}
+              </p>
+            ))}
+          </div>
+        </div>
+
+        {/* Ingredients */}
+        <div className="mb-4">
+          <label
+            htmlFor="recipe_ingredients"
+            className="mb-2 block text-sm font-medium"
+          >
+            Ingredients (one per line)
+          </label>
+          <textarea
+            id="recipe_ingredients"
+            name="recipe_ingredients"
+            rows={5}
+            defaultValue={recipe.recipe_ingredients.join("\n")}
+            className="block w-full rounded-md border border-gray-200 p-2 text-sm"
+            aria-describedby="recipe_ingredients-error"
+          />
+          <div
+            id="recipe_ingredients-error"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {state.errors.recipe_ingredients?.map((e) => (
+              <p className="mt-2 text-sm text-red-500" key={e}>
+                {e}
+              </p>
+            ))}
+          </div>
+        </div>
+
+        {/* Steps */}
+        <div className="mb-4">
+          <label
+            htmlFor="recipe_steps"
+            className="mb-2 block text-sm font-medium"
+          >
+            Steps (one per line)
+          </label>
+          <textarea
+            id="recipe_steps"
+            name="recipe_steps"
+            rows={6}
+            defaultValue={recipe.recipe_steps.join("\n")}
+            className="block w-full rounded-md border border-gray-200 p-2 text-sm"
+            aria-describedby="recipe_steps-error"
+          />
+          <div id="recipe_steps-error" aria-live="polite" aria-atomic="true">
+            {state.errors.recipe_steps?.map((e) => (
+              <p className="mt-2 text-sm text-red-500" key={e}>
+                {e}
+              </p>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Type */}
-      <div className="mb-4">
-        <label htmlFor="recipe_type" className="mb-2 block text-sm font-medium">
-          Type
-        </label>
-        <select
-          id="recipe_type"
-          name="recipe_type"
-          defaultValue={recipe.recipe_type}
-          className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm"
-          aria-describedby="recipe_type-error"
+      <div className="mt-6 flex justify-end gap-4">
+        <Link
+          href="/dashboard/recipes"
+          className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
         >
-          {RECIPE_TYPES.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-        <div id="recipe_type-error" aria-live="polite" aria-atomic="true">
-          {state.errors.recipe_type?.map((e) => (
-            <p className="mt-2 text-sm text-red-500" key={e}>
-              {e}
-            </p>
-          ))}
-        </div>
-      </div>
-
-      {/* Ingredients */}
-      <div className="mb-4">
-        <label
-          htmlFor="recipe_ingredients"
-          className="mb-2 block text-sm font-medium"
-        >
-          Ingredients (one per line)
-        </label>
-        <textarea
-          id="recipe_ingredients"
-          name="recipe_ingredients"
-          rows={5}
-          defaultValue={recipe.recipe_ingredients.join("\n")}
-          className="block w-full rounded-md border border-gray-200 p-2 text-sm"
-          aria-describedby="recipe_ingredients-error"
-        />
-        <div
-          id="recipe_ingredients-error"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {state.errors.recipe_ingredients?.map((e) => (
-            <p className="mt-2 text-sm text-red-500" key={e}>
-              {e}
-            </p>
-          ))}
-        </div>
-      </div>
-
-      {/* Steps */}
-      <div className="mb-4">
-        <label
-          htmlFor="recipe_steps"
-          className="mb-2 block text-sm font-medium"
-        >
-          Steps (one per line)
-        </label>
-        <textarea
-          id="recipe_steps"
-          name="recipe_steps"
-          rows={6}
-          defaultValue={recipe.recipe_steps.join("\n")}
-          className="block w-full rounded-md border border-gray-200 p-2 text-sm"
-          aria-describedby="recipe_steps-error"
-        />
-        <div id="recipe_steps-error" aria-live="polite" aria-atomic="true">
-          {state.errors.recipe_steps?.map((e) => (
-            <p className="mt-2 text-sm text-red-500" key={e}>
-              {e}
-            </p>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-6 flex justify-end gap-3">
-        <Button type="submit">Save changes</Button>
+          Discard Changes
+        </Link>
+        <Button type="submit">Edit Recipe</Button>
       </div>
 
       {state.message && (

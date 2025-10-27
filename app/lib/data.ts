@@ -7,6 +7,8 @@ import {
   RecipesTable,
   LatestInvoiceRaw,
   Revenue,
+  RecipeField,
+  RecipeForm,
 } from "./definitions";
 import { formatCurrency } from "./utils";
 
@@ -240,20 +242,6 @@ export async function fetchCustomers() {
     throw new Error("Failed to fetch all customers.");
   }
 }
-
-export type RecipeField = {
-  id: string;
-  recipe_name: string;
-  recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
-};
-
-export type RecipeForm = {
-  id: string;
-  recipe_name: string;
-  recipe_ingredients: string[];
-  recipe_steps: string[];
-  recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
-};
 
 // Fetch recipes
 export async function fetchRecipes() {

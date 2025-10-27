@@ -62,7 +62,7 @@ export type RecipesTable = {
   recipe_ingredients: string[];
   recipe_steps: string[];
   recipe_created_at: string;
-  recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
+  recipe_type: "Breakfast" | "Lunch" | "Dinner" | "Dessert" | "Snack";
 };
 
 export type CustomersTableType = {
@@ -95,4 +95,18 @@ export type InvoiceForm = {
   customer_id: string;
   amount: number;
   status: "pending" | "paid";
+};
+
+export type RecipeField = {
+  id: string;
+  recipe_name: string;
+  recipe_type: "Breakfast" | "Lunch" | "Dinner" | "Dessert" | "Snack";
+};
+
+export type RecipeForm = {
+  id: string;
+  recipe_name: string;
+  recipe_ingredients: string[];
+  recipe_steps: string[];
+  recipe_type: "Breakfast" | "Lunch" | "Dinner" | "Dessert" | "Snack";
 };
