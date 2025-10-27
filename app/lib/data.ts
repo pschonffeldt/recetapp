@@ -241,13 +241,21 @@ export async function fetchCustomers() {
   }
 }
 
-// Fetch recipes
 export type RecipeField = {
   id: string;
   recipe_name: string;
   recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
 };
 
+export type RecipeForm = {
+  id: string;
+  recipe_name: string;
+  recipe_ingredients: string[];
+  recipe_steps: string[];
+  recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
+};
+
+// Fetch recipes
 export async function fetchRecipes() {
   try {
     const recipes = await sql<RecipeField[]>`
@@ -263,6 +271,26 @@ export async function fetchRecipes() {
   } catch (err) {
     console.error("Database Error:", err);
     throw new Error("Failed to fetch all recipes.");
+  }
+}
+
+export async function fetchRecipeById(id: string) {
+  try {
+    const rows = await sql<RecipeForm[]>`
+      SELECT
+        id,
+        recipe_name,
+        recipe_ingredients,
+        recipe_steps,
+        recipe_type
+      FROM recipes
+      WHERE id = ${id};
+    `;
+
+    return rows[0] ?? null; // return a single recipe or null
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch recipe.");
   }
 }
 

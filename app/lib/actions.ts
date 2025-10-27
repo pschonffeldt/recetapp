@@ -218,3 +218,73 @@ export async function createRecipe(
   revalidatePath("/dashboard/recipes");
   redirect("/dashboard/recipes");
 }
+
+// ✅Update schema that includes id
+const UpdateRecipeSchema = RecipeSchema.extend({
+  id: z.string().uuid("Invalid recipe id"),
+});
+
+// Edit recipe function
+const splitLines = (v: FormDataEntryValue | null) =>
+  String(v ?? "")
+    .split(/\r?\n/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+export async function updateRecipe(
+  _prev: RecipeFormState,
+  formData: FormData
+): Promise<RecipeFormState> {
+  const parsed = UpdateRecipeSchema.safeParse({
+    id: formData.get("id"),
+    recipe_name: formData.get("recipe_name"),
+    recipe_type: formData.get("recipe_type"),
+    recipe_ingredients: splitLines(formData.get("recipe_ingredients")),
+    recipe_steps: splitLines(formData.get("recipe_steps")),
+  });
+
+  if (!parsed.success) {
+    const errors: RecipeFormState["errors"] = {};
+    for (const issue of parsed.error.issues) {
+      const key = issue.path[0] as keyof RecipeFormState["errors"];
+      (errors[key] ??= []).push(issue.message);
+    }
+    // if id fails, it won’t be in RecipeFormState["errors"]; show a top-level message
+    if (
+      !errors.recipe_name &&
+      !errors.recipe_type &&
+      !errors.recipe_ingredients &&
+      !errors.recipe_steps
+    ) {
+      return { message: "Invalid recipe id.", errors };
+    }
+    return { message: "Please correct the errors below.", errors };
+  }
+
+  const { id, recipe_name, recipe_type, recipe_ingredients, recipe_steps } =
+    parsed.data;
+
+  try {
+    await sql`
+      UPDATE recipes
+      SET
+        recipe_name        = ${recipe_name},
+        recipe_type        = ${recipe_type}::recipe_type_enum,
+        recipe_ingredients = ${recipe_ingredients}::text[],
+        recipe_steps       = ${recipe_steps}::text[]
+      WHERE id = ${id};
+    `;
+  } catch (e) {
+    console.error("Update recipe failed:", e);
+    return {
+      message:
+        e instanceof Error
+          ? `Failed to update recipe: ${e.message}`
+          : "Failed to update recipe.",
+      errors: {},
+    };
+  }
+
+  revalidatePath("/dashboard/recipes");
+  redirect("/dashboard/recipes");
+}
