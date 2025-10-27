@@ -9,6 +9,7 @@ import { AuthError } from "next-auth";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
+// Invoice form data validation schema
 const FormSchema = z.object({
   id: z.string(),
   customerId: z.string({
@@ -23,8 +24,20 @@ const FormSchema = z.object({
   date: z.string(),
 });
 
+// Recipe form data validation schema
+const RecipeSchema = z.object({
+  recipe_name: z.string().min(1, "Recipe name is required"),
+  recipe_type: z.enum(["breakfast", "lunch", "dinner", "dessert", "snack"]),
+  recipe_ingredients: z
+    .array(z.string().min(1))
+    .min(1, "Enter at least one ingredient"),
+  recipe_steps: z.array(z.string().min(1)).min(1, "Enter at least one step"),
+});
+
+// Create invoice function
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
+// Invoice creation state/type
 export type State = {
   errors?: {
     customerId?: string[];
@@ -34,6 +47,18 @@ export type State = {
   message?: string | null;
 };
 
+// Recipe creation state/type
+export type RecipeFormState = {
+  message: string | null;
+  errors: {
+    recipe_name?: string[];
+    recipe_type?: string[];
+    recipe_ingredients?: string[];
+    recipe_steps?: string[];
+  };
+};
+
+// Authentication verification function
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData
@@ -53,6 +78,7 @@ export async function authenticate(
   }
 }
 
+// Create invoice function
 export async function createInvoice(prevState: State, formData: FormData) {
   // Validate form using Zod
   const validatedFields = CreateInvoice.safeParse({
@@ -92,11 +118,13 @@ export async function createInvoice(prevState: State, formData: FormData) {
   redirect("/dashboard/invoices");
 }
 
+// Delete invoice function
 export async function deleteInvoice(id: string) {
   await sql`DELETE FROM invoices WHERE id = ${id}`;
   revalidatePath("/dashboard/invoices");
 }
 
+// Delete recipe function
 export async function deleteRecipe(id: string) {
   await sql`DELETE FROM recipes WHERE id = ${id}`;
   revalidatePath("/dashboard/recipes");
@@ -111,6 +139,7 @@ export async function reviewRecipe(id: string) {
 // Use Zod to update the expected types
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
+// Update invoice function
 export async function updateInvoice(
   id: string,
   prevState: State,
@@ -144,4 +173,48 @@ export async function updateInvoice(
 
   revalidatePath("/dashboard/invoices");
   redirect("/dashboard/invoices");
+}
+// Turns a textarea’s newline-separated text into a clean string[] by converting the value to a string, splitting on newlines, trimming each line, and dropping any empty lines.
+function splitLinesToArray(v: FormDataEntryValue | null): string[] {
+  return String(v ?? "")
+    .split(/\r?\n/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+// Create recipe function
+export async function createRecipe(
+  _prevState: RecipeFormState,
+  formData: FormData
+): Promise<RecipeFormState> {
+  const parsed = RecipeSchema.safeParse({
+    recipe_name: formData.get("recipe_name"),
+    recipe_type: formData.get("recipe_type"),
+    recipe_ingredients: splitLinesToArray(formData.get("recipe_ingredients")),
+    recipe_steps: splitLinesToArray(formData.get("recipe_steps")),
+  });
+
+  if (!parsed.success) {
+    const errors: RecipeFormState["errors"] = {};
+    for (const issue of parsed.error.issues) {
+      const key = issue.path[0] as keyof RecipeFormState["errors"];
+      (errors[key] ??= []).push(issue.message);
+    }
+    return { message: "Please correct the errors below.", errors };
+  }
+
+  try {
+    const { recipe_name, recipe_type, recipe_ingredients, recipe_steps } =
+      parsed.data;
+    await sql`
+      INSERT INTO recipes (recipe_name, recipe_ingredients, recipe_steps, recipe_type)
+      VALUES (${recipe_name}, ${recipe_ingredients}, ${recipe_steps}, ${recipe_type})
+    `;
+  } catch (err) {
+    console.error("Create recipe failed:", err);
+    return { message: "Failed to create recipe.", errors: {} };
+  }
+
+  revalidatePath("/dashboard/recipes");
+  redirect("/dashboard/recipes");
 }

@@ -241,6 +241,31 @@ export async function fetchCustomers() {
   }
 }
 
+// Fetch recipes
+export type RecipeField = {
+  id: string;
+  recipe_name: string;
+  recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
+};
+
+export async function fetchRecipes() {
+  try {
+    const recipes = await sql<RecipeField[]>`
+      SELECT
+        id,
+        recipe_name,
+        recipe_type
+      FROM recipes
+      ORDER BY recipe_name ASC
+    `;
+
+    return recipes;
+  } catch (err) {
+    console.error("Database Error:", err);
+    throw new Error("Failed to fetch all recipes.");
+  }
+}
+
 export async function fetchFilteredCustomers(query: string) {
   try {
     const data = await sql<CustomersTableType[]>`
