@@ -7,41 +7,41 @@ export default function RecipesType({ type }: { type: string }) {
       className={clsx(
         "inline-flex items-center rounded-full px-2 py-1 text-xs",
         {
-          "bg-blue-500 text-white": type === "Breakfast",
-          "bg-green-500 text-white": type === "Lunch",
-          "bg-purple-500 text-white": type === "Dinner",
-          "bg-yellow-500 text-white": type === "Dessert",
-          "bg-red-500 text-white": type === "Snack",
+          "bg-blue-500 text-white": type === "breakfast",
+          "bg-green-500 text-white": type === "lunch",
+          "bg-purple-500 text-white": type === "dinner",
+          "bg-yellow-500 text-white": type === "dessert",
+          "bg-red-500 text-white": type === "snack",
         }
       )}
     >
-      {type === "Breakfast" ? (
+      {type === "breakfast" ? (
         <>
-          Breakfast
+          breakfast
           {/* <ClockIcon className="ml-1 w-4 text-gray-500" /> */}
         </>
       ) : null}
-      {type === "Lunch" ? (
+      {type === "lunch" ? (
         <>
-          Lunch
+          lunch
           {/* <CheckIcon className="ml-1 w-4 text-white" /> */}
         </>
       ) : null}
-      {type === "Dinner" ? (
+      {type === "dinner" ? (
         <>
-          Dinner
+          dinner
           {/* <CheckIcon className="ml-1 w-4 text-white" /> */}
         </>
       ) : null}
-      {type === "Dessert" ? (
+      {type === "dessert" ? (
         <>
-          Dessert
+          dessert
           {/* <CheckIcon className="ml-1 w-4 text-white" /> */}
         </>
       ) : null}
-      {type === "Snack" ? (
+      {type === "snack" ? (
         <>
-          Snack
+          snack
           {/* <CheckIcon className="ml-1 w-4 text-white" /> */}
         </>
       ) : null}

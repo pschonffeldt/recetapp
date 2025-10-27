@@ -6,11 +6,11 @@ import { Button } from "@/app/ui/button";
 import Link from "next/link";
 
 const RECIPE_TYPES = [
-  "Breakfast",
-  "Lunch",
-  "Dinner",
-  "Dessert",
-  "Snack",
+  "breakfast",
+  "lunch",
+  "dinner",
+  "dessert",
+  "snack",
 ] as const;
 
 type Props = {

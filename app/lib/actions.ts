@@ -27,7 +27,7 @@ const FormSchema = z.object({
 // Recipe form data validation schema
 const RecipeSchema = z.object({
   recipe_name: z.string().min(1, "Recipe name is required"),
-  recipe_type: z.enum(["Breakfast", "Lunch", "Dinner", "Dessert", "Snack"]),
+  recipe_type: z.enum(["breakfast", "lunch", "dinner", "dessert", "snack"]),
   recipe_ingredients: z
     .array(z.string().min(1))
     .min(1, "Enter at least one ingredient"),
