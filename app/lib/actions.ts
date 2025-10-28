@@ -130,6 +130,13 @@ export async function deleteRecipe(id: string) {
   revalidatePath("/dashboard/recipes");
 }
 
+// Delete recipe from viewer function
+export async function deleteRecipeFromViewer(id: string) {
+  await sql`DELETE FROM recipes WHERE id = ${id}`;
+  revalidatePath("/dashboard/recipes");
+  redirect("/dashboard/recipes");
+}
+
 // Still need to create this!
 export async function reviewRecipe(id: string) {
   await sql`DELETE FROM recipes WHERE id = ${id}`;

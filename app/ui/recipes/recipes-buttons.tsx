@@ -1,4 +1,4 @@
-import { deleteRecipe, reviewRecipe } from "@/app/lib/actions";
+import { deleteRecipe, deleteRecipeFromViewer } from "@/app/lib/actions";
 import {
   MagnifyingGlassCircleIcon,
   PencilIcon,
@@ -33,8 +33,6 @@ export function ViewRecipe({ id }: { id: string }) {
 }
 
 export function UpdateRecipe({ id }: { id: string }) {
-  const deleteRecipeWithId = deleteRecipe.bind(null, id);
-
   return (
     <Link
       href={`/dashboard/recipes/${id}/edit`}
@@ -42,6 +40,32 @@ export function UpdateRecipe({ id }: { id: string }) {
     >
       <PencilIcon className="w-5" />
     </Link>
+  );
+}
+
+export function UpdateRecipeOnViewer({ id }: { id: string }) {
+  return (
+    <Link
+      href={`/dashboard/recipes/${id}/edit`}
+      className="flex h-10 items-center rounded-lg bg-blue-500 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+    >
+      Edit Recipe
+    </Link>
+  );
+}
+
+export function DeleteRecipeOnViewer({ id }: { id: string }) {
+  const deleteRecipeWithId = deleteRecipeFromViewer.bind(null, id);
+
+  return (
+    <form action={deleteRecipeWithId}>
+      <button
+        type="submit"
+        className="flex h-10 items-center rounded-lg bg-blue-500 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+      >
+        Delete Recipe
+      </button>
+    </form>
   );
 }
 

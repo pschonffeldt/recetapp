@@ -1,11 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
 import { type RecipeFormState } from "@/app/lib/actions";
 import { Button } from "@/app/ui/button";
 import Link from "next/link";
-import { formatDateToLocal } from "@/app/lib/utils";
-import { fetchFilteredRecipes } from "@/app/lib/data";
+import {
+  DeleteRecipe,
+  DeleteRecipeOnViewer,
+  UpdateRecipeOnViewer,
+} from "./recipes-buttons";
 
 const RECIPE_TYPES = [
   "breakfast",
@@ -104,6 +106,8 @@ export default function ViewerRecipe({ recipe }: Props) {
             Return to list
           </Link>
           <Button type="submit">Share Recipe</Button>
+          <UpdateRecipeOnViewer id={recipe.id} />
+          <DeleteRecipeOnViewer id={recipe.id} />
         </div>
       </section>
     </div>
