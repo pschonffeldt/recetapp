@@ -1,7 +1,7 @@
 import { fetchFilteredRecipes } from "@/app/lib/data";
 import RecipesType from "./recipes-status";
 import { formatDateToLocal } from "@/app/lib/utils";
-import { DeleteRecipe, ReviewRecipe, UpdateRecipe } from "./recipes-buttons";
+import { DeleteRecipe, ViewRecipe, UpdateRecipe } from "./recipes-buttons";
 
 export default async function RecipesTable({
   query,
@@ -134,7 +134,7 @@ export default async function RecipesTable({
 
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end gap-3">
-                        <ReviewRecipe id={recipe.id} />
+                        <ViewRecipe id={recipe.id} />
                         <UpdateRecipe id={recipe.id} />
                         <DeleteRecipe id={recipe.id} />
                       </div>

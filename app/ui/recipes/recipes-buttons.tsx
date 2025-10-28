@@ -19,12 +19,12 @@ export function CreateRecipe() {
   );
 }
 
-export function ReviewRecipe({ id }: { id: string }) {
-  const reviewRecipeWithId = reviewRecipe.bind(null, id);
+export function ViewRecipe({ id }: { id: string }) {
+  const deleteRecipeWithId = deleteRecipe.bind(null, id);
 
   return (
     <Link
-      href={`/dashboard/recipes/${id}/review`}
+      href={`/dashboard/recipes/${id}/viewer`}
       className="rounded-md border p-2 hover:bg-gray-100"
     >
       <MagnifyingGlassCircleIcon className="w-5" />

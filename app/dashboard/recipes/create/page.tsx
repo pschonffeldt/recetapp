@@ -18,7 +18,7 @@ export default async function Page() {
           { label: "Recipes", href: "/dashboard/recipes" },
           {
             label: "Create Recipe",
-            href: "/dashboard/invoices/recipes",
+            href: "/dashboard/recipes/create",
             active: true,
           },
         ]}
