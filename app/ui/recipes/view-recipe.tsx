@@ -3,11 +3,8 @@
 import { type RecipeFormState } from "@/app/lib/actions";
 import { Button } from "@/app/ui/button";
 import Link from "next/link";
-import {
-  DeleteRecipe,
-  DeleteRecipeOnViewer,
-  UpdateRecipeOnViewer,
-} from "./recipes-buttons";
+import { DeleteRecipeOnViewer, UpdateRecipeOnViewer } from "./recipes-buttons";
+// import html2pdf from "html2pdf.js";s
 
 const RECIPE_TYPES = [
   "breakfast",
@@ -35,9 +32,20 @@ const capitalizeFirst = (s: string) =>
 export default function ViewerRecipe({ recipe }: Props) {
   const initial: RecipeFormState = { message: null, errors: {} };
 
+  async function handleOnClick() {
+    const html2pdf = await require("html2pdf.js");
+    const element = document.querySelector("#print");
+    html2pdf(element, {
+      margin: 20,
+    });
+  }
+
   return (
     <div>
-      <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 shadow-sm">
+      <div
+        id="print"
+        className="rounded-xl border border-gray-200 bg-gray-50 p-6 shadow-sm"
+      >
         {/* Recipe name and type */}
         <header className="mb-6">
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
@@ -105,7 +113,7 @@ export default function ViewerRecipe({ recipe }: Props) {
           >
             Return to list
           </Link>
-          <Button type="submit">Share Recipe</Button>
+          <Button onClick={handleOnClick}>Share Recipe</Button>
           <UpdateRecipeOnViewer id={recipe.id} />
           <DeleteRecipeOnViewer id={recipe.id} />
         </div>
