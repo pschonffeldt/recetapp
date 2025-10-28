@@ -1,108 +1,74 @@
+/* ============================================
+ * Type Definitions
+ * --------------------------------------------
+ * - Central source of truth for data shapes
+ * - Mirrors DB columns and UI DTOs
+ * - Keep in sync with schema/ORM models
+ * ============================================ */
+
+/**
+ * High-level notes:
+ * - Amounts are stored in cents (number) at the DB layer.
+ * - Some “table” types mirror SELECT joins.
+ * - “Raw” types represent DB results pre-formatting.
+ * - UI-facing types (e.g., LatestInvoice) may have formatted strings.
+ */
+
 // This file contains type definitions for your data.
 // It describes the shape of the data, and what data type each property should accept.
-// For simplicity of teaching, we're manually defining these types.
 // However, these types are generated automatically if you're using an ORM such as Prisma.
+
+/* =======================================================
+ * Core Entities
+ * ======================================================= */
+
+/** Authenticated application user (not necessarily a customer). */
 export type User = {
   id: string;
   name: string;
   email: string;
+  /** Hashed password when persisted; do not expose to the client. */
   password: string;
 };
 
-export type Customer = {
-  id: string;
-  name: string;
-  email: string;
-  image_url: string;
-};
-
-export type Invoice = {
-  id: string; // Will be created on the database
-  customer_id: string;
-  amount: number; // Stored in cents
-  status: "pending" | "paid";
-  date: string;
-  ingredients: string;
-};
-
+/** Aggregated revenue row (e.g., for charts). */
 export type Revenue = {
+  /** Month label (e.g., "Jan", "2025-01"). */
   month: string;
+  /** Revenue value in dollars (already aggregated for display). */
   revenue: number;
 };
 
-export type LatestInvoice = {
-  id: string;
-  name: string;
-  image_url: string;
-  email: string;
-  amount: string;
-};
+/* =======================================================
+ * Recipes
+ * ======================================================= */
 
-// The database returns a number for amount, but we later format it to a string with the formatCurrency function
-export type LatestInvoiceRaw = Omit<LatestInvoice, "amount"> & {
-  amount: number;
-};
-
-export type InvoicesTable = {
-  id: string;
-  customer_id: string;
-  name: string;
-  email: string;
-  image_url: string;
-  date: string;
-  ingredients: string;
-  amount: number;
-  status: "pending" | "paid";
-};
-
-// Recipe table type
+/** Recipe row used in paginated table views. */
 export type RecipesTable = {
   id: string;
   recipe_name: string;
+  /** Array of ingredient lines (normalized). */
   recipe_ingredients: string[];
+  /** Array of step lines (normalized). */
   recipe_steps: string[];
+  /** ISO timestamp string from DB (created_at). */
   recipe_created_at: string;
+  /** Enum of allowed recipe types. */
   recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
 };
 
-export type CustomersTableType = {
-  id: string;
-  name: string;
-  email: string;
-  image_url: string;
-  total_invoices: number;
-  total_pending: number;
-  total_paid: number;
-};
+/* =======================================================
+ * Form Helpers (Dropdowns / Forms)
+ * ======================================================= */
 
-export type FormattedCustomersTable = {
-  id: string;
-  name: string;
-  email: string;
-  image_url: string;
-  total_invoices: number;
-  total_pending: string;
-  total_paid: string;
-};
-
-export type CustomerField = {
-  id: string;
-  name: string;
-};
-
-export type InvoiceForm = {
-  id: string;
-  customer_id: string;
-  amount: number;
-  status: "pending" | "paid";
-};
-
+/** Minimal recipe record for selects. */
 export type RecipeField = {
   id: string;
   recipe_name: string;
   recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
 };
 
+/** Full recipe shape for edit/create forms. */
 export type RecipeForm = {
   id: string;
   recipe_name: string;
