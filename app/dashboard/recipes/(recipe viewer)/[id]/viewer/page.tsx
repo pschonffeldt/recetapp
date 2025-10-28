@@ -1,4 +1,4 @@
-import Breadcrumbs from "@/app/ui/invoices/breadcrumbs";
+import Breadcrumbs from "@/app/ui/recipes/breadcrumbs";
 import { fetchRecipeById } from "@/app/lib/data";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";

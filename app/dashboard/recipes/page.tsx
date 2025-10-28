@@ -1,4 +1,4 @@
-import Pagination from "@/app/ui/invoices/pagination";
+import Pagination from "@/app/ui/recipes/pagination";
 import Search from "@/app/ui/search";
 import RecipesTable from "@/app/ui/recipes/recipes-table";
 import { inter } from "@/app/ui/fonts";

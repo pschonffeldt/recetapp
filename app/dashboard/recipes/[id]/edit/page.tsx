@@ -1,5 +1,5 @@
 import EditRecipeForm from "@/app/ui/recipes/edit-recipe-form";
-import Breadcrumbs from "@/app/ui/invoices/breadcrumbs";
+import Breadcrumbs from "@/app/ui/recipes/breadcrumbs";
 import { fetchRecipeById } from "@/app/lib/data";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";

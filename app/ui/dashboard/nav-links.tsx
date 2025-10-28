@@ -16,11 +16,6 @@ import { DocumentPlusIcon } from "@heroicons/react/20/solid";
 // Depending on the size of the application, this would be stored in a database.
 const links = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
-  {
-    name: "Invoices",
-    href: "/dashboard/invoices",
-    icon: DocumentDuplicateIcon,
-  },
   { name: "Recipes", href: "/dashboard/recipes", icon: DocumentPlusIcon },
   // { name: "Ingredients", href: "/dashboard/customers", icon: UserGroupIcon },
   // { name: "Shopping", href: "/dashboard/shopping", icon: ShoppingCartIcon },

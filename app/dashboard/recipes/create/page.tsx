@@ -1,4 +1,4 @@
-import Breadcrumbs from "@/app/ui/invoices/breadcrumbs";
+import Breadcrumbs from "@/app/ui/recipes/breadcrumbs";
 import { fetchRecipes } from "@/app/lib/data";
 import { Metadata } from "next";
 import RecipeForm from "@/app/ui/recipes/create-recipe-form";
