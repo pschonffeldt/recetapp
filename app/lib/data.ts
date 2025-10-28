@@ -1,9 +1,11 @@
+/* ============================================
+ * Data Access Layer (Postgres via postgres.js)
+ * - Centralized queries for dashboard, invoices,
+ *   customers, and recipes.
+ * ============================================ */
+
 import postgres from "postgres";
 import {
-  CustomerField,
-  CustomersTableType,
-  InvoiceForm,
-  InvoicesTable,
   RecipesTable,
   LatestInvoiceRaw,
   Revenue,
@@ -12,8 +14,27 @@ import {
 } from "./definitions";
 import { formatCurrency } from "./utils";
 
+/* ================================
+ * Database Client
+ * ================================ */
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
+/* ================================
+ * Pagination
+ * ================================ */
+
+/** Items per page used by listings */
+const ITEMS_PER_PAGE = 8;
+
+/* =======================================================
+ * Revenue
+ * ======================================================= */
+
+/**
+ * Fetch all revenue rows.
+ * @returns Promise<Revenue[]>
+ * @throws Error if DB query fails
+ */
 export async function fetchRevenue() {
   try {
     const data = await sql<Revenue[]>`SELECT * FROM revenue`;
@@ -24,7 +45,15 @@ export async function fetchRevenue() {
   }
 }
 
-// Fetch the last 5 invoices, sorted by date
+/* =======================================================
+ * Invoices — Latest, Cards, Filtering, Pagination, Single
+ * ======================================================= */
+
+/**
+ * Fetch the last 5 invoices sorted by date (desc), joined with customer.
+ * Formats amount for UI display.
+ * @returns Promise<Array<{ amount: string; name: string; image_url: string; email: string; id: string }>>
+ */
 export async function fetchLatestInvoices() {
   try {
     const data = await sql<LatestInvoiceRaw[]>`
@@ -45,12 +74,14 @@ export async function fetchLatestInvoices() {
   }
 }
 
-// Dashboard indicators fetch
+/**
+ * Fetch dashboard KPI card data (counts + totals by status).
+ * Note: Split into parallel queries for demonstration purposes.
+ * @returns Promise<{ numberOfCustomers: number; numberOfInvoices: number; totalPaidInvoices: string; totalPendingInvoices: string; }>
+ */
 export async function fetchCardData() {
   try {
-    // You can probably combine these into a single SQL query
-    // However, we are intentionally splitting them to demonstrate
-    // how to initialize multiple queries in parallel with JS.
+    // These are intentionally separated to demonstrate Promise.all:
     const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
     const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
     const invoiceStatusPromise = sql`SELECT
@@ -64,8 +95,11 @@ export async function fetchCardData() {
       invoiceStatusPromise,
     ]);
 
+    // Defensive conversions from text to number:
     const numberOfInvoices = Number(data[0][0].count ?? "0");
     const numberOfCustomers = Number(data[1][0].count ?? "0");
+
+    // Format totals for UI:
     const totalPaidInvoices = formatCurrency(data[2][0].paid ?? "0");
     const totalPendingInvoices = formatCurrency(data[2][0].pending ?? "0");
 
@@ -81,51 +115,25 @@ export async function fetchCardData() {
   }
 }
 
-// Items per page
-const ITEMS_PER_PAGE = 8;
+/* =======================================================
+ * Recipes — Filtered List, Paging, Single, List
+ * ======================================================= */
 
-// Invoices data fetch
-export async function fetchFilteredInvoices(
-  query: string,
-  currentPage: number
-) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-
-  try {
-    const invoices = await sql<InvoicesTable[]>`
-      SELECT
-        invoices.id,
-        invoices.amount,
-        invoices.date,
-        invoices.status,
-        customers.name,
-        customers.ingredients,
-        customers.email,
-        customers.image_url
-      FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
-      WHERE
-        customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`} OR
-        invoices.amount::text ILIKE ${`%${query}%`} OR
-        invoices.date::text ILIKE ${`%${query}%`} OR
-        invoices.status ILIKE ${`%${query}%`}
-      ORDER BY invoices.date DESC
-      LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset}
-    `;
-
-    return invoices;
-  } catch (error) {
-    console.error("Database Error:", error);
-    throw new Error("Failed to fetch invoices.");
-  }
-}
-
-// Recipes data fetch
+/**
+ * Fetch a paginated list of recipes matching a query across:
+ * - recipe_name, recipe_type
+ * - ingredients (unnest on text[])
+ * - steps (unnest on text[])
+ *
+ * @param query       - Search string for filter
+ * @param currentPage - 1-based page index
+ * @returns Promise<RecipesTable[]>
+ */
 export async function fetchFilteredRecipes(query: string, currentPage: number) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
   const q = `%${query}%`;
 
+  // Build WHERE clause only if query exists to avoid full-table ILIKEs:
   const where = query
     ? sql`
         WHERE
@@ -153,6 +161,12 @@ export async function fetchFilteredRecipes(query: string, currentPage: number) {
   return rows;
 }
 
+/**
+ * Compute total pages for recipes given a filter query.
+ *
+ * @param query - Search string for filter
+ * @returns Promise<number> totalPages
+ */
 export async function fetchRecipesPages(query: string) {
   if (!query) {
     const [{ count }] = await sql<{ count: number }[]>`
@@ -160,6 +174,7 @@ export async function fetchRecipesPages(query: string) {
     `;
     return Math.ceil(count / ITEMS_PER_PAGE);
   }
+
   const q = `%${query}%`;
   const [{ count }] = await sql<{ count: number }[]>`
     SELECT COUNT(*)::int AS count
@@ -173,70 +188,11 @@ export async function fetchRecipesPages(query: string) {
   return Math.ceil(count / ITEMS_PER_PAGE);
 }
 
-export async function fetchInvoicesPages(query: string) {
-  try {
-    const data = await sql`SELECT COUNT(*)
-    FROM invoices
-    JOIN customers ON invoices.customer_id = customers.id
-    WHERE
-      customers.name ILIKE ${`%${query}%`} OR
-      customers.email ILIKE ${`%${query}%`} OR
-      invoices.amount::text ILIKE ${`%${query}%`} OR
-      invoices.date::text ILIKE ${`%${query}%`} OR
-      invoices.status ILIKE ${`%${query}%`}
-  `;
-
-    const totalPages = Math.ceil(Number(data[0].count) / ITEMS_PER_PAGE);
-    return totalPages;
-  } catch (error) {
-    console.error("Database Error:", error);
-    throw new Error("Failed to fetch total number of invoices.");
-  }
-}
-
-export async function fetchInvoiceById(id: string) {
-  try {
-    const data = await sql<InvoiceForm[]>`
-      SELECT
-        invoices.id,
-        invoices.customer_id,
-        invoices.amount,
-        invoices.status
-      FROM invoices
-      WHERE invoices.id = ${id};
-    `;
-
-    const invoice = data.map((invoice) => ({
-      ...invoice,
-      // Convert amount from cents to dollars
-      amount: invoice.amount / 100,
-    }));
-    console.log(invoice); // Invoice is an empty array []
-    return invoice[0];
-  } catch (error) {
-    console.error("Database Error:", error);
-    throw new Error("Failed to fetch invoice.");
-  }
-}
-
-export async function fetchCustomers() {
-  try {
-    const customers = await sql<CustomerField[]>`
-      SELECT
-        id,
-        name
-      FROM customers
-      ORDER BY name ASC
-    `;
-
-    return customers;
-  } catch (err) {
-    console.error("Database Error:", err);
-    throw new Error("Failed to fetch all customers.");
-  }
-}
-
-// Fetch recipes
+/**
+ * Fetch a minimal list of recipes (id, name, type) ordered by name.
+ * Useful for select dropdowns.
+ * @returns Promise<RecipeField[]>
+ */
 export async function fetchRecipes() {
   try {
     const recipes = await sql<RecipeField[]>`
@@ -255,6 +211,12 @@ export async function fetchRecipes() {
   }
 }
 
+/**
+ * Fetch a single recipe by id.
+ *
+ * @param id - Recipe id (UUID)
+ * @returns Promise<RecipeForm | null>
+ */
 export async function fetchRecipeById(id: string) {
   try {
     const rows = await sql<RecipeForm[]>`
@@ -272,38 +234,5 @@ export async function fetchRecipeById(id: string) {
   } catch (error) {
     console.error("Database Error:", error);
     throw new Error("Failed to fetch recipe.");
-  }
-}
-
-export async function fetchFilteredCustomers(query: string) {
-  try {
-    const data = await sql<CustomersTableType[]>`
-		SELECT
-		  customers.id,
-		  customers.name,
-		  customers.email,
-		  customers.image_url,
-		  COUNT(invoices.id) AS total_invoices,
-		  SUM(CASE WHEN invoices.status = 'pending' THEN invoices.amount ELSE 0 END) AS total_pending,
-		  SUM(CASE WHEN invoices.status = 'paid' THEN invoices.amount ELSE 0 END) AS total_paid
-		FROM customers
-		LEFT JOIN invoices ON customers.id = invoices.customer_id
-		WHERE
-		  customers.name ILIKE ${`%${query}%`} OR
-        customers.email ILIKE ${`%${query}%`}
-		GROUP BY customers.id, customers.name, customers.email, customers.image_url
-		ORDER BY customers.name ASC
-	  `;
-
-    const customers = data.map((customer) => ({
-      ...customer,
-      total_pending: formatCurrency(customer.total_pending),
-      total_paid: formatCurrency(customer.total_paid),
-    }));
-
-    return customers;
-  } catch (err) {
-    console.error("Database Error:", err);
-    throw new Error("Failed to fetch customer table.");
   }
 }
