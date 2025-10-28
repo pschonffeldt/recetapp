@@ -1,4 +1,3 @@
-import { CheckIcon, ClockIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 
 export default function RecipesType({ type }: { type: string }) {
@@ -15,36 +14,11 @@ export default function RecipesType({ type }: { type: string }) {
         }
       )}
     >
-      {type === "breakfast" ? (
-        <>
-          breakfast
-          {/* <ClockIcon className="ml-1 w-4 text-gray-500" /> */}
-        </>
-      ) : null}
-      {type === "lunch" ? (
-        <>
-          lunch
-          {/* <CheckIcon className="ml-1 w-4 text-white" /> */}
-        </>
-      ) : null}
-      {type === "dinner" ? (
-        <>
-          dinner
-          {/* <CheckIcon className="ml-1 w-4 text-white" /> */}
-        </>
-      ) : null}
-      {type === "dessert" ? (
-        <>
-          dessert
-          {/* <CheckIcon className="ml-1 w-4 text-white" /> */}
-        </>
-      ) : null}
-      {type === "snack" ? (
-        <>
-          snack
-          {/* <CheckIcon className="ml-1 w-4 text-white" /> */}
-        </>
-      ) : null}
+      {type === "breakfast" ? <>Breakfast</> : null}
+      {type === "lunch" ? <>Lunch</> : null}
+      {type === "dinner" ? <>Dinner</> : null}
+      {type === "dessert" ? <>Dessert</> : null}
+      {type === "snack" ? <>Snack</> : null}
     </span>
   );
 }
