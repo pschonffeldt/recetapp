@@ -60,6 +60,13 @@ export default async function RecipesTable({
                       {formatDateToLocal(recipe.recipe_created_at)}
                     </div>
                   </div>
+
+                  {/* Actions */}
+                  <div className="mt-4 flex justify-end gap-2 border-t pt-3">
+                    <ViewRecipe id={recipe.id} />
+                    <UpdateRecipe id={recipe.id} />
+                    <DeleteRecipe id={recipe.id} />
+                  </div>
                 </div>
               ))
             )}
