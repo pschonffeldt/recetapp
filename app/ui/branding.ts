@@ -49,7 +49,15 @@
  * ---------------------------------------------------------------------------
  */
 
-type Token = "background" | "brand" | "alt" | "positive" | "destructive";
+type Token =
+  | "background"
+  | "brand"
+  | "alt"
+  | "positive"
+  | "destructive"
+  | "dark"
+  | "darker"
+  | "darkbtn";
 type Kind = "bg" | "text" | "border";
 
 const CLASSES: Record<Token, Record<Kind, string>> = {
@@ -73,6 +81,21 @@ const CLASSES: Record<Token, Record<Kind, string>> = {
     bg: "bg-red-600",
     text: "text-red-600",
     border: "border-red-600",
+  },
+  dark: {
+    bg: "bg-gray-800",
+    text: "text-gray-800",
+    border: "border-gray-800",
+  },
+  darker: {
+    bg: "bg-gray-900",
+    text: "text-gray-900",
+    border: "border-gray-900",
+  },
+  darkbtn: {
+    bg: "bg-gray-700",
+    text: "text-gray-700",
+    border: "border-gray-700",
   },
 };
 
