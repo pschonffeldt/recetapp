@@ -11,6 +11,7 @@ import {
   Revenue,
   RecipeField,
   RecipeForm,
+  LatestRecipeRaw,
 } from "./definitions";
 import { formatCurrency } from "./utils";
 
@@ -74,6 +75,29 @@ export async function fetchLatestInvoices() {
   }
 }
 
+export async function fetchLatestRecipes() {
+  try {
+    const data = await sql<LatestRecipeRaw[]>`
+      SELECT
+        id,
+        recipe_name,
+        recipe_created_at,
+        recipe_ingredients,
+        recipe_steps,
+        recipe_type
+      FROM recipes
+      ORDER BY recipe_created_at DESC
+      LIMIT 5
+    `;
+
+    // No amount/currency formatting needed for recipes
+    return data;
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch the latest recipes.");
+  }
+}
+
 /**
  * Fetch dashboard KPI card data (counts + totals by status).
  * Note: Split into parallel queries for demonstration purposes.
@@ -115,6 +139,78 @@ export async function fetchCardData() {
   }
 }
 
+// Types for the small aggregated queries
+type TypeCountRow = { recipe_type: string | null; count: number };
+type LatestRecipeRow = {
+  id: string;
+  recipe_name: string;
+  recipe_created_at: string;
+};
+
+export async function fetchRecipeCardData() {
+  try {
+    // Run in parallel
+    const totalRecipesPromise = sql`SELECT COUNT(*)::int AS count FROM recipes`;
+
+    const recentRecipesPromise = sql`SELECT COUNT(*)::int AS count
+          FROM recipes
+          WHERE recipe_created_at >= NOW() - INTERVAL '7 days'`;
+
+    const typesBreakdownPromise = sql<TypeCountRow[]>`
+        SELECT recipe_type, COUNT(*)::int AS count
+        FROM recipes
+        GROUP BY recipe_type
+        ORDER BY count DESC`;
+
+    const latestRecipePromise = sql<LatestRecipeRow[]>`
+        SELECT id, recipe_name, recipe_created_at
+        FROM recipes
+        ORDER BY recipe_created_at DESC
+        LIMIT 1`;
+
+    const [
+      totalRecipesRes,
+      recentRecipesRes,
+      typesBreakdownRes,
+      latestRecipeRes,
+    ] = await Promise.all([
+      totalRecipesPromise,
+      recentRecipesPromise,
+      typesBreakdownPromise,
+      latestRecipePromise,
+    ]);
+
+    // Defensive reads
+    const numberOfRecipes = Number(totalRecipesRes?.[0]?.count ?? 0);
+    const recipesLast7Days = Number(recentRecipesRes?.[0]?.count ?? 0);
+
+    const types = (typesBreakdownRes ?? []).map((r) => ({
+      type: r.recipe_type ?? "Unknown",
+      count: r.count ?? 0,
+    }));
+
+    const topType = types.length ? types[0] : null;
+
+    const latest = latestRecipeRes?.[0]
+      ? {
+          id: latestRecipeRes[0].id,
+          name: latestRecipeRes[0].recipe_name,
+          createdAt: latestRecipeRes[0].recipe_created_at,
+        }
+      : null;
+
+    return {
+      numberOfRecipes,
+      recipesLast7Days,
+      types, // array: [{ type: 'Dessert', count: 12 }, ...]
+      topType, // most common type or null
+      latest, // { id, name, createdAt } or null
+    };
+  } catch (error) {
+    console.error("Database Error:", error);
+    throw new Error("Failed to fetch recipe card data.");
+  }
+}
 /* =======================================================
  * Recipes — Filtered List, Paging, Single, List
  * ======================================================= */

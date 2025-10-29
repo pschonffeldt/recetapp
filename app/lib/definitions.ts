@@ -121,3 +121,13 @@ export type RecipeForm = {
   recipe_steps: string[];
   recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
 };
+
+//  To be organized, used on dashboard latest recipe table
+export type LatestRecipeRaw = {
+  id: string;
+  recipe_name: string;
+  recipe_created_at: string; // or `created_at` if that's your column
+  recipe_ingredients: string[]; // assuming text[]
+  recipe_steps: string[]; // assuming text[]
+  recipe_type: string;
+};
