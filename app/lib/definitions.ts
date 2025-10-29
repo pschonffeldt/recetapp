@@ -40,51 +40,6 @@ export type Revenue = {
 };
 
 /* =======================================================
- * Invoices (Dashboard/Lists)
- * ======================================================= */
-
-/** UI-ready latest invoice item with formatted amount. */
-export type LatestInvoice = {
-  id: string;
-  name: string;
-  image_url: string;
-  email: string;
-  /** Human-readable currency string (via formatCurrency). */
-  amount: string;
-};
-
-/**
- * Raw variant from DB before formatting.
- * The database returns a number for amount, but we later format it to a string
- * with the formatCurrency function.
- */
-export type LatestInvoiceRaw = Omit<LatestInvoice, "amount"> & {
-  /** Amount in cents (number) from DB. */
-  amount: number;
-};
-
-/**
- * Joined row for invoice listings (e.g., tables with customer info).
- * Mirrors SELECT with JOIN customers.
- */
-export type InvoicesTable = {
-  id: string;
-  /** FK -> Customer.id */
-  customer_id: string;
-  /** Customer fields included for convenience in list views. */
-  name: string;
-  email: string;
-  image_url: string;
-  /** Invoice date (ISO YYYY-MM-DD). */
-  date: string;
-  /** Free-form text; present on current schema. */
-  ingredients: string;
-  /** Amount in cents. */
-  amount: number;
-  status: "pending" | "paid";
-};
-
-/* =======================================================
  * Recipes
  * ======================================================= */
 

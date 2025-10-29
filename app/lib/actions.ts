@@ -40,16 +40,6 @@ const UpdateRecipeSchema = RecipeSchema.extend({
  * Types
  * ======================================================= */
 
-/** UI state returned by invoice actions on validation errors */
-export type State = {
-  errors?: {
-    customerId?: string[];
-    amount?: string[];
-    status?: string[];
-  };
-  message?: string | null;
-};
-
 /** UI state returned by recipe actions on validation errors */
 export type RecipeFormState = {
   message: string | null;
