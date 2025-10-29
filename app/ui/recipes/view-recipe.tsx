@@ -4,7 +4,6 @@ import { type RecipeFormState } from "@/app/lib/actions";
 import { Button } from "@/app/ui/button";
 import Link from "next/link";
 import { DeleteRecipeOnViewer, UpdateRecipeOnViewer } from "./recipes-buttons";
-// import html2pdf from "html2pdf.js";s
 
 const RECIPE_TYPES = [
   "breakfast",
@@ -44,7 +43,7 @@ export default function ViewerRecipe({ recipe }: Props) {
     <div>
       <div
         id="print"
-        className="rounded-xl border border-gray-200 bg-gray-50 p-6 shadow-sm"
+        className="rounded-md border-gray-200 bg-gray-50 p-6 shadow-sm"
       >
         {/* Recipe name and type */}
         <header className="mb-6">
@@ -67,7 +66,7 @@ export default function ViewerRecipe({ recipe }: Props) {
         {/* Ingredients */}
         <section className="mb-6 grid gap-3 sm:grid-cols-2">
           {/* Ingredients */}
-          <div className="rounded-lg bg-white p-4 ring-1 ring-gray-200">
+          <div className="rounded-md bg-white border border-gray-200 py-2 px-3 text-sm">
             <h2 className="mb-3 text-lg font-semibold text-gray-900">
               Ingredients
             </h2>
@@ -85,7 +84,7 @@ export default function ViewerRecipe({ recipe }: Props) {
             )}
           </div>
           {/* Steps */}
-          <div className="rounded-lg bg-white p-4 ring-1 ring-gray-200">
+          <div className="rounded-md bg-white border border-gray-200 py-2 px-3 text-sm">
             <h2 className="mb-3 text-lg font-semibold text-gray-900">Steps</h2>
             {recipe.recipe_steps?.length ? (
               <ol className="list-decimal space-y-2 pl-6 text-gray-800">
@@ -113,7 +112,7 @@ export default function ViewerRecipe({ recipe }: Props) {
           >
             Return to list
           </Link>
-          <Button onClick={handleOnClick}>Share Recipe</Button>
+          <Button onClick={handleOnClick}>Share</Button>
           <UpdateRecipeOnViewer id={recipe.id} />
           <DeleteRecipeOnViewer id={recipe.id} />
         </div>

@@ -23,6 +23,10 @@ type Props = {
   };
 };
 
+// Turn to sentence case
+const capitalizeFirst = (s: string) =>
+  s ? s[0].toUpperCase() + s.slice(1).toLowerCase() : "";
+
 export default function EditRecipeForm({ recipe }: Props) {
   const initial: RecipeFormState = { message: null, errors: {} };
   const [state, formAction] = useActionState(updateRecipe, initial);
@@ -74,7 +78,7 @@ export default function EditRecipeForm({ recipe }: Props) {
           >
             {RECIPE_TYPES.map((t) => (
               <option key={t} value={t}>
-                {t}
+                {capitalizeFirst(t)}
               </option>
             ))}
           </select>
@@ -149,7 +153,7 @@ export default function EditRecipeForm({ recipe }: Props) {
         >
           Discard Changes
         </Link>
-        <Button type="submit">Edit Recipe</Button>
+        <Button type="submit">Save Changes</Button>
       </div>
 
       {state.message && (
