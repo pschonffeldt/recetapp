@@ -48,10 +48,9 @@ export function RecipesSkeleton() {
   return (
     <div className="flex flex-row items-center justify-between border-b border-gray-100 py-4">
       <div className="flex items-center">
-        <div className="mr-2 h-8 w-8 rounded-full bg-gray-200" />
-        <div className="min-w-0">
-          <div className="h-5 w-40 rounded-md bg-gray-200" />
-          <div className="mt-2 h-4 w-12 rounded-md bg-gray-200" />
+        <div className="min-w-60">
+          <div className="h-5 w-20 rounded-md bg-gray-200" />
+          <div className="mt-2 h-4 w-60 rounded-md bg-gray-200" />
         </div>
       </div>
       <div className="mt-2 h-4 w-12 rounded-md bg-gray-200" />
@@ -144,7 +143,6 @@ export function RecipesMobileSkeleton() {
     <div className="mb-2 w-full rounded-md bg-white p-4">
       <div className="flex items-center justify-between border-b border-gray-100 pb-8">
         <div className="flex items-center">
-          <div className="mr-2 h-8 w-8 rounded-full bg-gray-100"></div>
           <div className="h-6 w-16 rounded bg-gray-100"></div>
         </div>
         <div className="h-6 w-16 rounded bg-gray-100"></div>
@@ -180,25 +178,22 @@ export function RecipesTableSkeleton() {
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
-                  Customer
+                  Recipe
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Email
+                  Ingredients
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Amount
+                  Steps
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Date
+                  Creation date
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
-                  Status
+                  Type
                 </th>
-                <th
-                  scope="col"
-                  className="relative pb-4 pl-3 pr-6 pt-2 sm:pr-6"
-                >
-                  <span className="sr-only">Edit</span>
+                <th scope="col" className="relative py-3 pl-6 pr-3">
+                  <span className="sr-only">Actions</span>
                 </th>
               </tr>
             </thead>
