@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { updateRecipe, type RecipeFormState } from "@/app/lib/actions";
 import { Button } from "@/app/ui/button";
 import Link from "next/link";
+import { capitalizeFirst } from "@/app/lib/utils";
 
 const RECIPE_TYPES = [
   "breakfast",
@@ -22,10 +23,6 @@ type Props = {
     recipe_steps: string[];
   };
 };
-
-// Turn to sentence case
-const capitalizeFirst = (s: string) =>
-  s ? s[0].toUpperCase() + s.slice(1).toLowerCase() : "";
 
 export default function EditRecipeForm({ recipe }: Props) {
   const initial: RecipeFormState = { message: null, errors: {} };

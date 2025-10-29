@@ -3,10 +3,6 @@ import RecipesType from "./recipes-status";
 import { formatDateToLocal } from "@/app/lib/utils";
 import { DeleteRecipe, ViewRecipe, UpdateRecipe } from "./recipes-buttons";
 
-// Turn to sentence case
-const capitalizeFirst = (s: string) =>
-  s ? s[0].toUpperCase() + s.slice(1).toLowerCase() : "";
-
 export default async function RecipesTable({
   query,
   currentPage,

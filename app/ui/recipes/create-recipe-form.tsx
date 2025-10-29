@@ -4,10 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { Button } from "@/app/ui/button";
 import { createRecipe, RecipeFormState } from "@/app/lib/actions";
-
-// Turn to sentence case
-const capitalizeFirst = (s: string) =>
-  s ? s[0].toUpperCase() + s.slice(1).toLowerCase() : "";
+import { capitalizeFirst } from "@/app/lib/utils";
 
 // Dropdown of meal type:
 const RECIPE_TYPES = [
