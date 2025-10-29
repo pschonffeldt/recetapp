@@ -6,6 +6,9 @@ import {
 } from "@heroicons/react/24/outline";
 import { inter } from "@/app/ui/fonts";
 import { fetchCardData } from "@/app/lib/data";
+import { capitalizeFirst } from "@/app/lib/utils";
+import type { ReactNode } from "react";
+import RecipesType from "../recipes/recipes-status";
 
 const iconMap = {
   collected: BanknotesIcon, // Avg. Ingredients / Recipe
@@ -26,7 +29,7 @@ export default async function CardWrapper() {
     <>
       <Card
         title="Most Recurring Category"
-        value={mostRecurringCategory}
+        value={<RecipesType type={mostRecurringCategory} />}
         type="pending"
       />
       <Card
@@ -50,11 +53,10 @@ export function Card({
   type,
 }: {
   title: string;
-  value: number | string;
+  value: ReactNode; // <— was number | string
   type: "invoices" | "customers" | "pending" | "collected";
 }) {
   const Icon = iconMap[type];
-
   return (
     <div className="rounded-xl bg-gray-50 p-2 shadow-sm">
       <div className="flex p-4">
@@ -62,8 +64,7 @@ export function Card({
         <h3 className="ml-2 text-sm font-medium">{title}</h3>
       </div>
       <p
-        className={`${inter.className}
-          truncate rounded-xl bg-white px-4 py-8 text-center text-2xl`}
+        className={`${inter.className} truncate rounded-xl bg-white px-4 py-8 text-center text-2xl`}
       >
         {value}
       </p>
