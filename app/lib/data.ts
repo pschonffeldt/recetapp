@@ -7,7 +7,6 @@
 import postgres from "postgres";
 import {
   RecipesTable,
-  LatestInvoiceRaw,
   Revenue,
   RecipeField,
   RecipeForm,
@@ -55,25 +54,6 @@ export async function fetchRevenue() {
  * Formats amount for UI display.
  * @returns Promise<Array<{ amount: string; name: string; image_url: string; email: string; id: string }>>
  */
-export async function fetchLatestInvoices() {
-  try {
-    const data = await sql<LatestInvoiceRaw[]>`
-      SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
-      FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
-      ORDER BY invoices.date DESC
-      LIMIT 5`;
-
-    const latestInvoices = data.map((invoice) => ({
-      ...invoice,
-      amount: formatCurrency(invoice.amount),
-    }));
-    return latestInvoices;
-  } catch (error) {
-    console.error("Database Error:", error);
-    throw new Error("Failed to fetch the latest invoices.");
-  }
-}
 
 export async function fetchLatestRecipes() {
   try {
