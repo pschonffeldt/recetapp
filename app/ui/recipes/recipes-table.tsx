@@ -56,7 +56,8 @@ export default async function RecipesTable({
                           : "—"}
                       </span>
                     </div>
-                    <div className="text-gray-500">
+                    <div className="flex flex-row text-gray-500">
+                      <p className="pr-1">Created at -</p>
                       {formatDateToLocal(recipe.recipe_created_at)}
                     </div>
                   </div>
