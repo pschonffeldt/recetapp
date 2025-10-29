@@ -74,9 +74,9 @@ export function DeleteRecipe({ id }: { id: string }) {
 
   return (
     <form action={deleteRecipeWithId}>
-      <button type="submit" className="rounded-md border p-2 hover:bg-gray-100">
+      <button type="submit" className="rounded-md border p-2 hover:bg-red-100">
         <span className="sr-only">Delete</span>
-        <TrashIcon className="w-4" />
+        <TrashIcon className="w-5" />
       </button>
     </form>
   );
