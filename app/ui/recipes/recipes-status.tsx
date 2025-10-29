@@ -5,7 +5,7 @@ import clsx from "clsx";
 type Props = { type?: string | null };
 
 const STYLE: Record<string, string> = {
-  breakfast: "bg-blue-500 text-white",
+  breakfast: "bg-orange-500 text-white",
   lunch: "bg-green-500 text-white",
   dinner: "bg-purple-500 text-white",
   dessert: "bg-yellow-500 text-white",

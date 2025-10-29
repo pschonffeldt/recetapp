@@ -4,7 +4,8 @@ import { type RecipeFormState } from "@/app/lib/actions";
 import { Button } from "@/app/ui/button";
 import Link from "next/link";
 import { DeleteRecipeOnViewer, UpdateRecipeOnViewer } from "./recipes-buttons";
-import { capitalizeFirst } from "@/app/lib/utils";
+import RecipesType from "./recipes-status";
+import { brand } from "../branding";
 
 const RECIPE_TYPES = [
   "breakfast",
@@ -49,14 +50,16 @@ export default function ViewerRecipe({ recipe }: Props) {
           </h1>
           <div className="mt-5 flex flex-wrap items-center gap-2">
             {/* Chip */}
-            <span className="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800 ring-1 ring-amber-200">
+            <span
+              className={`${brand(
+                "brand",
+                "bg"
+              )} inline-flex items-center rounded-full px-2 py-1 text-xs font-medium text-white`}
+            >
               Recipe type
             </span>
             {/* Type chip */}
-            <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200">
-              <span className="mr-2 h-2 w-2 rounded-full bg-emerald-500"></span>
-              {capitalizeFirst(recipe.recipe_type)}
-            </span>
+            <RecipesType type={recipe.recipe_type} />
           </div>
         </header>
 
