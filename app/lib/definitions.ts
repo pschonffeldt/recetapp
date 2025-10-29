@@ -86,3 +86,12 @@ export type LatestRecipeRaw = {
   recipe_steps: string[]; // assuming text[]
   recipe_type: string;
 };
+
+// Dashboard upper OKRs type
+
+export type CardData = {
+  totalRecipes: number;
+  avgIngredients: number;
+  mostRecurringCategory: string;
+  totalIngredients: number;
+};

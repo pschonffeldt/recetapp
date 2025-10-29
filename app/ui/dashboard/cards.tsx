@@ -8,35 +8,36 @@ import { inter } from "@/app/ui/fonts";
 import { fetchCardData } from "@/app/lib/data";
 
 const iconMap = {
-  collected: BanknotesIcon,
-  customers: UserGroupIcon,
-  pending: ClockIcon,
-  invoices: InboxIcon,
+  collected: BanknotesIcon, // Avg. Ingredients / Recipe
+  customers: UserGroupIcon, // Total Ingredients
+  pending: ClockIcon, // Most Recurring Category
+  invoices: InboxIcon, // Total Recipes
 };
 
 export default async function CardWrapper() {
   const {
-    numberOfInvoices,
-    numberOfCustomers,
-    totalPaidInvoices,
-    totalPendingInvoices,
+    totalRecipes,
+    avgIngredients,
+    mostRecurringCategory,
+    totalIngredients,
   } = await fetchCardData();
+
   return (
     <>
       <Card
         title="Most Recurring Category"
-        value={totalPaidInvoices}
-        type="collected"
-      />
-      <Card
-        title="Avg. Recepie cost"
-        value={totalPendingInvoices}
+        value={mostRecurringCategory}
         type="pending"
       />
-      <Card title="Total Recepies" value={numberOfInvoices} type="invoices" />
+      <Card
+        title="Avg. Ingredients / Recipe"
+        value={avgIngredients.toFixed(1)}
+        type="collected"
+      />
+      <Card title="Total Recipes" value={totalRecipes} type="invoices" />
       <Card
         title="Total Ingredients"
-        value={numberOfCustomers}
+        value={totalIngredients}
         type="customers"
       />
     </>

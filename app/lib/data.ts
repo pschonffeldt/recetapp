@@ -1,7 +1,7 @@
 /* ============================================
  * Data Access Layer (Postgres via postgres.js)
  * - Centralized queries for dashboard, invoices,
- *   customers, and recipes.
+ *    recipes.
  * ============================================ */
 
 import postgres from "postgres";
@@ -11,6 +11,7 @@ import {
   RecipeField,
   RecipeForm,
   LatestRecipeRaw,
+  CardData,
 } from "./definitions";
 import { formatCurrency } from "./utils";
 
@@ -45,16 +46,6 @@ export async function fetchRevenue() {
   }
 }
 
-/* =======================================================
- * Invoices — Latest, Cards, Filtering, Pagination, Single
- * ======================================================= */
-
-/**
- * Fetch the last 5 invoices sorted by date (desc), joined with customer.
- * Formats amount for UI display.
- * @returns Promise<Array<{ amount: string; name: string; image_url: string; email: string; id: string }>>
- */
-
 export async function fetchLatestRecipes() {
   try {
     const data = await sql<LatestRecipeRaw[]>`
@@ -83,39 +74,64 @@ export async function fetchLatestRecipes() {
  * Note: Split into parallel queries for demonstration purposes.
  * @returns Promise<{ numberOfCustomers: number; numberOfInvoices: number; totalPaidInvoices: string; totalPendingInvoices: string; }>
  */
-export async function fetchCardData() {
+
+export async function fetchCardData(): Promise<CardData> {
   try {
-    // These are intentionally separated to demonstrate Promise.all:
-    const invoiceCountPromise = sql`SELECT COUNT(*) FROM invoices`;
-    const customerCountPromise = sql`SELECT COUNT(*) FROM customers`;
-    const invoiceStatusPromise = sql`SELECT
-         SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
-         SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
-         FROM invoices`;
+    // 1) Total recipes
+    const totalRecipesPromise = sql/* sql */ `
+      SELECT COUNT(*)::int AS count
+      FROM recipes
+    `;
 
-    const data = await Promise.all([
-      invoiceCountPromise,
-      customerCountPromise,
-      invoiceStatusPromise,
-    ]);
+    // 2) Average ingredients per recipe
+    const avgIngredientsPromise = sql/* sql */ `
+      SELECT COALESCE(AVG(CARDINALITY(recipe_ingredients)), 0)::float AS avg_count
+      FROM recipes
+    `;
 
-    // Defensive conversions from text to number:
-    const numberOfInvoices = Number(data[0][0].count ?? "0");
-    const numberOfCustomers = Number(data[1][0].count ?? "0");
+    // 3) Most recurring category
+    const topCategoryPromise = sql/* sql */ `
+      SELECT recipe_type, COUNT(*)::int AS c
+      FROM recipes
+      WHERE recipe_type IS NOT NULL
+      GROUP BY recipe_type
+      ORDER BY c DESC
+      LIMIT 1
+    `;
 
-    // Format totals for UI:
-    const totalPaidInvoices = formatCurrency(data[2][0].paid ?? "0");
-    const totalPendingInvoices = formatCurrency(data[2][0].pending ?? "0");
+    // 4) Total unique ingredients across all recipes
+    const totalIngredientsPromise = sql/* sql */ `
+      SELECT COALESCE(COUNT(DISTINCT TRIM(LOWER(ing))), 0)::int AS count
+      FROM (
+        SELECT UNNEST(recipe_ingredients) AS ing
+        FROM recipes
+        WHERE recipe_ingredients IS NOT NULL
+      ) AS t
+    `;
+
+    const [totalRecipesRes, avgIngrRes, topCatRes, totalIngrRes] =
+      await Promise.all([
+        totalRecipesPromise,
+        avgIngredientsPromise,
+        topCategoryPromise,
+        totalIngredientsPromise,
+      ]);
+
+    const totalRecipes = Number(totalRecipesRes?.[0]?.count ?? 0);
+    const avgIngredients = Number(avgIngrRes?.[0]?.avg_count ?? 0);
+    const mostRecurringCategory =
+      (topCatRes?.[0]?.recipe_type as string) ?? "—";
+    const totalIngredients = Number(totalIngrRes?.[0]?.count ?? 0);
 
     return {
-      numberOfCustomers,
-      numberOfInvoices,
-      totalPaidInvoices,
-      totalPendingInvoices,
+      totalRecipes,
+      avgIngredients,
+      mostRecurringCategory,
+      totalIngredients,
     };
   } catch (error) {
     console.error("Database Error:", error);
-    throw new Error("Failed to fetch card data.");
+    throw new Error("Failed to fetch recipe card data.");
   }
 }
 
