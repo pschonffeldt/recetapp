@@ -5,6 +5,10 @@ import { useActionState } from "react";
 import { Button } from "@/app/ui/button";
 import { createRecipe, RecipeFormState } from "@/app/lib/actions";
 
+// Turn to sentence case
+const capitalizeFirst = (s: string) =>
+  s ? s[0].toUpperCase() + s.slice(1).toLowerCase() : "";
+
 // Dropdown of meal type:
 const RECIPE_TYPES = [
   "breakfast",
@@ -38,7 +42,6 @@ export default function RecipeForm() {
               className="peer block w-full rounded-md border border-gray-200 py-2 pl-4 text-sm outline-2 placeholder:text-gray-500"
               aria-describedby="recipe_name-error"
             />
-            {/* <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" /> */}
           </div>
           <div id="recipe_name-error" aria-live="polite" aria-atomic="true">
             {state.errors?.recipe_name?.map((e) => (
@@ -69,7 +72,7 @@ export default function RecipeForm() {
             </option>
             {RECIPE_TYPES.map((t) => (
               <option key={t} value={t}>
-                {t}
+                {capitalizeFirst(t)}
               </option>
             ))}
           </select>
