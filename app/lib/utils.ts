@@ -73,5 +73,5 @@ export const generatePagination = (currentPage: number, totalPages: number) => {
 };
 
 // Turn to sentence case
-export const capitalizeFirst = (s: string) =>
+export const capitalizeFirst = (s: string | any) =>
   s ? s[0].toUpperCase() + s.slice(1).toLowerCase() : "";

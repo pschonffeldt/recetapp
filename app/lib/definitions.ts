@@ -1,23 +1,3 @@
-/* ============================================
- * Type Definitions
- * --------------------------------------------
- * - Central source of truth for data shapes
- * - Mirrors DB columns and UI DTOs
- * - Keep in sync with schema/ORM models
- * ============================================ */
-
-/**
- * High-level notes:
- * - Amounts are stored in cents (number) at the DB layer.
- * - Some “table” types mirror SELECT joins.
- * - “Raw” types represent DB results pre-formatting.
- * - UI-facing types (e.g., LatestInvoice) may have formatted strings.
- */
-
-// This file contains type definitions for your data.
-// It describes the shape of the data, and what data type each property should accept.
-// However, these types are generated automatically if you're using an ORM such as Prisma.
-
 /* =======================================================
  * Core Entities
  * ======================================================= */
@@ -69,12 +49,26 @@ export type RecipeField = {
 };
 
 /** Full recipe shape for edit/create forms. */
+export type Difficulty = "easy" | "medium" | "hard" | null;
+export type Visibility = "private" | "public";
+
 export type RecipeForm = {
   id: string;
   recipe_name: string;
-  recipe_ingredients: string[];
-  recipe_steps: string[];
-  recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
+  recipe_ingredients: string[]; // text[]
+  recipe_steps: string[]; // text[]
+  recipe_type: string; // your enum type if you have it
+
+  // NEW FIELDS
+  servings: number | null;
+  prep_time_min: number | null;
+  difficulty: Difficulty;
+  status: Visibility;
+  dietary_flags: string[]; // text[]
+  allergens: string[]; // text[]
+  calories_total: number | null;
+  estimated_cost_total: string | null; // numeric -> string
+  equipment: string[]; // text[]
 };
 
 //  To be organized, used on dashboard latest recipe table
@@ -87,7 +81,9 @@ export type LatestRecipeRaw = {
   recipe_type: string;
 };
 
-// Dashboard upper OKRs type
+/* =======================================================
+ * Dashboard upper OKRs
+ * ======================================================= */
 
 export type CardData = {
   totalRecipes: number;

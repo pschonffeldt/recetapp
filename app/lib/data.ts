@@ -309,6 +309,26 @@ export async function fetchRecipes() {
  * @param id - Recipe id (UUID)
  * @returns Promise<RecipeForm | null>
  */
+// export async function fetchRecipeById(id: string) {
+//   try {
+//     const rows = await sql<RecipeForm[]>`
+//       SELECT
+//         id,
+//         recipe_name,
+//         recipe_ingredients,
+//         recipe_steps,
+//         recipe_type
+//       FROM recipes
+//       WHERE id = ${id};
+//     `;
+
+//     return rows[0] ?? null;
+//   } catch (error) {
+//     console.error("Database Error:", error);
+//     throw new Error("Failed to fetch recipe.");
+//   }
+// }
+
 export async function fetchRecipeById(id: string) {
   try {
     const rows = await sql<RecipeForm[]>`
@@ -317,12 +337,23 @@ export async function fetchRecipeById(id: string) {
         recipe_name,
         recipe_ingredients,
         recipe_steps,
-        recipe_type
-      FROM recipes
-      WHERE id = ${id};
+        recipe_type,
+
+        -- NEW
+        servings,
+        prep_time_min,
+        difficulty,
+        status,
+        COALESCE(dietary_flags, ARRAY[]::text[])   AS dietary_flags,
+        COALESCE(allergens,     ARRAY[]::text[])   AS allergens,
+        calories_total,
+        estimated_cost_total,                       -- comes back as string
+        COALESCE(equipment,     ARRAY[]::text[])   AS equipment
+      FROM public.recipes
+      WHERE id = ${id}::uuid;
     `;
 
-    return rows[0] ?? null; // return a single recipe or null
+    return rows[0] ?? null;
   } catch (error) {
     console.error("Database Error:", error);
     throw new Error("Failed to fetch recipe.");

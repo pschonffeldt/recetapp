@@ -6,27 +6,12 @@ import Link from "next/link";
 import { DeleteRecipeOnViewer, UpdateRecipeOnViewer } from "./recipes-buttons";
 import RecipesType from "./recipes-status";
 import { brand } from "../branding";
+import { RecipeForm } from "@/app/lib/definitions";
+import { inter } from "../fonts";
+import { capitalizeFirst } from "@/app/lib/utils";
+import { MetricCard } from "./recipe-stat";
 
-const RECIPE_TYPES = [
-  "breakfast",
-  "lunch",
-  "dinner",
-  "dessert",
-  "snack",
-] as const;
-
-type Props = {
-  recipe: {
-    id: string;
-    recipe_name: string;
-    recipe_type: (typeof RECIPE_TYPES)[number];
-    recipe_ingredients: string[];
-    recipe_steps: string[];
-  };
-};
-
-// Render page
-export default function ViewerRecipe({ recipe }: Props) {
+export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
   const initial: RecipeFormState = { message: null, errors: {} };
 
   async function handleOnClick() {
@@ -37,6 +22,7 @@ export default function ViewerRecipe({ recipe }: Props) {
     });
   }
 
+  // Render page
   return (
     <div>
       <div
@@ -63,46 +49,128 @@ export default function ViewerRecipe({ recipe }: Props) {
           </div>
         </header>
 
-        {/* Ingredients */}
-        <section className="mb-6 grid gap-3 sm:grid-cols-2">
-          {/* Ingredients */}
-          <div className="rounded-md bg-white border border-gray-200 py-2 px-3 text-sm">
-            <h2 className="mb-3 text-lg font-semibold text-gray-900">
-              Ingredients
-            </h2>
-            {recipe.recipe_ingredients?.length ? (
-              <ul className="list-disc space-y-1.5 pl-6 text-gray-800">
-                {recipe.recipe_ingredients
-                  .map((s) => (typeof s === "string" ? s.trim() : s))
-                  .filter(Boolean)
-                  .map((ing, i) => (
-                    <li key={`ing-${i}`}>{ing}</li>
-                  ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-gray-600">No ingredients yet.</p>
-            )}
-          </div>
-          {/* Steps */}
-          <div className="rounded-md bg-white border border-gray-200 py-2 px-3 text-sm">
-            <h2 className="mb-3 text-lg font-semibold text-gray-900">Steps</h2>
-            {recipe.recipe_steps?.length ? (
-              <ol className="list-decimal space-y-2 pl-6 text-gray-800">
-                {recipe.recipe_steps
-                  .map((s) => (typeof s === "string" ? s.trim() : s))
-                  .filter(Boolean)
-                  .map((step, i) => (
-                    <li key={`step-${i}`} className="leading-relaxed">
-                      {step}
-                    </li>
-                  ))}
-              </ol>
-            ) : (
-              <p className="text-sm text-gray-600">No steps yet.</p>
-            )}
+        {/* Module testing stats */}
+        <section className="mb-6 grid gap-4 sm:grid-cols-4">
+          {/* Servings */}
+          <MetricCard
+            title="Servings"
+            value={recipe.servings}
+            unit="portions"
+            fontClassName={inter.className}
+          />
+
+          {/* Prep time */}
+          <MetricCard
+            title="Prep time"
+            value={recipe.prep_time_min}
+            unit="min"
+            fontClassName={inter.className}
+          />
+
+          {/* Recipe calories (total) */}
+          <MetricCard
+            title="Recipe calories"
+            value={recipe.calories_total}
+            unit="kcal"
+            fontClassName={inter.className}
+          />
+
+          {/* Recipe cost (total) */}
+          <MetricCard
+            title="Recipe cost"
+            value={
+              recipe.estimated_cost_total
+                ? Number(recipe.estimated_cost_total)
+                : null
+            }
+            unit="S/"
+            unitPosition="left"
+            fontClassName={inter.className}
+          />
+
+          {/* Allergens (0/1 centered, 2+ list) */}
+          <MetricCard
+            title="Allergens"
+            items={recipe.allergens}
+            emptyLabel="No allergens."
+            fontClassName={inter.className}
+          />
+
+          {/* Dietary flags (0/1 centered, 2+ list) */}
+          <MetricCard
+            title="Dietary flags"
+            items={recipe.dietary_flags}
+            emptyLabel="No dietary flags."
+            fontClassName={inter.className}
+          />
+
+          {/* Calories per serving */}
+          <MetricCard
+            title="Calories / serving"
+            value={
+              recipe.calories_total != null &&
+              recipe.servings &&
+              recipe.servings > 0
+                ? Math.round(recipe.calories_total / recipe.servings)
+                : null
+            }
+            unit="kcal"
+            fontClassName={inter.className}
+          />
+
+          {/* Cost per serving */}
+          <MetricCard
+            title="Cost / serving"
+            value={
+              recipe.estimated_cost_total &&
+              recipe.servings &&
+              recipe.servings > 0
+                ? Math.round(
+                    (Number(recipe.estimated_cost_total) / recipe.servings) *
+                      100
+                  ) / 100
+                : null
+            }
+            unit="S/"
+            unitPosition="left"
+            fontClassName={inter.className}
+          />
+        </section>
+
+        {/* Ingredients & Steps */}
+        <section className="mb-6 grid gap-3 items-stretch sm:grid-cols-2">
+          {/* Left: Ingredients (stretches to natural height) */}
+          <MetricCard
+            title="Ingredients"
+            items={recipe.recipe_ingredients}
+            emptyLabel="No ingredients."
+            listStyle="disc"
+            fontClassName={inter.className}
+            className="h-full"
+          />
+
+          {/* Right: Steps + Equipment (even heights) */}
+          <div className="flex h-full flex-col gap-3">
+            <MetricCard
+              title="Steps"
+              items={recipe.recipe_steps}
+              emptyLabel="No steps."
+              listStyle="decimal"
+              fontClassName={inter.className}
+              className="flex-1" // <-- take half
+            />
+            <MetricCard
+              title="Equipment"
+              items={recipe.equipment}
+              emptyLabel="No equipment."
+              listStyle="disc"
+              fontClassName={inter.className}
+              className="flex-1" // <-- take the other half
+            />
           </div>
         </section>
       </div>
+
       {/* Buttons */}
       <section>
         <div className="mt-6 flex justify-end gap-4">
