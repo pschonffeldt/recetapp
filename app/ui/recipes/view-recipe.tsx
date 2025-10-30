@@ -8,8 +8,7 @@ import RecipesType from "./recipes-status";
 import { brand } from "../branding";
 import { RecipeForm } from "@/app/lib/definitions";
 import { inter } from "../fonts";
-import { capitalizeFirst } from "@/app/lib/utils";
-import { MetricCard } from "./recipe-stat";
+import { MetricCard, MetricCardMobile } from "./recipe-stat";
 
 export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
   const initial: RecipeFormState = { message: null, errors: {} };
@@ -49,10 +48,9 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
           </div>
         </header>
 
-        {/* Module testing stats */}
-        <section className="mb-6 grid gap-4 sm:grid-cols-4">
-          {/* Servings */}
-          <MetricCard
+        {/* Stats mobile*/}
+        <section className="mb-6 grid gap-4 sm:grid-cols-4 md:hidden grid-cols-2">
+          <MetricCardMobile
             title="Servings"
             value={recipe.servings}
             unit="portions"
@@ -60,7 +58,7 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
           />
 
           {/* Prep time */}
-          <MetricCard
+          <MetricCardMobile
             title="Prep time"
             value={recipe.prep_time_min}
             unit="min"
@@ -68,7 +66,7 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
           />
 
           {/* Recipe calories (total) */}
-          <MetricCard
+          <MetricCardMobile
             title="Recipe calories"
             value={recipe.calories_total}
             unit="kcal"
@@ -76,7 +74,7 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
           />
 
           {/* Recipe cost (total) */}
-          <MetricCard
+          <MetricCardMobile
             title="Recipe cost"
             value={
               recipe.estimated_cost_total
@@ -89,7 +87,7 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
           />
 
           {/* Allergens (0/1 centered, 2+ list) */}
-          <MetricCard
+          <MetricCardMobile
             title="Allergens"
             items={recipe.allergens}
             emptyLabel="No allergens."
@@ -97,13 +95,95 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
           />
 
           {/* Dietary flags (0/1 centered, 2+ list) */}
-          <MetricCard
+          <MetricCardMobile
             title="Dietary flags"
             items={recipe.dietary_flags}
             emptyLabel="No dietary flags."
             fontClassName={inter.className}
           />
 
+          {/* Calories per serving */}
+          <MetricCardMobile
+            title="Calories / serving"
+            value={
+              recipe.calories_total != null &&
+              recipe.servings &&
+              recipe.servings > 0
+                ? Math.round(recipe.calories_total / recipe.servings)
+                : null
+            }
+            unit="kcal"
+            fontClassName={inter.className}
+          />
+
+          {/* Cost per serving */}
+          <MetricCardMobile
+            title="Cost / serving"
+            value={
+              recipe.estimated_cost_total &&
+              recipe.servings &&
+              recipe.servings > 0
+                ? Math.round(
+                    (Number(recipe.estimated_cost_total) / recipe.servings) *
+                      100
+                  ) / 100
+                : null
+            }
+            unit="S/"
+            unitPosition="left"
+            fontClassName={inter.className}
+          />
+        </section>
+
+        {/* Stats desktop */}
+        <section className="hidden md:grid md:grid-cols-4 gap-4 mb-6">
+          {/* Servings */}
+          <MetricCard
+            title="Servings"
+            value={recipe.servings}
+            unit="portions"
+            fontClassName={inter.className}
+          />
+          {/* Prep time */}
+          <MetricCard
+            title="Prep time"
+            value={recipe.prep_time_min}
+            unit="min"
+            fontClassName={inter.className}
+          />
+          {/* Recipe calories (total) */}
+          <MetricCard
+            title="Recipe calories"
+            value={recipe.calories_total}
+            unit="kcal"
+            fontClassName={inter.className}
+          />
+          {/* Recipe cost (total) */}
+          <MetricCard
+            title="Recipe cost"
+            value={
+              recipe.estimated_cost_total
+                ? Number(recipe.estimated_cost_total)
+                : null
+            }
+            unit="S/"
+            unitPosition="left"
+            fontClassName={inter.className}
+          />
+          {/* Allergens (0/1 centered, 2+ list) */}
+          <MetricCard
+            title="Allergens"
+            items={recipe.allergens}
+            emptyLabel="No allergens."
+            fontClassName={inter.className}
+          />
+          {/* Dietary flags (0/1 centered, 2+ list) */}
+          <MetricCard
+            title="Dietary flags"
+            items={recipe.dietary_flags}
+            emptyLabel="No dietary flags."
+            fontClassName={inter.className}
+          />
           {/* Calories per serving */}
           <MetricCard
             title="Calories / serving"
@@ -117,7 +197,6 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             unit="kcal"
             fontClassName={inter.className}
           />
-
           {/* Cost per serving */}
           <MetricCard
             title="Cost / serving"
