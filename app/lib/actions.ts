@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import postgres from "postgres";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
+import { RecipeForm } from "./definitions";
 
 /* ================================
  * Database Client
@@ -22,16 +23,47 @@ const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
  * ======================================================= */
 
 /** Recipe form schema used for create/update (id added later for updates) */
+
+// visibility & difficulty
+const StatusEnum = z.enum(["private", "public"]);
+const DifficultyEnum = z.enum(["easy", "medium", "hard"]);
+
 const RecipeSchema = z.object({
   recipe_name: z.string().min(1, "Recipe name is required"),
   recipe_type: z.enum(["breakfast", "lunch", "dinner", "dessert", "snack"]),
+
   recipe_ingredients: z
     .array(z.string().min(1))
     .min(1, "Enter at least one ingredient"),
   recipe_steps: z.array(z.string().min(1)).min(1, "Enter at least one step"),
+
+  // NEW — no `optional()` here; we use defaults so undefined never escapes
+  servings: z
+    .number()
+    .int()
+    .min(1, "Must be 1 or greater")
+    .nullable()
+    .default(null),
+  prep_time_min: z
+    .number()
+    .int()
+    .min(0, "Must be 0 or greater")
+    .nullable()
+    .default(null),
+  difficulty: DifficultyEnum.nullable().default(null),
+  status: StatusEnum.default("private"),
+  dietary_flags: z.array(z.string().min(1)).default([]),
+  allergens: z.array(z.string().min(1)).default([]),
+  calories_total: z
+    .number()
+    .int()
+    .min(0, "Must be 0 or greater")
+    .nullable()
+    .default(null),
+  estimated_cost_total: z.string().nullable().default(null), // numeric as string
+  equipment: z.array(z.string().min(1)).default([]),
 });
 
-/* Update recipe schema (RecipeSchema + id) */
 const UpdateRecipeSchema = RecipeSchema.extend({
   id: z.string().uuid("Invalid recipe id"),
 });
@@ -43,12 +75,7 @@ const UpdateRecipeSchema = RecipeSchema.extend({
 /** UI state returned by recipe actions on validation errors */
 export type RecipeFormState = {
   message: string | null;
-  errors: {
-    recipe_name?: string[];
-    recipe_type?: string[];
-    recipe_ingredients?: string[];
-    recipe_steps?: string[];
-  };
+  errors: Partial<Record<keyof RecipeForm, string[]>>;
 };
 
 /* =======================================================
@@ -111,19 +138,27 @@ function splitLinesToArray(v: FormDataEntryValue | null): string[] {
  * @param _prevState - Unused previous state (kept for server action signature)
  * @param formData   - FormData from the recipe form
  */
+
 export async function createRecipe(
-  _prevState: RecipeFormState,
+  _prev: RecipeFormState,
   formData: FormData
 ): Promise<RecipeFormState> {
-  // 1) Validate form fields
   const parsed = RecipeSchema.safeParse({
     recipe_name: formData.get("recipe_name"),
     recipe_type: formData.get("recipe_type"),
-    recipe_ingredients: splitLinesToArray(formData.get("recipe_ingredients")),
-    recipe_steps: splitLinesToArray(formData.get("recipe_steps")),
+    recipe_ingredients: toLines(formData.get("recipe_ingredients")),
+    recipe_steps: toLines(formData.get("recipe_steps")),
+    servings: toInt(formData.get("servings")),
+    prep_time_min: toInt(formData.get("prep_time_min")),
+    difficulty: (formData.get("difficulty") as string | null) ?? null,
+    status: (formData.get("status") as string) ?? "private",
+    dietary_flags: toLines(formData.get("dietary_flags")),
+    allergens: toLines(formData.get("allergens")),
+    calories_total: toInt(formData.get("calories_total")),
+    estimated_cost_total: toMoney(formData.get("estimated_cost_total")),
+    equipment: toLines(formData.get("equipment")),
   });
 
-  // 2) Early return on validation errors
   if (!parsed.success) {
     const errors: RecipeFormState["errors"] = {};
     for (const issue of parsed.error.issues) {
@@ -133,20 +168,37 @@ export async function createRecipe(
     return { message: "Please correct the errors below.", errors };
   }
 
-  // 3) Insert into DB
+  const d = parsed.data;
+
   try {
-    const { recipe_name, recipe_type, recipe_ingredients, recipe_steps } =
-      parsed.data;
     await sql`
-      INSERT INTO recipes (recipe_name, recipe_ingredients, recipe_steps, recipe_type)
-      VALUES (${recipe_name}, ${recipe_ingredients}, ${recipe_steps}, ${recipe_type})
+      INSERT INTO recipes (
+        recipe_name, recipe_ingredients, recipe_steps, recipe_type,
+        servings, prep_time_min, difficulty, status,
+        dietary_flags, allergens, calories_total, estimated_cost_total, equipment
+      ) VALUES (
+        ${d.recipe_name},
+        ${d.recipe_ingredients}::text[],
+        ${d.recipe_steps}::text[],
+        ${d.recipe_type}::recipe_type_enum,
+
+        ${d.servings}::smallint,
+        ${d.prep_time_min}::smallint,
+        ${d.difficulty}::difficulty_enum,
+        ${d.status}::status_enum,
+
+        ${d.dietary_flags}::text[],
+        ${d.allergens}::text[],
+        ${d.calories_total}::int,
+        ${d.estimated_cost_total}::numeric,
+        ${d.equipment}::text[]
+      );
     `;
   } catch (err) {
     console.error("Create recipe failed:", err);
     return { message: "Failed to create recipe.", errors: {} };
   }
 
-  // 4) Revalidate and redirect
   revalidatePath("/dashboard/recipes");
   redirect("/dashboard/recipes");
 }
@@ -201,51 +253,64 @@ const splitLines = (v: FormDataEntryValue | null) =>
  * @param _prev    - Unused previous state (kept for server action signature)
  * @param formData - FormData from the recipe edit form
  */
+
 export async function updateRecipe(
   _prev: RecipeFormState,
   formData: FormData
 ): Promise<RecipeFormState> {
-  // 1) Validate form fields
   const parsed = UpdateRecipeSchema.safeParse({
     id: formData.get("id"),
+
     recipe_name: formData.get("recipe_name"),
     recipe_type: formData.get("recipe_type"),
-    recipe_ingredients: splitLines(formData.get("recipe_ingredients")),
-    recipe_steps: splitLines(formData.get("recipe_steps")),
+    recipe_ingredients: toLines(formData.get("recipe_ingredients")),
+    recipe_steps: toLines(formData.get("recipe_steps")),
+
+    servings: toInt(formData.get("servings")),
+    prep_time_min: toInt(formData.get("prep_time_min")),
+    difficulty: (formData.get("difficulty") as string | null) ?? null,
+    status: (formData.get("status") as string) ?? "private",
+    dietary_flags: toLines(formData.get("dietary_flags")),
+    allergens: toLines(formData.get("allergens")),
+    calories_total: toInt(formData.get("calories_total")),
+    estimated_cost_total: toMoney(formData.get("estimated_cost_total")),
+    equipment: toLines(formData.get("equipment")),
   });
 
-  // 2) Early return on validation errors
   if (!parsed.success) {
     const errors: RecipeFormState["errors"] = {};
     for (const issue of parsed.error.issues) {
       const key = issue.path[0] as keyof RecipeFormState["errors"];
       (errors[key] ??= []).push(issue.message);
     }
-    // If only id fails, surface a top-level message
-    if (
-      !errors.recipe_name &&
-      !errors.recipe_type &&
-      !errors.recipe_ingredients &&
-      !errors.recipe_steps
-    ) {
+    // Surface ID-only failures nicely
+    if (Object.keys(errors).length === 1 && errors.id) {
       return { message: "Invalid recipe id.", errors };
     }
     return { message: "Please correct the errors below.", errors };
   }
 
-  // 3) Persist changes
-  const { id, recipe_name, recipe_type, recipe_ingredients, recipe_steps } =
-    parsed.data;
+  const d = parsed.data;
 
   try {
     await sql`
       UPDATE recipes
       SET
-        recipe_name        = ${recipe_name},
-        recipe_type        = ${recipe_type}::recipe_type_enum,
-        recipe_ingredients = ${recipe_ingredients}::text[],
-        recipe_steps       = ${recipe_steps}::text[]
-      WHERE id = ${id};
+        recipe_name        = ${d.recipe_name},
+        recipe_type        = ${d.recipe_type}::recipe_type_enum,
+        recipe_ingredients = ${d.recipe_ingredients}::text[],
+        recipe_steps       = ${d.recipe_steps}::text[],
+
+        servings           = ${d.servings}::smallint,
+        prep_time_min      = ${d.prep_time_min}::smallint,
+        difficulty         = ${d.difficulty}::difficulty_enum,
+        status             = ${d.status}::status_enum,
+        dietary_flags      = ${d.dietary_flags}::text[],
+        allergens          = ${d.allergens}::text[],
+        calories_total     = ${d.calories_total}::int,
+        estimated_cost_total = ${d.estimated_cost_total}::numeric,
+        equipment          = ${d.equipment}::text[]
+      WHERE id = ${d.id}::uuid;
     `;
   } catch (e) {
     console.error("Update recipe failed:", e);
@@ -258,7 +323,23 @@ export async function updateRecipe(
     };
   }
 
-  // 4) Revalidate and redirect
   revalidatePath("/dashboard/recipes");
   redirect("/dashboard/recipes");
 }
+
+// Parse a number input -> number | null
+const toInt = (v: FormDataEntryValue | null) =>
+  v == null || v === "" ? null : Number(v);
+
+// Keep money as string (DB numeric comes/goes as string)
+const toMoney = (v: FormDataEntryValue | null) =>
+  v == null || v === "" ? null : String(v);
+
+// Split textarea (supports newline OR comma), trim & dedupe
+const toLines = (v: FormDataEntryValue | null) => {
+  const arr = String(v ?? "")
+    .split(/\r?\n|,/g)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return Array.from(new Set(arr));
+};

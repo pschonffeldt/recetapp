@@ -60,15 +60,15 @@ export type RecipeForm = {
   recipe_type: string; // your enum type if you have it
 
   // NEW FIELDS
-  servings: number | null;
-  prep_time_min: number | null;
-  difficulty: Difficulty;
+  servings?: number | null;
+  prep_time_min?: number | null;
+  difficulty?: Difficulty;
   status: Visibility;
-  dietary_flags: string[]; // text[]
-  allergens: string[]; // text[]
-  calories_total: number | null;
-  estimated_cost_total: string | null; // numeric -> string
-  equipment: string[]; // text[]
+  dietary_flags?: string[]; // text[]
+  allergens?: string[]; // text[]
+  calories_total?: number | null;
+  estimated_cost_total?: string | null; // numeric -> string
+  equipment?: string[]; // text[]
 };
 
 //  To be organized, used on dashboard latest recipe table
@@ -91,3 +91,13 @@ export type CardData = {
   mostRecurringCategory: string;
   totalIngredients: number;
 };
+
+// To organize later
+// this are the recipe types I use on my edit feature
+export const RECIPE_TYPES = [
+  "breakfast",
+  "lunch",
+  "dinner",
+  "dessert",
+  "snack",
+] as const;
