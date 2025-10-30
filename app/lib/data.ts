@@ -13,7 +13,6 @@ import {
   LatestRecipeRaw,
   CardData,
 } from "./definitions";
-import { formatCurrency } from "./utils";
 
 /* ================================
  * Database Client

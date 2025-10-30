@@ -6,7 +6,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { inter } from "@/app/ui/fonts";
 import { fetchCardData } from "@/app/lib/data";
-import { capitalizeFirst } from "@/app/lib/utils";
 import type { ReactNode } from "react";
 import RecipesType from "../recipes/recipes-status";
 

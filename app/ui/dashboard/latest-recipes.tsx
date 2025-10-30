@@ -37,11 +37,13 @@ export default async function LatestRecipes() {
                     </p>
                   </div>
                 </div>
-                <p
-                  className={`${inter.className} truncate text-sm font-medium md:text-base`}
-                >
-                  <RecipesType type={recipe.recipe_type} />
-                </p>
+                <div className="flex items-center flex-wrap">
+                  <p
+                    className={`${inter.className} truncate text-sm font-medium md:text-base`}
+                  >
+                    <RecipesType type={recipe.recipe_type} />
+                  </p>
+                </div>
               </div>
             );
           })}
