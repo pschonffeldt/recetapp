@@ -25,7 +25,7 @@ export default function NavLinks() {
             href={link.href}
             // Highlight active link with clsx and usePathname
             className={clsx(
-              "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3",
+              "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 lg:flex-none lg:justify-start lg:p-2 lg:px-3",
               // Detecting the pathname itself and giving it a special color
               {
                 "bg-sky-100 text-blue-600": pathname === link.href,
@@ -33,7 +33,8 @@ export default function NavLinks() {
             )}
           >
             <LinkIcon className="w-6" />
-            <p className="hidden md:block">{link.name}</p>
+            {/* <p className="hidden md:block">{link.name}</p> */}
+            <p className="hidden lg:block">{link.name}</p>
           </Link>
         );
       })}

@@ -36,14 +36,13 @@ export default async function Page() {
           <CardWrapper />
         </Suspense>
       </div>
-      <div className="mt-6  gap-6 md:grid-cols-4 lg:grid-cols-8">
+      <div className="mt-6 gap-6 md:grid-cols-4 lg:grid-cols-8">
         <Suspense fallback={<LatestRecipesSkeleton />}>
           <LatestRecipes />
         </Suspense>
       </div>
-      <div className="mt-6  gap-6 md:grid-cols-4 lg:grid-cols-8">
+      {/* <div className="mt-6  gap-6 md:grid-cols-4 lg:grid-cols-8">
         <Suspense fallback={<RevenueChartSkeleton />}>
-          {/* <RevenueChart /> */}
           <PieChart
             data={recipeBreakdown}
             title="Recipe types breakdown"
@@ -52,6 +51,29 @@ export default async function Page() {
             showPercent
           />
         </Suspense>
+      </div> */}
+      {/* <RevenueChart /> */}
+      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="rounded-lg">
+          {" "}
+          <PieChart
+            data={recipeBreakdown}
+            title="Recipe types breakdown"
+            size={180}
+            thickness={22}
+            showPercent
+          />
+        </div>
+        <div className="rounded-lg">
+          {" "}
+          <PieChart
+            data={recipeBreakdown}
+            title="Recipe types breakdown"
+            size={180}
+            thickness={22}
+            showPercent
+          />
+        </div>
       </div>
     </main>
   );

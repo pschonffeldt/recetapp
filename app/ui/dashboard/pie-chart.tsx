@@ -58,12 +58,12 @@ export default function PieChart({
     .join(", ");
 
   return (
-    <div className="w-full md:col-span-4">
+    <div className="w-full">
       <h2 className="mb-4 text-xl md:text-2xl">{title}</h2>
-
+      {/* <div className="rounded-xl bg-gray-50 p-4"> */}
       <div className="rounded-xl bg-gray-50 p-4">
-        {/* <div className="grid grid-cols-1 items-center gap-6 rounded-md bg-white p-4 md:grid-cols-3"> */}
-        <div className="grid grid-cols-1 items-center gap-6 rounded-md bg-white p-4 ">
+        {/* <div className="grid grid-cols-1 items-center gap-6 rounded-md bg-white p-4 "> */}
+        <div className="grid grid-cols-1 md:grid-cols-1 items-center gap-6 rounded-md bg-white p-4">
           {/* Chart */}
           <div className="flex items-center justify-center">
             <div
@@ -96,8 +96,8 @@ export default function PieChart({
           </div>
 
           {/* Legend */}
-          <div className="md:col-span-2">
-            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div>
+            <ul className="grid grid-cols-1 md:grid-cols-1 items-center gap-2 rounded-md bg-white">
               {segments.map((s) => (
                 <li
                   key={s.label}
@@ -123,11 +123,6 @@ export default function PieChart({
               ))}
             </ul>
           </div>
-        </div>
-
-        <div className="flex items-center pb-2 pt-6">
-          {/* optional footer icon/label to match your bar chart */}
-          <h3 className="ml-0 text-sm text-gray-500">Current snapshot</h3>
         </div>
       </div>
     </div>
