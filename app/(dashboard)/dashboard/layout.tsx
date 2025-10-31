@@ -15,7 +15,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="flex-grow p-6 lg:overflow-y-auto lg:p-12">
         {children}{" "}
         <UserSettingsFab
-          profileHref="/dashboard/profile"
+          profileHref="/dashboard/account"
           settingsHref="/dashboard/settings"
           logoutAction={logout}
         />

@@ -13,7 +13,11 @@ export default async function Page() {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: "Profile", href: "/dashboard/profile", active: true },
+          {
+            label: "Account settings",
+            href: "/dashboard/account",
+            active: true,
+          },
         ]}
       />
 

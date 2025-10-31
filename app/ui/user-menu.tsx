@@ -26,7 +26,7 @@ type Props = {
 };
 
 export default function UserSettingsFab({
-  profileHref = "/dashboard/profile",
+  profileHref = "/dashboard/account",
   settingsHref = "/dashboard/settings",
   logoutAction,
   title = "User menu",
