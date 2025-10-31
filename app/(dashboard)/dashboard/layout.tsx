@@ -1,4 +1,6 @@
 import SideNav from "@/app/ui/dashboard/sidenav";
+import UserSettingsFab from "@/app/ui/user-menu";
+import { logout } from "@/auth";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -7,7 +9,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="w-full flex-none md:w-60">
         <SideNav />
       </div>
-      <div className="flex-grow p-6 md:overflow-y-auto md:p-12">{children}</div>
+      <div className="flex-grow p-6 md:overflow-y-auto md:p-12">
+        {children}{" "}
+        <UserSettingsFab
+          profileHref="/dashboard/profile"
+          settingsHref="/dashboard/settings"
+          logoutAction={logout} // pass the server action itself
+        />
+      </div>
     </div>
   );
 }
