@@ -29,14 +29,14 @@ export default function PieChart({
 
   // default palette if a slice doesn't provide color
   const palette = [
-    "#3b82f6",
-    "#10b981",
-    "#f59e0b",
-    "#ef4444",
-    "#8b5cf6",
-    "#06b6d4",
-    "#84cc16",
-    "#f97316",
+    "#a522eb",
+    "#89c522",
+    "#eab308",
+    "#dc2626",
+    "#7c3aed",
+    "#0891b2",
+    "#65a30d",
+    "#ea580c",
   ];
 
   // build the conic-gradient segments
@@ -47,7 +47,9 @@ export default function PieChart({
     const start = currentAngle;
     const end = currentAngle + angle;
     currentAngle = end;
-    const color = d.color ?? palette[i % palette.length];
+
+    const color = palette[i % palette.length];
+
     return { ...d, pct, start, end, color };
   });
 
