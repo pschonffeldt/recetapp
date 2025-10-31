@@ -10,6 +10,7 @@ import {
 } from "@/app/ui/skeletons";
 import { Metadata } from "next";
 import PieChart from "@/app/ui/dashboard/pie-chart";
+import { MetricCard } from "@/app/ui/recipes/recipe-indicators";
 
 // Set title for metadata
 export const metadata: Metadata = {

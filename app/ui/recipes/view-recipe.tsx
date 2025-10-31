@@ -8,7 +8,7 @@ import RecipesType from "./recipes-status";
 import { brand } from "../branding";
 import { RecipeForm } from "@/app/lib/definitions";
 import { inter } from "../fonts";
-import { MetricCard, MetricCardMobile } from "./recipe-stat";
+import { MetricCard, MetricCardMobile } from "./recipe-indicators";
 
 export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
   const initial: RecipeFormState = { message: null, errors: {} };

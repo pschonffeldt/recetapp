@@ -1,4 +1,3 @@
-// app/ui/components/MetricCard.tsx
 import React from "react";
 
 type BaseProps = {
@@ -47,9 +46,8 @@ export function MetricCard({
 
     return (
       <div
-        className={`relative rounded-md bg-white shadow-md ${
-          heightClassName ?? "h-24 sm:h-28"
-        } ${className}`}
+        className={`relative rounded-md bg-white shadow-md border border-gray-100
+ ${heightClassName ?? "h-24 sm:h-28"} ${className}`}
       >
         <span className="absolute left-4 top-3 text-xs font-medium text-gray-500">
           {title}
@@ -88,7 +86,7 @@ export function MetricCard({
   if (items.length === 0) {
     return (
       <div
-        className={`relative rounded-md bg-white shadow-md ${
+        className={`relative rounded-md bg-white shadow-md border border-gray-100 ${
           heightClassName ?? "h-24 sm:h-28"
         } ${className}`}
       >
@@ -108,7 +106,7 @@ export function MetricCard({
   if (items.length === 1) {
     return (
       <div
-        className={`relative rounded-md bg-white shadow-md ${
+        className={`relative rounded-md bg-white shadow-md border border-gray-100 ${
           heightClassName ?? "h-24 sm:h-28"
         } ${className}`}
       >
@@ -133,7 +131,9 @@ export function MetricCard({
       : "list-disc"; // default bullets
 
   return (
-    <div className={`relative rounded-md bg-white shadow-md ${className}`}>
+    <div
+      className={`relative rounded-md bg-white shadow-md border border-gray-100 ${className}`}
+    >
       <span className="absolute left-4 top-3 text-xs font-medium text-gray-500">
         {title}
       </span>
@@ -169,7 +169,7 @@ export function MetricCardMobile({
 
     return (
       <div
-        className={`relative rounded-md bg-white shadow-md ${
+        className={`relative rounded-md bg-white shadow-md border border-gray-100 ${
           heightClassName ?? "h-24 sm:h-28"
         } ${className}`}
       >
@@ -210,7 +210,7 @@ export function MetricCardMobile({
   if (items.length === 0) {
     return (
       <div
-        className={`relative rounded-md bg-white shadow-md ${
+        className={`relative rounded-md bg-white shadow-md border border-gray-100 ${
           heightClassName ?? "h-24 sm:h-28"
         } ${className}`}
       >
@@ -230,7 +230,7 @@ export function MetricCardMobile({
   if (items.length === 1) {
     return (
       <div
-        className={`relative rounded-md bg-white shadow-md ${
+        className={`relative rounded-md bg-white shadow-md border border-gray-100 ${
           heightClassName ?? "h-24 sm:h-28"
         } ${className}`}
       >
@@ -255,7 +255,9 @@ export function MetricCardMobile({
       : "list-disc"; // default bullets
 
   return (
-    <div className={`relative rounded-md bg-white shadow-md ${className}`}>
+    <div
+      className={`relative rounded-md bg-white shadow-md border border-gray-100 ${className}`}
+    >
       <span className="absolute left-4 top-3 text-xs font-medium text-gray-500">
         {title}
       </span>

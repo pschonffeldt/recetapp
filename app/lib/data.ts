@@ -302,32 +302,6 @@ export async function fetchRecipes() {
   }
 }
 
-/**
- * Fetch a single recipe by id.
- *
- * @param id - Recipe id (UUID)
- * @returns Promise<RecipeForm | null>
- */
-// export async function fetchRecipeById(id: string) {
-//   try {
-//     const rows = await sql<RecipeForm[]>`
-//       SELECT
-//         id,
-//         recipe_name,
-//         recipe_ingredients,
-//         recipe_steps,
-//         recipe_type
-//       FROM recipes
-//       WHERE id = ${id};
-//     `;
-
-//     return rows[0] ?? null;
-//   } catch (error) {
-//     console.error("Database Error:", error);
-//     throw new Error("Failed to fetch recipe.");
-//   }
-// }
-
 export async function fetchRecipeById(id: string) {
   try {
     const rows = await sql<RecipeForm[]>`
