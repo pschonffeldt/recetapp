@@ -13,7 +13,7 @@ export default async function CardWrapper() {
   } = await fetchCardData();
 
   return (
-    <>
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
       <MetricCard
         title="Most Recurring Category"
         value={capitalizeFirst(mostRecurringCategory)}
@@ -35,6 +35,6 @@ export default async function CardWrapper() {
         value={totalIngredients}
         fontClassName={inter.className}
       />
-    </>
+    </div>
   );
 }
