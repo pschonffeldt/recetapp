@@ -2,6 +2,7 @@ import { fetchFilteredRecipes } from "@/app/lib/data";
 import { formatDateToLocal } from "@/app/lib/utils";
 import RecipesType from "./recipes-status";
 import SortButton from "./sort-button";
+import { ViewRecipe, UpdateRecipe, DeleteRecipe } from "./recipes-buttons";
 
 export default async function RecipesTable({
   query,
@@ -24,84 +25,11 @@ export default async function RecipesTable({
   const isEmpty = !recipes || recipes.length === 0;
 
   return (
-    <table className="hidden w-full table-fixed text-gray-900 mt-4 md:table">
-      <colgroup>
-        <col className="w-52" />
-        <col className="w-[30%]" />
-        <col className="w-[26%]" />
-        <col className="w-32" />
-        <col className="w-28" />
-        <col className="w-28" />
-      </colgroup>
-
-      <thead className="text-left text-sm font-normal">
-        <tr>
-          <th className="px-4 py-5 border-b sm:pl-6">
-            <SortButton column="name" label="Recipe" />
-          </th>
-          <th className="px-3 py-5 font-medium border-b">Ingredients</th>
-          <th className="px-3 py-5 font-medium border-b">Steps</th>
-          <th className="px-3 py-5 font-medium whitespace-nowrap border-b">
-            <SortButton column="date" label="Creation date" />
-          </th>
-          <th className="px-3 py-5 font-medium border-b">
-            <SortButton column="type" label="Type" />
-          </th>
-          <th className="relative py-3 pl-6 pr-3 border-b">
-            <span className="sr-only">Actions</span>
-          </th>
-        </tr>
-      </thead>
-
-      <tbody className="bg-white">
-        {isEmpty ? (
-          <tr>
-            <td
-              colSpan={6}
-              className="px-6 py-10 text-center text-sm text-gray-500"
-            >
-              No recipes found.
-            </td>
-          </tr>
-        ) : (
-          recipes.map((recipe: any) => (
-            <tr
-              key={recipe.id}
-              className="w-full border-b py-3 text-sm last-of-type:border-none"
-            >
-              <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                <p className="font-medium">{recipe.recipe_name}</p>
-              </td>
-              <td className="px-3 py-3 whitespace-normal break-words">
-                {recipe.recipe_ingredients?.length
-                  ? recipe.recipe_ingredients.join(", ")
-                  : "—"}
-              </td>
-              <td className="px-3 py-3 whitespace-normal break-words">
-                {recipe.recipe_steps?.length
-                  ? recipe.recipe_steps.join(", ")
-                  : "—"}
-              </td>
-              <td className="whitespace-nowrap px-3 py-3 text-gray-600">
-                {formatDateToLocal(recipe.recipe_created_at)}
-              </td>
-              <td className="whitespace-nowrap px-3 py-3">
-                <RecipesType type={recipe.recipe_type} />
-              </td>
-              <td className="whitespace-nowrap py-3 pl-6 pr-3">
-                {/* your action buttons */}
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  );
-}
-
-/* Mobile cards */
-
-/* <div className="md:hidden">
+    <div className="mt-6 flow-root">
+      <div className="inline-block min-w-full align-middle">
+        <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
+          {/* Mobile cards */}
+          <div className="md:hidden">
             {isEmpty ? (
               <div className="w-full rounded-md bg-white p-4 text-gray-500">
                 No recipes found.
@@ -140,6 +68,7 @@ export default async function RecipesTable({
                     </div>
                   </div>
 
+                  {/* Actions */}
                   <div className="mt-4 flex justify-end gap-2 border-t pt-3">
                     <ViewRecipe id={recipe.id} />
                     <UpdateRecipe id={recipe.id} />
@@ -148,4 +77,92 @@ export default async function RecipesTable({
                 </div>
               ))
             )}
-          </div>*/
+          </div>
+          {/* Desktop table */}
+          <table className="hidden w-full table-fixed text-gray-900 mt-4 md:table">
+            <colgroup>
+              {/* Recipe Name */}
+              <col className="w-42" />
+              {/* Recipe Ingredients */}
+              <col className="w-[25%]" />
+              {/* Recipe Steps */}
+              <col className="w-[25%]" />
+              {/* Recipe Creation date */}
+              <col className="w-32" />
+              {/* Recipe Type */}
+              <col className="w-28" />
+              {/* Recipe Buttons */}
+              <col className="w-30" />
+            </colgroup>
+
+            <thead className="text-left text-sm font-normal">
+              <tr>
+                <th className="px-4 py-5 sm:pl-6">
+                  <SortButton column="name" label="Recipe" />
+                </th>
+                <th className="px-3 py-5 font-medium">Ingredients</th>
+                <th className="px-3 py-5 font-medium">Steps</th>
+                <th className="px-3 py-5 font-medium whitespace-nowrap ">
+                  <SortButton column="date" label="Creation date" />
+                </th>
+                <th className="px-3 py-5 font-medium">
+                  <SortButton column="type" label="Type" />
+                </th>
+                <th className="relative py-3 pl-6 pr-3">
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="bg-white">
+              {isEmpty ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="px-6 py-10 text-center text-sm text-gray-500"
+                  >
+                    No recipes found.
+                  </td>
+                </tr>
+              ) : (
+                recipes.map((recipe: any) => (
+                  <tr
+                    key={recipe.id}
+                    className="w-full border-b py-3 text-sm last-of-type:border-none"
+                  >
+                    <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                      <p className="font-medium">{recipe.recipe_name}</p>
+                    </td>
+                    <td className="px-3 py-3 whitespace-normal break-words">
+                      {recipe.recipe_ingredients?.length
+                        ? recipe.recipe_ingredients.join(", ")
+                        : "—"}
+                    </td>
+                    <td className="px-3 py-3 whitespace-normal break-words">
+                      {recipe.recipe_steps?.length
+                        ? recipe.recipe_steps.join(", ")
+                        : "—"}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 text-gray-600">
+                      {formatDateToLocal(recipe.recipe_created_at)}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3">
+                      <RecipesType type={recipe.recipe_type} />
+                    </td>
+                    <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                      <div className="flex justify-end gap-3">
+                        <ViewRecipe id={recipe.id} />
+                        <UpdateRecipe id={recipe.id} />
+                        <DeleteRecipe id={recipe.id} />
+                      </div>{" "}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

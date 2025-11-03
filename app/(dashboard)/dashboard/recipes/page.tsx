@@ -30,10 +30,8 @@ export default async function Page(props: {
   const order = (searchParams?.order as "asc" | "desc") || "desc";
   const type = searchParams?.type || "";
 
-  // ✅ pages computed with SAME filters used by the list:
   const totalPages = await fetchRecipesPages({ q: query, type });
 
-  // ✅ no redirect: clamp locally so we never fetch an empty page
   const safePage = totalPages === 0 ? 1 : Math.min(pageFromUrl, totalPages);
 
   return (
