@@ -2,6 +2,7 @@ import { fetchFilteredRecipes } from "@/app/lib/data";
 import RecipesType from "./recipes-status";
 import { formatDateToLocal } from "@/app/lib/utils";
 import { DeleteRecipe, ViewRecipe, UpdateRecipe } from "./recipes-buttons";
+import { COUNTRIES, RECIPE_TYPES } from "@/app/lib/definitions";
 
 export default async function RecipesTable({
   query,
@@ -70,7 +71,16 @@ export default async function RecipesTable({
           </div>
 
           {/* Desktop table */}
-          <table className="hidden min-w-full text-gray-900 md:table">
+          <table className="hidden w-full table-fixed text-gray-900 md:table">
+            <colgroup>
+              <col className="w-[16%]" />
+              <col className="w-[25%]" />
+              <col className="w-[25%]" />
+              <col className="w-32" />
+              <col className="w-28" />
+              <col className="w-28" />
+            </colgroup>
+
             <thead className="rounded-lg text-left text-sm font-normal">
               <tr>
                 <th scope="col" className="px-4 py-5 font-medium sm:pl-6">
@@ -82,7 +92,10 @@ export default async function RecipesTable({
                 <th scope="col" className="px-3 py-5 font-medium">
                   Steps
                 </th>
-                <th scope="col" className="px-3 py-5 font-medium">
+                <th
+                  scope="col"
+                  className="px-3 py-5 font-medium whitespace-nowrap"
+                >
                   Creation date
                 </th>
                 <th scope="col" className="px-3 py-5 font-medium">
@@ -109,37 +122,43 @@ export default async function RecipesTable({
                   <tr
                     key={recipe.id}
                     className="w-full border-b py-3 text-sm last-of-type:border-none
-                      [&:first-child>td:first-child]:rounded-tl-lg
-                      [&:first-child>td:last-child]:rounded-tr-lg
-                      [&:last-child>td:first-child]:rounded-bl-lg
-                      [&:last-child>td:last-child]:rounded-br-lg"
+            [&:first-child>td:first-child]:rounded-tl-lg
+            [&:first-child>td:last-child]:rounded-tr-lg
+            [&:last-child>td:first-child]:rounded-bl-lg
+            [&:last-child>td:last-child]:rounded-br-lg"
                   >
-                    <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                    {/* Recipe */}
+                    <td className="py-3 pl-6 pr-3 px-3 whitespace-normal break-words">
                       <div className="flex items-center gap-3">
                         <p className="font-medium">{recipe.recipe_name}</p>
                       </div>
                     </td>
 
-                    <td className="px-3 py-3">
+                    {/* Ingredients: wrap to add height if needed */}
+                    <td className="px-3 py-3 whitespace-normal break-words">
                       {recipe.recipe_ingredients.length
                         ? recipe.recipe_ingredients.join(", ")
                         : "—"}
                     </td>
 
-                    <td className="px-3 py-3">
+                    {/* Steps: narrower column, wrap to add height */}
+                    <td className="px-3 py-3 whitespace-normal break-words">
                       {recipe.recipe_steps.length
                         ? recipe.recipe_steps.join(", ")
                         : "—"}
                     </td>
 
+                    {/* Creation date: never wrap */}
                     <td className="whitespace-nowrap px-3 py-3 text-gray-600">
                       {formatDateToLocal(recipe.recipe_created_at)}
                     </td>
 
+                    {/* Type */}
                     <td className="whitespace-nowrap px-3 py-3">
                       <RecipesType type={recipe.recipe_type} />
                     </td>
 
+                    {/* Actions */}
                     <td className="whitespace-nowrap py-3 pl-6 pr-3">
                       <div className="flex justify-end gap-3">
                         <ViewRecipe id={recipe.id} />
