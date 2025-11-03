@@ -42,7 +42,7 @@ export default async function Page() {
                 type="text"
                 defaultValue="Pablo"
                 autoComplete="given-name"
-                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
               />
               <button
                 type="button"
@@ -66,7 +66,7 @@ export default async function Page() {
                 type="text"
                 defaultValue="Mitkof"
                 autoComplete="family-name"
-                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
               />
             </div>
 
@@ -81,7 +81,7 @@ export default async function Page() {
                 type="email"
                 defaultValue="you@example.com"
                 autoComplete="email"
-                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
               />
               <button
                 type="button"
@@ -113,7 +113,7 @@ export default async function Page() {
                 name="password"
                 type="password"
                 autoComplete="new-password"
-                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
               />
               <button
                 type="button"
@@ -136,7 +136,7 @@ export default async function Page() {
                 name="confirm_password"
                 type="password"
                 autoComplete="new-password"
-                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
               />
             </div>
           </div>
@@ -161,7 +161,7 @@ export default async function Page() {
                 id="country"
                 name="country"
                 defaultValue="Chile"
-                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
               >
                 {COUNTRIES.map((c) => (
                   <option key={c} value={c}>
@@ -189,7 +189,7 @@ export default async function Page() {
                 id="language"
                 name="language"
                 defaultValue="es" // or "en"
-                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
               >
                 {LANGUAGE.map((t) => (
                   <option key={t} value={t}>

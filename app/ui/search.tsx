@@ -29,6 +29,7 @@ export default function Search({ placeholder }: { placeholder: string }) {
         Search
       </label>
       <input
+        // Class text-base help us get rid of the IOS auto zoom
         className="peer text-base block w-full rounded-md border border-gray-200 py-[9px] pl-10 outline-2 placeholder:text-gray-500"
         placeholder={placeholder}
         onChange={(e) => {

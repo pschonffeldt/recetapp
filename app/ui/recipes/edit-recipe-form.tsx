@@ -33,7 +33,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               name="recipe_name"
               type="text"
               defaultValue={recipe.recipe_name}
-              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm"
+              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-bases"
               aria-describedby="recipe_name-error"
             />
             <div id="recipe_name-error" aria-live="polite" aria-atomic="true">
@@ -56,7 +56,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               id="recipe_type"
               name="recipe_type"
               defaultValue={recipe.recipe_type}
-              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-sm"
+              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base"
               aria-describedby="recipe_type-error"
             >
               {RECIPE_TYPES.map((t) => (
@@ -86,7 +86,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               name="recipe_ingredients"
               rows={5}
               defaultValue={recipe.recipe_ingredients.join("\n")}
-              className="block w-full rounded-md border border-gray-200 p-2 text-sm"
+              className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="recipe_ingredients-error"
             />
             <div
@@ -114,7 +114,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               name="recipe_steps"
               rows={5}
               defaultValue={recipe.recipe_steps.join("\n")}
-              className="block w-full rounded-md border border-gray-200 p-2 text-sm"
+              className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="recipe_steps-error"
             />
             <div id="recipe_steps-error" aria-live="polite" aria-atomic="true">
@@ -138,7 +138,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               name="equipment"
               rows={4}
               defaultValue={(recipe.equipment ?? []).join("\n")}
-              className="block w-full rounded-md border border-gray-200 p-2 text-sm"
+              className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="equipment-error"
             />
             <div id="equipment-error" aria-live="polite" aria-atomic="true">
@@ -162,7 +162,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               name="allergens"
               rows={4}
               defaultValue={(recipe.allergens ?? []).join("\n")}
-              className="block w-full rounded-md border border-gray-200 p-2 text-sm"
+              className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="allergens-error"
             />
             <div id="allergens-error" aria-live="polite" aria-atomic="true">
@@ -186,7 +186,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               name="dietary_flags"
               rows={4}
               defaultValue={(recipe.dietary_flags ?? []).join("\n")}
-              className="block w-full rounded-md border border-gray-200 p-2 text-sm"
+              className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="dietary_flags-error"
             />
             <div id="dietary_flags-error" aria-live="polite" aria-atomic="true">
@@ -216,7 +216,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               min={1}
               step={1}
               defaultValue={recipe.servings ?? ""}
-              className="block w-full rounded-md border border-gray-200 p-2 text-sm"
+              className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="servings-error"
             />
             <div id="servings-error" aria-live="polite" aria-atomic="true">
@@ -243,7 +243,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               min={0}
               step={1}
               defaultValue={recipe.prep_time_min ?? ""} // null-safe
-              className="block w-full rounded-md border border-gray-200 p-2 text-sm"
+              className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="prep_time_min-error"
             />
             <div id="prep_time_min-error" aria-live="polite" aria-atomic="true">
@@ -269,7 +269,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               min={0}
               step={1}
               defaultValue={recipe.calories_total ?? ""} // number | ""
-              className="block w-full rounded-md border border-gray-200 p-2 text-sm"
+              className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="calories_total-error"
             />
             <div
@@ -300,7 +300,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               min={0}
               step="0.01"
               defaultValue={recipe.estimated_cost_total ?? ""} // string | ""
-              className="block w-full rounded-md border border-gray-200 p-2 text-sm"
+              className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="estimated_cost_total-error"
             />
             <div
