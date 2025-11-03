@@ -6,56 +6,71 @@ import Link from "next/link";
 import { generatePagination } from "@/app/lib/utils";
 import { usePathname, useSearchParams } from "next/navigation";
 
-export default function Pagination({ totalPages }: { totalPages: number }) {
+export default function Pagination({
+  totalPages,
+  currentPage: currentPageProp, // optional: allow parent to pass a clamped page
+}: {
+  totalPages: number;
+  currentPage?: number;
+}) {
+  // Hide pager when it's pointless
+  if (totalPages <= 1) return null;
+
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentPage = Number(searchParams.get("page")) || 1;
 
-  const createPageURL = (pageNumber: number | string) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("page", pageNumber.toString());
-    return `${pathname}?${params.toString()}`;
+  const clamp = (n: number) =>
+    Math.min(Math.max(1, n), Math.max(1, totalPages));
+
+  // If parent gave us the safe page, use it. Otherwise read from URL and clamp.
+  const urlPage = Number(searchParams.get("page")) || 1;
+  const currentPage = clamp(currentPageProp ?? urlPage);
+
+  const createPageURL = (pageNumber: number) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("page", String(clamp(pageNumber))); // never build invalid links
+    return `${pathname}?${next.toString()}`;
   };
 
+  // Always generate around the *safe* page
   const allPages = generatePagination(currentPage, totalPages);
 
   return (
-    <>
-      <div className="inline-flex">
-        <PaginationArrow
-          direction="left"
-          href={createPageURL(currentPage - 1)}
-          isDisabled={currentPage <= 1}
-        />
+    <div className="inline-flex">
+      <PaginationArrow
+        direction="left"
+        href={createPageURL(currentPage - 1)}
+        isDisabled={currentPage <= 1}
+      />
 
-        <div className="flex -space-x-px">
-          {allPages.map((page, index) => {
-            let position: "first" | "last" | "single" | "middle" | undefined;
+      <div className="flex -space-x-px">
+        {allPages.map((page, index) => {
+          const isEllipsis = page === "...";
+          let position: "first" | "last" | "single" | "middle" | undefined;
+          if (index === 0) position = "first";
+          if (index === allPages.length - 1) position = "last";
+          if (allPages.length === 1) position = "single";
+          if (isEllipsis) position = "middle";
 
-            if (index === 0) position = "first";
-            if (index === allPages.length - 1) position = "last";
-            if (allPages.length === 1) position = "single";
-            if (page === "...") position = "middle";
-
-            return (
-              <PaginationNumber
-                key={`${page}-${index}`}
-                href={createPageURL(page)}
-                page={page}
-                position={position}
-                isActive={currentPage === page}
-              />
-            );
-          })}
-        </div>
-
-        <PaginationArrow
-          direction="right"
-          href={createPageURL(currentPage + 1)}
-          isDisabled={currentPage >= totalPages}
-        />
+          return (
+            <PaginationNumber
+              key={`${page}-${index}`}
+              page={page}
+              position={position}
+              isActive={currentPage === page}
+              // never link ellipsis; clamp all numeric targets
+              href={!isEllipsis ? createPageURL(page as number) : ""}
+            />
+          );
+        })}
       </div>
-    </>
+
+      <PaginationArrow
+        direction="right"
+        href={createPageURL(currentPage + 1)}
+        isDisabled={currentPage >= totalPages}
+      />
+    </div>
   );
 }
 

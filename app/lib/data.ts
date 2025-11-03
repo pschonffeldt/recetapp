@@ -210,46 +210,121 @@ export async function fetchRecipeCardData() {
  * Recipes — Filtered List, Paging, Single, List
  * ======================================================= */
 
-/**
- * Fetch a paginated list of recipes matching a query across:
- * - recipe_name, recipe_type
- * - ingredients (unnest on text[])
- * - steps (unnest on text[])
- *
- * @param query       - Search string for filter
- * @param currentPage - 1-based page index
- * @returns Promise<RecipesTable[]>
- */
-export async function fetchFilteredRecipes(query: string, currentPage: number) {
-  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-  const q = `%${query}%`;
+type SortCol = "name" | "date" | "type";
+type SortDir = "asc" | "desc";
 
-  // Build WHERE clause only if query exists to avoid full-table ILIKEs:
-  const where = query
-    ? sql`
-        WHERE
-          recipes.recipe_name ILIKE ${q} OR
-          recipes.recipe_type::text ILIKE ${q} OR
-          EXISTS (SELECT 1 FROM unnest(recipes.recipe_ingredients) ing WHERE ing ILIKE ${q}) OR
-          EXISTS (SELECT 1 FROM unnest(recipes.recipe_steps) st WHERE st ILIKE ${q})
-      `
-    : sql``;
+function pickRows<T = any>(result: any): T[] {
+  // Works for both @vercel/postgres (result.rows) and postgres (result is already an array)
+  return Array.isArray(result) ? result : result?.rows ?? [];
+}
 
-  const rows = await sql<RecipesTable[]>`
-    SELECT
-      recipes.id,
-      recipes.recipe_name,
-      recipes.recipe_ingredients,
-      recipes.recipe_steps,
-      recipes.recipe_created_at,
-      recipes.recipe_type
+function andAll(parts: any[]) {
+  // Build "a AND b AND c" without sql.join
+  if (parts.length === 0) return sql``;
+  const [first, ...rest] = parts;
+  return rest.reduce((acc, cur) => sql`${acc} AND ${cur}`, first);
+}
+
+export async function fetchFilteredRecipes(
+  arg1:
+    | string
+    | {
+        q?: string;
+        type?: string;
+        sort?: SortCol;
+        order?: SortDir;
+        page?: number;
+      },
+  pageMaybe?: number,
+  opts: { type?: string; sort?: SortCol; order?: SortDir } = {}
+) {
+  // Normalize inputs
+  let q = "";
+  let page = 1;
+  let type = "";
+  let sort: SortCol = "date";
+  let order: SortDir = "desc";
+
+  if (typeof arg1 === "string") {
+    q = arg1 ?? "";
+    page = pageMaybe ?? 1;
+    type = opts.type ?? "";
+    sort = opts.sort ?? "date";
+    order = opts.order ?? "desc";
+  } else {
+    q = arg1.q ?? "";
+    page = arg1.page ?? 1;
+    type = arg1.type ?? "";
+    sort = arg1.sort ?? "date";
+    order = arg1.order ?? "desc";
+  }
+
+  const PAGE_SIZE = 10;
+  const offset = (page - 1) * PAGE_SIZE;
+
+  // WHERE
+  const predicates: any[] = [];
+
+  // 🔎 FULL-TEXT-ish search across name + arrays (+ type)
+  if (q) {
+    const pat = "%" + q + "%";
+
+    const nameLike = sql`recipe_name ILIKE ${pat}`;
+    // ingredients is text[]: unnest and ILIKE each element
+    const ingredientsLike = sql`EXISTS (
+    SELECT 1 FROM unnest(recipe_ingredients) AS ing
+    WHERE ing ILIKE ${pat}
+  )`;
+    // steps is text[] as well
+    const stepsLike = sql`EXISTS (
+    SELECT 1 FROM unnest(recipe_steps) AS st
+    WHERE st ILIKE ${pat}
+  )`;
+    // if recipe_type is an enum, cast to text
+    const typeLike = sql`recipe_type::text ILIKE ${pat}`;
+
+    // group ORs for the search block
+    predicates.push(
+      sql`(${nameLike} OR ${ingredientsLike} OR ${stepsLike} OR ${typeLike})`
+    );
+  }
+
+  // existing single-value filter (keeps working)
+  if (type) predicates.push(sql`recipe_type = ${type}`);
+
+  const whereSql = predicates.length ? sql`WHERE ${andAll(predicates)}` : sql``;
+
+  // ORDER BY
+  const sortCol =
+    sort === "name"
+      ? sql`recipe_name`
+      : sort === "type"
+      ? sql`recipe_type`
+      : sql`recipe_created_at`;
+  const dir = order === "asc" ? sql`ASC` : sql`DESC`;
+
+  const result = await sql/* sql */ `
+    SELECT id, recipe_name, recipe_ingredients, recipe_steps, recipe_created_at, recipe_type
     FROM recipes
-    ${where}
-    ORDER BY recipes.recipe_created_at DESC
-    LIMIT ${ITEMS_PER_PAGE} OFFSET ${offset};
+    ${whereSql}
+    ORDER BY ${sortCol} ${dir}
+    LIMIT ${PAGE_SIZE} OFFSET ${offset}
   `;
 
-  return rows;
+  return pickRows(result);
+}
+
+export async function fetchRecipesTotal(params: { q?: string; type?: string }) {
+  const { q = "", type = "" } = params;
+  const predicates: any[] = [];
+  if (q) predicates.push(sql`recipe_name ILIKE ${"%" + q + "%"}`);
+  if (type) predicates.push(sql`recipe_type = ${type}`);
+  const whereSql = predicates.length ? sql`WHERE ${andAll(predicates)}` : sql``;
+
+  const totalRes =
+    await sql/* sql */ `SELECT COUNT(*)::int AS count FROM recipes ${whereSql}`;
+  const rows = pickRows<{ count: number }>(totalRes);
+  return rows[0]?.count ?? 0;
 }
 
 /**
@@ -258,24 +333,58 @@ export async function fetchFilteredRecipes(query: string, currentPage: number) {
  * @param query - Search string for filter
  * @returns Promise<number> totalPages
  */
-export async function fetchRecipesPages(query: string) {
-  if (!query) {
+
+export async function fetchRecipesPages(
+  arg: string | { q?: string; type?: string }
+) {
+  const q = typeof arg === "string" ? arg : arg.q ?? "";
+  const type = typeof arg === "string" ? "" : arg.type ?? "";
+
+  // same page size you use to fetch the list
+  const ITEMS_PER_PAGE = 10;
+
+  // no filters: simple fast count
+  if (!q && !type) {
     const [{ count }] = await sql<{ count: number }[]>`
-      SELECT COUNT(*)::int AS count FROM recipes;
+      SELECT COUNT(*)::int AS count
+      FROM recipes;
     `;
     return Math.ceil(count / ITEMS_PER_PAGE);
   }
 
-  const q = `%${query}%`;
+  // build WHERE = (search across fields) AND (optional exact type)
+  const parts: any[] = [];
+
+  if (q) {
+    const pat = `%${q}%`;
+    parts.push(sql`
+      (
+        recipes.recipe_name ILIKE ${pat}
+        OR recipes.recipe_type::text ILIKE ${pat}
+        OR EXISTS (SELECT 1 FROM unnest(recipes.recipe_ingredients) AS ing WHERE ing ILIKE ${pat})
+        OR EXISTS (SELECT 1 FROM unnest(recipes.recipe_steps)       AS st  WHERE st  ILIKE ${pat})
+      )
+    `);
+  }
+
+  if (type) {
+    parts.push(sql`recipes.recipe_type = ${type}`);
+  }
+
+  // combine with AND, without sql.join (works on all dialect shapes)
+  const whereSql =
+    parts.length === 0
+      ? sql``
+      : sql`WHERE ${parts
+          .slice(1)
+          .reduce((acc, cur) => sql`${acc} AND ${cur}`, parts[0])}`;
+
   const [{ count }] = await sql<{ count: number }[]>`
     SELECT COUNT(*)::int AS count
     FROM recipes
-    WHERE
-      recipes.recipe_name ILIKE ${q} OR
-      recipes.recipe_type::text ILIKE ${q} OR
-      EXISTS (SELECT 1 FROM unnest(recipes.recipe_ingredients) ing WHERE ing ILIKE ${q}) OR
-      EXISTS (SELECT 1 FROM unnest(recipes.recipe_steps) st WHERE st ILIKE ${q});
+    ${whereSql};
   `;
+
   return Math.ceil(count / ITEMS_PER_PAGE);
 }
 
