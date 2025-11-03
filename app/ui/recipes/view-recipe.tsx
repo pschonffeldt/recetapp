@@ -257,7 +257,7 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             href="/dashboard/recipes"
             className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
           >
-            Return to list
+            Return
           </Link>
           <Button onClick={handleOnClick}>Share</Button>
           <UpdateRecipeOnViewer id={recipe.id} />
