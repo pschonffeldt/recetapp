@@ -1,4 +1,13 @@
-// app/ui/recipes/recipes-buttons.tsx
+// ============================================
+// Recipe Action Buttons (Client UI fragments)
+// - Icon-only controls with accessible labels
+// - Keep public API: CreateRecipe, ViewRecipe, UpdateRecipe,
+//   UpdateRecipeOnViewer, DeleteRecipeOnViewer, DeleteRecipe
+// ============================================
+
+/* ================================
+ * Imports (grouped by role)
+ * ================================ */
 import { deleteRecipe, deleteRecipeFromViewer } from "@/app/lib/actions";
 import {
   MagnifyingGlassCircleIcon,
@@ -8,19 +17,24 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
-/* 
-  NOTE ON A11Y FOR ICON-ONLY CONTROLS
-  - Provide a programmatic name with aria-label.
-  - Keep the icon decorative via aria-hidden="true".
-  - (Optional) Add a matching title to help mouse users with tooltips.
-*/
+/* ================================
+ * A11y notes for icon-only controls
+ * ================================
+ * - Provide a programmatic name via aria-label.
+ * - Mark icons as decorative with aria-hidden="true".
+ * - Optional title attribute for mouse users (tooltip).
+ * - Buttons/links keep native keyboard semantics.
+ */
 
+/* ================================
+ * Create (link button)
+ * Visible text → aria-label is optional, kept for consistency.
+ * ================================ */
 export function CreateRecipe() {
   return (
     <Link
       href="/dashboard/recipes/create"
       className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-      // Visible text already present; aria-label is optional here.
       aria-label="Create recipe"
       title="Create recipe"
     >
@@ -30,6 +44,10 @@ export function CreateRecipe() {
   );
 }
 
+/* ================================
+ * View (icon-only link)
+ * Keeps unused bind as-is (no behavior change).
+ * ================================ */
 export function ViewRecipe({ id }: { id: string }) {
   const deleteRecipeWithId = deleteRecipe.bind(null, id); // (unused but preserved)
 
@@ -41,12 +59,15 @@ export function ViewRecipe({ id }: { id: string }) {
       title="View recipe details"
     >
       <MagnifyingGlassCircleIcon className="w-5" aria-hidden="true" />
-      {/* Redundant, but helpful for some AT; keep if you prefer */}
+      {/* Redundant for some AT; safe to keep */}
       <span className="sr-only">View recipe</span>
     </Link>
   );
 }
 
+/* ================================
+ * Edit (icon-only link)
+ * ================================ */
 export function UpdateRecipe({ id }: { id: string }) {
   return (
     <Link
@@ -61,6 +82,10 @@ export function UpdateRecipe({ id }: { id: string }) {
   );
 }
 
+/* ================================
+ * Edit (viewer context — text button)
+ * Uses visible text; aria-label keeps naming consistent.
+ * ================================ */
 export function UpdateRecipeOnViewer({ id }: { id: string }) {
   return (
     <Link
@@ -74,6 +99,10 @@ export function UpdateRecipeOnViewer({ id }: { id: string }) {
   );
 }
 
+/* ================================
+ * Delete (viewer context — form submit)
+ * Server Action form retained as-is.
+ * ================================ */
 export function DeleteRecipeOnViewer({ id }: { id: string }) {
   const deleteRecipeWithId = deleteRecipeFromViewer.bind(null, id);
 
@@ -91,6 +120,10 @@ export function DeleteRecipeOnViewer({ id }: { id: string }) {
   );
 }
 
+/* ================================
+ * Delete (icon-only button in table/list)
+ * Retains form + server action; adds clear accessible name.
+ * ================================ */
 export function DeleteRecipe({ id }: { id: string }) {
   const deleteRecipeWithId = deleteRecipe.bind(null, id);
 
@@ -102,7 +135,7 @@ export function DeleteRecipe({ id }: { id: string }) {
         aria-label="Delete recipe"
         title="Delete recipe"
       >
-        {/* Keep sr-only text for AT; icon is decorative */}
+        {/* Programmatic name for AT; icon is decorative */}
         <span className="sr-only">Delete</span>
         <TrashIcon className="w-5" aria-hidden="true" />
       </button>
