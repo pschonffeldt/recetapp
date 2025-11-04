@@ -1,18 +1,44 @@
+// ============================================
+// Create Recipe Page (SSR)
+// - Shows breadcrumb trail and the recipe creation form
+// - No data fetching needed here (form handles its own needs)
+// ============================================
+
+/* ================================
+ * Imports (grouped by role)
+ * ================================ */
+
+// UI
 import Breadcrumbs from "@/app/ui/recipes/breadcrumbs";
-import { fetchRecipes } from "@/app/lib/data";
-import { Metadata } from "next";
 import RecipeForm from "@/app/ui/recipes/create-recipe-form";
+
+// Data (DAL)
+import { fetchRecipes } from "@/app/lib/data"; // NOTE: currently unused in this file
+
+// Framework
+import { Metadata } from "next";
+
+/* ================================
+ * Metadata
+ * ================================ */
 
 // Set title for metadata
 export const metadata: Metadata = {
   title: "Create Recipe",
 };
 
+/* ================================
+ * Page Component (Server Component)
+ * ================================ */
+/**
+ * Renders:
+ *  - Breadcrumb navigation for context
+ *  - Recipe creation form
+ */
 export default async function Page() {
-  const recipes = await fetchRecipes();
-
   return (
     <main>
+      {/* Breadcrumb trail */}
       <Breadcrumbs
         breadcrumbs={[
           { label: "Recipes", href: "/dashboard/recipes" },
@@ -23,6 +49,8 @@ export default async function Page() {
           },
         ]}
       />
+
+      {/* Recipe creation form */}
       <RecipeForm />
     </main>
   );
