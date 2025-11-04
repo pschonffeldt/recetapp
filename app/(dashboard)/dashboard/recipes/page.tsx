@@ -30,7 +30,7 @@ export default async function Page(props: {
   const order = (searchParams?.order as "asc" | "desc") || "desc";
   const type = searchParams?.type || "";
 
-  const totalPages = await fetchRecipesPages({ q: query, type });
+  const totalPages = await fetchRecipesPages({ query: query, type });
 
   const safePage = totalPages === 0 ? 1 : Math.min(pageFromUrl, totalPages);
 

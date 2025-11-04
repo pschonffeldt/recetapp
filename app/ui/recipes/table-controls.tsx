@@ -1,23 +1,23 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { setParams } from "./url";
 
-const TYPES = ["Breakfast", "Lunch", "Dinner", "Snack"]; // or read from your enum
+const TYPES = ["Breakfast", "Lunch", "Dinner", "Snack"];
 
 export default function Controls({ initial }: { initial: any }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // Search with tiny debounce
-  const [q, setQ] = useState(initial.q);
+  const [query, setQ] = useState(initial.query);
   useEffect(() => {
     const t = setTimeout(() => {
-      router.replace(setParams(searchParams, { q }));
+      router.replace(setParams(searchParams, { query }));
     }, 300);
     return () => clearTimeout(t);
-  }, [q, router, searchParams]);
+  }, [query, router, searchParams]);
 
   const onType = (type: string) =>
     router.replace(setParams(searchParams, { type }));
@@ -25,7 +25,7 @@ export default function Controls({ initial }: { initial: any }) {
   return (
     <div className="flex flex-wrap items-center gap-3">
       <input
-        value={q}
+        value={query}
         onChange={(e) => setQ(e.target.value)}
         placeholder="Search recipe..."
         className="h-10 w-64 rounded-md border border-gray-300 px-3 text-sm"
