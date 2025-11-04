@@ -1,5 +1,13 @@
 "use client";
 
+// ============================================
+// Pagination (Client Component, a11y-enhanced)
+// - Same logic as your current component
+// - Adds a11y: <nav>, aria-current on active page,
+//   aria-label + rel on arrows
+// - Adds tooltips via `title` on arrows and numbers
+// ============================================
+
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Link from "next/link";
@@ -26,6 +34,7 @@ export default function Pagination({
   const urlPage = Number(searchParams.get("page")) || 1;
   const currentPage = clamp(currentPageProp ?? urlPage);
 
+  // Build a URL for a given page, preserving other query params
   const createPageURL = (pageNumber: number) => {
     const next = new URLSearchParams(searchParams);
     next.set("page", String(clamp(pageNumber))); // never build invalid links
@@ -36,7 +45,7 @@ export default function Pagination({
   const allPages = generatePagination(currentPage, totalPages);
 
   return (
-    <div className="inline-flex">
+    <nav aria-label="Pagination" className="inline-flex">
       <PaginationArrow
         direction="left"
         href={createPageURL(currentPage - 1)}
@@ -70,7 +79,7 @@ export default function Pagination({
         href={createPageURL(currentPage + 1)}
         isDisabled={currentPage >= totalPages}
       />
-    </div>
+    </nav>
   );
 }
 
@@ -96,10 +105,32 @@ function PaginationNumber({
     }
   );
 
-  return isActive || position === "middle" ? (
-    <div className={className}>{page}</div>
-  ) : (
-    <Link href={href} className={className}>
+  // Tooltip text
+  const title =
+    position === "middle"
+      ? ""
+      : isActive
+      ? `Page ${page} (current)`
+      : `Go to page ${page}`;
+
+  // Active page and ellipsis are not links
+  if (isActive) {
+    return (
+      <div className={className} aria-current="page" title={title}>
+        {page}
+      </div>
+    );
+  }
+  if (position === "middle") {
+    return (
+      <div className={className} aria-hidden="true" role="presentation">
+        {page}
+      </div>
+    );
+  }
+
+  return (
+    <Link href={href} className={className} title={title} aria-label={title}>
       {page}
     </Link>
   );
@@ -131,10 +162,26 @@ function PaginationArrow({
       <ArrowRightIcon className="w-4" />
     );
 
+  const label = direction === "left" ? "Previous page" : "Next page";
+  const rel = direction === "left" ? "prev" : "next";
+
   return isDisabled ? (
-    <div className={className}>{icon}</div>
+    <div
+      className={className}
+      aria-disabled="true"
+      aria-label={label}
+      title={label}
+    >
+      {icon}
+    </div>
   ) : (
-    <Link className={className} href={href}>
+    <Link
+      className={className}
+      href={href}
+      aria-label={label}
+      title={label}
+      rel={rel}
+    >
       {icon}
     </Link>
   );
