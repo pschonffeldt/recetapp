@@ -12,9 +12,6 @@
 import Breadcrumbs from "@/app/ui/recipes/breadcrumbs";
 import RecipeForm from "@/app/ui/recipes/create-recipe-form";
 
-// Data (DAL)
-import { fetchRecipes } from "@/app/lib/data"; // NOTE: currently unused in this file
-
 // Framework
 import { Metadata } from "next";
 
