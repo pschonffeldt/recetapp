@@ -69,7 +69,7 @@ export type RecipeForm = {
   calories_total?: number | null;
   estimated_cost_total?: string | null; // numeric -> string
   equipment?: string[]; // text[]
-  recipe_updated_at?: string; // no more Date union
+  recipe_updated_at?: string;
   recipe_created_at: string;
 };
 
