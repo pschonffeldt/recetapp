@@ -62,6 +62,19 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             {/* Type chip */}
             <RecipesType type={recipe.recipe_type} />
           </div>
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            {/* Chip */}
+            <span
+              className={`${brand(
+                "brand",
+                "bg"
+              )} inline-flex items-center rounded-full px-2 py-1 text-xs font-medium text-white`}
+            >
+              Difficulty
+            </span>
+            {/* Type chip */}
+            <RecipesType type={recipe.difficulty} />
+          </div>
         </header>
 
         {/* Stats mobile*/}
