@@ -564,8 +564,6 @@ export async function fetchRecipeById(id: string) {
         recipe_ingredients,
         recipe_steps,
         recipe_type,
-
-        -- NEW
         servings,
         prep_time_min,
         difficulty,
@@ -574,7 +572,9 @@ export async function fetchRecipeById(id: string) {
         COALESCE(allergens,     ARRAY[]::text[])   AS allergens,
         calories_total,
         estimated_cost_total,                       -- comes back as string
-        COALESCE(equipment,     ARRAY[]::text[])   AS equipment
+        COALESCE(equipment,     ARRAY[]::text[])   AS equipment,
+        (recipe_created_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_created_at,
+        (recipe_updated_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_updated_at
       FROM public.recipes
       WHERE id = ${id}::uuid;
     `;

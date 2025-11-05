@@ -9,6 +9,10 @@ import { brand } from "../branding";
 import { RecipeForm } from "@/app/lib/definitions";
 import { inter } from "../fonts";
 import { MetricCard, MetricCardMobile } from "./recipe-indicators";
+import { formatDateToLocal } from "@/app/lib/utils";
+
+// helper (local)
+const asDate = (d: string | Date) => (d instanceof Date ? d : new Date(d));
 
 export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
   const initial: RecipeFormState = { message: null, errors: {} };
@@ -33,6 +37,18 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
             {recipe.recipe_name}
           </h1>
+          <div className="flex flex-row">
+            <p>Created date - </p>
+            <time dateTime={new Date(recipe.recipe_created_at!).toISOString()}>
+              {formatDateToLocal(recipe.recipe_created_at!)}
+            </time>
+          </div>
+          <div className="flex flex-row">
+            <p>Last update - </p>
+            <time dateTime={new Date(recipe.recipe_updated_at!).toISOString()}>
+              {formatDateToLocal(recipe.recipe_updated_at!)}
+            </time>
+          </div>
           <div className="mt-5 flex flex-wrap items-center gap-2">
             {/* Chip */}
             <span
