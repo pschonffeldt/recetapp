@@ -5,7 +5,7 @@ import { updateRecipe, type RecipeFormState } from "@/app/lib/actions";
 import { Button } from "@/app/ui/button";
 import Link from "next/link";
 import { capitalizeFirst } from "@/app/lib/utils";
-import { RECIPE_TYPES, RecipeForm } from "@/app/lib/definitions";
+import { DIFFICULTY, RECIPE_TYPES, RecipeForm } from "@/app/lib/definitions";
 
 // initial state with strong typing
 const initialState: RecipeFormState = { message: null, errors: {} };
@@ -67,6 +67,38 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
             </select>
             <div id="recipe_type-error" aria-live="polite" aria-atomic="true">
               {state.errors.recipe_type?.map((e) => (
+                <p className="mt-2 text-sm text-red-500" key={e}>
+                  {e}
+                </p>
+              ))}
+            </div>
+          </div>
+          {/* Difficulty */}
+          <div className="mb-4">
+            <label
+              htmlFor="difficulty"
+              className="mb-2 block text-sm font-medium"
+            >
+              Difficulty
+            </label>
+            <select
+              id="difficulty"
+              name="difficulty"
+              defaultValue={recipe.difficulty}
+              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base"
+              aria-describedby="difficulty-error"
+            >
+              <option value="" disabled>
+                Select a difficulty
+              </option>
+              {DIFFICULTY.map((t) => (
+                <option key={t} value={t}>
+                  {capitalizeFirst(t)}
+                </option>
+              ))}
+            </select>
+            <div id="difficulty-error" aria-live="polite" aria-atomic="true">
+              {state.errors?.difficulty?.map((e) => (
                 <p className="mt-2 text-sm text-red-500" key={e}>
                   {e}
                 </p>

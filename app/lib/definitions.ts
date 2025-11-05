@@ -49,7 +49,7 @@ export type RecipeField = {
 };
 
 /** Full recipe shape for edit/create forms. */
-export type Difficulty = "easy" | "medium" | "hard" | null;
+export type Difficulty = "easy" | "medium" | "hard";
 export type Visibility = "private" | "public";
 
 export type RecipeForm = {
@@ -94,7 +94,9 @@ export type CardData = {
   totalIngredients: number;
 };
 
-// To organize later
+/* =======================================================
+ * TO BE ORGANIZED!
+ * ======================================================= */
 // this are the recipe types I use on my edit feature
 export const RECIPE_TYPES = [
   "breakfast",
@@ -104,7 +106,7 @@ export const RECIPE_TYPES = [
   "snack",
 ] as const;
 
-// this are the recipe types I use on my edit feature
+// this are the recipe dofficulty
 export const DIFFICULTY = ["easy", "medium", "hard"] as const;
 
 // this are the languages types I use on my profile settings
