@@ -61,7 +61,7 @@ export function MetricCard({
               {rest.unit && unitPos === "left" && (
                 <span className="mr-2 text-sm text-gray-500">{rest.unit}</span>
               )}
-              <span className="text-3xl font-semibold text-gray-900">
+              <span className="text-2xl font-semibold text-gray-900">
                 {rest.value}
               </span>
               {rest.unit && unitPos === "right" && (
@@ -141,7 +141,7 @@ export function MetricCard({
       <div className={`${fontClassName} px-4 pb-4 pt-8`}>
         <ul className={`${listClass} space-y-2 text-gray-800 pl-6`}>
           {items.map((it, i) => (
-            <li key={`${title}-item-${i}`} className="leading-relaxed">
+            <li key={`${title}-item-${i}`} className="leading-4">
               {it}
             </li>
           ))}
@@ -185,7 +185,7 @@ export function MetricCardMobile({
               {rest.unit && unitPos === "left" && (
                 <span className="mr-2 text-sm text-gray-500">{rest.unit}</span>
               )}
-              <span className="text-3xl font-semibold text-gray-900">
+              <span className="text-xl font-semibold text-gray-900">
                 {rest.value}
               </span>
               {rest.unit && unitPos === "right" && (

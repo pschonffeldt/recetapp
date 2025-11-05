@@ -9,7 +9,7 @@ import { brand } from "../branding";
 import { RecipeForm } from "@/app/lib/definitions";
 import { inter } from "../fonts";
 import { MetricCard, MetricCardMobile } from "./recipe-indicators";
-import { formatDateToLocal } from "@/app/lib/utils";
+import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils";
 
 // helper (local)
 const asDate = (d: string | Date) => (d instanceof Date ? d : new Date(d));
@@ -28,61 +28,43 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
   // Render page
   return (
     <div>
-      <div
-        id="print"
-        className="rounded-md border-gray-200 bg-gray-50 p-6 shadow-sm"
-      >
+      <div id="print" className="rounded-md border-gray-200 bg-gray-50 p-6">
         {/* Recipe name and type */}
         <header className="mb-6">
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
             {recipe.recipe_name}
           </h1>
-          <div className="flex flex-row">
-            <p>Created date - </p>
-            <time dateTime={new Date(recipe.recipe_created_at!).toISOString()}>
-              {formatDateToLocal(recipe.recipe_created_at!)}
-            </time>
-          </div>
-          <div className="flex flex-row">
-            <p>Last update - </p>
-            <time dateTime={new Date(recipe.recipe_updated_at!).toISOString()}>
-              {formatDateToLocal(recipe.recipe_updated_at!)}
-            </time>
-          </div>
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            {/* Chip */}
-            <span
-              className={`${brand(
-                "brand",
-                "bg"
-              )} inline-flex items-center rounded-full px-2 py-1 text-xs font-medium text-white`}
-            >
-              Recipe type
-            </span>
-            {/* Type chip */}
-            <RecipesType type={recipe.recipe_type} />
-          </div>
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            {/* Chip */}
-            <span
-              className={`${brand(
-                "brand",
-                "bg"
-              )} inline-flex items-center rounded-full px-2 py-1 text-xs font-medium text-white`}
-            >
-              Difficulty
-            </span>
-            {/* Type chip */}
-            <RecipesType type={recipe.difficulty} />
-          </div>
         </header>
 
         {/* Stats mobile*/}
         <section className="mb-6 grid gap-4 sm:grid-cols-4 md:hidden grid-cols-2">
           <MetricCardMobile
+            title="Creation date"
+            value={formatDateToLocal(recipe.recipe_created_at!)}
+            fontClassName={inter.className}
+          />
+          {/* Last edit */}
+          <MetricCardMobile
+            title="Last edit"
+            value={formatDateToLocal(recipe.recipe_updated_at!)}
+            fontClassName={inter.className}
+          />
+          {/* Recipe type */}
+          <MetricCardMobile
+            title="Recipe type"
+            value={capitalizeFirst(recipe.recipe_type)}
+            fontClassName={inter.className}
+          />
+          {/* Preparation difficulty */}
+          <MetricCardMobile
+            title="Preparation difficulty"
+            value={capitalizeFirst(recipe.difficulty)}
+            fontClassName={inter.className}
+          />
+          <MetricCardMobile
             title="Servings"
             value={recipe.servings}
-            unit="portions"
+            unit="servings"
             fontClassName={inter.className}
           />
 
@@ -166,11 +148,35 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
 
         {/* Stats desktop */}
         <section className="hidden md:grid md:grid-cols-4 gap-4 mb-6">
+          {/* Creation date */}
+          <MetricCard
+            title="Creation date"
+            value={formatDateToLocal(recipe.recipe_created_at!)}
+            fontClassName={inter.className}
+          />
+          {/* Last edit */}
+          <MetricCard
+            title="Last edit"
+            value={formatDateToLocal(recipe.recipe_updated_at!)}
+            fontClassName={inter.className}
+          />
+          {/* Recipe type */}
+          <MetricCard
+            title="Recipe type"
+            value={capitalizeFirst(recipe.recipe_type)}
+            fontClassName={inter.className}
+          />
+          {/* Preparation difficulty */}
+          <MetricCard
+            title="Preparation difficulty"
+            value={capitalizeFirst(recipe.difficulty)}
+            fontClassName={inter.className}
+          />
           {/* Servings */}
           <MetricCard
             title="Servings"
             value={recipe.servings}
-            unit="portions"
+            unit="servings"
             fontClassName={inter.className}
           />
           {/* Prep time */}
@@ -244,7 +250,7 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             fontClassName={inter.className}
           />
         </section>
-
+        {/* Stats third row */}
         {/* Ingredients & Steps */}
         <section className="mb-6 grid gap-3 items-stretch sm:grid-cols-2">
           {/* Left: Ingredients (stretches to natural height) */}
