@@ -286,7 +286,7 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
       </div>
 
       {/* Buttons */}
-      <section>
+      <section className="pb-6">
         <div className="mt-6 flex justify-end gap-4">
           <Link
             href="/dashboard/recipes"

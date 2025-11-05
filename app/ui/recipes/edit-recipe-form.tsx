@@ -14,7 +14,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
   const [state, formAction] = useActionState(updateRecipe, initialState);
 
   return (
-    <form action={formAction}>
+    <form action={formAction} className="pb-12">
       {/* Recipe form fields */}
       <input type="hidden" name="id" value={recipe.id} />
       <div className="rounded-md bg-gray-50 p-4 md:p-6">
@@ -33,7 +33,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               name="recipe_name"
               type="text"
               defaultValue={recipe.recipe_name}
-              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-bases"
+              className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base"
               aria-describedby="recipe_name-error"
             />
             <div id="recipe_name-error" aria-live="polite" aria-atomic="true">

@@ -156,7 +156,7 @@ export async function createRecipe(
     allergens: toLines(formData.get("allergens")),
     calories_total: toInt(formData.get("calories_total")),
     estimated_cost_total: toMoney(formData.get("estimated_cost_total")),
-    equipment: toLines(formData.get("equipment")),
+    equipment: toLines(formData.get("recipe_equipment")),
   });
 
   if (!parsed.success) {

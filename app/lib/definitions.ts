@@ -104,6 +104,9 @@ export const RECIPE_TYPES = [
   "snack",
 ] as const;
 
+// this are the recipe types I use on my edit feature
+export const DIFFICULTY = ["easy", "medium", "hard"] as const;
+
 // this are the languages types I use on my profile settings
 export const LANGUAGE = ["english"] as const;
 
