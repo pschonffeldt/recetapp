@@ -31,14 +31,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     // Root flex layout:
     // - mobile: column (sidenav above content)
     // - lg+: row (sidenav left, content right) with hidden overflow on cross-axis
-    <div className="flex h-screen flex-col lg:flex-row lg:overflow-hidden">
+    <div className="flex h-screen flex-col lg:fixed lg:inset-0 lg:flex-row lg:overflow-hidden lg:min-h-0">
       {/* Side navigation column (fixed width on lg+, full width on mobile) */}
-      <div className="w-full flex-none lg:w-60">
+      <div className="w-full flex-none lg:w-60 lg:min-h-0 lg:overflow-y-auto">
         <SideNav />
       </div>
 
       {/* Main content area (grows to fill, scrolls on lg+) */}
-      <div className="flex-grow p-6 lg:overflow-y-auto lg:p-12">
+      <div className="flex-grow min-h-0 p-6 lg:overflow-y-auto lg:p-12 lg:overscroll-y-contain">
         {children}{" "}
         {/* Floating action button for profile/settings/logout.
             - Passes the server action `logout` to the FAB.

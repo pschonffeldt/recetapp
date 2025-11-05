@@ -187,7 +187,7 @@ export default async function RecipesTable({
                     className="w-full border-b py-3 text-sm last-of-type:border-none"
                   >
                     {/* Name */}
-                    <td className="whitespace-nowrap py-3 pl-6 pr-3">
+                    <td className="whitespace-normal py-3 pl-6 pr-3">
                       <p className="font-medium">{recipe.recipe_name}</p>
                     </td>
 
@@ -206,7 +206,7 @@ export default async function RecipesTable({
                     </td>
 
                     {/* Created at (machine-readable <time>) */}
-                    <td className="whitespace-nowrap px-3 py-3 text-gray-600">
+                    <td className="whitespace-normal px-3 py-3 text-gray-600">
                       <time
                         dateTime={new Date(
                           recipe.recipe_created_at

@@ -87,7 +87,7 @@ export default async function Page(props: {
   // 4) Render
   // -----------------------------
   return (
-    <div className="w-full">
+    <div className="w-full min-h-0">
       {/* Header row (title + actions) */}
       <div className="flex w-full items-center justify-between">
         <h1 className={`${inter.className} text-2xl`}>Recipes</h1>

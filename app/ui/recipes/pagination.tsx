@@ -45,7 +45,7 @@ export default function Pagination({
   const allPages = generatePagination(currentPage, totalPages);
 
   return (
-    <nav aria-label="Pagination" className="inline-flex">
+    <nav aria-label="Pagination" className="inline-flex pb-10">
       <PaginationArrow
         direction="left"
         href={createPageURL(currentPage - 1)}
