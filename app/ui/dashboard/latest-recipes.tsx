@@ -9,7 +9,7 @@ export default async function LatestRecipes() {
   const latestRecipes = await fetchLatestRecipes();
   return (
     <div className="flex w-full flex-col md:col-span-4">
-      <h2 className={`${inter.className} mb-4 text-xl md:text-2xl`}>
+      <h2 className={`${inter.className} mb-4 pl-6 text-xl md:text-2xl`}>
         Latest Recipes
       </h2>
       <div className="flex grow flex-col justify-between rounded-xl bg-gray-50 p-4">

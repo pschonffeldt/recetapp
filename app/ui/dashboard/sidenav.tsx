@@ -7,14 +7,13 @@ import { PowerIcon } from "@heroicons/react/24/outline";
 
 export default function SideNav() {
   return (
-    // <div className="flex h-full flex-col px-3 py-4 md:px-2">
-    <div className="flex h-full flex-col px-3 py-4 lg:px-2">
+    <div className="flex h-full flex-col lg:px-2">
       {/* Box containing the logo + link to home when click */}
       <Link
         className={`${brand(
           "brand",
           "bg"
-        )} mb-2 flex h-20 items-end justify-start rounded-md p-4 lg:h-40`}
+        )} mb-2 flex h-20 items-end justify-start p-4 rounded-b-lg lg:h-40`}
         href="/"
       >
         {/* Brand logo */}
@@ -25,7 +24,7 @@ export default function SideNav() {
       </Link>
       {/* Box containing everything lower than the logo */}
       {/* <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2"> */}
-      <div className="flex grow flex-row justify-between space-x-2 lg:flex-col lg:space-x-0 lg:space-y-2">
+      <div className="flex grow flex-row justify-between space-x-2 px-4 lg:px-0 lg:flex-col lg:space-x-0 lg:space-y-2">
         {/* Navigation buttons */}
         <NavLinks />
         {/* Space between buttons and sign out button */}

@@ -90,11 +90,11 @@ export default async function Page(props: {
     <div className="w-full min-h-0">
       {/* Header row (title + actions) */}
       <div className="flex w-full items-center justify-between">
-        <h1 className={`${inter.className} text-2xl`}>Recipes</h1>
+        <h1 className={`${inter.className} text-xl pl-6 lg:pl-0`}>Recipes</h1>
       </div>
 
       {/* Toolbar: search (resets page on change inside that component) + create */}
-      <div className="mt-4 flex items-center justify-between gap-2 md:mt-8">
+      <div className="mt-4 flex items-center px-2 justify-between gap-2 md:mt-8 lg:px-0">
         <Search placeholder="Search recipes, ingredients or type ..." />
         <CreateRecipe />
       </div>

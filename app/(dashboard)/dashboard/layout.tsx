@@ -38,7 +38,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Main content area (grows to fill, scrolls on lg+) */}
-      <div className="flex-grow min-h-0 p-6 lg:overflow-y-auto lg:p-12 lg:overscroll-y-contain">
+      <div className="flex-grow min-h-0 pt-6 lg:overflow-y-auto lg:p-12 lg:overscroll-y-contain">
+        {/* <div className="flex-grow min-h-0lg:overflow-y-auto lg:overscroll-y-contain"> */}
         {children}{" "}
         {/* Floating action button for profile/settings/logout.
             - Passes the server action `logout` to the FAB.

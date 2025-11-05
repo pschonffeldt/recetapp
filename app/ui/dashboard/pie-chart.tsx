@@ -59,7 +59,7 @@ export default function PieChart({
 
   return (
     <div className="w-full">
-      <h2 className="mb-4 text-xl md:text-2xl">{title}</h2>
+      <h2 className="mb-4 pl-6 text-xl md:text-2xl">{title}</h2>
       {/* <div className="rounded-xl bg-gray-50 p-4"> */}
       <div className="rounded-xl bg-gray-50 p-4">
         {/* <div className="grid grid-cols-1 items-center gap-6 rounded-md bg-white p-4 "> */}
