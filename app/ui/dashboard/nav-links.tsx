@@ -11,7 +11,7 @@ const links = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
   { name: "Recipes", href: "/dashboard/recipes", icon: DocumentPlusIcon },
   { name: "Account", href: "/dashboard/account", icon: UserIcon },
-  { name: "Settings", href: "/dashboard/settings", icon: WrenchIcon },
+  // { name: "Settings", href: "/dashboard/settings", icon: WrenchIcon },
 ];
 
 export default function NavLinks() {
