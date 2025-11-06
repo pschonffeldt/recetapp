@@ -13,6 +13,7 @@ import { formatDateToLocal } from "@/app/lib/utils";
 import RecipesType from "./recipes-status";
 import SortButton from "./sort-button";
 import { ViewRecipe, UpdateRecipe, DeleteRecipe } from "./recipes-buttons";
+import RecipesDifficulty from "./recipes-difficulty";
 
 /* ================================
  * Component
@@ -73,10 +74,15 @@ export default async function RecipesTable({
                   key={recipe.id}
                   className="mb-2 w-full rounded-md bg-white p-4"
                 >
-                  {/* Header row: name + type chip */}
-                  <div className="flex items-center justify-between border-b pb-3">
+                  {/* Header row: name + type and difficulty chip */}
+                  <div className="flex flex-col place-items-start justify-between border-b pb-2 gap-1">
                     <p className="font-medium">{recipe.recipe_name}</p>
-                    <RecipesType type={recipe.recipe_type} />
+                    <div className="flex items-center justify-between text-gray-500 text-sm gap-2">
+                      <p>Type:</p>
+                      <RecipesType type={recipe.recipe_type} />
+                      <p className="pl-4">Difficulty:</p>
+                      <RecipesDifficulty type={recipe.difficulty} />
+                    </div>
                   </div>
 
                   {/* Body fields */}
@@ -103,17 +109,31 @@ export default async function RecipesTable({
                       </span>
                     </div>
 
-                    {/* Created at (machine-readable <time>) */}
-                    <div className="flex flex-row text-gray-500">
-                      <p className="pr-1">Created at -</p>
-                      <time
-                        dateTime={new Date(
-                          recipe.recipe_created_at
-                        ).toISOString()}
-                      >
-                        {formatDateToLocal(recipe.recipe_created_at)}
-                      </time>
+                    <div className="flex flex-col gap-1 text-gray-500">
+                      {/* Created at (machine-readable <time>) */}
+                      <div className="flex flex-row">
+                        <p className="pr-1">Created at -</p>
+                        <time
+                          dateTime={new Date(
+                            recipe.recipe_created_at
+                          ).toISOString()}
+                        >
+                          {formatDateToLocal(recipe.recipe_created_at)}
+                        </time>
+                      </div>
+                      {/* Last updated at (machine-readable <time>) */}
+                      <div className="flex flex-row">
+                        <p className="pr-1">Last update at -</p>
+                        <p>{formatDateToLocal(recipe.recipe_updated_at)}</p>
+                      </div>
                     </div>
+                    {/* Opción de chips abajo */}
+                    {/* <div className="flex flex-row place-items-start text-gray-500 gap-2">
+                      <p>Type:</p>
+                      <RecipesType type={recipe.recipe_type} />
+                      <p>Difficulty:</p>
+                      <RecipesDifficulty type={recipe.difficulty} />
+                    </div> */}
                   </div>
 
                   {/* Actions: view / edit / delete */}

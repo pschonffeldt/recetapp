@@ -385,7 +385,7 @@ export async function fetchFilteredRecipes(
   // 5) Final query with LIMIT/OFFSET
   // -----------------------------
   const result = await sql/* sql */ `
-    SELECT id, recipe_name, recipe_ingredients, recipe_steps, recipe_created_at, recipe_type
+    SELECT id, recipe_name, recipe_ingredients, recipe_steps, recipe_created_at, recipe_type, difficulty, recipe_updated_at
     FROM recipes
     ${whereSql}
     ORDER BY ${sortCol} ${dir}
