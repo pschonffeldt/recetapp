@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
 import postgres from "postgres";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
-import { RecipeForm } from "./definitions";
+import { RecipeForm, UserForm } from "./definitions";
 
 /* ================================
  * Database Client
@@ -76,6 +76,11 @@ const UpdateRecipeSchema = RecipeSchema.extend({
 export type RecipeFormState = {
   message: string | null;
   errors: Partial<Record<keyof RecipeForm, string[]>>;
+};
+
+export type UserFormState = {
+  message: string | null;
+  errors: Partial<Record<keyof UserForm, string[]>>;
 };
 
 /* =======================================================
@@ -327,6 +332,72 @@ export async function updateRecipe(
   redirect("/dashboard/recipes");
 }
 
+/**
+ * Update an existing user.
+ * - Validates input with Zod (including UUID id)
+ * - Casts to proper Postgres types
+ * - Revalidates and redirects to /dashboard/recipes on success
+ *
+ * @param _prev    - Unused previous state (kept for server action signature)
+ * @param formData - FormData from the recipe edit form
+ */
+
+export async function updateUser(
+  _prev: UserFormState,
+  formData: FormData
+): Promise<UserFormState> {
+  const parsed = UpdateUserSchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("first_name"),
+    last_name: formData.get("last_name"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    country: formData.get("country"),
+    language: formData.get("language"),
+  });
+
+  if (!parsed.success) {
+    const errors: UserFormState["errors"] = {};
+    for (const issue of parsed.error.issues) {
+      const key = issue.path[0] as keyof UserFormState["errors"];
+      (errors[key] ??= []).push(issue.message);
+    }
+    // Surface ID-only failures nicely
+    if (Object.keys(errors).length === 1 && errors.id) {
+      return { message: "Invalid recipe id.", errors };
+    }
+    return { message: "Please correct the errors above.", errors };
+  }
+
+  const user = parsed.data;
+
+  try {
+    await sql`
+      UPDATE recipes
+      SET
+        name        = ${user.name},
+        last_name        = ${user.last_name},
+        email        = ${user.email},
+        password        = ${user.password},
+        country        = ${user.country},
+        language        = ${user.language},
+      WHERE id = ${user.id}::uuid;
+    `;
+  } catch (e) {
+    console.error("Update user failed:", e);
+    return {
+      message:
+        e instanceof Error
+          ? `Failed to update user: ${e.message}`
+          : "Failed to update user.",
+      errors: {},
+    };
+  }
+
+  revalidatePath("/dashboard/account");
+  redirect("/dashboard/account");
+}
+
 // Parse a number input -> number | null
 const toInt = (v: FormDataEntryValue | null) =>
   v == null || v === "" ? null : Number(v);
@@ -343,3 +414,16 @@ const toLines = (v: FormDataEntryValue | null) => {
     .filter(Boolean);
   return Array.from(new Set(arr));
 };
+
+const UserSchema = z.object({
+  name: z.string().min(1, "USer name is required"),
+  last_name: z.string().min(1, "User last name is required"),
+  email: z.string().min(1, "User email is required"),
+  password: z.string().min(1, "User password is required"),
+  country: z.string().min(1, "User country is required"),
+  language: z.enum(["es"]),
+});
+
+const UpdateUserSchema = UserSchema.extend({
+  id: z.string().uuid("Invalid user id"),
+});

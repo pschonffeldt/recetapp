@@ -12,6 +12,8 @@ import {
   RecipeForm,
   LatestRecipeRaw,
   CardData,
+  UserForm,
+  User,
 } from "./definitions";
 
 /* ================================
@@ -586,4 +588,14 @@ export async function fetchRecipeById(id: string) {
     console.error("Database Error:", error);
     throw new Error("Failed to fetch recipe.");
   }
+}
+
+export async function fetchUserById(id: string) {
+  if (!id) throw new Error("fetchUserById: id is required");
+  const rows = await sql<UserForm[]>`
+    SELECT id, name, last_name, email, password, country, language
+    FROM public.users
+    WHERE id = ${id}::uuid
+  `;
+  return rows[0] ?? null;
 }

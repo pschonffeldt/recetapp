@@ -25,21 +25,21 @@ export const { auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       async authorize(credentials) {
-        const parsedCredentials = z
+        const parsed = z
           .object({ email: z.string().email(), password: z.string().min(6) })
           .safeParse(credentials);
 
-        if (parsedCredentials.success) {
-          const { email, password } = parsedCredentials.data;
-          const user = await getUser(email);
-          if (!user) return null;
-          const passwordsMatch = await bcrypt.compare(password, user.password);
+        if (!parsed.success) return null;
 
-          if (passwordsMatch) return user;
-        }
+        const { email, password } = parsed.data;
+        const user = await getUser(email); // SELECT * FROM users WHERE email=$1
+        if (!user) return null;
 
-        console.log("Invalid credentials");
-        return null;
+        const ok = await bcrypt.compare(password, user.password);
+        if (!ok) return null;
+
+        // return a safe, minimal object that includes the id
+        return { id: user.id, name: user.name, email: user.email } as any;
       },
     }),
   ],

@@ -1,15 +1,22 @@
 /* =======================================================
- * Core Entities
+ * User Entities
  * ======================================================= */
 
 /** Authenticated application user (not necessarily a customer). */
 export type User = {
   id: string;
   name: string;
+  last_name: string;
   email: string;
   /** Hashed password when persisted; do not expose to the client. */
   password: string;
+  country: string;
+  language: string;
 };
+
+/* =======================================================
+ * Revenue Entities
+ * ======================================================= */
 
 /** Aggregated revenue row (e.g., for charts). */
 export type Revenue = {
@@ -20,7 +27,7 @@ export type Revenue = {
 };
 
 /* =======================================================
- * Recipes
+ * Recipes table
  * ======================================================= */
 
 /** Recipe row used in paginated table views. */
@@ -38,7 +45,7 @@ export type RecipesTable = {
 };
 
 /* =======================================================
- * Form Helpers (Dropdowns / Forms)
+ * Recipe form Helpers (Dropdowns / Forms)
  * ======================================================= */
 
 /** Minimal recipe record for selects. */
@@ -58,8 +65,6 @@ export type RecipeForm = {
   recipe_ingredients: string[]; // text[]
   recipe_steps: string[]; // text[]
   recipe_type: string; // your enum type if you have it
-
-  // NEW FIELDS
   servings?: number | null;
   prep_time_min?: number | null;
   difficulty?: Difficulty;
@@ -71,6 +76,22 @@ export type RecipeForm = {
   equipment?: string[]; // text[]
   recipe_updated_at?: string;
   recipe_created_at: string;
+};
+
+/* =======================================================
+ * User form Helpers (Dropdowns / Forms)
+ * ======================================================= */
+
+// Account settings, user form
+
+export type UserForm = {
+  id: string;
+  name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  country: Country;
+  language: Language;
 };
 
 //  To be organized, used on dashboard latest recipe table
@@ -95,7 +116,7 @@ export type CardData = {
 };
 
 /* =======================================================
- * TO BE ORGANIZED!
+ * Recipes types and difficulty
  * ======================================================= */
 // this are the recipe types I use on my edit feature
 export const RECIPE_TYPES = [
@@ -109,8 +130,9 @@ export const RECIPE_TYPES = [
 // this are the recipe dofficulty
 export const DIFFICULTY = ["easy", "medium", "hard"] as const;
 
-// this are the languages types I use on my profile settings
-export const LANGUAGE = ["english"] as const;
+/* =======================================================
+ * Countries and languages
+ * ======================================================= */
 
 // Countries list
 export const COUNTRIES = [
@@ -312,3 +334,8 @@ export const COUNTRIES = [
 ] as const;
 
 export type Country = (typeof COUNTRIES)[number];
+
+// Lagnguage list
+export const LANGUAGE = ["english"] as const;
+
+export type Language = (typeof LANGUAGE)[number];
