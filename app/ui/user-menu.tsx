@@ -3,16 +3,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  UserCircleIcon,
-  Cog6ToothIcon,
-  PowerIcon,
-} from "@heroicons/react/24/outline";
+import { UserCircleIcon, PowerIcon } from "@heroicons/react/24/outline";
+import { ChartBarIcon, PlusIcon } from "@heroicons/react/20/solid";
 
 type Props = {
   /** Routes to navigate with router.push */
+  dashboardleHref?: string;
   profileHref?: string;
-  settingsHref?: string;
+  recipesHref?: string;
 
   /**
    * Server Action for Auth.js/NextAuth v5 logout.
@@ -26,8 +24,9 @@ type Props = {
 };
 
 export default function UserSettingsFab({
+  dashboardleHref = "/dashboard",
   profileHref = "/dashboard/account",
-  settingsHref = "/dashboard/settings",
+  recipesHref = "/dashboard/recipes",
   logoutAction,
   title = "User menu",
   avatarUrl,
@@ -119,14 +118,20 @@ export default function UserSettingsFab({
         >
           <div className="p-2">
             <MenuItem
+              icon={<ChartBarIcon className="h-5 w-5" />}
+              label="Dashboard"
+              onClick={() => go(dashboardleHref)}
+            />
+            <MenuItem
+              icon={<PlusIcon className="h-5 w-5" />}
+              label="Recipes"
+              onClick={() => go(recipesHref)}
+            />
+            <div className="my-1 h-px bg-gray-200/60 " />
+            <MenuItem
               icon={<UserCircleIcon className="h-5 w-5" />}
               label="Profile"
               onClick={() => go(profileHref)}
-            />
-            <MenuItem
-              icon={<Cog6ToothIcon className="h-5 w-5" />}
-              label="Settings"
-              onClick={() => go(settingsHref)}
             />
 
             <div className="my-1 h-px bg-gray-200/60 " />

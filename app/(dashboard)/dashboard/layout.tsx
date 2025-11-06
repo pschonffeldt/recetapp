@@ -45,8 +45,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             - Passes the server action `logout` to the FAB.
             - Links point to account/settings routes inside dashboard. */}
         <UserSettingsFab
-          profileHref="/dashboard/account"
-          settingsHref="/dashboard/settings"
+          // profileHref="/dashboard/account"
+          // settingsHref="/dashboard/settings"
           logoutAction={logout}
         />
       </div>
