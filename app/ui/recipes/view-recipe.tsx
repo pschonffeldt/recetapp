@@ -97,22 +97,6 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             fontClassName={inter.className}
           />
 
-          {/* Allergens (0/1 centered, 2+ list) */}
-          <MetricCardMobile
-            title="Allergens"
-            items={recipe.allergens}
-            emptyLabel="No allergens."
-            fontClassName={inter.className}
-          />
-
-          {/* Dietary flags (0/1 centered, 2+ list) */}
-          <MetricCardMobile
-            title="Dietary flags"
-            items={recipe.dietary_flags}
-            emptyLabel="No dietary flags."
-            fontClassName={inter.className}
-          />
-
           {/* Calories per serving */}
           <MetricCardMobile
             title="Calories / serving"
@@ -142,6 +126,22 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             }
             unit="S/"
             unitPosition="left"
+            fontClassName={inter.className}
+          />
+
+          {/* Allergens (0/1 centered, 2+ list) */}
+          <MetricCardMobile
+            title="Allergens"
+            items={recipe.allergens}
+            emptyLabel="No allergens."
+            fontClassName={inter.className}
+          />
+
+          {/* Dietary flags (0/1 centered, 2+ list) */}
+          <MetricCardMobile
+            title="Dietary flags"
+            items={recipe.dietary_flags}
+            emptyLabel="No dietary flags."
             fontClassName={inter.className}
           />
         </section>

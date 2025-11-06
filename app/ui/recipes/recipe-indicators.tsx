@@ -170,16 +170,12 @@ export function MetricCardMobile({
     return (
       <div
         className={`relative rounded-md bg-white shadow-md border border-gray-100 ${
-          heightClassName ?? "h-24 sm:h-28"
+          heightClassName ?? "h-16"
         } ${className}`}
       >
-        <span className="absolute left-4 top-3 text-xs font-medium text-gray-500">
-          {title}
-        </span>
+        <span className="text-xs pl-2 font-medium text-gray-500">{title}</span>
 
-        <div
-          className={`${fontClassName} flex h-full items-center justify-center`}
-        >
+        <div className={`${fontClassName} flex items-center justify-center`}>
           {hasValue ? (
             <div className="flex items-baseline">
               {rest.unit && unitPos === "left" && (
@@ -211,13 +207,11 @@ export function MetricCardMobile({
     return (
       <div
         className={`relative rounded-md bg-white shadow-md border border-gray-100 ${
-          heightClassName ?? "h-24 sm:h-28"
+          heightClassName ?? "h-16"
         } ${className}`}
       >
-        <span className="absolute left-4 top-3 text-xs font-medium text-gray-500">
-          {title}
-        </span>
-        <div className="flex h-full items-center justify-center">
+        <span className="text-xs pl-2 font-medium text-gray-500">{title}</span>
+        <div className="flex items-center justify-center">
           <span className="text-sm text-gray-600">
             {rest.emptyLabel ?? "No items."}
           </span>
@@ -231,15 +225,11 @@ export function MetricCardMobile({
     return (
       <div
         className={`relative rounded-md bg-white shadow-md border border-gray-100 ${
-          heightClassName ?? "h-24 sm:h-28"
+          heightClassName ?? "h-16"
         } ${className}`}
       >
-        <span className="absolute left-4 top-3 text-xs font-medium text-gray-500">
-          {title}
-        </span>
-        <div
-          className={`${fontClassName} flex h-full items-center justify-center`}
-        >
+        <span className="text-xs pl-2 font-medium text-gray-500">{title}</span>
+        <div className={`${fontClassName} flex items-center justify-center`}>
           <span className="text-2xl font-medium text-gray-900">{items[0]}</span>
         </div>
       </div>
@@ -258,12 +248,10 @@ export function MetricCardMobile({
     <div
       className={`relative rounded-md bg-white shadow-md border border-gray-100 ${className}`}
     >
-      <span className="absolute left-4 top-3 text-xs font-medium text-gray-500">
-        {title}
-      </span>
+      <span className="text-xs pl-2 font-medium text-gray-500">{title}</span>
 
-      <div className={`${fontClassName} px-4 pb-4 pt-8`}>
-        <ul className={`${listClass} space-y-2 text-gray-800 pl-6`}>
+      <div className={`${fontClassName} px-4 pb-2`}>
+        <ul className={`${listClass} text-gray-800 pl-6`}>
           {items.map((it, i) => (
             <li key={`${title}-item-${i}`} className="leading-relaxed">
               {it}
