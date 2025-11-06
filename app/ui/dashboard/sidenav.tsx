@@ -24,7 +24,7 @@ export default function SideNav() {
       </Link>
       {/* Box containing everything lower than the logo */}
       {/* <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2"> */}
-      <div className="flex grow flex-row justify-between space-x-2 px-4 lg:px-0 lg:flex-col lg:space-x-0 lg:space-y-2">
+      <div className="flex grow flex-row justify-between space-x-2 px-2 lg:px-0 lg:flex-col lg:space-x-0 lg:space-y-2">
         {/* Navigation buttons */}
         <NavLinks />
         {/* Space between buttons and sign out button */}
