@@ -59,8 +59,8 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
       {/* PROFILE FORM */}
       <form action={profileAction}>
         <input type="hidden" name="id" value={user.id} />
-        <div className="space-y-6 rounded-md bg-gray-50 p-4 md:p-6">
-          <section className="p-3 text-sm border-b-2 border-b-gray-200">
+        <div className="rounded-md bg-gray-50 p-4 md:p-6">
+          <section className="p-3 text-sm ">
             <h2 className={`${inter.className} mb-4 text-xl md:text-2xl`}>
               Personal information
             </h2>
@@ -170,8 +170,8 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
       {/* PASSWORD FORM */}
       <form action={pwdAction} className="mt-8">
         <input type="hidden" name="id" value={user.id} />
-        <div className="space-y-6 rounded-md bg-gray-50 p-4 md:p-6">
-          <section className="p-3 text-sm border-b-2 border-b-gray-200">
+        <div className="rounded-md bg-gray-50 p-4 md:p-6">
+          <section className="p-3 text-sm ">
             <h2 className={`${inter.className} mb-4 text-xl md:text-2xl`}>
               Login information
             </h2>

@@ -3,18 +3,10 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { Button } from "@/app/ui/button";
-import { createRecipe, RecipeFormState } from "@/app/lib/actions";
+import { createRecipe } from "@/app/lib/actions";
 import { capitalizeFirst } from "@/app/lib/utils";
 import { RECIPE_TYPES, DIFFICULTY } from "@/app/lib/definitions";
-
-// Dropdown of meal type:
-// const RECIPE_TYPES = [
-//   "breakfast",
-//   "lunch",
-//   "dinner",
-//   "dessert",
-//   "snack",
-// ] as const;
+import { RecipeFormState } from "@/app/lib/action-types";
 
 export default function RecipeForm() {
   const initialState: RecipeFormState = { message: null, errors: {} };
