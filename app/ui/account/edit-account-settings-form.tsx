@@ -154,7 +154,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
 
         <div className="mt-6 flex justify-center gap-4 px-6 lg:justify-end lg:px-0">
           <Link
-            href="/dashboard/recipes"
+            href="/dashboard"
             className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
           >
             Discard Changes
