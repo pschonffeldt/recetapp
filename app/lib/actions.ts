@@ -9,7 +9,14 @@ import { redirect } from "next/navigation";
 import postgres from "postgres";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
-import { RecipeForm, UserForm } from "./definitions";
+import { auth } from "@/auth";
+import bcrypt from "bcrypt";
+import {
+  UpdateUserPasswordSchema,
+  UpdateUserProfileSchema,
+} from "./validation";
+import { toInt, toLines, toMoney } from "./form-helpers";
+import { RecipeFormState } from "./action-types";
 
 /* ================================
  * Database Client
@@ -67,21 +74,6 @@ const RecipeSchema = z.object({
 const UpdateRecipeSchema = RecipeSchema.extend({
   id: z.string().uuid("Invalid recipe id"),
 });
-
-/* =======================================================
- * Types
- * ======================================================= */
-
-/** UI state returned by recipe actions on validation errors */
-export type RecipeFormState = {
-  message: string | null;
-  errors: Partial<Record<keyof RecipeForm, string[]>>;
-};
-
-export type UserFormState = {
-  message: string | null;
-  errors: Partial<Record<keyof UserForm, string[]>>;
-};
 
 /* =======================================================
  * Auth
@@ -170,7 +162,7 @@ export async function createRecipe(
       const key = issue.path[0] as keyof RecipeFormState["errors"];
       (errors[key] ??= []).push(issue.message);
     }
-    return { message: "Please correct the errors below.", errors };
+    return { message: "Please correct the errors above.", errors };
   }
 
   const d = parsed.data;
@@ -342,88 +334,126 @@ export async function updateRecipe(
  * @param formData - FormData from the recipe edit form
  */
 
-export async function updateUser(
-  _prev: UserFormState,
+/**
+ * Accepts optional fields; if a field is absent/blank, we don't touch it.
+ * - Name/Last name/Country/Language: non-empty string when present
+ * - Email: valid email when present
+ * - Password: min 6 when present (hashed before saving)
+ */
+
+// "" | null -> undefined, otherwise trimmed string
+const toOptional = (v: FormDataEntryValue | null) => {
+  const s = (v ?? "").toString().trim();
+  return s === "" ? undefined : s;
+};
+
+/** Update name / last_name / email only */
+export async function updateUserProfile(
+  _prev: {
+    message: string | null;
+    errors: Record<string, string[]>;
+    ok: boolean;
+  },
   formData: FormData
-): Promise<UserFormState> {
-  const parsed = UpdateUserSchema.safeParse({
-    id: formData.get("id"),
-    name: formData.get("first_name"),
-    last_name: formData.get("last_name"),
-    email: formData.get("email"),
+) {
+  const session = await auth();
+  const userId = (session?.user as any)?.id as string | undefined;
+  if (!userId) return { message: "Unauthorized.", errors: {}, ok: false };
+
+  const candidate = {
+    name: toOptional(formData.get("name")),
+    last_name: toOptional(formData.get("last_name")),
+    email: toOptional(formData.get("email")),
+  };
+
+  const parsed = UpdateUserProfileSchema.safeParse(candidate);
+  if (!parsed.success) {
+    const errors: Record<string, string[]> = {};
+    for (const issue of parsed.error.issues) {
+      const key = (issue.path[0] as string) || "_form";
+      (errors[key] ??= []).push(issue.message);
+    }
+    return { message: "Please correct the errors above.", errors, ok: false };
+  }
+
+  const d = parsed.data;
+
+  const sets: any[] = [];
+  if (d.name !== undefined) sets.push(sql`name = ${d.name}`);
+  if (d.last_name !== undefined) sets.push(sql`last_name = ${d.last_name}`);
+  if (d.email !== undefined) sets.push(sql`email = ${d.email}`);
+
+  if (sets.length === 0) {
+    return { message: null, errors: {}, ok: true, shouldRefresh: false };
+  }
+
+  const setSql =
+    sets.length === 1
+      ? sets[0]
+      : sets.slice(1).reduce((acc, cur) => sql`${acc}, ${cur}`, sets[0]);
+
+  try {
+    await sql`UPDATE public.users SET ${setSql} WHERE id = ${userId}::uuid`;
+  } catch (e) {
+    console.error("updateUserProfile failed:", e);
+    return { message: "Failed to update profile.", errors: {}, ok: false };
+  }
+
+  // header/SSR bits might show name/email -> allow a refresh signal
+  revalidatePath("/dashboard/account");
+  return { message: null, errors: {}, ok: true, shouldRefresh: true };
+}
+
+/** Update password only */
+export async function updateUserPassword(
+  _prev: {
+    message: string | null;
+    errors: Record<string, string[]>;
+    ok: boolean;
+  },
+  formData: FormData
+) {
+  const session = await auth();
+  const userId = (session?.user as any)?.id as string | undefined;
+  if (!userId) return { message: "Unauthorized.", errors: {}, ok: false };
+
+  const raw = {
     password: formData.get("password"),
-    country: formData.get("country"),
-    language: formData.get("language"),
+    confirm_password: formData.get("confirm_password"),
+  };
+
+  // If both are blank, treat as no-op success
+  const bothEmpty =
+    (!raw.password || String(raw.password).trim() === "") &&
+    (!raw.confirm_password || String(raw.confirm_password).trim() === "");
+  if (bothEmpty) {
+    return { message: null, errors: {}, ok: true, shouldRefresh: false };
+  }
+
+  const parsed = UpdateUserPasswordSchema.safeParse({
+    password: String(raw.password ?? ""),
+    confirm_password: String(raw.confirm_password ?? ""),
   });
 
   if (!parsed.success) {
-    const errors: UserFormState["errors"] = {};
+    const errors: Record<string, string[]> = {};
     for (const issue of parsed.error.issues) {
-      const key = issue.path[0] as keyof UserFormState["errors"];
+      const key = (issue.path[0] as string) || "_form";
       (errors[key] ??= []).push(issue.message);
     }
-    // Surface ID-only failures nicely
-    if (Object.keys(errors).length === 1 && errors.id) {
-      return { message: "Invalid recipe id.", errors };
-    }
-    return { message: "Please correct the errors above.", errors };
+    return { message: "Please correct the errors above.", errors, ok: false };
   }
 
-  const user = parsed.data;
+  const { password } = parsed.data;
 
   try {
-    await sql`
-      UPDATE recipes
-      SET
-        name        = ${user.name},
-        last_name        = ${user.last_name},
-        email        = ${user.email},
-        password        = ${user.password},
-        country        = ${user.country},
-        language        = ${user.language},
-      WHERE id = ${user.id}::uuid;
-    `;
+    const hash = await bcrypt.hash(password, 10);
+    await sql`UPDATE public.users SET password = ${hash} WHERE id = ${userId}::uuid`;
   } catch (e) {
-    console.error("Update user failed:", e);
-    return {
-      message:
-        e instanceof Error
-          ? `Failed to update user: ${e.message}`
-          : "Failed to update user.",
-      errors: {},
-    };
+    console.error("updateUserPassword failed:", e);
+    return { message: "Failed to update password.", errors: {}, ok: false };
   }
 
   revalidatePath("/dashboard/account");
-  redirect("/dashboard/account");
+  return { message: null, errors: {}, ok: true, shouldRefresh: false };
 }
-
-// Parse a number input -> number | null
-const toInt = (v: FormDataEntryValue | null) =>
-  v == null || v === "" ? null : Number(v);
-
-// Keep money as string (DB numeric comes/goes as string)
-const toMoney = (v: FormDataEntryValue | null) =>
-  v == null || v === "" ? null : String(v);
-
-// Split textarea (supports newline OR comma), trim & dedupe
-const toLines = (v: FormDataEntryValue | null) => {
-  const arr = String(v ?? "")
-    .split(/\r?\n|,/g)
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return Array.from(new Set(arr));
-};
-
-const UserSchema = z.object({
-  name: z.string().min(1, "USer name is required"),
-  last_name: z.string().min(1, "User last name is required"),
-  email: z.string().min(1, "User email is required"),
-  password: z.string().min(1, "User password is required"),
-  country: z.string().min(1, "User country is required"),
-  language: z.enum(["es"]),
-});
-
-const UpdateUserSchema = UserSchema.extend({
-  id: z.string().uuid("Invalid user id"),
-});
