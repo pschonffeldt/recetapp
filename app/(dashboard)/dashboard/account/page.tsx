@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Account Settings" };
 export default async function Page() {
   const session = await auth();
   const id = (session?.user as any)?.id as string | undefined;
-  if (!id) notFound(); // or redirect("/login")
+  if (!id) notFound();
 
   const user = await fetchUserById(id);
   if (!user) notFound();

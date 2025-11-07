@@ -1,12 +1,12 @@
-// app/ui/account/edit-account-settings-form.tsx
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { updateUserProfile, updateUserPassword } from "@/app/lib/actions";
 import { type UserForm } from "@/app/lib/definitions";
 import { inter } from "../fonts";
 import Link from "next/link";
 import { Button } from "../button";
+import { useToast } from "@/app/ui/toast/toast-provider";
 
 type ActionResult = {
   ok: boolean;
@@ -14,33 +14,42 @@ type ActionResult = {
   errors: Record<string, string[]>;
 };
 
-function FieldErrors({ id, errors }: { id: string; errors?: string[] }) {
-  if (!errors?.length) return null;
-  return (
-    <div id={`${id}-error`} aria-live="polite" aria-atomic="true">
-      {errors.map((e) => (
-        <p key={e} className="mt-2 text-sm text-red-500">
-          {e}
-        </p>
-      ))}
-    </div>
-  );
-}
-
 const emptyState: ActionResult = { ok: false, message: null, errors: {} };
 
 export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
-  // PROFILE
+  const { push } = useToast();
+
+  // Separate actions
   const [profileState, profileAction] = useActionState<ActionResult, FormData>(
     updateUserProfile,
     emptyState
   );
 
-  // PASSWORD
   const [pwdState, pwdAction] = useActionState<ActionResult, FormData>(
     updateUserPassword,
     emptyState
   );
+
+  // Toasts after success
+  useEffect(() => {
+    if (profileState.ok) {
+      push({
+        variant: "success",
+        title: "Profile updated",
+        message: "Your changes were saved.",
+      });
+    }
+  }, [profileState.ok, push]);
+
+  useEffect(() => {
+    if (pwdState.ok) {
+      push({
+        variant: "success",
+        title: "Password updated",
+        message: "Your password was changed successfully.",
+      });
+    }
+  }, [pwdState.ok, push]);
 
   const hasErr = (state: ActionResult, k: string) =>
     Boolean(state.errors?.[k]?.length);
@@ -51,12 +60,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
       <form action={profileAction}>
         <input type="hidden" name="id" value={user.id} />
         <div className="space-y-6 rounded-md bg-gray-50 p-4 md:p-6">
-          <section className="p-3 text-sm">
+          <section className="p-3 text-sm border-b-2 border-b-gray-200">
             <h2 className={`${inter.className} mb-4 text-xl md:text-2xl`}>
               Personal information
             </h2>
 
             <div className="mb-6 grid gap-6 rounded-md p-2 sm:grid-cols-2">
+              {/* First name */}
               <div>
                 <label
                   htmlFor="name"
@@ -76,9 +86,14 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     hasErr(profileState, "name") ? "name-error" : undefined
                   }
                 />
-                <FieldErrors id="name" errors={profileState.errors?.name} />
+                {profileState.errors?.name?.length ? (
+                  <p id="name-error" className="mt-2 text-sm text-red-500">
+                    {profileState.errors.name[0]}
+                  </p>
+                ) : null}
               </div>
 
+              {/* Last name */}
               <div>
                 <label
                   htmlFor="last_name"
@@ -100,12 +115,14 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                       : undefined
                   }
                 />
-                <FieldErrors
-                  id="last_name"
-                  errors={profileState.errors?.last_name}
-                />
+                {profileState.errors?.last_name?.length ? (
+                  <p id="last_name-error" className="mt-2 text-sm text-red-500">
+                    {profileState.errors.last_name[0]}
+                  </p>
+                ) : null}
               </div>
 
+              {/* Email */}
               <div>
                 <label
                   htmlFor="email"
@@ -125,7 +142,11 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     hasErr(profileState, "email") ? "email-error" : undefined
                   }
                 />
-                <FieldErrors id="email" errors={profileState.errors?.email} />
+                {profileState.errors?.email?.length ? (
+                  <p id="email-error" className="mt-2 text-sm text-red-500">
+                    {profileState.errors.email[0]}
+                  </p>
+                ) : null}
               </div>
             </div>
           </section>
@@ -147,16 +168,16 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
       </form>
 
       {/* PASSWORD FORM */}
-      {/* Use the 1-arg dispatcher returned by useActionState */}
       <form action={pwdAction} className="mt-8">
         <input type="hidden" name="id" value={user.id} />
         <div className="space-y-6 rounded-md bg-gray-50 p-4 md:p-6">
-          <section className="p-3 text-sm">
+          <section className="p-3 text-sm border-b-2 border-b-gray-200">
             <h2 className={`${inter.className} mb-4 text-xl md:text-2xl`}>
               Login information
             </h2>
 
             <div className="mb-6 grid gap-6 rounded-md p-2 sm:grid-cols-2">
+              {/* Password */}
               <div>
                 <label
                   htmlFor="password"
@@ -175,9 +196,14 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     hasErr(pwdState, "password") ? "password-error" : undefined
                   }
                 />
-                <FieldErrors id="password" errors={pwdState.errors?.password} />
+                {pwdState.errors?.password?.length ? (
+                  <p id="password-error" className="mt-2 text-sm text-red-500">
+                    {pwdState.errors.password[0]}
+                  </p>
+                ) : null}
               </div>
 
+              {/* Confirm password */}
               <div>
                 <label
                   htmlFor="confirm_password"
@@ -198,10 +224,14 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                       : undefined
                   }
                 />
-                <FieldErrors
-                  id="confirm_password"
-                  errors={pwdState.errors?.confirm_password}
-                />
+                {pwdState.errors?.confirm_password?.length ? (
+                  <p
+                    id="confirm_password-error"
+                    className="mt-2 text-sm text-red-500"
+                  >
+                    {pwdState.errors.confirm_password[0]}
+                  </p>
+                ) : null}
               </div>
             </div>
           </section>
