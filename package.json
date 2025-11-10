@@ -3,7 +3,12 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev --turbopack",
-    "start": "next start"
+    "start": "next start",
+    "db:migrate:users": "dotenv -e .env -- bash -lc 'psql \"$POSTGRES_URL\" -f migrations/20251110_users_lifecycle.sql'",
+    "db:psql": "dotenv -e .env -- bash -lc 'psql \"$POSTGRES_URL\"'",
+    "db:migrate:all": "dotenv -e .env -- bash -lc 'set -e; for f in migrations/*.sql; do echo Running $f; psql \"$POSTGRES_URL\" -f \"$f\"; done'",
+    "db:migrate:users:win": "dotenv -e .env -- powershell -NoProfile -Command \"psql $env:POSTGRES_URL -f migrations/20251110_users_lifecycle.sql\"",
+    "db:psql:win": "dotenv -e .env -- powershell -NoProfile -Command \"psql $env:POSTGRES_URL\""
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -27,7 +32,8 @@
     "@types/bcrypt": "^5.0.2",
     "@types/node": "22.10.7",
     "@types/react": "19.0.7",
-    "@types/react-dom": "19.0.3"
+    "@types/react-dom": "19.0.3",
+    "dotenv-cli": "^11.0.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
