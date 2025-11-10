@@ -15,6 +15,7 @@ import {
   UserForm,
   User,
 } from "./definitions";
+import { requireUserId } from "@/app/lib/auth-helpers";
 
 /* ================================
  * Database Client
@@ -88,9 +89,8 @@ export async function fetchRevenue() {
  * ======================================================= */
 
 export async function fetchLatestRecipes() {
+  const userId = await requireUserId();
   try {
-    // Dashboard widget: intentional fixed limit (not tied to RECIPES_PAGE_SIZE).
-    // If you need a different count, change 5 here or add a parameter.
     const data = await sql<LatestRecipeRaw[]>`
       SELECT
         id,
@@ -99,9 +99,10 @@ export async function fetchLatestRecipes() {
         recipe_ingredients,
         recipe_steps,
         recipe_type
-      FROM recipes
+      FROM public.recipes
+      WHERE user_id = ${userId}::uuid
       ORDER BY recipe_created_at DESC
-      LIMIT 5  -- intentional fixed limit for dashboard widget
+      LIMIT 5
     `;
     return data;
   } catch (error) {
@@ -116,41 +117,38 @@ export async function fetchLatestRecipes() {
  * @returns Promise<{ numberOfCustomers: number; numberOfInvoices: number; totalPaidInvoices: string; totalPendingInvoices: string; }>
  */
 export async function fetchCardData(): Promise<CardData> {
+  const userId = await requireUserId();
   try {
-    // Kick off all four queries in parallel for performance
-    // 1) Total recipes
     const totalRecipesPromise = sql/* sql */ `
       SELECT COUNT(*)::int AS count
-      FROM recipes
+      FROM public.recipes
+      WHERE user_id = ${userId}::uuid
     `;
 
-    // 2) Average ingredients per recipe
     const avgIngredientsPromise = sql/* sql */ `
       SELECT COALESCE(AVG(CARDINALITY(recipe_ingredients)), 0)::float AS avg_count
-      FROM recipes
+      FROM public.recipes
+      WHERE user_id = ${userId}::uuid
     `;
 
-    // 3) Most recurring category
     const topCategoryPromise = sql/* sql */ `
       SELECT recipe_type, COUNT(*)::int AS c
-      FROM recipes
-      WHERE recipe_type IS NOT NULL
+      FROM public.recipes
+      WHERE user_id = ${userId}::uuid AND recipe_type IS NOT NULL
       GROUP BY recipe_type
       ORDER BY c DESC
       LIMIT 1
     `;
 
-    // 4) Total unique ingredients across all recipes
     const totalIngredientsPromise = sql/* sql */ `
       SELECT COALESCE(COUNT(DISTINCT TRIM(LOWER(ing))), 0)::int AS count
       FROM (
         SELECT UNNEST(recipe_ingredients) AS ing
-        FROM recipes
-        WHERE recipe_ingredients IS NOT NULL
+        FROM public.recipes
+        WHERE user_id = ${userId}::uuid AND recipe_ingredients IS NOT NULL
       ) AS t
     `;
 
-    // 5) Wait for all results
     const [totalRecipesRes, avgIngrRes, topCatRes, totalIngrRes] =
       await Promise.all([
         totalRecipesPromise,
@@ -159,14 +157,12 @@ export async function fetchCardData(): Promise<CardData> {
         totalIngredientsPromise,
       ]);
 
-    // 6) Defensive reads & normalization
     const totalRecipes = Number(totalRecipesRes?.[0]?.count ?? 0);
     const avgIngredients = Number(avgIngrRes?.[0]?.avg_count ?? 0);
     const mostRecurringCategory =
       (topCatRes?.[0]?.recipe_type as string) ?? "—";
     const totalIngredients = Number(totalIngrRes?.[0]?.count ?? 0);
 
-    // 7) Return consolidated card data
     return {
       totalRecipes,
       avgIngredients,
@@ -174,34 +170,42 @@ export async function fetchCardData(): Promise<CardData> {
       totalIngredients,
     };
   } catch (error) {
-    // 8) Error handling
     console.error("Database Error:", error);
     throw new Error("Failed to fetch recipe card data.");
   }
 }
 
 export async function fetchRecipeCardData() {
+  const userId = await requireUserId();
   try {
-    // 1) Run four aggregated queries in parallel
-    const totalRecipesPromise = sql`SELECT COUNT(*)::int AS count FROM recipes`;
+    const totalRecipesPromise = sql`
+      SELECT COUNT(*)::int AS count FROM public.recipes
+      WHERE user_id = ${userId}::uuid
+    `;
 
-    const recentRecipesPromise = sql`SELECT COUNT(*)::int AS count
-          FROM recipes
-          WHERE recipe_created_at >= NOW() - INTERVAL '7 days'`;
+    const recentRecipesPromise = sql`
+      SELECT COUNT(*)::int AS count
+      FROM public.recipes
+      WHERE user_id = ${userId}::uuid
+        AND recipe_created_at >= NOW() - INTERVAL '7 days'
+    `;
 
     const typesBreakdownPromise = sql<TypeCountRow[]>`
-        SELECT recipe_type, COUNT(*)::int AS count
-        FROM recipes
-        GROUP BY recipe_type
-        ORDER BY count DESC`;
+      SELECT recipe_type, COUNT(*)::int AS count
+      FROM public.recipes
+      WHERE user_id = ${userId}::uuid
+      GROUP BY recipe_type
+      ORDER BY count DESC
+    `;
 
     const latestRecipePromise = sql<LatestRecipeRow[]>`
-        SELECT id, recipe_name, recipe_created_at
-        FROM recipes
-        ORDER BY recipe_created_at DESC
-        LIMIT 1`;
+      SELECT id, recipe_name, recipe_created_at
+      FROM public.recipes
+      WHERE user_id = ${userId}::uuid
+      ORDER BY recipe_created_at DESC
+      LIMIT 1
+    `;
 
-    // 2) Await all results
     const [
       totalRecipesRes,
       recentRecipesRes,
@@ -214,20 +218,13 @@ export async function fetchRecipeCardData() {
       latestRecipePromise,
     ]);
 
-    // 3) Normalize numbers
     const numberOfRecipes = Number(totalRecipesRes?.[0]?.count ?? 0);
     const recipesLast7Days = Number(recentRecipesRes?.[0]?.count ?? 0);
-
-    // 4) Map breakdown to a friendly shape
     const types = (typesBreakdownRes ?? []).map((r) => ({
       type: r.recipe_type ?? "Unknown",
       count: r.count ?? 0,
     }));
-
-    // 5) Compute top type (if any)
     const topType = types.length ? types[0] : null;
-
-    // 6) Pick latest recipe (if any)
     const latest = latestRecipeRes?.[0]
       ? {
           id: latestRecipeRes[0].id,
@@ -236,16 +233,8 @@ export async function fetchRecipeCardData() {
         }
       : null;
 
-    // 7) Return consolidated object
-    return {
-      numberOfRecipes,
-      recipesLast7Days,
-      types, // array: [{ type: 'Dessert', count: 12 }, ...]
-      topType, // most common type or null
-      latest, // { id, name, createdAt } or null
-    };
+    return { numberOfRecipes, recipesLast7Days, types, topType, latest };
   } catch (error) {
-    // 8) Error handling
     console.error("Database Error:", error);
     throw new Error("Failed to fetch recipe card data.");
   }
@@ -286,12 +275,8 @@ export async function fetchFilteredRecipes(
   pageMaybe?: number,
   opts: { type?: string; sort?: SortCol; order?: SortDir } = {}
 ) {
-  // -----------------------------
-  // 1) Normalize inputs
-  //    - Support both object and string overloads.
-  //    - Prefer `query`.
-  //    - Provide stable defaults for sort/order/page/type.
-  // -----------------------------
+  const userId = await requireUserId();
+
   let searchQuery = "";
   let page = 1;
   let type = "";
@@ -305,7 +290,6 @@ export async function fetchFilteredRecipes(
     sort = opts.sort ?? "date";
     order = opts.order ?? "desc";
   } else {
-    // Preferred object form
     searchQuery = arg1.query ?? "";
     page = arg1.page ?? 1;
     type = arg1.type ?? "";
@@ -313,68 +297,27 @@ export async function fetchFilteredRecipes(
     order = arg1.order ?? "desc";
   }
 
-  // -----------------------------
-  // 2) Paging setup
-  // Paging: assumes page >= 1 (callers must clamp).
-  // A negative/zero page would yield a negative OFFSET. Postgres treats negative OFFSET ~ 0,
-  // but behavior can vary by driver. Always clamp at the caller before invoking this function.
-  // -----------------------------
-
   const offset = (page - 1) * RECIPES_PAGE_SIZE;
 
-  // -----------------------------
-  // 3) Build WHERE predicates
-  //    - If free-text exists, OR across:
-  //        • recipe_name ILIKE
-  //        • ingredients[] (UNNEST + ILIKE via EXISTS)
-  //        • steps[] (UNNEST + ILIKE via EXISTS)
-  //        • recipe_type::text ILIKE (handles enum types)
-  //    - Optionally AND an exact recipe_type filter.
-  /**
-   * ...
-   * @param type Exact match on recipe_type (expects canonical enum value or normalized string).
-   */
-  // -----------------------------
-  const predicates: any[] = [];
+  const predicates: any[] = [
+    sql`user_id = ${userId}::uuid`, // <-- ALWAYS scope to owner
+  ];
 
   if (searchQuery) {
     const pat = `%${searchQuery}%`;
-
     const nameLike = sql`recipe_name ILIKE ${pat}`;
-    const ingredientsLike = sql`EXISTS (
-      SELECT 1 FROM unnest(recipe_ingredients) AS ing
-      WHERE ing ILIKE ${pat}
-    )`;
-    const stepsLike = sql`EXISTS (
-      SELECT 1 FROM unnest(recipe_steps) AS st
-      WHERE st ILIKE ${pat}
-    )`;
-    // Include type in the free-text search (casts ENUM → text)
-    // This is *search*, not the exact filter above.
+    const ingredientsLike = sql`EXISTS (SELECT 1 FROM unnest(recipe_ingredients) AS ing WHERE ing ILIKE ${pat})`;
+    const stepsLike = sql`EXISTS (SELECT 1 FROM unnest(recipe_steps)       AS st  WHERE st  ILIKE ${pat})`;
     const typeLike = sql`recipe_type::text ILIKE ${pat}`;
-    // Group all ORs into one predicate to be ANDed later
     predicates.push(
       sql`(${nameLike} OR ${ingredientsLike} OR ${stepsLike} OR ${typeLike})`
     );
   }
 
-  // Exact type filter:
-  // NOTE: `type` must be a canonical value.
-  // If `recipe_type` is a Postgres ENUM, this expects a valid enum literal.
-  // If it's a text/varchar column, callers must pass a normalized canonical string.
-  if (type) {
-    // type filter expects canonical enum value
-    predicates.push(sql`recipe_type = ${type}`);
-  }
+  if (type) predicates.push(sql`recipe_type = ${type}`);
 
-  // Compose final WHERE using AND across all predicates
-  const whereSql = predicates.length ? sql`WHERE ${andAll(predicates)}` : sql``;
+  const whereSql = sql`WHERE ${andAll(predicates)}`;
 
-  // -----------------------------
-  // 4) ORDER BY composition
-  //    - Map human-friendly sort key → actual column.
-  //    - Default to creation date.
-  // -----------------------------
   const sortCol =
     sort === "name"
       ? sql`recipe_name`
@@ -383,20 +326,13 @@ export async function fetchFilteredRecipes(
       : sql`recipe_created_at`;
   const dir = order === "asc" ? sql`ASC` : sql`DESC`;
 
-  // -----------------------------
-  // 5) Final query with LIMIT/OFFSET
-  // -----------------------------
   const result = await sql/* sql */ `
     SELECT id, recipe_name, recipe_ingredients, recipe_steps, recipe_created_at, recipe_type, difficulty, recipe_updated_at
-    FROM recipes
+    FROM public.recipes
     ${whereSql}
     ORDER BY ${sortCol} ${dir}
     LIMIT ${RECIPES_PAGE_SIZE} OFFSET ${offset}
   `;
-
-  // -----------------------------
-  // 6) Normalize driver result shape (postgres.js vs @vercel/postgres)
-  // -----------------------------
   return pickRows(result);
 }
 
@@ -412,51 +348,33 @@ export async function fetchRecipesTotal(params: {
   query?: string;
   type?: string;
 }) {
-  // 1) Normalize inputs; prefer `query``
+  const userId = await requireUserId();
   const searchQuery = params.query ?? "";
   const type = params.type ?? "";
 
-  // 2) Build WHERE parts identical to the list query
-  const parts: any[] = [];
+  const parts: any[] = [sql`recipes.user_id = ${userId}::uuid`];
 
   if (searchQuery) {
     const pat = `%${searchQuery}%`;
-
-    const nameLike = sql`recipes.recipe_name ILIKE ${pat}`;
-    const ingredientsLike = sql`EXISTS (
-      SELECT 1 FROM unnest(recipes.recipe_ingredients) AS ing
-      WHERE ing ILIKE ${pat}
-    )`;
-    const stepsLike = sql`EXISTS (
-      SELECT 1 FROM unnest(recipes.recipe_steps) AS st
-      WHERE st ILIKE ${pat}
-    )`;
-    const typeLike = sql`recipes.recipe_type::text ILIKE ${pat}`; // search, not exact
-
-    // Single OR block (to be ANDed with exact type if provided)
-    parts.push(
-      sql`(${nameLike} OR ${ingredientsLike} OR ${stepsLike} OR ${typeLike})`
-    );
+    parts.push(sql`
+      (
+        recipes.recipe_name ILIKE ${pat}
+        OR recipes.recipe_type::text ILIKE ${pat}
+        OR EXISTS (SELECT 1 FROM unnest(recipes.recipe_ingredients) AS ing WHERE ing ILIKE ${pat})
+        OR EXISTS (SELECT 1 FROM unnest(recipes.recipe_steps)       AS st  WHERE st  ILIKE ${pat})
+      )
+    `);
   }
 
-  if (type) {
-    // Exact equality on recipe_type:
-    // - ENUM: expects a valid enum literal
-    // - TEXT: callers must pass a canonical normalized value
-    parts.push(sql`recipes.recipe_type = ${type}`); // type filter expects canonical enum value
-  }
+  if (type) parts.push(sql`recipes.recipe_type = ${type}`);
 
-  // 3) Combine predicates with AND; empty if no filters provided
-  const whereSql = parts.length ? sql`WHERE ${andAll(parts)}` : sql``;
+  const whereSql = sql`WHERE ${andAll(parts)}`;
 
-  // 4) COUNT(*) of filtered rows
   const totalRes = await sql<{ count: number }[]>/* sql */ `
     SELECT COUNT(*)::int AS count
-    FROM recipes
+    FROM public.recipes AS recipes
     ${whereSql}
   `;
-
-  // 5) Normalize and return count safely (0 if no row returned)
   const rows = pickRows<{ count: number }>(totalRes);
   return rows[0]?.count ?? 0;
 }
@@ -479,21 +397,11 @@ export async function fetchRecipesTotal(params: {
 export async function fetchRecipesPages(
   arg: string | { query?: string; type?: string }
 ) {
-  // 1) Normalize inputs; prefer `query`
+  const userId = await requireUserId();
   const searchQuery = typeof arg === "string" ? arg : arg.query ?? "";
   const type = typeof arg === "string" ? "" : arg.type ?? "";
 
-  // 2) Fast-path: no filters → simple table count
-  if (!searchQuery && !type) {
-    const [{ count }] = await sql<{ count: number }[]>`
-      SELECT COUNT(*)::int AS count
-      FROM recipes;
-    `;
-    return Math.ceil(count / RECIPES_PAGE_SIZE);
-  }
-
-  // 3) Build WHERE predicates (identical to list and total)
-  const parts: any[] = [];
+  const parts: any[] = [sql`recipes.user_id = ${userId}::uuid`];
 
   if (searchQuery) {
     const pat = `%${searchQuery}%`;
@@ -506,27 +414,15 @@ export async function fetchRecipesPages(
       )
     `);
   }
+  if (type) parts.push(sql`recipes.recipe_type = ${type}`);
 
-  if (type) {
-    // Exact type filter — expects canonical enum value / normalized string.
-    parts.push(sql`recipes.recipe_type = ${type}`);
-  }
+  const whereSql = sql`WHERE ${andAll(parts)}`;
 
-  // 4) Compose final WHERE (AND all parts)
-  const whereSql =
-    parts.length === 0
-      ? sql``
-      : sql`WHERE ${parts
-          .slice(1)
-          .reduce((acc, cur) => sql`${acc} AND ${cur}`, parts[0])}`;
-
-  // 5) Count matching rows and convert to total pages using the shared page size
   const [{ count }] = await sql<{ count: number }[]>`
     SELECT COUNT(*)::int AS count
-    FROM recipes
-    ${whereSql};
+    FROM public.recipes AS recipes
+    ${whereSql}
   `;
-
   return Math.ceil(count / RECIPES_PAGE_SIZE);
 }
 
@@ -536,29 +432,24 @@ export async function fetchRecipesPages(
  * @returns Promise<RecipeField[]>
  */
 export async function fetchRecipes() {
+  const userId = await requireUserId();
   try {
-    // 1) Query minimal fields ordered by name
     const recipes = await sql<RecipeField[]>`
-      SELECT
-        id,
-        recipe_name,
-        recipe_type
-      FROM recipes
+      SELECT id, recipe_name, recipe_type
+      FROM public.recipes
+      WHERE user_id = ${userId}::uuid
       ORDER BY recipe_name ASC
     `;
-
-    // 2) Return as-is
     return recipes;
   } catch (err) {
-    // 3) Error handling
     console.error("Database Error:", err);
     throw new Error("Failed to fetch all recipes.");
   }
 }
 
 export async function fetchRecipeById(id: string) {
+  const userId = await requireUserId();
   try {
-    // 1) Fetch a single recipe by UUID (with COALESCE for arrays)
     const rows = await sql<RecipeForm[]>`
       SELECT
         id,
@@ -570,21 +461,19 @@ export async function fetchRecipeById(id: string) {
         prep_time_min,
         difficulty,
         status,
-        COALESCE(dietary_flags, ARRAY[]::text[])   AS dietary_flags,
-        COALESCE(allergens,     ARRAY[]::text[])   AS allergens,
+        COALESCE(dietary_flags, ARRAY[]::text[]) AS dietary_flags,
+        COALESCE(allergens,     ARRAY[]::text[]) AS allergens,
         calories_total,
-        estimated_cost_total,                       -- comes back as string
-        COALESCE(equipment,     ARRAY[]::text[])   AS equipment,
+        estimated_cost_total,
+        COALESCE(equipment,     ARRAY[]::text[]) AS equipment,
         (recipe_created_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_created_at,
         (recipe_updated_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_updated_at
       FROM public.recipes
-      WHERE id = ${id}::uuid;
+      WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
+      LIMIT 1;
     `;
-
-    // 2) Return first row (or null if not found)
     return rows[0] ?? null;
   } catch (error) {
-    // 3) Error handling
     console.error("Database Error:", error);
     throw new Error("Failed to fetch recipe.");
   }
