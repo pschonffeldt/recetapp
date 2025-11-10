@@ -5,13 +5,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import postgres from "postgres";
 import { signIn } from "@/auth";
-import { AuthError } from "next-auth";
 import { auth } from "@/auth";
 import bcrypt from "bcrypt";
-import {
-  UpdateUserPasswordSchema,
-  UpdateUserProfileSchema,
-} from "./validation";
+import { UpdateUserProfileSchema } from "./validation";
 import { toInt, toLines, toMoney } from "./form-helpers";
 import { RecipeFormState } from "./action-types";
 
@@ -85,21 +81,27 @@ const UpdateRecipeSchema = RecipeSchema.extend({
  * @returns string | undefined
  */
 export async function authenticate(
-  prevState: string | undefined,
+  _prevState: string | undefined,
   formData: FormData
 ) {
   try {
     await signIn("credentials", formData);
   } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case "CredentialsSignin":
-          return "Invalid credentials.";
-        default:
-          return "Something went wrong.";
-      }
-    }
-    // Unknown error: surface it to the error boundary/logs
+    // NextAuth v5 may throw different shapes; normalize what we show the user
+    const e = error as any;
+
+    // Common cases across v5:
+    // - e.type === 'CredentialsSignin'
+    // - e.name === 'AuthError' && e.type === 'CredentialsSignin'
+    // - e.digest may include 'CredentialsSignin'
+    const isCredsError =
+      e?.type === "CredentialsSignin" ||
+      (e?.name === "AuthError" && e?.type === "CredentialsSignin") ||
+      (typeof e?.digest === "string" && e.digest.includes("CredentialsSignin"));
+
+    if (isCredsError) return "Invalid credentials.";
+
+    // Unknown error → surface to error boundary/logs (keeps behavior consistent)
     throw error;
   }
 }
