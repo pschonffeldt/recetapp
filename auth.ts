@@ -1,50 +1,76 @@
-"use server";
-
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { z } from "zod";
 import type { User } from "@/app/lib/definitions";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import postgres from "postgres";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
-async function getUser(email: string): Promise<User | undefined> {
+async function getUserByEmail(email: string): Promise<User | undefined> {
   try {
-    const user = await sql<User[]>`SELECT * FROM users WHERE email=${email}`;
-    return user[0];
-  } catch (error) {
-    console.error("Failed to fetch user:", error);
-    throw new Error("Failed to fetch user.");
+    const rows = await sql<User[]>`
+      SELECT id, name, email, password
+      FROM public.users
+      WHERE email = ${email}
+      LIMIT 1
+    `;
+    return rows[0];
+  } catch (err) {
+    console.error("getUserByEmail failed:", err);
+    // DO NOT throw – returning undefined lets authorize() return null (401) instead of 500
+    return undefined;
   }
 }
 
 export const { auth, signIn, signOut } = NextAuth({
   ...authConfig,
+  trustHost: true,
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     Credentials({
-      async authorize(credentials) {
-        const parsed = z
-          .object({ email: z.string().email(), password: z.string().min(6) })
-          .safeParse(credentials);
+      name: "Email & Password",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(raw) {
+        try {
+          const parsed = z
+            .object({
+              email: z.string().email(),
+              password: z.string().min(6),
+            })
+            .safeParse(raw);
+          if (!parsed.success) return null;
 
-        if (!parsed.success) return null;
+          const { email, password } = parsed.data;
+          const user = await getUserByEmail(email.toLowerCase().trim());
+          if (!user) return null;
 
-        const { email, password } = parsed.data;
-        const user = await getUser(email); // SELECT * FROM users WHERE email=$1
-        if (!user) return null;
+          const hashed = (user as any).password as string | undefined;
+          if (!hashed) return null;
 
-        const ok = await bcrypt.compare(password, user.password);
-        if (!ok) return null;
+          const ok = await bcrypt.compare(password, hashed);
+          if (!ok) return null;
 
-        // return a safe, minimal object that includes the id
-        return { id: user.id, name: user.name, email: user.email } as any;
+          return {
+            id: user.id,
+            name: user.name ?? null,
+            email: user.email ?? null,
+          } as any;
+        } catch (err) {
+          console.error("authorize() failed:", err);
+          return null; // important: avoid 500s
+        }
       },
     }),
   ],
 });
 
+// auth.ts (add at bottom, or keep near your NextAuth export)
 export async function logout() {
+  "use server";
   await signOut({ redirectTo: "/login" });
 }

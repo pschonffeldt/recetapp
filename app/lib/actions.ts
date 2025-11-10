@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import postgres from "postgres";
 import { signIn } from "@/auth";
 import { auth } from "@/auth";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { UpdateUserProfileSchema } from "./validation";
 import { toInt, toLines, toMoney } from "./form-helpers";
 import { RecipeFormState } from "./action-types";
