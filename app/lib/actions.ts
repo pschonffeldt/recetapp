@@ -137,6 +137,12 @@ export async function createRecipe(
   _prev: RecipeFormState,
   formData: FormData
 ): Promise<RecipeFormState> {
+  const session = await auth();
+  const userId = (session?.user as any)?.id as string | undefined;
+  if (!userId) {
+    return { message: "You must be signed in to create a recipe.", errors: {} };
+  }
+
   const parsed = RecipeSchema.safeParse({
     recipe_name: formData.get("recipe_name"),
     recipe_type: formData.get("recipe_type"),
@@ -150,7 +156,10 @@ export async function createRecipe(
     allergens: toLines(formData.get("allergens")),
     calories_total: toInt(formData.get("calories_total")),
     estimated_cost_total: toMoney(formData.get("estimated_cost_total")),
-    equipment: toLines(formData.get("recipe_equipment")),
+    // make sure this matches your form field; fallback covers both names
+    equipment: toLines(
+      formData.get("equipment") ?? formData.get("recipe_equipment")
+    ),
   });
 
   if (!parsed.success) {
@@ -166,10 +175,11 @@ export async function createRecipe(
 
   try {
     await sql`
-      INSERT INTO recipes (
+      INSERT INTO public.recipes (
         recipe_name, recipe_ingredients, recipe_steps, recipe_type,
         servings, prep_time_min, difficulty, status,
-        dietary_flags, allergens, calories_total, estimated_cost_total, equipment
+        dietary_flags, allergens, calories_total, estimated_cost_total, equipment,
+        user_id
       ) VALUES (
         ${d.recipe_name},
         ${d.recipe_ingredients}::text[],
@@ -185,12 +195,15 @@ export async function createRecipe(
         ${d.allergens}::text[],
         ${d.calories_total}::int,
         ${d.estimated_cost_total}::numeric,
-        ${d.equipment}::text[]
+        ${d.equipment}::text[],
+
+        ${userId}::uuid
       );
     `;
-  } catch (err) {
-    console.error("Create recipe failed:", err);
-    return { message: "Failed to create recipe.", errors: {} };
+  } catch (e) {
+    console.error("Create recipe failed:", e);
+    const msg = e instanceof Error ? e.message : String(e);
+    return { message: `Failed to create recipe: ${msg}`, errors: {} };
   }
 
   revalidatePath("/dashboard/recipes");

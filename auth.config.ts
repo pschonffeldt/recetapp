@@ -5,15 +5,20 @@ export const authConfig = {
   pages: { signIn: "/login" },
 
   callbacks: {
-    // persist the DB id on the JWT
     async jwt({ token, user }) {
+      // When a user signs in, NextAuth gives you `user` once.
       if (user?.id) token.id = user.id;
+      // On later runs, there is no `user`, so ensure we still have an id.
+      if (!token.id && token.sub) token.id = token.sub;
       return token;
     },
 
-    // expose it on the session so server/client can read it
     async session({ session, token }) {
-      if (token?.id) (session.user as any).id = token.id as string;
+      // Copy id onto the session for both server/client usage.
+      const id = (token as any).id ?? token.sub;
+      if (session.user && id) {
+        (session.user as any).id = id as string;
+      }
       return session;
     },
 
@@ -27,5 +32,5 @@ export const authConfig = {
     },
   },
 
-  providers: [], // providers are added in auth.ts
+  providers: [], // add your real providers in auth.ts
 } satisfies NextAuthConfig;
