@@ -375,14 +375,19 @@ export async function updateUserProfile(
 
   const d = parsed.data;
 
+  // Build dynamic SET list from provided fields
   const sets: any[] = [];
   if (d.name !== undefined) sets.push(sql`name = ${d.name}`);
   if (d.last_name !== undefined) sets.push(sql`last_name = ${d.last_name}`);
   if (d.email !== undefined) sets.push(sql`email = ${d.email}`);
 
   if (sets.length === 0) {
+    // Nothing to update
     return { message: null, errors: {}, ok: true, shouldRefresh: false };
   }
+
+  // Stamp profile_updated_at when something changed
+  sets.push(sql`profile_updated_at = now()`);
 
   const setSql =
     sets.length === 1
@@ -396,8 +401,9 @@ export async function updateUserProfile(
     return { message: "Failed to update profile.", errors: {}, ok: false };
   }
 
-  // header/SSR bits might show name/email -> allow a refresh signal
+  // Allow UI that reads user from RSC to refresh (e.g., header, page)
   revalidatePath("/dashboard/account");
+
   return { message: null, errors: {}, ok: true, shouldRefresh: true };
 }
 
@@ -412,45 +418,36 @@ export async function updateUserPassword(
 ) {
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
-  if (!userId) return { message: "Unauthorized.", errors: {}, ok: false };
+  if (!userId) return { ok: false, message: "Unauthorized.", errors: {} };
 
-  const raw = {
-    password: formData.get("password"),
-    confirm_password: formData.get("confirm_password"),
-  };
+  const password = toOptional(formData.get("password"));
+  const confirm = toOptional(formData.get("confirm_password"));
 
-  // If both are blank, treat as no-op success
-  const bothEmpty =
-    (!raw.password || String(raw.password).trim() === "") &&
-    (!raw.confirm_password || String(raw.confirm_password).trim() === "");
-  if (bothEmpty) {
-    return { message: null, errors: {}, ok: true, shouldRefresh: false };
+  const errors: Record<string, string[]> = {};
+  if (!password) errors.password = ["Password is required."];
+  if (!confirm) errors.confirm_password = ["Confirm password is required."];
+  if (password && password.length < 6) errors.password = ["Min 6 characters."];
+  if (password && confirm && password !== confirm)
+    errors.confirm_password = ["Passwords do not match."];
+
+  if (Object.keys(errors).length) {
+    return { ok: false, message: "Please correct the errors.", errors };
   }
 
-  const parsed = UpdateUserPasswordSchema.safeParse({
-    password: String(raw.password ?? ""),
-    confirm_password: String(raw.confirm_password ?? ""),
-  });
-
-  if (!parsed.success) {
-    const errors: Record<string, string[]> = {};
-    for (const issue of parsed.error.issues) {
-      const key = (issue.path[0] as string) || "_form";
-      (errors[key] ??= []).push(issue.message);
-    }
-    return { message: "Please correct the errors above.", errors, ok: false };
-  }
-
-  const { password } = parsed.data;
+  const hash = await bcrypt.hash(password!, 10);
 
   try {
-    const hash = await bcrypt.hash(password, 10);
-    await sql`UPDATE public.users SET password = ${hash} WHERE id = ${userId}::uuid`;
+    await sql`
+      UPDATE public.users
+      SET password = ${hash}, password_changed_at = now()
+      WHERE id = ${userId}::uuid
+    `;
   } catch (e) {
     console.error("updateUserPassword failed:", e);
-    return { message: "Failed to update password.", errors: {}, ok: false };
+    return { ok: false, message: "Failed to update password.", errors: {} };
   }
 
-  revalidatePath("/dashboard/account");
-  return { message: null, errors: {}, ok: true, shouldRefresh: false };
+  // Optional: if using NextAuth sessions DB, invalidate others here.
+  // (You can skip if using JWT without a session store.)
+  return { ok: true, message: null, errors: {} };
 }
