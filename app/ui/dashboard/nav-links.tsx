@@ -1,6 +1,6 @@
 "use client";
 
-import { HomeIcon, UserIcon, WrenchIcon } from "@heroicons/react/24/outline";
+import { HomeIcon, MegaphoneIcon, UserIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
@@ -11,6 +11,11 @@ const links = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
   { name: "Recipes", href: "/dashboard/recipes", icon: DocumentPlusIcon },
   { name: "Account", href: "/dashboard/account", icon: UserIcon },
+  {
+    name: "Notifications",
+    href: "/dashboard/notifications",
+    icon: MegaphoneIcon,
+  },
   // { name: "Settings", href: "/dashboard/settings", icon: WrenchIcon },
 ];
 

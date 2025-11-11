@@ -3,7 +3,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserCircleIcon, PowerIcon } from "@heroicons/react/24/outline";
+import {
+  UserCircleIcon,
+  PowerIcon,
+  MegaphoneIcon,
+} from "@heroicons/react/24/outline";
 import { ChartBarIcon, PlusIcon } from "@heroicons/react/20/solid";
 
 type Props = {
@@ -11,6 +15,7 @@ type Props = {
   dashboardleHref?: string;
   profileHref?: string;
   recipesHref?: string;
+  notificationsHref?: string;
 
   /**
    * Server Action for Auth.js/NextAuth v5 logout.
@@ -27,6 +32,7 @@ export default function UserSettingsFab({
   dashboardleHref = "/dashboard",
   profileHref = "/dashboard/account",
   recipesHref = "/dashboard/recipes",
+  notificationsHref = "/dashboard/notifications",
   logoutAction,
   title = "User menu",
   avatarUrl,
@@ -127,14 +133,18 @@ export default function UserSettingsFab({
               label="Recipes"
               onClick={() => go(recipesHref)}
             />
-            <div className="my-1 h-px bg-gray-200/60 " />
+            <MenuItem
+              icon={<MegaphoneIcon className="h-5 w-5" />}
+              label="Notifications"
+              onClick={() => go(notificationsHref)}
+            />
             <MenuItem
               icon={<UserCircleIcon className="h-5 w-5" />}
-              label="Profile"
+              label="Account"
               onClick={() => go(profileHref)}
             />
 
-            <div className="my-1 h-px bg-gray-200/60 " />
+            <div className="my-1 mb-10 h-px bg-gray-200/60 " />
 
             {logoutAction ? (
               // Attach the server action DIRECTLY to the form
