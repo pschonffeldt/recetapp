@@ -47,24 +47,26 @@ export default function SignupForm() {
         </h1>
 
         {/* First name */}
-        <div className="relative">
+        <div className="">
           <label
             className="mb-3 mt-5 block text-xs font-medium text-gray-900"
             htmlFor="name"
           >
             First name
           </label>
-          <input
-            id="name"
-            name="name"
-            className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
-            placeholder="Your first name"
-            required
-          />
-          <UserIcon className="pointer-events-none absolute left-3 top-[62px] h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-          {err("name") && (
-            <p className="mt-2 text-sm text-red-500">{err("name")}</p>
-          )}
+          <div className="relative">
+            <input
+              id="name"
+              name="name"
+              className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
+              placeholder="Your first name"
+              required
+            />
+            <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            {err("name") && (
+              <p className="mt-2 text-sm text-red-500">{err("name")}</p>
+            )}
+          </div>
         </div>
 
         {/* Last name */}
@@ -75,16 +77,18 @@ export default function SignupForm() {
           >
             Last name
           </label>
-          <input
-            id="last_name"
-            name="last_name"
-            className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
-            placeholder="Your last name (optional)"
-          />
-          <UserIcon className="pointer-events-none absolute left-3 h-[18px] w-[18px] text-gray-500 opacity-0 peer-focus:opacity-100" />
-          {err("last_name") && (
-            <p className="mt-2 text-sm text-red-500">{err("last_name")}</p>
-          )}
+          <div className="relative">
+            <input
+              id="last_name"
+              name="last_name"
+              className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
+              placeholder="Your last name (optional)"
+            />
+            <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+            {err("name") && (
+              <p className="mt-2 text-sm text-red-500">{err("last_name")}</p>
+            )}
+          </div>
         </div>
 
         {/* Email */}

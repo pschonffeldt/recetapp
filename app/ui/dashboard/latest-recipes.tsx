@@ -7,6 +7,9 @@ import RecipesType from "../recipes/recipes-status";
 
 export default async function LatestRecipes() {
   const latestRecipes = await fetchLatestRecipes();
+  // Simple empty-state check
+  const isEmpty = !latestRecipes || latestRecipes.length === 0;
+
   return (
     <div className="flex w-full flex-col md:col-span-4">
       <h2 className={`${inter.className} mb-4 pl-6 text-xl md:text-2xl`}>
@@ -14,8 +17,12 @@ export default async function LatestRecipes() {
       </h2>
       <div className="flex grow flex-col justify-between rounded-xl bg-gray-50 p-4">
         <div className="bg-white px-6">
-          {latestRecipes.map((recipe, i) => {
-            return (
+          {isEmpty ? (
+            <div className="w-full rounded-md bg-white p-4 text-sm text-gray-500">
+              You don't have any recipes yet 😔!
+            </div>
+          ) : (
+            (latestRecipes ?? []).map((recipe, i) => (
               <div
                 key={recipe.id}
                 className={clsx(
@@ -45,12 +52,8 @@ export default async function LatestRecipes() {
                   </p>
                 </div>
               </div>
-            );
-          })}
-        </div>
-        <div className="flex items-center pb-2 pt-6">
-          <ArrowPathIcon className="h-5 w-5 text-gray-500" />
-          <h3 className="ml-2 text-sm text-gray-500 ">Updated just now</h3>
+            ))
+          )}
         </div>
       </div>
     </div>

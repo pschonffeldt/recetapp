@@ -507,8 +507,8 @@ export async function createAccount(_prev: any, formData: FormData) {
 
   const { name, last_name, email, password } = parsed.data;
 
-  // Ensure email not taken (race is guarded by unique index, but this is UX-friendly)
-  const existing = await sql/*sql*/ `
+  // UX check (unique index still guarantees at DB level)
+  const existing = await sql/* sql */ `
     SELECT 1 FROM public.users WHERE LOWER(email) = ${email} LIMIT 1`;
   if (existing.length) {
     return {
@@ -520,16 +520,15 @@ export async function createAccount(_prev: any, formData: FormData) {
 
   const hash = await bcrypt.hash(password, 10);
 
-  // Insert user; set password_changed_at on creation
+  // Create user
   let userId: string | null = null;
   try {
-    const rows = await sql<{ id: string }[]>/*sql*/ `
+    const rows = await sql<{ id: string }[]>/* sql */ `
       INSERT INTO public.users (name, last_name, email, password, password_changed_at)
       VALUES (${name}, ${last_name}, ${email}, ${hash}, NOW())
       RETURNING id`;
     userId = rows[0]?.id ?? null;
   } catch (e: any) {
-    // Unique index will throw if a race happens
     const msg = String(e?.message || e);
     return {
       ok: false,
@@ -540,14 +539,24 @@ export async function createAccount(_prev: any, formData: FormData) {
     };
   }
 
-  // Auto sign-in after successful signup
+  // Auto sign-in + redirect
   try {
-    await signIn("credentials", { redirect: false, email, password });
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: "/dashboard", // NextAuth will redirect on the server
+    });
+
+    // Fallback: if for any reason no redirect occurred, force it.
+    redirect("/dashboard");
   } catch {
-    // If auto sign-in fails, still return OK so the user can log in manually
+    // If sign-in fails, send them to login with a success hint.
+    redirect("/login?signup=success");
   }
 
-  return { ok: true, message: null, errors: {}, userId };
+  // Unreachable after redirect; keep for type completeness if this action is reused.
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return { ok: true, message: null, errors: {}, userId } as const;
 }
 
 export type SignupResult = {
