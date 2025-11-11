@@ -466,3 +466,93 @@ export async function updateUserPassword(
   // (You can skip if using JWT without a session store.)
   return { ok: true, message: null, errors: {} };
 }
+
+/* =======================================================
+ * Signup
+ * ======================================================= */
+
+const SignupSchema = z
+  .object({
+    name: z.string().trim().min(1, "First name is required"),
+    last_name: z.string().trim().optional().default(""),
+    email: z
+      .string()
+      .email()
+      .transform((e) => e.toLowerCase().trim()),
+    password: z.string().min(8, "Use at least 8 characters"),
+    confirm: z.string().min(8),
+  })
+  .refine((v) => v.password === v.confirm, {
+    message: "Passwords do not match",
+    path: ["confirm"],
+  });
+
+export async function createAccount(_prev: any, formData: FormData) {
+  const parsed = SignupSchema.safeParse({
+    name: formData.get("name"),
+    last_name: formData.get("last_name"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    confirm: formData.get("confirm"),
+  });
+
+  if (!parsed.success) {
+    const errors: Record<string, string[]> = {};
+    for (const issue of parsed.error.issues) {
+      const key = (issue.path[0] as string) || "_form";
+      (errors[key] ??= []).push(issue.message);
+    }
+    return { ok: false, message: "Fix errors and try again.", errors };
+  }
+
+  const { name, last_name, email, password } = parsed.data;
+
+  // Ensure email not taken (race is guarded by unique index, but this is UX-friendly)
+  const existing = await sql/*sql*/ `
+    SELECT 1 FROM public.users WHERE LOWER(email) = ${email} LIMIT 1`;
+  if (existing.length) {
+    return {
+      ok: false,
+      message: "Email is already registered.",
+      errors: { email: ["Email already in use"] },
+    };
+  }
+
+  const hash = await bcrypt.hash(password, 10);
+
+  // Insert user; set password_changed_at on creation
+  let userId: string | null = null;
+  try {
+    const rows = await sql<{ id: string }[]>/*sql*/ `
+      INSERT INTO public.users (name, last_name, email, password, password_changed_at)
+      VALUES (${name}, ${last_name}, ${email}, ${hash}, NOW())
+      RETURNING id`;
+    userId = rows[0]?.id ?? null;
+  } catch (e: any) {
+    // Unique index will throw if a race happens
+    const msg = String(e?.message || e);
+    return {
+      ok: false,
+      message: msg.includes("users_email_unique_idx")
+        ? "Email already in use."
+        : "Failed to create account.",
+      errors: {},
+    };
+  }
+
+  // Auto sign-in after successful signup
+  try {
+    await signIn("credentials", { redirect: false, email, password });
+  } catch {
+    // If auto sign-in fails, still return OK so the user can log in manually
+  }
+
+  return { ok: true, message: null, errors: {}, userId };
+}
+
+export type SignupResult = {
+  ok: boolean;
+  message: string | null;
+  errors: Record<string, string[]>;
+  userId?: string;
+};

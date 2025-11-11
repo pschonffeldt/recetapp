@@ -11,6 +11,7 @@ import { Button } from "./button";
 import { useActionState } from "react";
 import { authenticate } from "@/app/lib/actions";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -22,7 +23,7 @@ export default function LoginForm() {
 
   return (
     <form action={formAction} className="space-y-3">
-      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
+      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8 shadow-md">
         <h1 className={`${inter.className} mb-3 text-2xl`}>
           Please log in to continue.
         </h1>
@@ -71,6 +72,19 @@ export default function LoginForm() {
         <Button className="mt-4 w-full" aria-disabled={isPending}>
           Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>
+        <div
+          className="mt-4 flex h-8 items-end space-x-1"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {" "}
+          <p className="mt-2 text-center text-sm">
+            Don't have an account?{" "}
+            <Link href="/signup" className="text-blue-600 hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </div>
         <div
           className="flex h-8 items-end space-x-1"
           aria-live="polite"
