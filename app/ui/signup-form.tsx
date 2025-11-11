@@ -1,218 +1,184 @@
 "use client";
 
+import React, { useActionState } from "react";
 import Link from "next/link";
-import { inter } from "@/app/ui/fonts";
-import { Button } from "@/app/ui/button";
 import {
   AtSymbolIcon,
   KeyIcon,
   UserIcon,
-  ExclamationCircleIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
+import { inter } from "@/app/ui/fonts";
+import { Button } from "@/app/ui/button";
+import { createAccount } from "@/app/lib/actions";
 
-type Props = {
-  formAction: (fd: FormData) => void | Promise<void>;
-  isPending?: boolean;
-  callbackUrl?: string;
-  errorMessage?: string | null;
-  errors?: Record<string, string[]>;
+type SignupState = {
+  ok: boolean;
+  message: string | null;
+  errors: Record<string, string[]>;
+  userId?: string;
 };
 
-export default function SignupForm({
-  formAction,
-  isPending,
-  callbackUrl = "/dashboard",
-  errorMessage,
-  errors,
-}: Props) {
-  // helper to read first error per field
-  const err = (k: string) => errors?.[k]?.[0];
+const initial: SignupState = { ok: false, message: null, errors: {} };
+
+export default function SignupForm() {
+  // Adapter ensures the reducer signature matches <S, A> = <SignupState, FormData>
+  const reducer = async (
+    _prev: SignupState,
+    formData: FormData
+  ): Promise<SignupState> => {
+    const res = await createAccount(_prev, formData);
+    // shape already matches; cast keeps TS happy across module boundaries
+    return res as SignupState;
+  };
+
+  const [state, formAction, isPending] = useActionState<SignupState, FormData>(
+    reducer,
+    initial
+  );
+  const err = (k: keyof SignupState["errors"] | string) =>
+    state.errors?.[k as string]?.[0];
 
   return (
     <form action={formAction} className="space-y-3">
-      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8 shadow-md">
+      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
         <h1 className={`${inter.className} mb-3 text-2xl`}>
           Create your account.
         </h1>
 
-        <div className="w-full">
-          {/* First name */}
-          <div>
-            <label
-              htmlFor="name"
-              className="mb-3 mt-5 block text-xs font-medium text-gray-900"
-            >
-              First name
-            </label>
-            <div className="relative">
-              <input
-                id="name"
-                name="name"
-                placeholder="Your first name"
-                required
-                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
-                aria-invalid={Boolean(err("name"))}
-                aria-describedby={err("name") ? "name-error" : undefined}
-              />
-              <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
-            {err("name") && (
-              <p id="name-error" className="mt-2 text-sm text-red-500">
-                {err("name")}
-              </p>
-            )}
-          </div>
-
-          {/* Last name */}
-          <div className="mt-4">
-            <label
-              htmlFor="last_name"
-              className="mb-3 mt-5 block text-xs font-medium text-gray-900"
-            >
-              Last name
-            </label>
-            <div className="relative">
-              <input
-                id="last_name"
-                name="last_name"
-                placeholder="Your last name"
-                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
-                aria-invalid={Boolean(err("last_name"))}
-                aria-describedby={
-                  err("last_name") ? "last_name-error" : undefined
-                }
-              />
-              <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
-            {err("last_name") && (
-              <p id="last_name-error" className="mt-2 text-sm text-red-500">
-                {err("last_name")}
-              </p>
-            )}
-          </div>
-
-          {/* Email */}
-          <div className="mt-4">
-            <label
-              htmlFor="email"
-              className="mb-3 mt-5 block text-xs font-medium text-gray-900"
-            >
-              Email
-            </label>
-            <div className="relative">
-              <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Enter your email address"
-                required
-                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
-                aria-invalid={Boolean(err("email"))}
-                aria-describedby={err("email") ? "email-error" : undefined}
-              />
-              <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
-            {err("email") && (
-              <p id="email-error" className="mt-2 text-sm text-red-500">
-                {err("email")}
-              </p>
-            )}
-          </div>
-
-          {/* Password */}
-          <div className="mt-4">
-            <label
-              htmlFor="password"
-              className="mb-3 mt-5 block text-xs font-medium text-gray-900"
-            >
-              Password
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Create a password"
-                required
-                minLength={8} // set to 6 if you want parity with login
-                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
-                aria-invalid={Boolean(err("password"))}
-                aria-describedby={
-                  err("password") ? "password-error" : undefined
-                }
-              />
-              <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
-            {err("password") && (
-              <p id="password-error" className="mt-2 text-sm text-red-500">
-                {err("password")}
-              </p>
-            )}
-          </div>
-
-          {/* Confirm password */}
-          <div className="mt-4">
-            <label
-              htmlFor="confirm"
-              className="mb-3 mt-5 block text-xs font-medium text-gray-900"
-            >
-              Confirm password
-            </label>
-            <div className="relative">
-              <input
-                id="confirm"
-                name="confirm"
-                type="password"
-                placeholder="Repeat your password"
-                required
-                minLength={8}
-                className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
-                aria-invalid={Boolean(err("confirm"))}
-                aria-describedby={err("confirm") ? "confirm-error" : undefined}
-              />
-              <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            </div>
-            {err("confirm") && (
-              <p id="confirm-error" className="mt-2 text-sm text-red-500">
-                {err("confirm")}
-              </p>
-            )}
-          </div>
+        {/* First name */}
+        <div className="relative">
+          <label
+            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+            htmlFor="name"
+          >
+            First name
+          </label>
+          <input
+            id="name"
+            name="name"
+            className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
+            placeholder="Your first name"
+            required
+          />
+          <UserIcon className="pointer-events-none absolute left-3 top-[62px] h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          {err("name") && (
+            <p className="mt-2 text-sm text-red-500">{err("name")}</p>
+          )}
         </div>
 
-        <input type="hidden" name="redirectTo" value={callbackUrl} />
+        {/* Last name */}
+        <div className="mt-4">
+          <label
+            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+            htmlFor="last_name"
+          >
+            Last name
+          </label>
+          <input
+            id="last_name"
+            name="last_name"
+            className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
+            placeholder="Your last name (optional)"
+          />
+          <UserIcon className="pointer-events-none absolute left-3 h-[18px] w-[18px] text-gray-500 opacity-0 peer-focus:opacity-100" />
+          {err("last_name") && (
+            <p className="mt-2 text-sm text-red-500">{err("last_name")}</p>
+          )}
+        </div>
+
+        {/* Email */}
+        <div className="mt-4">
+          <label
+            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+            htmlFor="email"
+          >
+            Email
+          </label>
+          <div className="relative">
+            <input
+              id="email"
+              type="email"
+              name="email"
+              className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
+              placeholder="you@example.com"
+              required
+            />
+            <AtSymbolIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          </div>
+          {err("email") && (
+            <p className="mt-2 text-sm text-red-500">{err("email")}</p>
+          )}
+        </div>
+
+        {/* Password */}
+        <div className="mt-4">
+          <label
+            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+            htmlFor="password"
+          >
+            Password
+          </label>
+          <div className="relative">
+            <input
+              id="password"
+              type="password"
+              name="password"
+              className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
+              placeholder="Create a password"
+              required
+              minLength={8}
+            />
+            <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          </div>
+          {err("password") && (
+            <p className="mt-2 text-sm text-red-500">{err("password")}</p>
+          )}
+        </div>
+
+        {/* Confirm */}
+        <div className="mt-4">
+          <label
+            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+            htmlFor="confirm"
+          >
+            Confirm password
+          </label>
+          <div className="relative">
+            <input
+              id="confirm"
+              type="password"
+              name="confirm"
+              className="peer block w-full rounded-md border border-gray-200 py-[9px] pl-10 text-base outline-2 placeholder:text-gray-500"
+              placeholder="Repeat your password"
+              required
+              minLength={8}
+            />
+            <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
+          </div>
+          {err("confirm") && (
+            <p className="mt-2 text-sm text-red-500">{err("confirm")}</p>
+          )}
+        </div>
 
         <Button className="mt-4 w-full" aria-disabled={isPending}>
-          Create account
+          Create account{" "}
           <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
         </Button>
 
-        <div
-          className="mt-4 flex h-8 items-end space-x-1"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          <p className="mt-2 text-center text-sm">
-            Already have an account?{" "}
-            <Link href="/login" className="text-blue-600 hover:underline">
-              Log in
-            </Link>
-          </p>
-        </div>
-
-        <div
-          className="flex h-8 items-end space-x-1"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          {errorMessage && (
-            <>
-              <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
-              <p className="text-sm text-red-500">{errorMessage}</p>
-            </>
+        {/* Inline status */}
+        <div className="mt-2 min-h-6" aria-live="polite" aria-atomic="true">
+          {!!state.message && !state.ok && (
+            <p className="text-sm text-red-500">{state.message}</p>
           )}
         </div>
+
+        <p className="mt-2 text-center text-sm">
+          Already have an account?{" "}
+          <Link href="/login" className="text-blue-600 hover:underline">
+            Log in
+          </Link>
+        </p>
       </div>
     </form>
   );
