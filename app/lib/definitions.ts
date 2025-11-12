@@ -104,6 +104,14 @@ export type LatestRecipeRaw = {
   recipe_type: string;
 };
 
+//  For notifications fetch
+export type NotificationsRaw = {
+  id: string;
+  title: string;
+  content: string;
+  status: string[]; // assuming text[]
+};
+
 /* =======================================================
  * Dashboard upper OKRs
  * ======================================================= */

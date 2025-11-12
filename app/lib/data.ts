@@ -14,6 +14,7 @@ import {
   CardData,
   UserForm,
   User,
+  NotificationsRaw,
 } from "./definitions";
 import { requireUserId } from "@/app/lib/auth-helpers";
 
@@ -488,3 +489,7 @@ export async function fetchUserById(id: string) {
   `;
   return rows[0] ?? null;
 }
+
+/* =======================================================
+ * Notifications
+ * ======================================================= */
