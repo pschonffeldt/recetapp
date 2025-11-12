@@ -19,7 +19,6 @@ async function getUserByEmail(email: string): Promise<User | undefined> {
     return rows[0];
   } catch (err) {
     console.error("getUserByEmail failed:", err);
-    // DO NOT throw – returning undefined lets authorize() return null (401) instead of 500
     return undefined;
   }
 }
@@ -38,10 +37,7 @@ export const { auth, signIn, signOut } = NextAuth({
       async authorize(raw) {
         try {
           const parsed = z
-            .object({
-              email: z.string().email(),
-              password: z.string().min(6),
-            })
+            .object({ email: z.string().email(), password: z.string().min(6) })
             .safeParse(raw);
           if (!parsed.success) return null;
 
@@ -62,14 +58,13 @@ export const { auth, signIn, signOut } = NextAuth({
           } as any;
         } catch (err) {
           console.error("authorize() failed:", err);
-          return null; // important: avoid 500s
+          return null;
         }
       },
     }),
   ],
 });
 
-// auth.ts (add at bottom, or keep near your NextAuth export)
 export async function logout() {
   "use server";
   await signOut({ redirectTo: "/login" });
