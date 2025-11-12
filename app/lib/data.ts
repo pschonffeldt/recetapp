@@ -1,20 +1,11 @@
-/* ============================================
- * Data Access Layer (Postgres via postgres.js)
- * Centralized queries for dashboard, invoices,
- * and recipes.
- * ============================================ */
-
 import postgres from "postgres";
 import {
-  RecipesTable,
   Revenue,
   RecipeField,
   RecipeForm,
   LatestRecipeRaw,
   CardData,
   UserForm,
-  User,
-  NotificationsRaw,
 } from "./definitions";
 import { requireUserId } from "@/app/lib/auth-helpers";
 
@@ -112,11 +103,13 @@ export async function fetchLatestRecipes() {
   }
 }
 
-/**
+/* =======================================================
+ * Dashboard KPI
  * Fetch dashboard KPI card data (counts + totals by status).
  * Note: Split into parallel queries for demonstration purposes.
  * @returns Promise<{ numberOfCustomers: number; numberOfInvoices: number; totalPaidInvoices: string; totalPendingInvoices: string; }>
- */
+ * ======================================================= */
+
 export async function fetchCardData(): Promise<CardData> {
   const userId = await requireUserId();
   try {
