@@ -333,22 +333,23 @@ export async function updateRecipe(
     const rows = await sql/* sql */ `
       UPDATE public.recipes
       SET
-        recipe_name        = ${d.recipe_name},
-        recipe_type        = ${d.recipe_type}::recipe_type_enum,
-        recipe_ingredients = ${d.recipe_ingredients}::text[],
-        recipe_steps       = ${d.recipe_steps}::text[],
-        servings           = ${d.servings}::smallint,
-        prep_time_min      = ${d.prep_time_min}::smallint,
-        difficulty         = ${d.difficulty}::difficulty_enum,
-        status             = ${d.status}::status_enum,
-        dietary_flags      = ${d.dietary_flags}::text[],
-        allergens          = ${d.allergens}::text[],
-        calories_total     = ${d.calories_total}::int,
+        recipe_name          = ${d.recipe_name},
+        recipe_type          = ${d.recipe_type}::recipe_type_enum,
+        recipe_ingredients   = ${d.recipe_ingredients}::text[],
+        recipe_steps         = ${d.recipe_steps}::text[],
+        servings             = ${d.servings}::smallint,
+        prep_time_min        = ${d.prep_time_min}::smallint,
+        difficulty           = ${d.difficulty}::difficulty_enum,
+        status               = ${d.status}::status_enum,
+        dietary_flags        = ${d.dietary_flags}::text[],
+        allergens            = ${d.allergens}::text[],
+        calories_total       = ${d.calories_total}::int,
         estimated_cost_total = ${d.estimated_cost_total}::numeric,
-        equipment          = ${d.equipment}::text[]
+        equipment            = ${d.equipment}::text[],
+        recipe_updated_at    = now()
       WHERE id = ${d.id}::uuid
         AND user_id = ${userId}::uuid
-      RETURNING id
+      RETURNING id;
     `;
     if (!rows.length) {
       return {
