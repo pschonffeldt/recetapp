@@ -10,6 +10,7 @@ import bcrypt from "bcryptjs";
 import { UpdateUserProfileSchema } from "./validation";
 import { toInt, toLines, toMoney } from "./form-helpers";
 import { RecipeFormState } from "./action-types";
+import { requireUserId } from "./auth-helpers";
 
 /* ================================
  * Database Client
@@ -139,29 +140,26 @@ export async function createRecipe(
   _prev: RecipeFormState,
   formData: FormData
 ): Promise<RecipeFormState> {
-  const session = await auth();
-  const userId = (session?.user as any)?.id as string | undefined;
-  if (!userId) {
-    return { message: "You must be signed in to create a recipe.", errors: {} };
-  }
+  // 1) Enforce auth via helper
+  const userId = await requireUserId(); // throws if not logged in
 
+  // 2) Validate & normalize
   const parsed = RecipeSchema.safeParse({
     recipe_name: formData.get("recipe_name"),
     recipe_type: formData.get("recipe_type"),
-    recipe_ingredients: toLines(formData.get("recipe_ingredients")),
-    recipe_steps: toLines(formData.get("recipe_steps")),
+    recipe_ingredients: toLines(formData.get("recipe_ingredients")) ?? [],
+    recipe_steps: toLines(formData.get("recipe_steps")) ?? [],
     servings: toInt(formData.get("servings")),
     prep_time_min: toInt(formData.get("prep_time_min")),
     difficulty: (formData.get("difficulty") as string | null) ?? null,
     status: (formData.get("status") as string) ?? "private",
-    dietary_flags: toLines(formData.get("dietary_flags")),
-    allergens: toLines(formData.get("allergens")),
+    dietary_flags: toLines(formData.get("dietary_flags")) ?? [],
+    allergens: toLines(formData.get("allergens")) ?? [],
     calories_total: toInt(formData.get("calories_total")),
     estimated_cost_total: toMoney(formData.get("estimated_cost_total")),
-    // make sure this matches your form field; fallback covers both names
-    equipment: toLines(
-      formData.get("equipment") ?? formData.get("recipe_equipment")
-    ),
+    equipment:
+      toLines(formData.get("equipment") ?? formData.get("recipe_equipment")) ??
+      [],
   });
 
   if (!parsed.success) {
@@ -176,7 +174,7 @@ export async function createRecipe(
   const d = parsed.data;
 
   try {
-    await sql`
+    await sql/* sql */ `
       INSERT INTO public.recipes (
         recipe_name, recipe_ingredients, recipe_steps, recipe_type,
         servings, prep_time_min, difficulty, status,
@@ -187,25 +185,30 @@ export async function createRecipe(
         ${d.recipe_ingredients}::text[],
         ${d.recipe_steps}::text[],
         ${d.recipe_type}::recipe_type_enum,
-
         ${d.servings}::smallint,
         ${d.prep_time_min}::smallint,
         ${d.difficulty}::difficulty_enum,
         ${d.status}::status_enum,
-
         ${d.dietary_flags}::text[],
         ${d.allergens}::text[],
         ${d.calories_total}::int,
         ${d.estimated_cost_total}::numeric,
         ${d.equipment}::text[],
-
         ${userId}::uuid
       );
     `;
   } catch (e) {
     console.error("Create recipe failed:", e);
-    const msg = e instanceof Error ? e.message : String(e);
-    return { message: `Failed to create recipe: ${msg}`, errors: {} };
+    const msg = (e as any)?.message ?? String(e);
+    // 3) Friendlier DB error surfaces
+    if (msg.includes("recipes_user_id_fkey"))
+      return {
+        message: "Your session expired—please log in again.",
+        errors: {},
+      };
+    if (msg.includes("invalid input value for enum"))
+      return { message: "Invalid recipe type or difficulty.", errors: {} };
+    return { message: "Failed to create recipe.", errors: {} };
   }
 
   revalidatePath("/dashboard/recipes");
@@ -219,7 +222,18 @@ export async function createRecipe(
  * @param id - Recipe id
  */
 export async function deleteRecipe(id: string) {
-  await sql`DELETE FROM recipes WHERE id = ${id}`;
+  const session = await auth();
+  const userId = (session?.user as any)?.id as string | undefined;
+  if (!userId) throw new Error("Unauthorized.");
+
+  const res = await sql/*sql*/ `
+    DELETE FROM public.recipes
+    WHERE id = ${id}::uuid
+      AND user_id = ${userId}::uuid
+    RETURNING id
+  `;
+  if (!res.length) throw new Error("Recipe not found or not yours.");
+
   revalidatePath("/dashboard/recipes");
 }
 
@@ -229,7 +243,18 @@ export async function deleteRecipe(id: string) {
  * @param id - Recipe id
  */
 export async function deleteRecipeFromViewer(id: string) {
-  await sql`DELETE FROM recipes WHERE id = ${id}`;
+  const session = await auth();
+  const userId = (session?.user as any)?.id as string | undefined;
+  if (!userId) throw new Error("Unauthorized.");
+
+  const res = await sql/*sql*/ `
+    DELETE FROM public.recipes
+    WHERE id = ${id}::uuid
+      AND user_id = ${userId}::uuid
+    RETURNING id
+  `;
+  if (!res.length) throw new Error("Recipe not found or not yours.");
+
   revalidatePath("/dashboard/recipes");
   redirect("/dashboard/recipes");
 }
@@ -242,7 +267,19 @@ export async function deleteRecipeFromViewer(id: string) {
  * @param id - Recipe id
  */
 export async function reviewRecipe(id: string) {
-  await sql`DELETE FROM recipes WHERE id = ${id}`;
+  const session = await auth();
+  const userId = (session?.user as any)?.id as string | undefined;
+  if (!userId) throw new Error("Unauthorized.");
+
+  // Still a placeholder: currently deletes (keep scoped).
+  const res = await sql/*sql*/ `
+    DELETE FROM public.recipes
+    WHERE id = ${id}::uuid
+      AND user_id = ${userId}::uuid
+    RETURNING id
+  `;
+  if (!res.length) throw new Error("Recipe not found or not yours.");
+
   revalidatePath(`/dashboard/recipes/${id}/review`);
 }
 
@@ -267,14 +304,16 @@ export async function updateRecipe(
   _prev: RecipeFormState,
   formData: FormData
 ): Promise<RecipeFormState> {
+  const session = await auth();
+  const userId = (session?.user as any)?.id as string | undefined;
+  if (!userId) return { message: "Unauthorized.", errors: {} };
+
   const parsed = UpdateRecipeSchema.safeParse({
     id: formData.get("id"),
-
     recipe_name: formData.get("recipe_name"),
     recipe_type: formData.get("recipe_type"),
     recipe_ingredients: toLines(formData.get("recipe_ingredients")),
     recipe_steps: toLines(formData.get("recipe_steps")),
-
     servings: toInt(formData.get("servings")),
     prep_time_min: toInt(formData.get("prep_time_min")),
     difficulty: (formData.get("difficulty") as string | null) ?? null,
@@ -292,24 +331,20 @@ export async function updateRecipe(
       const key = issue.path[0] as keyof RecipeFormState["errors"];
       (errors[key] ??= []).push(issue.message);
     }
-    // Surface ID-only failures nicely
-    if (Object.keys(errors).length === 1 && errors.id) {
-      return { message: "Invalid recipe id.", errors };
-    }
+    if (errors.id) return { message: "Invalid recipe id.", errors };
     return { message: "Please correct the errors below.", errors };
   }
 
   const d = parsed.data;
 
   try {
-    await sql`
-      UPDATE recipes
+    const res = await sql/*sql*/ `
+      UPDATE public.recipes
       SET
         recipe_name        = ${d.recipe_name},
         recipe_type        = ${d.recipe_type}::recipe_type_enum,
         recipe_ingredients = ${d.recipe_ingredients}::text[],
         recipe_steps       = ${d.recipe_steps}::text[],
-
         servings           = ${d.servings}::smallint,
         prep_time_min      = ${d.prep_time_min}::smallint,
         difficulty         = ${d.difficulty}::difficulty_enum,
@@ -319,17 +354,16 @@ export async function updateRecipe(
         calories_total     = ${d.calories_total}::int,
         estimated_cost_total = ${d.estimated_cost_total}::numeric,
         equipment          = ${d.equipment}::text[]
-      WHERE id = ${d.id}::uuid;
+      WHERE id = ${d.id}::uuid
+        AND user_id = ${userId}::uuid
+      RETURNING id
     `;
+    if (!res.length) {
+      return { message: "Recipe not found or not yours.", errors: {} };
+    }
   } catch (e) {
     console.error("Update recipe failed:", e);
-    return {
-      message:
-        e instanceof Error
-          ? `Failed to update recipe: ${e.message}`
-          : "Failed to update recipe.",
-      errors: {},
-    };
+    return { message: "Failed to update recipe.", errors: {} };
   }
 
   revalidatePath("/dashboard/recipes");
