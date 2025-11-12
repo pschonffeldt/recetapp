@@ -224,16 +224,14 @@ export async function createRecipe(
 export async function deleteRecipe(id: string) {
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
-  if (!userId) throw new Error("Unauthorized.");
+  if (!userId) return;
 
-  const res = await sql/*sql*/ `
+  const rows = await sql/* sql */ `
     DELETE FROM public.recipes
-    WHERE id = ${id}::uuid
-      AND user_id = ${userId}::uuid
+    WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
     RETURNING id
   `;
-  if (!res.length) throw new Error("Recipe not found or not yours.");
-
+  // (Optional) You could surface a toast if rows.length === 0
   revalidatePath("/dashboard/recipes");
 }
 
@@ -245,16 +243,14 @@ export async function deleteRecipe(id: string) {
 export async function deleteRecipeFromViewer(id: string) {
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
-  if (!userId) throw new Error("Unauthorized.");
+  if (!userId) redirect("/login");
 
-  const res = await sql/*sql*/ `
+  const rows = await sql/* sql */ `
     DELETE FROM public.recipes
-    WHERE id = ${id}::uuid
-      AND user_id = ${userId}::uuid
+    WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
     RETURNING id
   `;
-  if (!res.length) throw new Error("Recipe not found or not yours.");
-
+  // Same optional toast if not found/unauthorized
   revalidatePath("/dashboard/recipes");
   redirect("/dashboard/recipes");
 }
@@ -269,17 +265,12 @@ export async function deleteRecipeFromViewer(id: string) {
 export async function reviewRecipe(id: string) {
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
-  if (!userId) throw new Error("Unauthorized.");
+  if (!userId) return;
 
-  // Still a placeholder: currently deletes (keep scoped).
-  const res = await sql/*sql*/ `
+  await sql/* sql */ `
     DELETE FROM public.recipes
-    WHERE id = ${id}::uuid
-      AND user_id = ${userId}::uuid
-    RETURNING id
+    WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
   `;
-  if (!res.length) throw new Error("Recipe not found or not yours.");
-
   revalidatePath(`/dashboard/recipes/${id}/review`);
 }
 
@@ -306,7 +297,9 @@ export async function updateRecipe(
 ): Promise<RecipeFormState> {
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
-  if (!userId) return { message: "Unauthorized.", errors: {} };
+  if (!userId) {
+    return { message: "You must be signed in.", errors: {} };
+  }
 
   const parsed = UpdateRecipeSchema.safeParse({
     id: formData.get("id"),
@@ -331,14 +324,13 @@ export async function updateRecipe(
       const key = issue.path[0] as keyof RecipeFormState["errors"];
       (errors[key] ??= []).push(issue.message);
     }
-    if (errors.id) return { message: "Invalid recipe id.", errors };
     return { message: "Please correct the errors below.", errors };
   }
 
   const d = parsed.data;
 
   try {
-    const res = await sql/*sql*/ `
+    const rows = await sql/* sql */ `
       UPDATE public.recipes
       SET
         recipe_name        = ${d.recipe_name},
@@ -358,8 +350,11 @@ export async function updateRecipe(
         AND user_id = ${userId}::uuid
       RETURNING id
     `;
-    if (!res.length) {
-      return { message: "Recipe not found or not yours.", errors: {} };
+    if (!rows.length) {
+      return {
+        message: "Recipe not found or you don’t have permission.",
+        errors: {},
+      };
     }
   } catch (e) {
     console.error("Update recipe failed:", e);
