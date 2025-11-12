@@ -16,6 +16,22 @@ type ActionResult = {
 
 const emptyState: ActionResult = { ok: false, message: null, errors: {} };
 
+// ------ NEW: helpers to surface a friendly error for toasts ------
+function pickFirstError(errors: Record<string, string[]>): string | null {
+  for (const key of Object.keys(errors)) {
+    const msgs = errors[key];
+    if (msgs && msgs.length) return msgs[0];
+  }
+  return null;
+}
+
+function resultToToastError(state: ActionResult): string | null {
+  // prefer first field error; otherwise use top-level message
+  const fieldMsg = pickFirstError(state.errors);
+  return fieldMsg ?? state.message ?? null;
+}
+// ------------------------------------------------------------------
+
 export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
   const { push } = useToast();
 
@@ -24,13 +40,12 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     updateUserProfile,
     emptyState
   );
-
   const [pwdState, pwdAction] = useActionState<ActionResult, FormData>(
     updateUserPassword,
     emptyState
   );
 
-  // Toasts after success
+  // Success toasts
   useEffect(() => {
     if (profileState.ok) {
       push({
@@ -50,6 +65,34 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
       });
     }
   }, [pwdState.ok, push]);
+
+  // ------ Error toasts ------
+  useEffect(() => {
+    if (!profileState.ok) {
+      const msg = resultToToastError(profileState);
+      if (msg) {
+        push({
+          variant: "error",
+          title: "Couldn’t update profile",
+          message: msg,
+        });
+      }
+    }
+  }, [profileState, push]);
+
+  useEffect(() => {
+    if (!pwdState.ok) {
+      const msg = resultToToastError(pwdState);
+      if (msg) {
+        push({
+          variant: "error",
+          title: "Couldn’t update password",
+          message: msg,
+        });
+      }
+    }
+  }, [pwdState, push]);
+  // -------------------------------
 
   const hasErr = (state: ActionResult, k: string) =>
     Boolean(state.errors?.[k]?.length);
@@ -153,6 +196,9 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
         </div>
 
         <div className="mt-6 flex justify-center gap-4 px-6 lg:justify-end lg:px-0">
+          {profileState.message && (
+            <p className="mt-3 text-sm text-red-600">{profileState.message}</p>
+          )}
           <Link
             href="/dashboard"
             className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
@@ -161,10 +207,6 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
           </Link>
           <Button type="submit">Save Changes</Button>
         </div>
-
-        {profileState.message && (
-          <p className="mt-3 text-sm text-red-600">{profileState.message}</p>
-        )}
       </form>
 
       {/* PASSWORD FORM */}
@@ -238,12 +280,11 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
         </div>
 
         <div className="mt-6 flex justify-center gap-4 px-6 lg:justify-end lg:px-0">
+          {pwdState.message && (
+            <p className="mt-3 text-sm text-red-600">{pwdState.message}</p>
+          )}
           <Button type="submit">Update Password</Button>
         </div>
-
-        {pwdState.message && (
-          <p className="mt-3 text-sm text-red-600">{pwdState.message}</p>
-        )}
       </form>
     </div>
   );

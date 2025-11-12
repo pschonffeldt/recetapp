@@ -401,36 +401,62 @@ export async function updateUserProfile(
   const userId = (session?.user as any)?.id as string | undefined;
   if (!userId) return { message: "Unauthorized.", errors: {}, ok: false };
 
-  const candidate = {
-    name: toOptional(formData.get("name")),
-    last_name: toOptional(formData.get("last_name")),
-    email: toOptional(formData.get("email")),
+  // Read raw values to detect “user explicitly cleared the field”
+  const rawName = formData.get("name");
+  const rawLast = formData.get("last_name");
+  const rawEmail = formData.get("email");
+
+  // Helper: "" | null -> undefined, otherwise trimmed
+  const toOptional = (v: FormDataEntryValue | null) => {
+    const s = (v ?? "").toString().trim();
+    return s === "" ? undefined : s;
   };
 
+  const candidate = {
+    name: toOptional(rawName),
+    last_name: toOptional(rawLast),
+    email: toOptional(rawEmail),
+  };
+
+  // Manual validation to catch explicit blanks (these would have become `undefined`)
+  const errors: Record<string, string[]> = {};
+  if (rawName !== null && String(rawName).trim() === "") {
+    errors.name = ["First name cannot be empty."];
+  }
+  if (rawLast !== null && String(rawLast).trim() === "") {
+    errors.last_name = ["Last name cannot be empty."];
+  }
+  if (rawEmail !== null && String(rawEmail).trim() === "") {
+    errors.email = ["Email cannot be empty."];
+  }
+
+  // Zod validation (format checks for email, etc.)
   const parsed = UpdateUserProfileSchema.safeParse(candidate);
   if (!parsed.success) {
-    const errors: Record<string, string[]> = {};
     for (const issue of parsed.error.issues) {
       const key = (issue.path[0] as string) || "_form";
       (errors[key] ??= []).push(issue.message);
     }
+  }
+
+  if (Object.keys(errors).length) {
     return { message: "Please correct the errors above.", errors, ok: false };
   }
 
-  const d = parsed.data;
+  const d = parsed.data!;
 
-  // Build dynamic SET list from provided fields
+  // Build dynamic SETs from provided fields
   const sets: any[] = [];
   if (d.name !== undefined) sets.push(sql`name = ${d.name}`);
   if (d.last_name !== undefined) sets.push(sql`last_name = ${d.last_name}`);
   if (d.email !== undefined) sets.push(sql`email = ${d.email}`);
 
   if (sets.length === 0) {
-    // Nothing to update
-    return { message: null, errors: {}, ok: true, shouldRefresh: false };
+    // User submitted, but nothing changed → show a gentle error toast
+    return { message: "No changes to save.", errors: {}, ok: false };
   }
 
-  // Stamp profile_updated_at when something changed
+  // Stamp lifecycle column
   sets.push(sql`profile_updated_at = now()`);
 
   const setSql =
@@ -440,12 +466,31 @@ export async function updateUserProfile(
 
   try {
     await sql`UPDATE public.users SET ${setSql} WHERE id = ${userId}::uuid`;
-  } catch (e) {
+  } catch (e: any) {
+    // Postgres duplicate-key on email → clear, field-level error + toast message
+    const code = e?.code as string | undefined; // e.g. '23505'
+    const constraint = (e?.constraint as string | undefined) || "";
+    const msg = String(e?.message || "");
+
+    const emailTaken =
+      code === "23505" &&
+      (/(users_email_unique|users_email_key)/i.test(constraint) ||
+        /duplicate key.*?(users_email_unique|users_email_key)/i.test(msg) ||
+        /duplicate key.*email/i.test(msg));
+
+    if (emailTaken) {
+      return {
+        ok: false,
+        message: "That email is already in use.",
+        errors: { email: ["That email is already in use."] },
+      };
+    }
+
     console.error("updateUserProfile failed:", e);
-    return { message: "Failed to update profile.", errors: {}, ok: false };
+    return { ok: false, message: "Failed to update profile.", errors: {} };
   }
 
-  // Allow UI that reads user from RSC to refresh (e.g., header, page)
+  // Let RSC bits refresh
   revalidatePath("/dashboard/account");
 
   return { message: null, errors: {}, ok: true, shouldRefresh: true };
@@ -468,7 +513,10 @@ export async function updateUserPassword(
   const confirm = toOptional(formData.get("confirm_password"));
 
   const errors: Record<string, string[]> = {};
-  if (!password) errors.password = ["Password is required."];
+  if (!password)
+    errors.password = [
+      "To change your password, fill in both password fields.",
+    ];
   if (!confirm) errors.confirm_password = ["Confirm password is required."];
   if (password && password.length < 6) errors.password = ["Min 6 characters."];
   if (password && confirm && password !== confirm)
