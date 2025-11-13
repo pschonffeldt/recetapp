@@ -486,3 +486,37 @@ export async function fetchUserById(id: string) {
 /* =======================================================
  * Notifications
  * ======================================================= */
+
+/* =======================================================
+ * Specific recipe and scope by owner.
+ * ======================================================= */
+export async function fetchRecipeByIdForOwner(
+  id: string
+): Promise<RecipeForm | null> {
+  const userId = await requireUserId();
+
+  const rows = await sql<RecipeForm[]>`
+    SELECT
+      id,
+      recipe_name,
+      recipe_ingredients,
+      recipe_steps,
+      recipe_type,
+      servings,
+      prep_time_min,
+      difficulty,
+      status,
+      COALESCE(dietary_flags, ARRAY[]::text[]) AS dietary_flags,
+      COALESCE(allergens,     ARRAY[]::text[]) AS allergens,
+      calories_total,
+      estimated_cost_total,
+      COALESCE(equipment,     ARRAY[]::text[]) AS equipment,
+      (recipe_created_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_created_at,
+      (recipe_updated_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_updated_at
+    FROM public.recipes
+    WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
+    LIMIT 1;
+  `;
+
+  return rows[0] ?? null;
+}
