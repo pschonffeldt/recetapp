@@ -82,25 +82,14 @@ export async function fetchRevenue() {
 
 export async function fetchLatestRecipes() {
   const userId = await requireUserId();
-  try {
-    const data = await sql<LatestRecipeRaw[]>`
-      SELECT
-        id,
-        recipe_name,
-        recipe_created_at,
-        recipe_ingredients,
-        recipe_steps,
-        recipe_type
-      FROM public.recipes
-      WHERE user_id = ${userId}::uuid
-      ORDER BY recipe_created_at DESC
-      LIMIT 5
-    `;
-    return data;
-  } catch (error) {
-    console.error("Database Error:", error);
-    throw new Error("Failed to fetch the latest recipes.");
-  }
+  const data = await sql<LatestRecipeRaw[]>/* sql */ `
+    SELECT id, recipe_name, recipe_created_at, recipe_ingredients, recipe_steps, recipe_type
+    FROM public.recipes
+    WHERE user_id = ${userId}::uuid
+    ORDER BY recipe_created_at DESC
+    LIMIT 5
+  `;
+  return data;
 }
 
 /* =======================================================
@@ -109,37 +98,38 @@ export async function fetchLatestRecipes() {
  * Note: Split into parallel queries for demonstration purposes.
  * @returns Promise<{ numberOfCustomers: number; numberOfInvoices: number; totalPaidInvoices: string; totalPendingInvoices: string; }>
  * ======================================================= */
-
+// Card tiles on the dashboard
 export async function fetchCardData(): Promise<CardData> {
   const userId = await requireUserId();
+
   try {
     const totalRecipesPromise = sql/* sql */ `
       SELECT COUNT(*)::int AS count
-      FROM public.recipes
-      WHERE user_id = ${userId}::uuid
+      FROM public.recipes r
+      WHERE r.user_id = ${userId}::uuid
     `;
 
     const avgIngredientsPromise = sql/* sql */ `
-      SELECT COALESCE(AVG(CARDINALITY(recipe_ingredients)), 0)::float AS avg_count
-      FROM public.recipes
-      WHERE user_id = ${userId}::uuid
+      SELECT COALESCE(AVG(CARDINALITY(r.recipe_ingredients)), 0)::float AS avg_count
+      FROM public.recipes r
+      WHERE r.user_id = ${userId}::uuid
     `;
 
     const topCategoryPromise = sql/* sql */ `
-      SELECT recipe_type, COUNT(*)::int AS c
-      FROM public.recipes
-      WHERE user_id = ${userId}::uuid AND recipe_type IS NOT NULL
-      GROUP BY recipe_type
-      ORDER BY c DESC
+      SELECT r.recipe_type, COUNT(*)::int AS c
+      FROM public.recipes r
+      WHERE r.user_id = ${userId}::uuid AND r.recipe_type IS NOT NULL
+      GROUP BY r.recipe_type
+      ORDER BY c DESC, r.recipe_type ASC
       LIMIT 1
     `;
 
     const totalIngredientsPromise = sql/* sql */ `
       SELECT COALESCE(COUNT(DISTINCT TRIM(LOWER(ing))), 0)::int AS count
       FROM (
-        SELECT UNNEST(recipe_ingredients) AS ing
-        FROM public.recipes
-        WHERE user_id = ${userId}::uuid AND recipe_ingredients IS NOT NULL
+        SELECT UNNEST(r.recipe_ingredients) AS ing
+        FROM public.recipes r
+        WHERE r.user_id = ${userId}::uuid AND r.recipe_ingredients IS NOT NULL
       ) AS t
     `;
 
@@ -151,52 +141,50 @@ export async function fetchCardData(): Promise<CardData> {
         totalIngredientsPromise,
       ]);
 
-    const totalRecipes = Number(totalRecipesRes?.[0]?.count ?? 0);
-    const avgIngredients = Number(avgIngrRes?.[0]?.avg_count ?? 0);
-    const mostRecurringCategory =
-      (topCatRes?.[0]?.recipe_type as string) ?? "—";
-    const totalIngredients = Number(totalIngrRes?.[0]?.count ?? 0);
-
     return {
-      totalRecipes,
-      avgIngredients,
-      mostRecurringCategory,
-      totalIngredients,
+      totalRecipes: Number(totalRecipesRes?.[0]?.count ?? 0),
+      avgIngredients: Number(avgIngrRes?.[0]?.avg_count ?? 0),
+      mostRecurringCategory:
+        (topCatRes?.[0]?.recipe_type as string | null) ?? "—",
+      totalIngredients: Number(totalIngrRes?.[0]?.count ?? 0),
     };
-  } catch (error) {
-    console.error("Database Error:", error);
+  } catch (e) {
+    console.error("Database Error (fetchCardData):", e);
     throw new Error("Failed to fetch recipe card data.");
   }
 }
 
+// “Recipe card data” (counts, last 7 days, breakdown, latest)
 export async function fetchRecipeCardData() {
   const userId = await requireUserId();
+
   try {
-    const totalRecipesPromise = sql`
-      SELECT COUNT(*)::int AS count FROM public.recipes
-      WHERE user_id = ${userId}::uuid
-    `;
-
-    const recentRecipesPromise = sql`
+    const totalRecipesPromise = sql/* sql */ `
       SELECT COUNT(*)::int AS count
-      FROM public.recipes
-      WHERE user_id = ${userId}::uuid
-        AND recipe_created_at >= NOW() - INTERVAL '7 days'
+      FROM public.recipes r
+      WHERE r.user_id = ${userId}::uuid
     `;
 
-    const typesBreakdownPromise = sql<TypeCountRow[]>`
-      SELECT recipe_type, COUNT(*)::int AS count
-      FROM public.recipes
-      WHERE user_id = ${userId}::uuid
-      GROUP BY recipe_type
-      ORDER BY count DESC
+    const recentRecipesPromise = sql/* sql */ `
+      SELECT COUNT(*)::int AS count
+      FROM public.recipes r
+      WHERE r.user_id = ${userId}::uuid
+        AND r.recipe_created_at >= NOW() - INTERVAL '7 days'
     `;
 
-    const latestRecipePromise = sql<LatestRecipeRow[]>`
-      SELECT id, recipe_name, recipe_created_at
-      FROM public.recipes
-      WHERE user_id = ${userId}::uuid
-      ORDER BY recipe_created_at DESC
+    const typesBreakdownPromise = sql<TypeCountRow[]>/* sql */ `
+      SELECT r.recipe_type, COUNT(*)::int AS count
+      FROM public.recipes r
+      WHERE r.user_id = ${userId}::uuid
+      GROUP BY r.recipe_type
+      ORDER BY count DESC, r.recipe_type ASC
+    `;
+
+    const latestRecipePromise = sql<LatestRecipeRow[]>/* sql */ `
+      SELECT r.id, r.recipe_name, r.recipe_created_at
+      FROM public.recipes r
+      WHERE r.user_id = ${userId}::uuid
+      ORDER BY r.recipe_created_at DESC, r.id DESC
       LIMIT 1
     `;
 
@@ -214,11 +202,14 @@ export async function fetchRecipeCardData() {
 
     const numberOfRecipes = Number(totalRecipesRes?.[0]?.count ?? 0);
     const recipesLast7Days = Number(recentRecipesRes?.[0]?.count ?? 0);
+
     const types = (typesBreakdownRes ?? []).map((r) => ({
       type: r.recipe_type ?? "Unknown",
       count: r.count ?? 0,
     }));
+
     const topType = types.length ? types[0] : null;
+
     const latest = latestRecipeRes?.[0]
       ? {
           id: latestRecipeRes[0].id,
@@ -228,8 +219,8 @@ export async function fetchRecipeCardData() {
       : null;
 
     return { numberOfRecipes, recipesLast7Days, types, topType, latest };
-  } catch (error) {
-    console.error("Database Error:", error);
+  } catch (e) {
+    console.error("Database Error (fetchRecipeCardData):", e);
     throw new Error("Failed to fetch recipe card data.");
   }
 }
@@ -271,6 +262,7 @@ export async function fetchFilteredRecipes(
 ) {
   const userId = await requireUserId();
 
+  // Normalize args
   let searchQuery = "";
   let page = 1;
   let type = "";
@@ -291,43 +283,58 @@ export async function fetchFilteredRecipes(
     order = arg1.order ?? "desc";
   }
 
+  // Clamp page
+  page = Number.isFinite(page) && page > 0 ? page : 1;
   const offset = (page - 1) * RECIPES_PAGE_SIZE;
 
-  const predicates: any[] = [
-    sql`user_id = ${userId}::uuid`, // <-- ALWAYS scope to owner
-  ];
+  // WHERE predicates (seed with owner)
+  const predicates: any[] = [sql`r.user_id = ${userId}::uuid`];
 
   if (searchQuery) {
     const pat = `%${searchQuery}%`;
-    const nameLike = sql`recipe_name ILIKE ${pat}`;
-    const ingredientsLike = sql`EXISTS (SELECT 1 FROM unnest(recipe_ingredients) AS ing WHERE ing ILIKE ${pat})`;
-    const stepsLike = sql`EXISTS (SELECT 1 FROM unnest(recipe_steps)       AS st  WHERE st  ILIKE ${pat})`;
-    const typeLike = sql`recipe_type::text ILIKE ${pat}`;
+    const nameLike = sql`r.recipe_name ILIKE ${pat}`;
+    const ingredientsLike = sql`EXISTS (SELECT 1 FROM unnest(r.recipe_ingredients) AS ing WHERE ing ILIKE ${pat})`;
+    const stepsLike = sql`EXISTS (SELECT 1 FROM unnest(r.recipe_steps)       AS st  WHERE st  ILIKE ${pat})`;
+    const typeLike = sql`r.recipe_type::text ILIKE ${pat}`;
     predicates.push(
       sql`(${nameLike} OR ${ingredientsLike} OR ${stepsLike} OR ${typeLike})`
     );
   }
 
-  if (type) predicates.push(sql`recipe_type = ${type}`);
+  if (type) {
+    // exact match (enum)
+    predicates.push(sql`r.recipe_type = ${type}`);
+  }
 
   const whereSql = sql`WHERE ${andAll(predicates)}`;
 
+  // Sort mapping
   const sortCol =
     sort === "name"
-      ? sql`recipe_name`
+      ? sql`r.recipe_name`
       : sort === "type"
-      ? sql`recipe_type`
-      : sql`recipe_created_at`;
+      ? sql`r.recipe_type`
+      : sql`r.recipe_created_at`; // "date"
+
   const dir = order === "asc" ? sql`ASC` : sql`DESC`;
 
-  const result = await sql/* sql */ `
-    SELECT id, recipe_name, recipe_ingredients, recipe_steps, recipe_created_at, recipe_type, difficulty, recipe_updated_at
-    FROM public.recipes
+  const rows = await sql/* sql */ `
+    SELECT
+      r.id,
+      r.recipe_name,
+      r.recipe_ingredients,
+      r.recipe_steps,
+      r.recipe_created_at,
+      r.recipe_type,
+      r.difficulty,
+      r.recipe_updated_at
+    FROM public.recipes AS r
     ${whereSql}
-    ORDER BY ${sortCol} ${dir}
+    ORDER BY ${sortCol} ${dir} NULLS LAST
     LIMIT ${RECIPES_PAGE_SIZE} OFFSET ${offset}
   `;
-  return pickRows(result);
+
+  return pickRows(rows);
 }
 
 /**
@@ -346,29 +353,30 @@ export async function fetchRecipesTotal(params: {
   const searchQuery = params.query ?? "";
   const type = params.type ?? "";
 
-  const parts: any[] = [sql`recipes.user_id = ${userId}::uuid`];
+  const parts: any[] = [sql`r.user_id = ${userId}::uuid`];
 
   if (searchQuery) {
     const pat = `%${searchQuery}%`;
     parts.push(sql`
       (
-        recipes.recipe_name ILIKE ${pat}
-        OR recipes.recipe_type::text ILIKE ${pat}
-        OR EXISTS (SELECT 1 FROM unnest(recipes.recipe_ingredients) AS ing WHERE ing ILIKE ${pat})
-        OR EXISTS (SELECT 1 FROM unnest(recipes.recipe_steps)       AS st  WHERE st  ILIKE ${pat})
+        r.recipe_name ILIKE ${pat}
+        OR r.recipe_type::text ILIKE ${pat}
+        OR EXISTS (SELECT 1 FROM unnest(r.recipe_ingredients) AS ing WHERE ing ILIKE ${pat})
+        OR EXISTS (SELECT 1 FROM unnest(r.recipe_steps)       AS st  WHERE st  ILIKE ${pat})
       )
     `);
   }
 
-  if (type) parts.push(sql`recipes.recipe_type = ${type}`);
+  if (type) parts.push(sql`r.recipe_type = ${type}`);
 
   const whereSql = sql`WHERE ${andAll(parts)}`;
 
   const totalRes = await sql<{ count: number }[]>/* sql */ `
     SELECT COUNT(*)::int AS count
-    FROM public.recipes AS recipes
+    FROM public.recipes AS r
     ${whereSql}
   `;
+
   const rows = pickRows<{ count: number }>(totalRes);
   return rows[0]?.count ?? 0;
 }
@@ -395,28 +403,31 @@ export async function fetchRecipesPages(
   const searchQuery = typeof arg === "string" ? arg : arg.query ?? "";
   const type = typeof arg === "string" ? "" : arg.type ?? "";
 
-  const parts: any[] = [sql`recipes.user_id = ${userId}::uuid`];
+  const parts: any[] = [sql`r.user_id = ${userId}::uuid`];
 
   if (searchQuery) {
     const pat = `%${searchQuery}%`;
     parts.push(sql`
       (
-        recipes.recipe_name ILIKE ${pat}
-        OR recipes.recipe_type::text ILIKE ${pat}
-        OR EXISTS (SELECT 1 FROM unnest(recipes.recipe_ingredients) AS ing WHERE ing ILIKE ${pat})
-        OR EXISTS (SELECT 1 FROM unnest(recipes.recipe_steps)       AS st  WHERE st  ILIKE ${pat})
+        r.recipe_name ILIKE ${pat}
+        OR r.recipe_type::text ILIKE ${pat}
+        OR EXISTS (SELECT 1 FROM unnest(r.recipe_ingredients) AS ing WHERE ing ILIKE ${pat})
+        OR EXISTS (SELECT 1 FROM unnest(r.recipe_steps)       AS st  WHERE st  ILIKE ${pat})
       )
     `);
   }
-  if (type) parts.push(sql`recipes.recipe_type = ${type}`);
+
+  if (type) parts.push(sql`r.recipe_type = ${type}`);
 
   const whereSql = sql`WHERE ${andAll(parts)}`;
 
-  const [{ count }] = await sql<{ count: number }[]>`
+  const res = await sql<{ count: number }[]>/* sql */ `
     SELECT COUNT(*)::int AS count
-    FROM public.recipes AS recipes
+    FROM public.recipes AS r
     ${whereSql}
   `;
+
+  const count = pickRows<{ count: number }>(res)[0]?.count ?? 0;
   return Math.ceil(count / RECIPES_PAGE_SIZE);
 }
 
