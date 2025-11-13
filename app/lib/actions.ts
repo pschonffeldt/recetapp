@@ -231,7 +231,7 @@ export async function deleteRecipe(id: string) {
     WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
     RETURNING id
   `;
-  // (Optional) You could surface a toast if rows.length === 0
+  // If no row, either not found or not owned—silently ignore from list views
   revalidatePath("/dashboard/recipes");
 }
 
@@ -250,7 +250,10 @@ export async function deleteRecipeFromViewer(id: string) {
     WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
     RETURNING id
   `;
-  // Same optional toast if not found/unauthorized
+  if (!rows.length) {
+    // Surface a clearer message if you prefer a toast on the viewer page
+    // For now, just send them back.
+  }
   revalidatePath("/dashboard/recipes");
   redirect("/dashboard/recipes");
 }
@@ -270,6 +273,7 @@ export async function reviewRecipe(id: string) {
   await sql/* sql */ `
     DELETE FROM public.recipes
     WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
+    RETURNING id
   `;
   revalidatePath(`/dashboard/recipes/${id}/review`);
 }
