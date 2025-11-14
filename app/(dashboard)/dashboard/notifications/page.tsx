@@ -1,26 +1,34 @@
-import { fetchNotifications } from "@/app/lib/data";
 import { Metadata } from "next";
 import Breadcrumbs from "@/app/ui/recipes/breadcrumbs";
 import NotificationsList from "@/app/ui/notifications/notifications-list";
+import { fetchNotifications } from "@/app/lib/data";
 
 export const metadata: Metadata = { title: "Notifications" };
 
 type Search = {
-  searchParams?: {
-    page?: string;
-    only?: "all" | "personal" | "broadcasts";
-    status?: "any" | "unread" | "read" | "archived";
-  };
+  page?: string;
+  only?: "all" | "personal" | "broadcasts";
+  status?: "any" | "unread" | "read" | "archived";
 };
 
-export default async function Page({ searchParams }: Search) {
-  const page = Math.max(1, Number(searchParams?.page ?? "1"));
-  const only = (searchParams?.only as any) ?? "all";
-  const status = (searchParams?.status as any) ?? "any";
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<Search>;
+}) {
+  const sp = await searchParams;
 
-  const { items, total, pageSize } = await fetchNotifications({
+  const page = sp.page ? Math.max(1, parseInt(sp.page, 10) || 1) : 1;
+  const only = (sp.only ?? "all") as "all" | "personal" | "broadcasts";
+  const status = (sp.status ?? "any") as "any" | "unread" | "read" | "archived";
+
+  const {
+    items,
+    total,
+    page: currentPage,
+    pageSize,
+  } = await fetchNotifications({
     page,
-    pageSize: 10,
     only,
     status,
   });
@@ -39,7 +47,7 @@ export default async function Page({ searchParams }: Search) {
       <NotificationsList
         items={items}
         total={total}
-        page={page}
+        page={currentPage}
         pageSize={pageSize}
       />
     </main>

@@ -112,6 +112,13 @@ export type NotificationsRaw = {
   status: string[]; // assuming text[]
 };
 
+export type FetchNotificationsResult = {
+  items: AppNotification[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
 /* =======================================================
  * Dashboard upper OKRs
  * ======================================================= */

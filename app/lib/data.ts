@@ -236,21 +236,6 @@ export async function fetchRecipeCardData() {
 type SortCol = "name" | "date" | "type";
 type SortDir = "asc" | "desc";
 
-/**
- * Fetch paginated, filtered, and sorted recipes.
- *
- * Accepts either:
- *  - an object with:
- *      - query?: string  (preferred)  → free-text search across name/ingredients/steps/type
- *      - type?: string   (exact match on recipe_type)
- *      - sort?: "name" | "date" | "type"
- *      - order?: "asc" | "desc"
- *      - page?: number   (1-based)
- *
- * Notes:
- *  - Uses RECIPES_PAGE_SIZE for LIMIT/OFFSET.
- *  - WHERE clause mirrors the logic used by the count function to prevent pagination drift.
- */
 export async function fetchFilteredRecipes(
   arg1:
     | string
@@ -551,30 +536,40 @@ export async function fetchUnreadCount() {
 }
 
 // Feed: personal (any status) + broadcasts (user_id IS NULL), newest first
-export async function fetchNotifications(params?: {
+import { type FetchNotificationsResult } from "@/app/lib/definitions";
+
+const NOTIFICATIONS_PAGE_SIZE = 5;
+const NOTIFICATIONS_PAGE_SIZE_MAX = 50;
+
+export async function fetchNotifications(opts?: {
   page?: number;
   pageSize?: number; // default 10
   only?: "all" | "personal" | "broadcasts"; // default "all"
-  status?: "unread" | "read" | "archived" | "any"; // personal filter only
-}) {
+  status?: "unread" | "read" | "archived" | "any"; // default "any"
+}): Promise<FetchNotificationsResult> {
   const userId = await requireUserId();
-  const page = Math.max(1, params?.page ?? 1);
-  const pageSize = Math.min(50, Math.max(1, params?.pageSize ?? 10));
-  const offset = (page - 1) * pageSize;
-  const only = params?.only ?? "all";
-  const status = params?.status ?? "any";
 
-  // With alias (used in SELECT … AS n …)
+  const page = Math.max(1, opts?.page ?? 1);
+  const rawPageSize = opts?.pageSize ?? NOTIFICATIONS_PAGE_SIZE;
+  const pageSize = Math.min(
+    NOTIFICATIONS_PAGE_SIZE_MAX,
+    Math.max(1, rawPageSize)
+  );
+  const offset = (page - 1) * pageSize;
+  const only = opts?.only ?? "all";
+  const status = opts?.status ?? "any";
+
+  // With alias (used where table is referenced as "n")
   const personalStatusSqlAliased =
     status === "any"
       ? sql`TRUE`
       : sql`n.status = ${status}::notification_status`;
 
-  // Bare (used in COUNT subqueries without alias)
+  // Bare (used inside COUNT subqueries without alias)
   const personalStatusSqlBare =
     status === "any" ? sql`TRUE` : sql`status = ${status}::notification_status`;
 
-  // Base queries
+  // Base sources
   const personalSql = sql/* sql */ `
     SELECT n.*
     FROM public.notifications AS n
@@ -588,7 +583,7 @@ export async function fetchNotifications(params?: {
     WHERE n.user_id IS NULL
   `;
 
-  // Compose the source
+  // Compose union
   const unionSql =
     only === "personal"
       ? personalSql
@@ -596,7 +591,7 @@ export async function fetchNotifications(params?: {
       ? broadcastSql
       : sql/* sql */ `${personalSql} UNION ALL ${broadcastSql}`;
 
-  // Wrap UNION as a derived table, then order/limit
+  // Page of rows
   const rows = await sql<DbNotificationRow[]>/* sql */ `
     SELECT *
     FROM (${unionSql}) AS u
@@ -604,7 +599,7 @@ export async function fetchNotifications(params?: {
     LIMIT ${pageSize} OFFSET ${offset}
   `;
 
-  // Total (for pagination UI)
+  // Total for pagination
   const [{ count: total }] = await sql<{ count: number }[]>/* sql */ `
     SELECT (
       CASE
@@ -632,7 +627,6 @@ export async function fetchNotifications(params?: {
     ) AS count
   `;
 
-  // Map to app-friendly shape
   const items: AppNotification[] = rows.map(toAppNotification);
 
   return { items, total, page, pageSize };
