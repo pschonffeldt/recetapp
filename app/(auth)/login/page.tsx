@@ -1,7 +1,7 @@
 import Logo from "@/app/ui/branding/recetapp-logo";
-import LoginForm from "@/app/ui/login-form";
 import { Suspense } from "react";
 import { Metadata } from "next";
+import LoginForm from "@/app/ui/login-signup/login-form";
 
 // Set title for metadata
 export const metadata: Metadata = {

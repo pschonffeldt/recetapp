@@ -1,5 +1,3 @@
-// Login and Signup layout
-
 import { ToastProvider } from "@/app/ui/toast/toast-provider";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
