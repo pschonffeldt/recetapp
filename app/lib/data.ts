@@ -6,7 +6,11 @@ import {
   LatestRecipeRaw,
   CardData,
   UserForm,
+  DbNotificationRow,
+  AppNotification,
+  toAppNotification,
 } from "./definitions";
+
 import { requireUserId } from "@/app/lib/auth-helpers";
 
 /* ================================
@@ -495,10 +499,6 @@ export async function fetchUserById(id: string) {
 }
 
 /* =======================================================
- * Notifications
- * ======================================================= */
-
-/* =======================================================
  * Specific recipe and scope by owner.
  * ======================================================= */
 export async function fetchRecipeByIdForOwner(
@@ -530,4 +530,110 @@ export async function fetchRecipeByIdForOwner(
   `;
 
   return rows[0] ?? null;
+}
+
+/* =======================================================
+ * Notifications
+ * ======================================================= */
+
+// ensure `sql` is already defined in this module as your postgres.js client
+
+// Unread count (personal-only; broadcasts are not “readable”)
+export async function fetchUnreadCount() {
+  const userId = await requireUserId();
+  const rows = await sql<{ c: number }[]>/* sql */ `
+    SELECT COUNT(*)::int AS c
+    FROM public.notifications
+    WHERE user_id = ${userId}::uuid
+      AND status = 'unread'::notification_status
+  `;
+  return rows[0]?.c ?? 0;
+}
+
+// Feed: personal (any status) + broadcasts (user_id IS NULL), newest first
+export async function fetchNotifications(params?: {
+  page?: number;
+  pageSize?: number; // default 10
+  only?: "all" | "personal" | "broadcasts"; // default "all"
+  status?: "unread" | "read" | "archived" | "any"; // personal filter only
+}) {
+  const userId = await requireUserId();
+  const page = Math.max(1, params?.page ?? 1);
+  const pageSize = Math.min(50, Math.max(1, params?.pageSize ?? 10));
+  const offset = (page - 1) * pageSize;
+  const only = params?.only ?? "all";
+  const status = params?.status ?? "any";
+
+  // With alias (used in SELECT … AS n …)
+  const personalStatusSqlAliased =
+    status === "any"
+      ? sql`TRUE`
+      : sql`n.status = ${status}::notification_status`;
+
+  // Bare (used in COUNT subqueries without alias)
+  const personalStatusSqlBare =
+    status === "any" ? sql`TRUE` : sql`status = ${status}::notification_status`;
+
+  // Base queries
+  const personalSql = sql/* sql */ `
+    SELECT n.*
+    FROM public.notifications AS n
+    WHERE n.user_id = ${userId}::uuid
+      AND ${personalStatusSqlAliased}
+  `;
+
+  const broadcastSql = sql/* sql */ `
+    SELECT n.*
+    FROM public.notifications AS n
+    WHERE n.user_id IS NULL
+  `;
+
+  // Compose the source
+  const unionSql =
+    only === "personal"
+      ? personalSql
+      : only === "broadcasts"
+      ? broadcastSql
+      : sql/* sql */ `${personalSql} UNION ALL ${broadcastSql}`;
+
+  // Wrap UNION as a derived table, then order/limit
+  const rows = await sql<DbNotificationRow[]>/* sql */ `
+    SELECT *
+    FROM (${unionSql}) AS u
+    ORDER BY COALESCE(u.published_at, u.created_at) DESC, u.id DESC
+    LIMIT ${pageSize} OFFSET ${offset}
+  `;
+
+  // Total (for pagination UI)
+  const [{ count: total }] = await sql<{ count: number }[]>/* sql */ `
+    SELECT (
+      CASE
+        WHEN ${only} = 'personal' THEN
+          (SELECT COUNT(*)::int
+             FROM public.notifications
+            WHERE user_id = ${userId}::uuid
+              AND ${personalStatusSqlBare})
+        WHEN ${only} = 'broadcasts' THEN
+          (SELECT COUNT(*)::int
+             FROM public.notifications
+            WHERE user_id IS NULL)
+        ELSE
+          (
+            (SELECT COUNT(*)::int
+               FROM public.notifications
+              WHERE user_id = ${userId}::uuid
+                AND ${personalStatusSqlBare})
+            +
+            (SELECT COUNT(*)::int
+               FROM public.notifications
+              WHERE user_id IS NULL)
+          )
+      END
+    ) AS count
+  `;
+
+  // Map to app-friendly shape
+  const items: AppNotification[] = rows.map(toAppNotification);
+
+  return { items, total, page, pageSize };
 }

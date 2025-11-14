@@ -650,3 +650,41 @@ export type SignupResult = {
   errors: Record<string, string[]>;
   userId?: string;
 };
+
+/* ================================
+ * Notifications — Actions
+ * ================================ */
+
+export async function markNotificationRead(_prev: any, formData: FormData) {
+  const userId = await requireUserId();
+  const id = String(formData.get("id") ?? "");
+
+  if (!id) return { ok: false, message: "Missing id" };
+
+  await sql/* sql */ `
+    UPDATE public.notifications
+    SET status = 'read'::notification_status
+    WHERE id = ${id}::uuid
+      AND user_id = ${userId}::uuid
+  `;
+
+  // Update header badge + page list
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/notifications");
+  return { ok: true, message: null };
+}
+
+export async function markAllNotificationsRead() {
+  const userId = await requireUserId();
+
+  await sql/* sql */ `
+    UPDATE public.notifications
+    SET status = 'read'::notification_status
+    WHERE user_id = ${userId}::uuid
+      AND status = 'unread'::notification_status
+  `;
+
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/notifications");
+  return { ok: true, message: null };
+}

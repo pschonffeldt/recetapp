@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { DocumentPlusIcon } from "@heroicons/react/20/solid";
+import Bell from "../notifications/bell";
 
 // Map of links to display in the side navigation.
 const links = [

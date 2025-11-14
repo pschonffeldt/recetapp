@@ -139,6 +139,52 @@ export const RECIPE_TYPES = [
 export const DIFFICULTY = ["easy", "medium", "hard"] as const;
 
 /* =======================================================
+ * Notifications
+ * ======================================================= */
+
+export type DbNotificationRow = {
+  id: string;
+  user_id: string | null;
+  title: string;
+  body: string;
+  kind: "system" | "maintenance" | "feature" | "message";
+  level: "info" | "success" | "warning" | "error";
+  link_url: string | null;
+  status: "unread" | "read" | "archived";
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AppNotification = Omit<
+  DbNotificationRow,
+  "published_at" | "created_at" | "updated_at" | "user_id" | "link_url"
+> & {
+  userId: string | null;
+  linkUrl: string | null;
+  publishedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export function toAppNotification(dbRow: DbNotificationRow): AppNotification {
+  const toDate = (v?: string | null) => (v ? new Date(v) : null);
+  return {
+    id: dbRow.id,
+    userId: dbRow.user_id,
+    title: dbRow.title,
+    body: dbRow.body,
+    kind: dbRow.kind,
+    level: dbRow.level,
+    linkUrl: dbRow.link_url,
+    status: dbRow.status,
+    publishedAt: toDate(dbRow.published_at),
+    createdAt: new Date(dbRow.created_at),
+    updatedAt: new Date(dbRow.updated_at),
+  };
+}
+
+/* =======================================================
  * Countries
  * ======================================================= */
 

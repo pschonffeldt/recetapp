@@ -1,9 +1,9 @@
 import SideNav from "@/app/ui/dashboard/sidenav";
 import { ToastProvider } from "@/app/ui/toast/toast-provider";
 import UserSettingsFab from "@/app/ui/dashboard/user-menu";
+import { logout } from "@/app/lib/logout";
 
 /* Auth */
-import { logout } from "@/auth";
 
 /* Toasts (client provider) */
 
