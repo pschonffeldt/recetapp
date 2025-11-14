@@ -4,7 +4,7 @@ import { Button } from "@/app/ui/button";
 import Link from "next/link";
 import { DeleteRecipeOnViewer, UpdateRecipeOnViewer } from "./recipes-buttons";
 import { RecipeForm } from "@/app/lib/definitions";
-import { inter } from "../fonts";
+import { inter } from "../branding/fonts";
 import { MetricCard, MetricCardMobile } from "./recipe-indicators";
 import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils";
 import { RecipeFormState } from "@/app/lib/action-types";

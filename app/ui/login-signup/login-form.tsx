@@ -1,17 +1,17 @@
 "use client";
 
-import { inter } from "@/app/ui/fonts";
+import { inter } from "@/app/ui/branding/fonts";
 import {
   AtSymbolIcon,
   KeyIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
-import { Button } from "./button";
 import { useActionState } from "react";
 import { authenticate } from "@/app/lib/actions";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { Button } from "../button";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();

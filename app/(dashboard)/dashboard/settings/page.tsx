@@ -1,6 +1,6 @@
 import RevenueChart from "@/app/ui/dashboard/revenue-chart";
 import LatestRecipes from "@/app/ui/dashboard/latest-recipes";
-import { inter } from "@/app/ui/fonts";
+import { inter } from "@/app/ui/branding/fonts";
 import CardWrapper from "@/app/ui/dashboard/cards";
 import { Suspense } from "react";
 import {

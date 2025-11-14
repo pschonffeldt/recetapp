@@ -14,7 +14,7 @@ import CardWrapper from "@/app/ui/dashboard/cards";
 import PieChart from "@/app/ui/dashboard/pie-chart";
 
 // Fonts & framework primitives
-import { inter } from "@/app/ui/fonts";
+import { inter } from "@/app/ui/branding/fonts";
 import { Suspense } from "react";
 import { Metadata } from "next";
 

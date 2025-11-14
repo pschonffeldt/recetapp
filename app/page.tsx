@@ -1,7 +1,7 @@
-import Logo from "@/app/ui/recetapp-logo";
+import Logo from "@/app/ui/branding/recetapp-logo";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { inter } from "@/app/ui/fonts";
+import { inter } from "@/app/ui/branding/fonts";
 import { Metadata } from "next";
 
 // Set title for metadata

@@ -1,5 +1,5 @@
 import "@/app/ui/global.css";
-import { inter } from "@/app/ui/fonts";
+import { inter } from "@/app/ui/branding/fonts";
 import { Metadata } from "next";
 
 // Set title for metadata based on title.template

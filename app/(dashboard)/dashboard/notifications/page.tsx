@@ -1,5 +1,5 @@
 import Pagination from "@/app/ui/recipes/pagination";
-import { inter } from "@/app/ui/fonts";
+import { inter } from "@/app/ui/branding/fonts";
 import { Suspense } from "react";
 import { Metadata } from "next";
 import { RecipesTableSkeleton } from "@/app/ui/skeletons";

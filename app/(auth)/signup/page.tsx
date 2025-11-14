@@ -1,5 +1,5 @@
-import Logo from "@/app/ui/recetapp-logo";
-import SignupForm from "@/app/ui/signup-form";
+import Logo from "@/app/ui/branding/recetapp-logo";
+import SignupForm from "@/app/ui/login-signup/signup-form";
 import { Suspense } from "react";
 
 export default function Page() {

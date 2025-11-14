@@ -1,4 +1,4 @@
-import { inter } from "@/app/ui/fonts";
+import { inter } from "@/app/ui/branding/fonts";
 
 export default function Logo() {
   return (

@@ -1,4 +1,4 @@
-import { inter } from "@/app/ui/fonts";
+import { inter } from "@/app/ui/branding/fonts";
 import { fetchCardData } from "@/app/lib/data";
 import type { ReactNode } from "react";
 import { MetricCard, MetricCardMobile } from "../recipes/recipe-indicators";

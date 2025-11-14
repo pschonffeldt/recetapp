@@ -1,12 +1,6 @@
-// app/(dashboard)/dashboard/layout.tsx
-// ============================================
-// Dashboard Layout (RSC) + ToastProvider
-// ============================================
-
-/* UI chrome */
 import SideNav from "@/app/ui/dashboard/sidenav";
 import { ToastProvider } from "@/app/ui/toast/toast-provider";
-import UserSettingsFab from "@/app/ui/user-menu";
+import UserSettingsFab from "@/app/ui/dashboard/user-menu";
 
 /* Auth */
 import { logout } from "@/auth";

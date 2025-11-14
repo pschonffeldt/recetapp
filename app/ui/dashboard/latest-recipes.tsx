@@ -1,7 +1,7 @@
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Image from "next/image";
-import { inter } from "@/app/ui/fonts";
+import { inter } from "@/app/ui/branding/fonts";
 import { fetchLatestRecipes } from "@/app/lib/data";
 import RecipesType from "../recipes/recipes-status";
 

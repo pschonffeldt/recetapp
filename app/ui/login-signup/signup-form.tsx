@@ -8,7 +8,7 @@ import {
   UserIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
-import { inter } from "@/app/ui/fonts";
+import { inter } from "@/app/ui/branding/fonts";
 import { Button } from "@/app/ui/button";
 import { createAccount } from "@/app/lib/actions";
 

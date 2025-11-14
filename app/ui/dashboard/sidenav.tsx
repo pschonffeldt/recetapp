@@ -1,7 +1,7 @@
 import Link from "next/link";
 import NavLinks from "@/app/ui/dashboard/nav-links";
-import Logo from "@/app/ui/recetapp-logo";
-import { brand } from "../branding";
+import Logo from "@/app/ui/branding/recetapp-logo";
+import { brand } from "../branding/branding";
 import { signOut } from "@/auth";
 import { PowerIcon } from "@heroicons/react/24/outline";
 

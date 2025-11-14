@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { updateUserProfile, updateUserPassword } from "@/app/lib/actions";
 import { type UserForm } from "@/app/lib/definitions";
-import { inter } from "../fonts";
+import { inter } from "../branding/fonts";
 import Link from "next/link";
 import { Button } from "../button";
 import { useToast } from "@/app/ui/toast/toast-provider";

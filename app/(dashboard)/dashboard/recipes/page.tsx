@@ -11,12 +11,12 @@
 
 // Page UI blocks
 import Pagination from "@/app/ui/recipes/pagination";
-import Search from "@/app/ui/search";
+import Search from "@/app/ui/recipes/search";
 import RecipesTable from "@/app/ui/recipes/recipes-table";
 import { CreateRecipe } from "@/app/ui/recipes/recipes-buttons";
 
 // Style & framework
-import { inter } from "@/app/ui/fonts";
+import { inter } from "@/app/ui/branding/fonts";
 import { Suspense } from "react";
 import { Metadata } from "next";
 
