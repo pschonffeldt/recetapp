@@ -225,10 +225,16 @@ export async function deleteRecipe(id: string) {
   const userId = await requireUserId();
   const rows = await sql/* sql */ `
     DELETE FROM public.recipes
-    WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
+    WHERE id = ${id}::uuid
+      AND user_id = ${userId}::uuid
     RETURNING id
   `;
-  if (!rows.length) throw new Error("Not found or unauthorized.");
+  if (!rows.length) {
+    // nothing matched: either not found or not owned by user
+    throw new Error(
+      "Recipe not found or you don’t have permission to delete it."
+    );
+  }
   revalidatePath("/dashboard/recipes");
 }
 
@@ -237,14 +243,20 @@ export async function deleteRecipe(id: string) {
  *
  * @param id - Recipe id
  */
+// --- Delete from viewer page + redirect back to index ---
 export async function deleteRecipeFromViewer(id: string) {
   const userId = await requireUserId();
   const rows = await sql/* sql */ `
     DELETE FROM public.recipes
-    WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
+    WHERE id = ${id}::uuid
+      AND user_id = ${userId}::uuid
     RETURNING id
   `;
-  if (!rows.length) throw new Error("Not found or unauthorized.");
+  if (!rows.length) {
+    throw new Error(
+      "Recipe not found or you don’t have permission to delete it."
+    );
+  }
   revalidatePath("/dashboard/recipes");
   redirect("/dashboard/recipes");
 }
