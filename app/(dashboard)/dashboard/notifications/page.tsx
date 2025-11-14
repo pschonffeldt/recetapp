@@ -5,12 +5,24 @@ import NotificationsList from "@/app/ui/notifications/notifications-list";
 
 export const metadata: Metadata = { title: "Notifications" };
 
-export default async function Page() {
-  const { items, total, page, pageSize } = await fetchNotifications({
-    page: 1,
-    pageSize: 20,
-    only: "all",
-    status: "any",
+type Search = {
+  searchParams?: {
+    page?: string;
+    only?: "all" | "personal" | "broadcasts";
+    status?: "any" | "unread" | "read" | "archived";
+  };
+};
+
+export default async function Page({ searchParams }: Search) {
+  const page = Math.max(1, Number(searchParams?.page ?? "1"));
+  const only = (searchParams?.only as any) ?? "all";
+  const status = (searchParams?.status as any) ?? "any";
+
+  const { items, total, pageSize } = await fetchNotifications({
+    page,
+    pageSize: 10,
+    only,
+    status,
   });
 
   return (

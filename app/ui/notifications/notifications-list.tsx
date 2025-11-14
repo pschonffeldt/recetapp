@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   markNotificationRead,
   markAllNotificationsRead,
@@ -14,7 +16,12 @@ type Props = {
   pageSize: number;
 };
 
-export default function NotificationsList({ items }: Props) {
+export default function NotificationsList({
+  items,
+  total,
+  page,
+  pageSize,
+}: Props) {
   const [oneState, markOne] = useActionState(
     markNotificationRead as any,
     {
@@ -25,8 +32,27 @@ export default function NotificationsList({ items }: Props) {
 
   const [allState, markAll] = useActionState(
     markAllNotificationsRead as any,
-    { ok: false, message: null } as any
+    {
+      ok: false,
+      message: null,
+    } as any
   );
+
+  // --- Pagination helpers (URLSearchParams) ---
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+  const hrefForPage = (p: number) => {
+    const sp = new URLSearchParams(searchParams?.toString() ?? "");
+    sp.set("page", String(p));
+    // keep any existing filters like ?only=…&status=…
+    return `${pathname}?${sp.toString()}`;
+  };
+
+  const prevDisabled = page <= 1;
+  const nextDisabled = page >= totalPages;
 
   return (
     <div className="rounded-md bg-gray-50 p-4 md:p-6">
@@ -109,6 +135,41 @@ export default function NotificationsList({ items }: Props) {
           );
         })}
       </ul>
+
+      {/* Pagination controls */}
+      <div className="mt-6 flex items-center justify-between">
+        <p className="text-sm text-gray-600">
+          Page {page} of {totalPages} • {total} total
+        </p>
+        <div className="flex gap-2">
+          <Link
+            prefetch={false}
+            aria-disabled={prevDisabled}
+            tabIndex={prevDisabled ? -1 : 0}
+            href={prevDisabled ? "#" : hrefForPage(page - 1)}
+            className={`rounded-md border px-3 py-2 text-sm ${
+              prevDisabled
+                ? "pointer-events-none opacity-50"
+                : "hover:bg-gray-100"
+            }`}
+          >
+            ← Previous
+          </Link>
+          <Link
+            prefetch={false}
+            aria-disabled={nextDisabled}
+            tabIndex={nextDisabled ? -1 : 0}
+            href={nextDisabled ? "#" : hrefForPage(page + 1)}
+            className={`rounded-md border px-3 py-2 text-sm ${
+              nextDisabled
+                ? "pointer-events-none opacity-50"
+                : "hover:bg-gray-100"
+            }`}
+          >
+            Next →
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

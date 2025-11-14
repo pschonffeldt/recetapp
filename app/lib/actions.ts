@@ -655,36 +655,37 @@ export type SignupResult = {
  * Notifications — Actions
  * ================================ */
 
-export async function markNotificationRead(_prev: any, formData: FormData) {
-  const userId = await requireUserId();
-  const id = String(formData.get("id") ?? "");
+// --- Notifications actions ---
+type ActionResult = { ok: boolean; message: string | null };
 
-  if (!id) return { ok: false, message: "Missing id" };
+export async function markNotificationRead(
+  _prev: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  const userId = await requireUserId();
+  const id = String(formData.get("id") || "");
+  if (!id) return { ok: false, message: "Missing id." };
 
   await sql/* sql */ `
     UPDATE public.notifications
-    SET status = 'read'::notification_status
-    WHERE id = ${id}::uuid
-      AND user_id = ${userId}::uuid
+       SET status = 'read'::notification_status, updated_at = now()
+     WHERE id = ${id}::uuid
+       AND user_id = ${userId}::uuid
   `;
-
-  // Update header badge + page list
-  revalidatePath("/dashboard");
   revalidatePath("/dashboard/notifications");
   return { ok: true, message: null };
 }
 
-export async function markAllNotificationsRead() {
+export async function markAllNotificationsRead(
+  _prev: ActionResult
+): Promise<ActionResult> {
   const userId = await requireUserId();
-
   await sql/* sql */ `
     UPDATE public.notifications
-    SET status = 'read'::notification_status
-    WHERE user_id = ${userId}::uuid
-      AND status = 'unread'::notification_status
+       SET status = 'read'::notification_status, updated_at = now()
+     WHERE user_id = ${userId}::uuid
+       AND status = 'unread'::notification_status
   `;
-
-  revalidatePath("/dashboard");
   revalidatePath("/dashboard/notifications");
   return { ok: true, message: null };
 }

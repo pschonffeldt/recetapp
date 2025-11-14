@@ -6,7 +6,8 @@
     "start": "next start",
     "db:psql": "dotenv -e .env -- bash -lc 'psql \"$POSTGRES_URL\"'",
     "db:migrate:users": "dotenv -e .env -- bash -lc 'psql \"$POSTGRES_URL\" -f migrations/20251110_users_lifecycle.sql'",
-    "db:migrate:all": "dotenv -e .env -- bash -lc 'set -e; for f in migrations/*.sql; do echo Running $f; psql \"$POSTGRES_URL\" -f \"$f\"; done'"
+    "db:migrate:all": "dotenv -e .env -- bash -lc 'set -e; for f in migrations/*.sql; do echo Running $f; psql \"$POSTGRES_URL\" -f \"$f\"; done'",
+    "db:seed:notifications": "dotenv -e .env -- psql \"$POSTGRES_URL\" -v ON_ERROR_STOP=1 -f scripts/seed_notifications.sql"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
