@@ -1,3 +1,4 @@
+// app/(dashboard)/dashboard/notifications/page.tsx
 import { auth } from "@/auth";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -16,25 +17,20 @@ type Search = {
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: Search;
+  // NOTE: in this repo, searchParams is a Promise
+  searchParams: Promise<Search>;
 }) {
-  // Admin check (to show “New notification” button)
+  const sp = await searchParams;
+
+  // Admin check (show “New notification” button)
   const session = await auth();
-  const email = (session?.user as any)?.email?.toLowerCase() ?? "";
-  const admins = (process.env.ADMIN_EMAILS ?? "")
-    .toLowerCase()
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const isAdmin = !!email && admins.includes(email);
+  const role = (session?.user as any)?.user_role ?? "user";
+  const isAdmin = role === "admin";
 
-  const page = Math.max(1, Number(searchParams?.page ?? 1));
-  const only = (searchParams?.only ?? "all") as NonNullable<Search["only"]>;
-  const status = (searchParams?.status ?? "any") as NonNullable<
-    Search["status"]
-  >;
+  const page = Math.max(1, Number(sp?.page ?? 1));
+  const only = (sp?.only ?? "all") as NonNullable<Search["only"]>;
+  const status = (sp?.status ?? "any") as NonNullable<Search["status"]>;
 
-  // Fetch notifications (flat options object)
   const {
     items,
     total,
@@ -42,7 +38,7 @@ export default async function Page({
     pageSize,
   } = await fetchNotifications({
     page,
-    pageSize: 10, // override default page size if desired
+    pageSize: 10,
     only,
     status,
   });
