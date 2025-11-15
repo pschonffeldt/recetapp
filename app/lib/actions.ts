@@ -10,7 +10,7 @@ import bcrypt from "bcryptjs";
 import { UpdateUserProfileSchema } from "./validation";
 import { toInt, toLines, toMoney } from "./form-helpers";
 import { RecipeFormState } from "./action-types";
-import { requireUserId } from "./auth-helpers";
+import { requireAdmin, requireUserId } from "./auth-helpers";
 
 /* ================================
  * Database Client
@@ -688,4 +688,93 @@ export async function markAllNotificationsRead(
   `;
   revalidatePath("/dashboard/notifications");
   return { ok: true, message: null };
+}
+
+const NewNotificationSchema = z.object({
+  userId: z
+    .string()
+    .uuid()
+    .nullable()
+    .transform((v) => v ?? null),
+  title: z.string().trim().min(1, "Title is required"),
+  body: z.string().trim().min(1, "Body is required"),
+  kind: z.enum(["system", "maintenance", "feature", "message"]),
+  level: z.enum(["info", "success", "warning", "error"]),
+  linkUrl: z
+    .string()
+    .url("Must be a valid URL")
+    .optional()
+    .nullable()
+    .transform((v) => (v ? v : null)),
+  publishNow: z.coerce.boolean().optional().default(true),
+  publishAt: z
+    .string()
+    .datetime()
+    .optional()
+    .nullable()
+    .transform((v) => (v ? v : null)),
+});
+
+export async function createNotification(
+  _prev:
+    | { ok: boolean; message: string | null; errors?: Record<string, string[]> }
+    | undefined,
+  formData: FormData
+) {
+  await requireAdmin();
+
+  const parsed = NewNotificationSchema.safeParse({
+    userId:
+      formData.get("userId") === "broadcast" ? null : formData.get("userId"),
+    title: formData.get("title"),
+    body: formData.get("body"),
+    kind: formData.get("kind"),
+    level: formData.get("level"),
+    linkUrl: formData.get("linkUrl"),
+    publishNow: formData.get("publishNow"),
+    publishAt: formData.get("publishAt"),
+  });
+
+  if (!parsed.success) {
+    const errors: Record<string, string[]> = {};
+    for (const issue of parsed.error.issues) {
+      const k = (issue.path[0] as string) || "_form";
+      (errors[k] ??= []).push(issue.message);
+    }
+    return { ok: false, message: "Fix errors and try again.", errors };
+  }
+
+  const d = parsed.data;
+
+  // Decide published_at
+  const publishedAt = d.publishNow
+    ? sql`now()`
+    : d.publishAt
+    ? sql`${d.publishAt}::timestamptz`
+    : null;
+
+  try {
+    const rows = await sql<{ id: string }[]>/* sql */ `
+      INSERT INTO public.notifications (
+        user_id, title, body, kind, level, link_url, status, published_at
+      )
+      VALUES (
+        ${d.userId}::uuid,
+        ${d.title},
+        ${d.body},
+        ${d.kind}::notification_kind,
+        ${d.level}::notification_level,
+        ${d.linkUrl},
+        ${
+          d.userId ? "unread" : "read"
+        }::notification_status,  -- broadcasts start as 'read'
+        ${publishedAt}
+      )
+      RETURNING id
+    `;
+    return { ok: true, message: null, id: rows[0]?.id };
+  } catch (e) {
+    console.error("createNotification failed:", e);
+    return { ok: false, message: "Failed to create notification." };
+  }
 }

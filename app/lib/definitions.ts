@@ -1,18 +1,40 @@
 /* =======================================================
- * User Entities
+ * User Entities (single source of truth)
  * ======================================================= */
 
-/** Authenticated application user (not necessarily a customer). */
-export type User = {
+/** Allowed roles in the app. Keep this the only role type. */
+export type Role = "user" | "admin";
+
+/** Raw row from the database. Matches the public.users table. */
+export type DbUserRow = {
   id: string;
-  name: string;
-  last_name: string;
+  name: string | null;
+  last_name: string | null;
   email: string;
-  /** Hashed password when persisted; do not expose to the client. */
-  password: string;
-  country: string;
-  language: string;
+  password: string | null; // hashed; NEVER send to client
+  country: string | null;
+  language: string | null;
+  user_role: Role; // enum/text in DB
 };
+
+/** Safe shape to use across the app (client/server) and in session. */
+export type AppUser = {
+  id: string;
+  name: string | null;
+  last_name: string | null;
+  email: string;
+  country: string | null;
+  language: string | null;
+  user_role: Role; // same property name as DB for simplicity
+};
+
+/** Backwards-compat: many places may import `User`. */
+export type User = AppUser;
+
+/** Narrowing helpers */
+export const isAdminRole = (r?: string | null): r is "admin" => r === "admin";
+export const isUserAdmin = (u?: { user_role?: string | null }) =>
+  isAdminRole(u?.user_role);
 
 /* =======================================================
  * Revenue Entities
@@ -190,6 +212,27 @@ export function toAppNotification(dbRow: DbNotificationRow): AppNotification {
     updatedAt: new Date(dbRow.updated_at),
   };
 }
+
+export type NewNotificationInput = {
+  // null → broadcast; uuid → personal
+  userId: string | null;
+  title: string;
+  body: string;
+  kind: "system" | "maintenance" | "feature" | "message";
+  level: "info" | "success" | "warning" | "error";
+  linkUrl?: string | null;
+
+  // when to publish
+  publishNow?: boolean;
+  publishAt?: string | null; // ISO string; server will coerce to timestamptz
+};
+
+export type CreateNotificationResult = {
+  ok: boolean;
+  message: string | null;
+  id?: string;
+  errors?: Record<string, string[]>;
+};
 
 /* =======================================================
  * Countries
