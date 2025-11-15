@@ -1,17 +1,28 @@
 "use client";
 
-import { HomeIcon, MegaphoneIcon, UserIcon } from "@heroicons/react/24/outline";
-import { DocumentPlusIcon, ShieldCheckIcon } from "@heroicons/react/20/solid";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import clsx from "clsx";
 
+import { HomeIcon, MegaphoneIcon, UserIcon } from "@heroicons/react/24/outline";
+import {
+  DocumentPlusIcon,
+  ShieldCheckIcon,
+  UsersIcon,
+} from "@heroicons/react/20/solid";
+
 type Props = { isAdmin: boolean };
+
+type NavItem = {
+  name: string;
+  href: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+};
 
 export default function NavLinksClient({ isAdmin }: Props) {
   const pathname = usePathname();
 
-  const links = [
+  const baseLinks: NavItem[] = [
     { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
     { name: "Recipes", href: "/dashboard/recipes", icon: DocumentPlusIcon },
     { name: "Account", href: "/dashboard/account", icon: UserIcon },
@@ -22,14 +33,18 @@ export default function NavLinksClient({ isAdmin }: Props) {
     },
   ];
 
-  // Add admin-only entry
-  if (isAdmin) {
-    links.push({
+  // Add as many admin-only links as you want here
+  const adminLinks: NavItem[] = [
+    {
       name: "New notification",
-      href: "/dashboard/notifications/new",
+      href: "/dashboard/admin/notification-center",
       icon: ShieldCheckIcon,
-    });
-  }
+    },
+    { name: "Users", href: "/dashboard/admin/users", icon: UsersIcon },
+    // { name: "System",        href: "/dashboard/admin/system",       icon: Cog6ToothIcon },
+  ];
+
+  const links = isAdmin ? [...baseLinks, ...adminLinks] : baseLinks;
 
   return (
     <>
