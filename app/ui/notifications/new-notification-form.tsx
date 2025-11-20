@@ -28,6 +28,7 @@ export default function NewNotificationForm({ users }: Props) {
     initialState
   );
 
+  // Error and success messages
   useEffect(() => {
     if (state?.ok) {
       push({
@@ -49,160 +50,177 @@ export default function NewNotificationForm({ users }: Props) {
   return (
     <form action={formAction} className="rounded-md bg-gray-50 p-4 md:p-6">
       {/* Recipient */}
-      <div className="mb-4">
-        <label className="mb-2 block text-sm font-medium">Recipient</label>
-        <div className="flex flex-col gap-3">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="radio"
-              name="audience"
-              value="broadcast"
-              checked={audience === "broadcast"}
-              onChange={() => setAudience("broadcast")}
-            />
-            Broadcast (all users)
-          </label>
-
-          <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-4">
+        <div className="mb-4">
+          <label className="mb-2 block text-sm font-medium">Recipient</label>
+          <div className="flex flex-col gap-3">
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="radio"
                 name="audience"
-                value="user"
-                checked={audience === "user"}
-                onChange={() => setAudience("user")}
+                value="broadcast"
+                checked={audience === "broadcast"}
+                onChange={() => setAudience("broadcast")}
               />
-              <span>Specific user:</span>
+              Broadcast (all users)
             </label>
-
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="audience"
+                  value="user"
+                  checked={audience === "user"}
+                  onChange={() => setAudience("user")}
+                />
+                <span>Specific user:</span>
+              </label>
+              <select
+                name="userId"
+                className="w-full max-w-md rounded-md border border-gray-200 px-3 py-2 text-sm"
+                disabled={audience !== "user"}
+                defaultValue=""
+              >
+                <option value="">Select a user…</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} {u.lastName} — {u.email}
+                  </option>
+                ))}
+              </select>
+              {err("userId") && (
+                <p className="mt-1 text-sm text-red-500">{err("userId")}</p>
+              )}
+            </div>
+          </div>
+        </div>
+        {/* Notification or message title */}
+        <div className="mb-4">
+          <label className="mb-2 block text-sm font-medium">Title</label>
+          <input
+            name="title"
+            type="text"
+            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+            placeholder="What’s new?"
+            required
+          />
+          {err("title") && (
+            <p className="mt-1 text-sm text-red-500">{err("title")}</p>
+          )}
+        </div>
+        {/* Notification or message body */}
+        <div className="mb-4">
+          <label className="mb-2 block text-sm font-medium">Body</label>
+          <textarea
+            name="body"
+            rows={5}
+            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+            placeholder="Details for users…"
+            required
+          />
+          {err("body") && (
+            <p className="mt-1 text-sm text-red-500">{err("body")}</p>
+          )}
+        </div>
+        {/* Notification or message Kind / Level */}
+        <div className="mb-4 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-medium">Kind</label>
             <select
-              name="userId"
-              className="w-full max-w-md rounded-md border border-gray-200 px-3 py-2 text-sm"
-              disabled={audience !== "user"}
-              defaultValue=""
+              name="kind"
+              defaultValue="system"
+              className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
             >
-              <option value="">Select a user…</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name} {u.lastName} — {u.email}
-                </option>
-              ))}
+              <option value="system">System</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="feature">Feature</option>
+              <option value="message">Message</option>
             </select>
-
-            {err("userId") && (
-              <p className="mt-1 text-sm text-red-500">{err("userId")}</p>
+            {err("kind") && (
+              <p className="mt-1 text-sm text-red-500">{err("kind")}</p>
+            )}
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-medium">Level</label>
+            <select
+              name="level"
+              defaultValue="info"
+              className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+            >
+              <option value="info">Info</option>
+              <option value="success">Success</option>
+              <option value="warning">Warning</option>
+              <option value="error">Error</option>
+            </select>
+            {err("level") && (
+              <p className="mt-1 text-sm text-red-500">{err("level")}</p>
             )}
           </div>
         </div>
-      </div>
-
-      {/* Title */}
-      <div className="mb-4">
-        <label className="mb-2 block text-sm font-medium">Title</label>
-        <input
-          name="title"
-          type="text"
-          className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
-          placeholder="What’s new?"
-          required
-        />
-        {err("title") && (
-          <p className="mt-1 text-sm text-red-500">{err("title")}</p>
-        )}
-      </div>
-
-      {/* Body */}
-      <div className="mb-4">
-        <label className="mb-2 block text-sm font-medium">Body</label>
-        <textarea
-          name="body"
-          rows={5}
-          className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
-          placeholder="Details for users…"
-          required
-        />
-        {err("body") && (
-          <p className="mt-1 text-sm text-red-500">{err("body")}</p>
-        )}
-      </div>
-
-      {/* Kind / Level */}
-      <div className="mb-4 grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-sm font-medium">Kind</label>
-          <select
-            name="kind"
-            defaultValue="system"
-            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
-          >
-            <option value="system">System</option>
-            <option value="maintenance">Maintenance</option>
-            <option value="feature">Feature</option>
-            <option value="message">Message</option>
-          </select>
-          {err("kind") && (
-            <p className="mt-1 text-sm text-red-500">{err("kind")}</p>
-          )}
-        </div>
-        <div>
-          <label className="mb-2 block text-sm font-medium">Level</label>
-          <select
-            name="level"
-            defaultValue="info"
-            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
-          >
-            <option value="info">Info</option>
-            <option value="success">Success</option>
-            <option value="warning">Warning</option>
-            <option value="error">Error</option>
-          </select>
-          {err("level") && (
-            <p className="mt-1 text-sm text-red-500">{err("level")}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Optional link */}
-      <div className="mb-4">
-        <label className="mb-2 block text-sm font-medium">
-          Link URL (optional)
-        </label>
-        <input
-          name="linkUrl"
-          type="url"
-          placeholder="https://example.com/changelog"
-          className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
-        />
-        {err("linkUrl") && (
-          <p className="mt-1 text-sm text-red-500">{err("linkUrl")}</p>
-        )}
-      </div>
-
-      {/* Publish controls */}
-      <div className="mb-6 grid gap-4 sm:grid-cols-2">
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            name="publishNow"
-            type="checkbox"
-            defaultChecked
-            onChange={(e) => setPublishNow(e.currentTarget.checked)}
-          />
-          Publish now
-        </label>
-
-        <div>
+        {/* Notification or message optional link */}
+        <div className="mb-4">
           <label className="mb-2 block text-sm font-medium">
-            Or schedule (UTC)
+            Link URL (optional)
           </label>
           <input
-            name="publishAt"
-            type="datetime-local"
+            name="linkUrl"
+            type="url"
+            placeholder="https://example.com/changelog"
             className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
-            disabled={publishNow}
           />
-          {err("publishAt") && (
-            <p className="mt-1 text-sm text-red-500">{err("publishAt")}</p>
+          {err("linkUrl") && (
+            <p className="mt-1 text-sm text-red-500">{err("linkUrl")}</p>
           )}
+        </div>
+        {/* Notification or message publish controls */}
+        <div className="mb-6">
+          <label className="mb-2 block text-sm font-medium">
+            Delivery time
+          </label>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex flex-col gap-2">
+              {/* Option 1: send now */}
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="publishNow"
+                  value="true" // will become "true" in FormData
+                  checked={publishNow}
+                  onChange={() => setPublishNow(true)}
+                />
+                <span>Send now</span>
+              </label>
+              {/* Option 2: schedule for later */}
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="radio"
+                    name="publishNow"
+                    value="false" // will become "false" in FormData
+                    checked={!publishNow}
+                    onChange={() => setPublishNow(false)}
+                  />
+                  <span>Schedule for later</span>
+                </label>
+              </div>
+              <div className="sm:w-64">
+                <label className="mb-2 block text-sm font-medium">
+                  Date &amp; time (UTC)
+                </label>
+                <input
+                  name="publishAt"
+                  type="datetime-local"
+                  className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm disabled:bg-gray-50"
+                  disabled={publishNow} // only enabled when "Schedule for later"
+                />
+                {err("publishAt") && (
+                  <p className="mt-1 text-sm text-red-500">
+                    {err("publishAt")}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
