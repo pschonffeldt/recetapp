@@ -723,6 +723,14 @@ export async function createNotification(
 ) {
   await requireAdmin();
 
+  // Normalize linkUrl: empty string -> undefined
+  // Allowing to send notifications or messages without URL's
+  const rawLinkUrl = formData.get("linkUrl");
+  const linkUrl =
+    typeof rawLinkUrl === "string" && rawLinkUrl.trim().length > 0
+      ? rawLinkUrl.trim()
+      : undefined;
+
   const parsed = NewNotificationSchema.safeParse({
     userId:
       formData.get("userId") === "broadcast" ? null : formData.get("userId"),
@@ -730,7 +738,7 @@ export async function createNotification(
     body: formData.get("body"),
     kind: formData.get("kind"),
     level: formData.get("level"),
-    linkUrl: formData.get("linkUrl"),
+    linkUrl,
     publishNow: formData.get("publishNow"),
     publishAt: formData.get("publishAt"),
   });
@@ -764,7 +772,7 @@ export async function createNotification(
         ${d.body},
         ${d.kind}::notification_kind,
         ${d.level}::notification_level,
-        ${d.linkUrl},
+        ${d.linkUrl ?? null},
         ${
           d.userId ? "unread" : "read"
         }::notification_status,  -- broadcasts start as 'read'
