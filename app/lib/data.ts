@@ -12,6 +12,7 @@ import {
 } from "./definitions";
 
 import { requireUserId } from "@/app/lib/auth-helpers";
+import { type FetchNotificationsResult } from "@/app/lib/definitions";
 
 /* ================================
  * Database Client
@@ -531,12 +532,10 @@ export async function fetchUnreadCount() {
     FROM public.notifications
     WHERE user_id = ${userId}::uuid
       AND status = 'unread'::notification_status
+      AND (published_at IS NULL OR published_at <= now())
   `;
   return rows[0]?.c ?? 0;
 }
-
-// Feed: personal (any status) + broadcasts (user_id IS NULL), newest first
-import { type FetchNotificationsResult } from "@/app/lib/definitions";
 
 const NOTIFICATIONS_PAGE_SIZE = 5;
 const NOTIFICATIONS_PAGE_SIZE_MAX = 50;
@@ -559,15 +558,23 @@ export async function fetchNotifications(opts?: {
   const only = opts?.only ?? "all";
   const status = opts?.status ?? "any";
 
-  // With alias (used where table is referenced as "n")
+  // status filters
   const personalStatusSqlAliased =
     status === "any"
       ? sql`TRUE`
       : sql`n.status = ${status}::notification_status`;
 
-  // Bare (used inside COUNT subqueries without alias)
   const personalStatusSqlBare =
     status === "any" ? sql`TRUE` : sql`status = ${status}::notification_status`;
+
+  // 🕒 publish window guards
+  const publishGuardAliased = sql/* sql */ `
+    (n.published_at IS NULL OR n.published_at <= now())
+  `;
+
+  const publishGuardBare = sql/* sql */ `
+    (published_at IS NULL OR published_at <= now())
+  `;
 
   // Base sources
   const personalSql = sql/* sql */ `
@@ -575,12 +582,14 @@ export async function fetchNotifications(opts?: {
     FROM public.notifications AS n
     WHERE n.user_id = ${userId}::uuid
       AND ${personalStatusSqlAliased}
+      AND ${publishGuardAliased}               -- only active personal
   `;
 
   const broadcastSql = sql/* sql */ `
     SELECT n.*
     FROM public.notifications AS n
     WHERE n.user_id IS NULL
+      AND ${publishGuardAliased}               -- only active broadcasts
   `;
 
   // Compose union
@@ -599,7 +608,7 @@ export async function fetchNotifications(opts?: {
     LIMIT ${pageSize} OFFSET ${offset}
   `;
 
-  // Total for pagination
+  // Total for pagination (also respects publish window)
   const [{ count: total }] = await sql<{ count: number }[]>/* sql */ `
     SELECT (
       CASE
@@ -607,21 +616,25 @@ export async function fetchNotifications(opts?: {
           (SELECT COUNT(*)::int
              FROM public.notifications
             WHERE user_id = ${userId}::uuid
-              AND ${personalStatusSqlBare})
+              AND ${personalStatusSqlBare}
+              AND ${publishGuardBare})
         WHEN ${only} = 'broadcasts' THEN
           (SELECT COUNT(*)::int
              FROM public.notifications
-            WHERE user_id IS NULL)
+            WHERE user_id IS NULL
+              AND ${publishGuardBare})
         ELSE
           (
             (SELECT COUNT(*)::int
                FROM public.notifications
               WHERE user_id = ${userId}::uuid
-                AND ${personalStatusSqlBare})
+                AND ${personalStatusSqlBare}
+                AND ${publishGuardBare})
             +
             (SELECT COUNT(*)::int
                FROM public.notifications
-              WHERE user_id IS NULL)
+              WHERE user_id IS NULL
+                AND ${publishGuardBare})
           )
       END
     ) AS count

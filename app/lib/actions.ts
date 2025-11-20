@@ -690,37 +690,58 @@ export async function markAllNotificationsRead(
   return { ok: true, message: null };
 }
 
-const NewNotificationSchema = z.object({
-  // null = broadcast, UUID string = specific user
-  userId: z
-    .string()
-    .uuid({ message: "Must be a valid user id" })
-    .nullable()
-    .optional(),
+const NewNotificationSchema = z
+  .object({
+    // null = broadcast, UUID string = specific user
+    userId: z
+      .string()
+      .uuid({ message: "Must be a valid user id" })
+      .nullable()
+      .optional(),
 
-  title: z.string().trim().min(1, "Title is required"),
-  body: z.string().trim().min(1, "Body is required"),
+    title: z.string().trim().min(1, "Title is required"),
+    body: z.string().trim().min(1, "Body is required"),
 
-  kind: z.enum(["system", "maintenance", "feature", "message"]),
-  level: z.enum(["info", "success", "warning", "error"]),
+    kind: z.enum(["system", "maintenance", "feature", "message"]),
+    level: z.enum(["info", "success", "warning", "error"]),
 
-  // You already normalize: undefined when empty, string when filled
-  // -> only validate when it's actually present
-  linkUrl: z.string().url("Must be a valid URL").optional(), // string | undefined
+    // linkUrl: you already normalize to undefined when empty
+    linkUrl: z.string().url("Must be a valid URL").optional(),
 
-  publishNow: z.coerce.boolean().optional().default(true),
+    // "on" / null / boolean → boolean
+    publishNow: z.coerce.boolean().optional().default(true),
 
-  // Allow empty / missing publishAt from the form
-  publishAt: z.preprocess((v) => {
-    if (v == null) return undefined;
-    if (typeof v === "string") {
-      const t = v.trim();
-      if (t === "") return undefined; // treat empty as "not set"
-      return t;
+    // Raw value from <input type="datetime-local" name="publishAt">
+    publishAt: z.preprocess(
+      (v) => {
+        // disabled -> FormData.get(...) === null
+        if (v == null) return undefined;
+        if (typeof v !== "string") return undefined;
+
+        const t = v.trim();
+        if (!t) return undefined; // empty string = not set
+
+        // keep the raw value; we'll parse later
+        return t;
+      },
+      // Only validate when there *is* a value
+      z
+        .string()
+        .refine((v) => !Number.isNaN(Date.parse(v)), {
+          message: "Must be a valid date/time",
+        })
+        .optional()
+    ),
+  })
+  .superRefine((data, ctx) => {
+    if (!data.publishNow && !data.publishAt) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["publishAt"],
+        message: "Pick a date/time or enable 'Publish now'",
+      });
     }
-    return v;
-  }, z.string().datetime({ message: "Must be a valid date/time" }).optional()),
-});
+  });
 
 export async function createNotification(
   _prev:
@@ -741,7 +762,7 @@ export async function createNotification(
       ? rawUserId.trim()
       : null;
 
-  // Normalize linkUrl: empty string -> undefined - So we can send notifications without URL's
+  // Normalize linkUrl: empty string -> undefined
   const rawLinkUrl = formData.get("linkUrl");
   const linkUrl =
     typeof rawLinkUrl === "string" && rawLinkUrl.trim().length > 0
@@ -770,24 +791,35 @@ export async function createNotification(
 
   const d = parsed.data;
 
-  const publishedAt = d.publishNow
-    ? sql`now()`
-    : d.publishAt
-    ? sql`${d.publishAt}::timestamptz`
-    : null;
+  // Scheduling rule:
+  // - If a publishAt date is provided -> schedule for that date
+  // - Else -> publish now
+  const publishedAt = d.publishAt ? new Date(d.publishAt) : new Date();
+
+  // 🔧 Normalize values for SQL (no `undefined`)
+  const userIdParam: string | null = d.userId ?? null;
+  const linkUrlParam: string | null = d.linkUrl ?? null;
 
   try {
-    const rows = await sql<{ id: string }[]>/* sql */ `
+    // Cast `sql` to any JUST for this call so TS stops complaining
+    const result = await (sql as any)/* sql */ `
       INSERT INTO public.notifications (
-        user_id, title, body, kind, level, link_url, status, published_at
+        user_id,
+        title,
+        body,
+        kind,
+        level,
+        link_url,
+        status,
+        published_at
       )
       VALUES (
-        ${d.userId}::uuid,
+        ${userIdParam},
         ${d.title},
         ${d.body},
         ${d.kind}::notification_kind,
         ${d.level}::notification_level,
-        ${d.linkUrl ?? null},
+        ${linkUrlParam},
         ${
           d.userId ? "unread" : "read"
         }::notification_status,  -- broadcasts start as 'read'
@@ -795,7 +827,11 @@ export async function createNotification(
       )
       RETURNING id
     `;
-    return { ok: true, message: null, id: rows[0]?.id };
+
+    // Most @vercel/postgres-style helpers expose `.rows`
+    const id = (result as any).rows?.[0]?.id as string | undefined;
+
+    return { ok: true, message: null, id };
   } catch (e) {
     console.error("createNotification failed:", e);
     return { ok: false, message: "Failed to create notification." };
