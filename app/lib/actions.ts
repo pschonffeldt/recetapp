@@ -691,28 +691,35 @@ export async function markAllNotificationsRead(
 }
 
 const NewNotificationSchema = z.object({
+  // null = broadcast, UUID string = specific user
   userId: z
     .string()
-    .uuid()
+    .uuid({ message: "Must be a valid user id" })
     .nullable()
-    .transform((v) => v ?? null),
+    .optional(),
+
   title: z.string().trim().min(1, "Title is required"),
   body: z.string().trim().min(1, "Body is required"),
+
   kind: z.enum(["system", "maintenance", "feature", "message"]),
   level: z.enum(["info", "success", "warning", "error"]),
-  linkUrl: z
-    .string()
-    .url("Must be a valid URL")
-    .optional()
-    .nullable()
-    .transform((v) => (v ? v : null)),
+
+  // You already normalize: undefined when empty, string when filled
+  // -> only validate when it's actually present
+  linkUrl: z.string().url("Must be a valid URL").optional(), // string | undefined
+
   publishNow: z.coerce.boolean().optional().default(true),
-  publishAt: z
-    .string()
-    .datetime()
-    .optional()
-    .nullable()
-    .transform((v) => (v ? v : null)),
+
+  // Allow empty / missing publishAt from the form
+  publishAt: z.preprocess((v) => {
+    if (v == null) return undefined;
+    if (typeof v === "string") {
+      const t = v.trim();
+      if (t === "") return undefined; // treat empty as "not set"
+      return t;
+    }
+    return v;
+  }, z.string().datetime({ message: "Must be a valid date/time" }).optional()),
 });
 
 export async function createNotification(
@@ -723,8 +730,18 @@ export async function createNotification(
 ) {
   await requireAdmin();
 
-  // Normalize linkUrl: empty string -> undefined
-  // Allowing to send notifications or messages without URL's
+  const audience = formData.get("audience");
+  const rawUserId = formData.get("userId");
+
+  // Decide who this is for
+  const userId =
+    audience === "broadcast"
+      ? null
+      : typeof rawUserId === "string" && rawUserId.trim().length > 0
+      ? rawUserId.trim()
+      : null;
+
+  // Normalize linkUrl: empty string -> undefined - So we can send notifications without URL's
   const rawLinkUrl = formData.get("linkUrl");
   const linkUrl =
     typeof rawLinkUrl === "string" && rawLinkUrl.trim().length > 0
@@ -732,8 +749,7 @@ export async function createNotification(
       : undefined;
 
   const parsed = NewNotificationSchema.safeParse({
-    userId:
-      formData.get("userId") === "broadcast" ? null : formData.get("userId"),
+    userId,
     title: formData.get("title"),
     body: formData.get("body"),
     kind: formData.get("kind"),
@@ -754,7 +770,6 @@ export async function createNotification(
 
   const d = parsed.data;
 
-  // Decide published_at
   const publishedAt = d.publishNow
     ? sql`now()`
     : d.publishAt
