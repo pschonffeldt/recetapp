@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/app/ui/recipes/breadcrumbs";
 import { requireAdmin } from "@/app/lib/auth-helpers";
 import NewNotificationForm from "@/app/ui/notifications/new-notification-form";
+import { fetchNotificationUsers } from "@/app/lib/data";
 
 export const metadata: Metadata = { title: "New Notification" };
 
@@ -13,6 +14,7 @@ export default async function Page() {
   } catch {
     notFound();
   }
+  const users = await fetchNotificationUsers();
 
   return (
     <main>
@@ -22,7 +24,7 @@ export default async function Page() {
           { label: "New", href: "/dashboard/notifications/new", active: true },
         ]}
       />
-      <NewNotificationForm />
+      <NewNotificationForm users={users} />
     </main>
   );
 }

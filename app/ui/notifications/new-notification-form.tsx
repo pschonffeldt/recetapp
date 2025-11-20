@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { createNotification } from "@/app/lib/actions";
 import { useToast } from "@/app/ui/toast/toast-provider";
+import { NotificationUserOption } from "@/app/lib/data";
 
 type ActionState = {
   ok: boolean;
@@ -13,9 +14,14 @@ type ActionState = {
 
 const initialState: ActionState = { ok: false, message: null };
 
-export default function NewNotificationForm() {
+type Props = {
+  users: NotificationUserOption[];
+};
+
+export default function NewNotificationForm({ users }: Props) {
   const { push } = useToast();
   const [publishNow, setPublishNow] = useState(true);
+  const [audience, setAudience] = useState<"broadcast" | "user">("broadcast");
 
   const [state, formAction] = useActionState<ActionState, FormData>(
     createNotification as any,
@@ -42,36 +48,52 @@ export default function NewNotificationForm() {
 
   return (
     <form action={formAction} className="rounded-md bg-gray-50 p-4 md:p-6">
-      {/* Target */}
+      {/* Recipient */}
       <div className="mb-4">
         <label className="mb-2 block text-sm font-medium">Recipient</label>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           <label className="flex items-center gap-2 text-sm">
             <input
               type="radio"
               name="audience"
               value="broadcast"
-              defaultChecked
+              checked={audience === "broadcast"}
+              onChange={() => setAudience("broadcast")}
             />
             Broadcast (all users)
           </label>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2">
             <label className="flex items-center gap-2 text-sm">
-              <input type="radio" name="audience" value="user" />
-              Specific user:
+              <input
+                type="radio"
+                name="audience"
+                value="user"
+                checked={audience === "user"}
+                onChange={() => setAudience("user")}
+              />
+              <span>Specific user:</span>
             </label>
-            <input
+
+            <select
               name="userId"
-              type="text"
-              placeholder="User UUID"
-              className="w-80 rounded-md border border-gray-200 px-3 py-2 text-sm"
-            />
+              className="w-full max-w-md rounded-md border border-gray-200 px-3 py-2 text-sm"
+              disabled={audience !== "user"}
+              defaultValue=""
+            >
+              <option value="">Select a user…</option>
+              {users.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name} {u.lastName} — {u.email}
+                </option>
+              ))}
+            </select>
+
+            {err("userId") && (
+              <p className="mt-1 text-sm text-red-500">{err("userId")}</p>
+            )}
           </div>
         </div>
-        {err("userId") && (
-          <p className="mt-1 text-sm text-red-500">{err("userId")}</p>
-        )}
       </div>
 
       {/* Title */}

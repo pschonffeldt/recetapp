@@ -524,6 +524,38 @@ export async function fetchRecipeByIdForOwner(
 
 // ensure `sql` is already defined in this module as your postgres.js client
 
+// Users for notification dropdown
+export type NotificationUserOption = {
+  id: string;
+  name: string;
+  lastName: string;
+  email: string;
+};
+
+export async function fetchNotificationUsers(): Promise<
+  NotificationUserOption[]
+> {
+  const rows = await sql<
+    {
+      id: string;
+      name: string;
+      last_name: string;
+      email: string;
+    }[]
+  >/* sql */ `
+    SELECT id, name, last_name, email
+    FROM public.users
+    ORDER BY last_name, name
+  `;
+
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    lastName: r.last_name,
+    email: r.email,
+  }));
+}
+
 // Unread count (personal-only; broadcasts are not “readable”)
 export async function fetchUnreadCount() {
   const userId = await requireUserId();
