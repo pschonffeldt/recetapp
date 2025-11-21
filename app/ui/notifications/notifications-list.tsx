@@ -8,6 +8,7 @@ import {
   markAllNotificationsRead,
 } from "@/app/lib/actions";
 import type { AppNotification } from "@/app/lib/definitions";
+import { capitalizeFirst } from "@/app/lib/utils";
 
 type Props = {
   items: AppNotification[];
@@ -71,39 +72,46 @@ export default function NotificationsList({
         </form>
       </div>
 
-      <ul className="space-y-3">
+      {/* Notification list mapper */}
+      <ul className="space-y-4">
         {items.map((n) => {
           const isBroadcast = n.userId == null;
           const isUnread = n.status === "unread" && !isBroadcast;
 
           return (
             <li key={n.id} className="rounded-md border bg-white p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm uppercase tracking-wide text-gray-500">
-                      {n.kind}
+              {/* Message / notification container */}
+              <div className="flex items-start gap-3">
+                {/* Message / notification content */}
+                <div className="flex-1">
+                  {/* Kind of message / notification */}
+                  <div className="flex w-full items-end gap-2">
+                    <span className="text-sm tracking-wide text-gray-500">
+                      Notification type:
+                    </span>
+                    <span className="rounded bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-black">
+                      {capitalizeFirst(n.kind)}
                     </span>
 
-                    {isUnread && (
-                      <span className="rounded bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-700">
-                        Unread
-                      </span>
-                    )}
-
-                    {isBroadcast && (
-                      <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-700">
-                        Broadcast
-                      </span>
-                    )}
+                    <div className="ml-auto flex items-center gap-2">
+                      {isUnread && (
+                        <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-700">
+                          Unread
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-row mt-1 text-lg font-semibold gap-1">
+                    <span>Subject:</span>
+                    <h3>{n.title}</h3>
                   </div>
 
-                  <h3 className="mt-1 text-lg font-semibold">{n.title}</h3>
-
-                  <p className="mt-1 whitespace-pre-line text-sm text-gray-700">
-                    {n.body}
-                  </p>
-
+                  <div className="border-b mt-2 p-4">
+                    <p className="mt-1 whitespace-pre-line text-sm text-gray-700">
+                      {n.body}
+                    </p>
+                  </div>
+                  {/* If there is a URL, display button */}
                   {n.linkUrl && (
                     <a
                       href={n.linkUrl}
@@ -115,9 +123,11 @@ export default function NotificationsList({
                     </a>
                   )}
                 </div>
+              </div>
 
-                {/* Mark read button: only for personal notifications */}
-                {!isBroadcast && isUnread && (
+              {/* Mark read button */}
+              <div className="pt-4 flex justify-end">
+                {isUnread && (
                   <form action={markOne} className="shrink-0">
                     <input type="hidden" name="id" value={n.id} />
                     <button

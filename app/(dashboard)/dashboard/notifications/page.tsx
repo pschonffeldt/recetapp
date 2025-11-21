@@ -81,6 +81,7 @@ export default async function Page({
 
   return (
     <main>
+      {/* Upper helpers like breadcrumbs and buttons */}
       <div className="mb-4 flex items-center justify-between">
         <Breadcrumbs
           breadcrumbs={[
@@ -91,14 +92,16 @@ export default async function Page({
             },
           ]}
         />
-        {isAdmin && (
+        {/* For adsmins only; button to go to notification center. */}
+        {/* Disabled for now as I believe is not the right place */}
+        {/* {isAdmin && (
           <Link
             href="/dashboard/notifications/new"
             className="rounded-md bg-gray-900 px-3 py-2 text-sm text-white hover:bg-black/80"
           >
             New notification
           </Link>
-        )}
+        )} */}
       </div>
 
       {/* Tabs */}
@@ -130,7 +133,7 @@ export default async function Page({
           );
         })}
       </div>
-
+      {/* Notification list */}
       <NotificationsList
         items={items}
         total={total}

@@ -659,35 +659,52 @@ export type SignupResult = {
 type ActionResult = { ok: boolean; message: string | null };
 
 export async function markNotificationRead(
-  _prev: ActionResult,
+  _prev: { ok: boolean; message: string | null } | undefined,
   formData: FormData
-): Promise<ActionResult> {
+) {
   const userId = await requireUserId();
-  const id = String(formData.get("id") || "");
-  if (!id) return { ok: false, message: "Missing id." };
+  const id = formData.get("id");
 
-  await sql/* sql */ `
-    UPDATE public.notifications
-       SET status = 'read'::notification_status, updated_at = now()
-     WHERE id = ${id}::uuid
-       AND user_id = ${userId}::uuid
-  `;
-  revalidatePath("/dashboard/notifications");
-  return { ok: true, message: null };
+  if (!id || typeof id !== "string") {
+    return { ok: false, message: "Missing notification id." };
+  }
+
+  try {
+    await sql/* sql */ `
+      UPDATE public.notifications
+      SET status = 'read'::notification_status
+      WHERE id = ${id}::uuid
+        AND user_id = ${userId}::uuid  -- 👈 only *this* user's notification
+    `;
+
+    revalidatePath("/dashboard/notifications");
+    return { ok: true, message: null };
+  } catch (e) {
+    console.error("markNotificationRead failed:", e);
+    return { ok: false, message: "Failed to mark notification as read." };
+  }
 }
 
 export async function markAllNotificationsRead(
-  _prev: ActionResult
-): Promise<ActionResult> {
+  _prev: { ok: boolean; message: string | null } | undefined,
+  _formData: FormData
+) {
   const userId = await requireUserId();
-  await sql/* sql */ `
-    UPDATE public.notifications
-       SET status = 'read'::notification_status, updated_at = now()
-     WHERE user_id = ${userId}::uuid
-       AND status = 'unread'::notification_status
-  `;
-  revalidatePath("/dashboard/notifications");
-  return { ok: true, message: null };
+
+  try {
+    await sql/* sql */ `
+      UPDATE public.notifications
+      SET status = 'read'::notification_status
+      WHERE user_id = ${userId}::uuid
+        AND status = 'unread'::notification_status
+    `;
+
+    revalidatePath("/dashboard/notifications");
+    return { ok: true, message: null };
+  } catch (e) {
+    console.error("markAllNotificationsRead failed:", e);
+    return { ok: false, message: "Failed to mark all notifications as read." };
+  }
 }
 
 const NewNotificationSchema = z
@@ -800,6 +817,9 @@ export async function createNotification(
   const userIdParam: string | null = d.userId ?? null;
   const linkUrlParam: string | null = d.linkUrl ?? null;
 
+  // Decide initial status
+  const initialStatus: "unread" | "read" = d.userId ? "unread" : "read"; // personal = unread, broadcast = read
+
   try {
     // Cast `sql` to any JUST for this call so TS stops complaining
     const result = await (sql as any)/* sql */ `
@@ -813,20 +833,18 @@ export async function createNotification(
         status,
         published_at
       )
-      VALUES (
-        ${userIdParam},
-        ${d.title},
-        ${d.body},
-        ${d.kind}::notification_kind,
-        ${d.level}::notification_level,
-        ${linkUrlParam},
-        ${
-          d.userId ? "unread" : "read"
-        }::notification_status,  -- broadcasts start as 'read'
-        ${publishedAt}
-      )
-      RETURNING id
-    `;
+  VALUES (
+    ${userIdParam},
+    ${d.title},
+    ${d.body},
+    ${d.kind}::notification_kind,
+    ${d.level}::notification_level,
+    ${linkUrlParam},
+    ${initialStatus}::notification_status,  -- personal = unread, broadcast = read
+    ${publishedAt}
+  )
+  RETURNING id
+`;
 
     // Most @vercel/postgres-style helpers expose `.rows`
     const id = (result as any).rows?.[0]?.id as string | undefined;
