@@ -95,7 +95,7 @@ export default async function Page({
       </div>
 
       {/* Tabs */}
-      <div className="mb-4 flex items-center justify-between flex-wrap gap-2 p-4">
+      <div className="mb-4 flex items-center flex-wrap gap-2 p-4">
         {TABS.map((t) => {
           const isActive = t.key === activeTab;
 
