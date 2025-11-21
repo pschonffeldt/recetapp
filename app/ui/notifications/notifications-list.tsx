@@ -10,6 +10,19 @@ import {
 import type { AppNotification } from "@/app/lib/definitions";
 import { capitalizeFirst } from "@/app/lib/utils";
 
+function formatDateTime(value?: string | null) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 type Props = {
   items: AppNotification[];
   total: number;
@@ -78,6 +91,10 @@ export default function NotificationsList({
           const isBroadcast = n.userId == null;
           const isUnread = n.status === "unread" && !isBroadcast;
 
+          const receivedAt = formatDateTime(
+            (n as any).publishedAt ?? (n as any).createdAt
+          );
+
           return (
             <li key={n.id} className="rounded-md border bg-white p-4">
               {/* Message / notification container */}
@@ -111,6 +128,11 @@ export default function NotificationsList({
                       {n.body}
                     </p>
                   </div>
+                  {receivedAt && (
+                    <p className="mt-2 text-xs text-gray-500">
+                      Received {receivedAt}
+                    </p>
+                  )}
                   {/* If there is a URL, display button */}
                   {n.linkUrl && (
                     <a
