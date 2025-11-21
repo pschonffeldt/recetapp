@@ -577,6 +577,7 @@ export async function fetchNotifications(opts?: {
   pageSize?: number; // default 10
   only?: "all" | "personal" | "broadcasts"; // default "all"
   status?: "unread" | "read" | "archived" | "any"; // default "any"
+  kind?: "all" | "system" | "maintenance" | "feature" | "message";
 }): Promise<FetchNotificationsResult> {
   const userId = await requireUserId();
 
@@ -589,6 +590,7 @@ export async function fetchNotifications(opts?: {
   const offset = (page - 1) * pageSize;
   const only = opts?.only ?? "all";
   const status = opts?.status ?? "any";
+  const kind = opts?.kind ?? "all";
 
   // status filters
   const personalStatusSqlAliased =
@@ -599,7 +601,14 @@ export async function fetchNotifications(opts?: {
   const personalStatusSqlBare =
     status === "any" ? sql`TRUE` : sql`status = ${status}::notification_status`;
 
-  // 🕒 publish window guards
+  // 👇 NEW kind filters
+  const kindSqlAliased =
+    kind === "all" ? sql`TRUE` : sql`n.kind = ${kind}::notification_kind`;
+
+  const kindSqlBare =
+    kind === "all" ? sql`TRUE` : sql`kind = ${kind}::notification_kind`;
+
+  // publish window guards
   const publishGuardAliased = sql/* sql */ `
     (n.published_at IS NULL OR n.published_at <= now())
   `;
@@ -614,14 +623,16 @@ export async function fetchNotifications(opts?: {
     FROM public.notifications AS n
     WHERE n.user_id = ${userId}::uuid
       AND ${personalStatusSqlAliased}
-      AND ${publishGuardAliased}               -- only active personal
+      AND ${kindSqlAliased}
+      AND ${publishGuardAliased}
   `;
 
   const broadcastSql = sql/* sql */ `
     SELECT n.*
     FROM public.notifications AS n
     WHERE n.user_id IS NULL
-      AND ${publishGuardAliased}               -- only active broadcasts
+      AND ${kindSqlAliased}
+      AND ${publishGuardAliased}
   `;
 
   // Compose union
@@ -640,7 +651,7 @@ export async function fetchNotifications(opts?: {
     LIMIT ${pageSize} OFFSET ${offset}
   `;
 
-  // Total for pagination (also respects publish window)
+  // Total for pagination (also respects status, kind, published_at)
   const [{ count: total }] = await sql<{ count: number }[]>/* sql */ `
     SELECT (
       CASE
@@ -649,11 +660,13 @@ export async function fetchNotifications(opts?: {
              FROM public.notifications
             WHERE user_id = ${userId}::uuid
               AND ${personalStatusSqlBare}
+              AND ${kindSqlBare}
               AND ${publishGuardBare})
         WHEN ${only} = 'broadcasts' THEN
           (SELECT COUNT(*)::int
              FROM public.notifications
             WHERE user_id IS NULL
+              AND ${kindSqlBare}
               AND ${publishGuardBare})
         ELSE
           (
@@ -661,11 +674,13 @@ export async function fetchNotifications(opts?: {
                FROM public.notifications
               WHERE user_id = ${userId}::uuid
                 AND ${personalStatusSqlBare}
+                AND ${kindSqlBare}
                 AND ${publishGuardBare})
             +
             (SELECT COUNT(*)::int
                FROM public.notifications
               WHERE user_id IS NULL
+                AND ${kindSqlBare}
                 AND ${publishGuardBare})
           )
       END
