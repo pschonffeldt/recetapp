@@ -1,11 +1,6 @@
 import SideNav from "@/app/ui/dashboard/sidenav";
+import UserSettingsFabServer from "@/app/ui/dashboard/userSettingsFabServer";
 import { ToastProvider } from "@/app/ui/toast/toast-provider";
-import UserSettingsFab from "@/app/ui/dashboard/user-menu";
-import { logout } from "@/app/lib/logout";
-
-/* Auth */
-
-/* Toasts (client provider) */
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,7 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Make the toast context available to ALL dashboard UI */}
       <ToastProvider>
         {/* Side navigation column */}
-        <div className="w-full flex-none lg:w-60 lg:min-h-0 lg:overflow-y-auto">
+        <div className="w-full flex-none lg:w-60 lg:minh-0 lg:overflow-y-auto">
           <SideNav />
         </div>
 
@@ -22,8 +17,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="flex-grow min-h-0 pt-6 lg:overflow-y-auto lg:p-12 lg:overscroll-y-contain">
           {children}
 
-          {/* Floating user menu / logout */}
-          <UserSettingsFab logoutAction={logout} />
+          {/* Floating user menu / logout (server wrapper handles isAdmin + logoutAction) */}
+          <UserSettingsFabServer />
         </div>
       </ToastProvider>
     </div>

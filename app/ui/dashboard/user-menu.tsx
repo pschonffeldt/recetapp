@@ -8,23 +8,26 @@ import {
   PowerIcon,
   MegaphoneIcon,
 } from "@heroicons/react/24/outline";
-import { ChartBarIcon, PlusIcon } from "@heroicons/react/20/solid";
+import {
+  ChartBarIcon,
+  PlusIcon,
+  ShieldCheckIcon,
+  UsersIcon,
+} from "@heroicons/react/20/solid";
 
 type Props = {
-  /** Routes to navigate with router.push */
   dashboardleHref?: string;
   profileHref?: string;
   recipesHref?: string;
   notificationsHref?: string;
 
-  /**
-   * Server Action for Auth.js/NextAuth v5 logout.
-   * Must be passed from a SERVER component and used directly on <form action={...}>.
-   */
-  logoutAction?: (formData: FormData) => Promise<void>;
+  /** Admin-only routes */
+  isAdmin?: boolean;
+  adminNotificationHref?: string;
+  adminUsersHref?: string;
 
+  logoutAction?: (formData: FormData) => Promise<void>;
   title?: string;
-  /** Optional avatar URL; if omitted, shows an icon */
   avatarUrl?: string;
 };
 
@@ -33,6 +36,11 @@ export default function UserSettingsFab({
   profileHref = "/dashboard/account",
   recipesHref = "/dashboard/recipes",
   notificationsHref = "/dashboard/notifications",
+
+  isAdmin = false,
+  adminNotificationHref = "/dashboard/admin/notification-center",
+  adminUsersHref = "/dashboard/admin/users",
+
   logoutAction,
   title = "User menu",
   avatarUrl,
@@ -123,6 +131,7 @@ export default function UserSettingsFab({
           }}
         >
           <div className="p-2">
+            {/* Regular user links */}
             <MenuItem
               icon={<ChartBarIcon className="h-5 w-5" />}
               label="Dashboard"
@@ -144,7 +153,25 @@ export default function UserSettingsFab({
               onClick={() => go(profileHref)}
             />
 
-            <div className="my-1 mb-10 h-px bg-gray-200/60 " />
+            {/* Admin-only section */}
+            {isAdmin && (
+              <>
+                <div className="my-2 h-px bg-gray-200/70" />
+                <MenuItem
+                  icon={<ShieldCheckIcon className="h-5 w-5" />}
+                  label="Admin · Notifications"
+                  onClick={() => go(adminNotificationHref)}
+                />
+                <MenuItem
+                  icon={<UsersIcon className="h-5 w-5" />}
+                  label="Admin · Users"
+                  onClick={() => go(adminUsersHref)}
+                />
+              </>
+            )}
+
+            {/* Divider before logout */}
+            <div className="my-2 h-px bg-gray-200/60" />
 
             {logoutAction ? (
               // Attach the server action DIRECTLY to the form
