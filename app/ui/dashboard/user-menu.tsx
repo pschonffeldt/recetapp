@@ -88,8 +88,8 @@ export default function UserSettingsFab({
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600",
         ].join(" ")}
         style={{
-          insetInlineEnd: "max(0.75rem, env(safe-area-inset-right))",
-          insetBlockStart: "max(0.75rem, env(safe-area-inset-top))",
+          insetInlineEnd: "max(1.75rem, env(safe-area-inset-right))",
+          insetBlockStart: "max(1.3rem, env(safe-area-inset-top))",
         }}
       >
         {avatarUrl ? (
