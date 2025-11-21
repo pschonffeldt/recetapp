@@ -11,7 +11,7 @@ type Search = {
   page?: string;
   only?: "all" | "personal" | "broadcasts";
   status?: "any" | "unread" | "read" | "archived";
-  tab?: string; // 👈 NEW: which tab is active
+  tab?: string;
 };
 
 // Tabs we show in the UI
@@ -75,14 +75,14 @@ export default async function Page({
     page,
     pageSize: 10,
     only,
-    status, // derived from tab
-    kind, // NEW: you'll need kind support in fetchNotifications
+    status,
+    kind,
   });
 
   return (
     <main>
       {/* Upper helpers like breadcrumbs and buttons */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between">
         <Breadcrumbs
           breadcrumbs={[
             {
@@ -92,20 +92,10 @@ export default async function Page({
             },
           ]}
         />
-        {/* For adsmins only; button to go to notification center. */}
-        {/* Disabled for now as I believe is not the right place */}
-        {/* {isAdmin && (
-          <Link
-            href="/dashboard/notifications/new"
-            className="rounded-md bg-gray-900 px-3 py-2 text-sm text-white hover:bg-black/80"
-          >
-            New notification
-          </Link>
-        )} */}
       </div>
 
       {/* Tabs */}
-      <div className="mb-4 flex flex-wrap gap-2 border-b border-gray-200 pb-2">
+      <div className="mb-4 flex items-center justify-between flex-wrap gap-2 p-4">
         {TABS.map((t) => {
           const isActive = t.key === activeTab;
 
