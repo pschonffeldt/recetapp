@@ -234,6 +234,119 @@ export type CreateNotificationResult = {
   errors?: Record<string, string[]>;
 };
 
+// ==========================
+// Language (codes must match your Postgres enum: user_language)
+// ==========================
+
+// Canonical codes that the DB accepts.
+export const LANGUAGE = ["en", "es"] as const;
+export type Language = (typeof LANGUAGE)[number];
+
+// Default language for new users / fallbacks
+export const DEFAULT_LANGUAGE: Language = "en";
+
+// Options for selects (what you wanted)
+export const LANGUAGE_OPTIONS = [
+  { value: "en", label: "English" },
+  { value: "es", label: "Spanish" },
+] as const;
+export type LanguageCode = (typeof LANGUAGE_OPTIONS)[number]["value"];
+
+// Quick map from code -> label (handy for badges, etc.)
+export const LANGUAGE_LABEL: Record<Language, string> = {
+  en: "English",
+  es: "Spanish",
+};
+
+// Fast membership check
+export const LANGUAGE_SET: ReadonlySet<Language> = new Set(LANGUAGE);
+
+// Type guard
+export function isLanguage(v: unknown): v is Language {
+  return typeof v === "string" && LANGUAGE_SET.has(v as Language);
+}
+
+/**
+ * Normalize arbitrary inputs (UI labels, localized names, uppercasing, etc.)
+ * to the canonical enum literal used in the DB ("en" | "es").
+ *
+ * Returns undefined if we can’t confidently map it.
+ */
+export function normalizeLanguage(input: unknown): Language | undefined {
+  if (typeof input !== "string") return undefined;
+  const s = input.trim().toLowerCase();
+
+  // Accept codes directly
+  if (s === "en" || s === "es") return s as Language;
+
+  // Accept common labels / variants
+  if (s === "english") return "en";
+  if (s === "spanish" || s === "español") return "es";
+
+  return undefined;
+}
+
+/* =======================================================
+ * Units
+ * ======================================================= */
+export type IngredientUnit =
+  | "ml"
+  | "l"
+  | "tsp"
+  | "tbsp"
+  | "cup_metric"
+  | "cup_us"
+  | "fl_oz"
+  | "pt"
+  | "qt"
+  | "gal"
+  | "pinch"
+  | "dash"
+  | "drop"
+  | "splash"
+  | "g"
+  | "kg"
+  | "oz"
+  | "lb"
+  | "mm"
+  | "cm"
+  | "in"
+  | "celsius"
+  | "fahrenheit"
+  | "piece";
+
+export const UNIT_LABELS: Record<IngredientUnit, string> = {
+  ml: "mL",
+  l: "L",
+  tsp: "tsp",
+  tbsp: "Tbsp",
+  cup_metric: "cup (metric)",
+  cup_us: "cup (US)",
+  fl_oz: "fl oz",
+  pt: "pt",
+  qt: "qt",
+  gal: "gal",
+  pinch: "pinch",
+  dash: "dash",
+  drop: "drop",
+  splash: "splash",
+  g: "g",
+  kg: "kg",
+  oz: "oz",
+  lb: "lb",
+  mm: "mm",
+  cm: "cm",
+  in: "in",
+  celsius: "°C",
+  fahrenheit: "°F",
+  piece: "piece",
+};
+
+// (optional) handy list for selects
+export const ALL_UNITS: IngredientUnit[] = Object.keys(
+  UNIT_LABELS
+) as IngredientUnit[];
+
 /* =======================================================
  * Countries
  * ======================================================= */
@@ -438,55 +551,3 @@ export const COUNTRIES = [
 ] as const;
 
 export type Country = (typeof COUNTRIES)[number];
-
-// ==========================
-// Language (codes must match your Postgres enum: user_language)
-// ==========================
-
-// Canonical codes that the DB accepts.
-export const LANGUAGE = ["en", "es"] as const;
-export type Language = (typeof LANGUAGE)[number];
-
-// Default language for new users / fallbacks
-export const DEFAULT_LANGUAGE: Language = "en";
-
-// Options for selects (what you wanted)
-export const LANGUAGE_OPTIONS = [
-  { value: "en", label: "English" },
-  { value: "es", label: "Spanish" },
-] as const;
-export type LanguageCode = (typeof LANGUAGE_OPTIONS)[number]["value"];
-
-// Quick map from code -> label (handy for badges, etc.)
-export const LANGUAGE_LABEL: Record<Language, string> = {
-  en: "English",
-  es: "Spanish",
-};
-
-// Fast membership check
-export const LANGUAGE_SET: ReadonlySet<Language> = new Set(LANGUAGE);
-
-// Type guard
-export function isLanguage(v: unknown): v is Language {
-  return typeof v === "string" && LANGUAGE_SET.has(v as Language);
-}
-
-/**
- * Normalize arbitrary inputs (UI labels, localized names, uppercasing, etc.)
- * to the canonical enum literal used in the DB ("en" | "es").
- *
- * Returns undefined if we can’t confidently map it.
- */
-export function normalizeLanguage(input: unknown): Language | undefined {
-  if (typeof input !== "string") return undefined;
-  const s = input.trim().toLowerCase();
-
-  // Accept codes directly
-  if (s === "en" || s === "es") return s as Language;
-
-  // Accept common labels / variants
-  if (s === "english") return "en";
-  if (s === "spanish" || s === "español") return "es";
-
-  return undefined;
-}
