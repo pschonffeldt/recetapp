@@ -1,9 +1,3 @@
-// ============================================
-// Create Recipe Page (SSR)
-// - Shows breadcrumb trail and the recipe creation form
-// - No data fetching needed here (form handles its own needs)
-// ============================================
-
 /* ================================
  * Imports (grouped by role)
  * ================================ */

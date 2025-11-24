@@ -7,6 +7,7 @@ import { createRecipe } from "@/app/lib/actions";
 import { capitalizeFirst } from "@/app/lib/utils";
 import { RECIPE_TYPES, DIFFICULTY } from "@/app/lib/definitions";
 import { RecipeFormState } from "@/app/lib/action-types";
+import IngredientsEditor from "@/app/ui/recipes/ingredients-editor";
 
 export default function RecipeForm() {
   const initialState: RecipeFormState = { message: null, errors: {} };
@@ -108,34 +109,8 @@ export default function RecipeForm() {
           </div>
         </div>
 
-        {/* Ingredients (one per line) */}
-        <div className="mb-4">
-          <label
-            htmlFor="recipe_ingredients"
-            className="mb-2 block text-sm font-medium"
-          >
-            Ingredients (one per line)
-          </label>
-          <textarea
-            id="recipe_ingredients"
-            name="recipe_ingredients"
-            rows={5}
-            placeholder={"Pan\nPalta\nSal"}
-            className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base placeholder:text-gray-500"
-            aria-describedby="recipe_ingredients-error"
-          />
-          <div
-            id="recipe_ingredients-error"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {state.errors?.recipe_ingredients?.map((e) => (
-              <p className="mt-2 text-sm text-red-500" key={e}>
-                {e}
-              </p>
-            ))}
-          </div>
-        </div>
+        {/* ✅ NEW: Structured ingredients editor */}
+        <IngredientsEditor initial={[]} />
 
         {/* Steps (one per line) */}
         <div className="mb-4">
@@ -192,6 +167,7 @@ export default function RecipeForm() {
             ))}
           </div>
         </div>
+
         {/* Allergens (one per line) */}
         <div className="mb-4">
           <label htmlFor="allergens" className="mb-2 block text-sm font-medium">
@@ -213,6 +189,7 @@ export default function RecipeForm() {
             ))}
           </div>
         </div>
+
         {/* Dietary flags (one per line) */}
         <div className="mb-4">
           <label
@@ -237,7 +214,8 @@ export default function RecipeForm() {
             ))}
           </div>
         </div>
-        {/* Input for servings, prep time, caloreis & cost */}
+
+        {/* Servings, prep time, calories & cost */}
         <div className="grid gap-4 md:grid-cols-4  sm:grid-cols-2">
           {/* Servings */}
           <div className="mb-4">
@@ -262,6 +240,7 @@ export default function RecipeForm() {
               ))}
             </div>
           </div>
+
           {/* Prep time (minutes) */}
           <div className="mb-4">
             <label
@@ -285,6 +264,7 @@ export default function RecipeForm() {
               ))}
             </div>
           </div>
+
           {/* Calories (total) */}
           <div className="mb-4">
             <label
@@ -312,6 +292,7 @@ export default function RecipeForm() {
               ))}
             </div>
           </div>
+
           {/* Estimated cost (total) */}
           <div className="mb-4">
             <label

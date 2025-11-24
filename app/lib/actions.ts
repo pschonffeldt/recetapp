@@ -11,6 +11,10 @@ import { UpdateUserProfileSchema } from "./validation";
 import { toInt, toLines, toMoney } from "./form-helpers";
 import { RecipeFormState } from "./action-types";
 import { requireAdmin, requireUserId } from "./auth-helpers";
+import type {
+  IngredientUnit,
+  IncomingIngredientPayload,
+} from "@/app/lib/definitions";
 
 /* ================================
  * Database Client
@@ -34,11 +38,11 @@ const RecipeSchema = z.object({
   recipe_type: z.enum(["breakfast", "lunch", "dinner", "dessert", "snack"]),
 
   recipe_ingredients: z
-    .array(z.string().min(1))
-    .min(1, "Enter at least one ingredient"),
+    .array(z.string().min(1)) // elements must be non-empty strings
+    .optional()
+    .default([]),
   recipe_steps: z.array(z.string().min(1)).min(1, "Enter at least one step"),
 
-  // NEW — no `optional()` here; we use defaults so undefined never escapes
   servings: z
     .number()
     .int()
@@ -143,11 +147,36 @@ export async function createRecipe(
   // 1) Enforce auth via helper
   const userId = await requireUserId(); // throws if not logged in
 
+  // ✅ Read structured ingredients coming from IngredientsEditor
+  const rawIngredients = formData.get("ingredientsJson");
+
+  let structuredIngredients: IncomingIngredientPayload[] = [];
+
+  if (typeof rawIngredients === "string" && rawIngredients.trim() !== "") {
+    try {
+      structuredIngredients = JSON.parse(
+        rawIngredients
+      ) as IncomingIngredientPayload[];
+    } catch (e) {
+      console.error("Failed to parse ingredientsJson:", e);
+      // you can choose to return a form error here if you want
+      structuredIngredients = [];
+    }
+  }
+
+  // For now we store only the ingredient names in recipe_ingredients (text[])
+  const ingredientNames = structuredIngredients.map(
+    (ing) => ing.ingredientName
+  );
+
   // 2) Validate & normalize
   const parsed = RecipeSchema.safeParse({
     recipe_name: formData.get("recipe_name"),
     recipe_type: formData.get("recipe_type"),
-    recipe_ingredients: toLines(formData.get("recipe_ingredients")) ?? [],
+
+    // ⬇️ use structured ingredient names instead of the old textarea
+    recipe_ingredients: ingredientNames,
+
     recipe_steps: toLines(formData.get("recipe_steps")) ?? [],
     servings: toInt(formData.get("servings")),
     prep_time_min: toInt(formData.get("prep_time_min")),
@@ -200,7 +229,6 @@ export async function createRecipe(
   } catch (e) {
     console.error("Create recipe failed:", e);
     const msg = (e as any)?.message ?? String(e);
-    // 3) Friendlier DB error surfaces
     if (msg.includes("recipes_user_id_fkey"))
       return {
         message: "Your session expired—please log in again.",
@@ -853,5 +881,170 @@ export async function createNotification(
   } catch (e) {
     console.error("createNotification failed:", e);
     return { ok: false, message: "Failed to create notification." };
+  }
+}
+
+/* =======================================================
+ * Ingredients handling
+ * ======================================================= */
+
+// A literal list of valid units to validate against
+const VALID_INGREDIENT_UNITS: IngredientUnit[] = [
+  "ml",
+  "l",
+  "tsp",
+  "tbsp",
+  "cup_metric",
+  "cup_us",
+  "fl_oz",
+  "pt",
+  "qt",
+  "gal",
+  "pinch",
+  "dash",
+  "drop",
+  "splash",
+  "g",
+  "kg",
+  "oz",
+  "lb",
+  "mm",
+  "cm",
+  "in",
+  "celsius",
+  "fahrenheit",
+  "piece",
+];
+
+const IngredientPayloadSchema = z.object({
+  ingredientName: z.string().trim().min(1),
+  quantity: z.number().nullable(),
+  unit: z
+    .string()
+    .nullable()
+    .transform((v) => (v === null ? null : (v as IngredientUnit))),
+  isOptional: z.boolean(),
+  position: z.number().int().nonnegative(),
+});
+
+const IngredientsPayloadSchema = z.array(IngredientPayloadSchema);
+
+export async function parseIngredientsJson(
+  formData: FormData
+): Promise<{ ingredients: IncomingIngredientPayload[]; error?: string }> {
+  const raw = formData.get("ingredientsJson");
+
+  if (typeof raw !== "string" || !raw.trim()) {
+    return { ingredients: [], error: undefined };
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as any[];
+
+    const cleaned: IncomingIngredientPayload[] = [];
+
+    parsed.forEach((item, index) => {
+      if (!item) return;
+
+      const name = String(item.ingredientName ?? "").trim();
+      if (!name) return;
+
+      let qty: number | null = null;
+      if (
+        item.quantity !== null &&
+        item.quantity !== undefined &&
+        item.quantity !== ""
+      ) {
+        const n = Number(item.quantity);
+        if (Number.isFinite(n)) qty = n;
+      }
+
+      const rawUnit = item.unit as string | null | undefined;
+      const unit =
+        rawUnit && rawUnit.length ? (rawUnit as IngredientUnit) : null;
+
+      const isOptional = Boolean(item.isOptional);
+
+      cleaned.push({
+        ingredientName: name,
+        quantity: qty,
+        unit,
+        isOptional,
+        position: typeof item.position === "number" ? item.position : index,
+      });
+    });
+
+    return { ingredients: cleaned, error: undefined };
+  } catch (e) {
+    console.error("parseIngredientsJson failed:", e);
+    return {
+      ingredients: [],
+      error: "Ingredients data is invalid.",
+    };
+  }
+}
+
+// Simple slug helper; replace with your own if you already have one
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // remove accents
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+async function syncRecipeIngredients(
+  recipeId: string,
+  ingredients: IncomingIngredientPayload[]
+) {
+  // Remove previous structured ingredients
+  await sql/* sql */ `
+    DELETE FROM public.recipe_ingredients
+    WHERE recipe_id = ${recipeId}::uuid
+  `;
+
+  if (!ingredients.length) {
+    console.log("DEBUG: no ingredients to sync for recipe", recipeId);
+    return;
+  }
+
+  for (const ing of ingredients) {
+    const trimmedName = ing.ingredientName.trim();
+    if (!trimmedName) continue;
+
+    const slug = slugify(trimmedName);
+
+    // Upsert ingredient
+    const ingredientRows = await sql<{ id: string }[]>/* sql */ `
+      INSERT INTO public.ingredients (name, slug)
+      VALUES (${trimmedName}, ${slug})
+      ON CONFLICT (slug)
+      DO UPDATE SET name = EXCLUDED.name
+      RETURNING id
+    `;
+
+    const ingredientId = ingredientRows[0]?.id;
+    if (!ingredientId) continue;
+
+    // Link recipe + ingredient
+    await sql/* sql */ `
+      INSERT INTO public.recipe_ingredients (
+        recipe_id,
+        ingredient_id,
+        quantity,
+        unit,
+        is_optional,
+        position
+      )
+      VALUES (
+        ${recipeId}::uuid,
+        ${ingredientId}::uuid,
+        ${ing.quantity},
+        ${ing.unit},
+        ${ing.isOptional},
+        ${ing.position}
+      )
+    `;
   }
 }

@@ -287,6 +287,36 @@ export function normalizeLanguage(input: unknown): Language | undefined {
 }
 
 /* =======================================================
+ * Ingredients
+ * ======================================================= */
+export type Ingredient = {
+  id: string;
+  name: string;
+  slug: string;
+  defaultUnit: IngredientUnit | null;
+  notes?: string | null;
+};
+
+export type RecipeIngredient = {
+  id: string;
+  recipeId: string;
+  ingredientId: string;
+  ingredientName: string;
+  quantity: number | null;
+  unit: IngredientUnit | null;
+  isOptional: boolean;
+  position: number;
+};
+
+export type IncomingIngredientPayload = {
+  ingredientName: string;
+  quantity: number | null;
+  unit: IngredientUnit | null;
+  isOptional: boolean;
+  position: number;
+};
+
+/* =======================================================
  * Units
  * ======================================================= */
 export type IngredientUnit =
