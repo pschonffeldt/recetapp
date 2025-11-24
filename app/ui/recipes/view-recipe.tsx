@@ -8,9 +8,69 @@ import { inter } from "../branding/fonts";
 import { MetricCard, MetricCardMobile } from "./recipe-indicators";
 import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils";
 import { RecipeFormState } from "@/app/lib/action-types";
+import { IncomingIngredientPayload, UNIT_LABELS } from "@/app/lib/definitions";
 
-// helper (local)
-const asDate = (d: string | Date) => (d instanceof Date ? d : new Date(d));
+// If your column is jsonb, the driver may give you:
+// - an array of objects
+// - or a JSON string
+// This helper normalizes that into `IncomingIngredientPayload[]`.
+function getStructuredIngredientsFromRecipe(
+  recipe: RecipeForm
+): IncomingIngredientPayload[] {
+  const raw = (recipe as any).recipe_ingredients_structured;
+
+  if (!raw) return [];
+
+  // Already parsed JSON (common with json/jsonb columns)
+  if (Array.isArray(raw)) {
+    return raw as IncomingIngredientPayload[];
+  }
+
+  // Stringified JSON
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed as IncomingIngredientPayload[];
+      }
+    } catch (e) {
+      console.error("Failed to parse structured ingredients JSON:", e);
+    }
+  }
+
+  return [];
+}
+
+// Turn one structured ingredient into a label string.
+function formatIngredient(ing: IncomingIngredientPayload): string {
+  const unitLabel = ing.unit ? UNIT_LABELS[ing.unit] ?? ing.unit : "";
+  const qtyPart =
+    ing.quantity != null
+      ? unitLabel
+        ? `${ing.quantity} ${unitLabel}`
+        : String(ing.quantity)
+      : "";
+
+  const base = qtyPart
+    ? `${qtyPart} ${ing.ingredientName}`
+    : ing.ingredientName;
+
+  return ing.isOptional ? `${base} (optional)` : base;
+}
+
+// Build the list of strings to feed into <MetricCard />.
+function buildIngredientLines(recipe: RecipeForm): string[] {
+  const structured = getStructuredIngredientsFromRecipe(recipe);
+
+  if (structured.length === 0) {
+    // Fallback to legacy plain-text ingredients
+    return recipe.recipe_ingredients ?? [];
+  }
+
+  return [...structured]
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+    .map(formatIngredient);
+}
 
 export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
   const initial: RecipeFormState = { message: null, errors: {} };
@@ -23,7 +83,9 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
     });
   }
 
-  // Render page
+  // ---------- Structured ingredients → pretty strings ----------
+  const ingredientLines = buildIngredientLines(recipe);
+
   return (
     <div>
       <div id="print" className="rounded-md border-gray-200 bg-gray-50 p-6">
@@ -34,26 +96,23 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
           </h1>
         </header>
 
-        {/* Stats mobile*/}
+        {/* Stats mobile */}
         <section className="mb-6 grid gap-4 sm:grid-cols-4 md:hidden grid-cols-2">
           <MetricCardMobile
             title="Creation date"
             value={formatDateToLocal(recipe.recipe_created_at!)}
             fontClassName={inter.className}
           />
-          {/* Last edit */}
           <MetricCardMobile
             title="Last edit"
             value={formatDateToLocal(recipe.recipe_updated_at!)}
             fontClassName={inter.className}
           />
-          {/* Recipe type */}
           <MetricCardMobile
             title="Recipe type"
             value={capitalizeFirst(recipe.recipe_type)}
             fontClassName={inter.className}
           />
-          {/* Preparation difficulty */}
           <MetricCardMobile
             title="Preparation difficulty"
             value={capitalizeFirst(recipe.difficulty)}
@@ -65,24 +124,18 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             unit="servings"
             fontClassName={inter.className}
           />
-
-          {/* Prep time */}
           <MetricCardMobile
             title="Prep time"
             value={recipe.prep_time_min}
             unit="min"
             fontClassName={inter.className}
           />
-
-          {/* Recipe calories (total) */}
           <MetricCardMobile
             title="Recipe calories"
             value={recipe.calories_total}
             unit="kcal"
             fontClassName={inter.className}
           />
-
-          {/* Recipe cost (total) */}
           <MetricCardMobile
             title="Recipe cost"
             value={
@@ -94,8 +147,6 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             unitPosition="left"
             fontClassName={inter.className}
           />
-
-          {/* Calories per serving */}
           <MetricCardMobile
             title="Calories / serving"
             value={
@@ -108,8 +159,6 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             unit="kcal"
             fontClassName={inter.className}
           />
-
-          {/* Cost per serving */}
           <MetricCardMobile
             title="Cost / serving"
             value={
@@ -126,16 +175,12 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             unitPosition="left"
             fontClassName={inter.className}
           />
-
-          {/* Allergens (0/1 centered, 2+ list) */}
           <MetricCardMobile
             title="Allergens"
             items={recipe.allergens}
             emptyLabel="No allergens."
             fontClassName={inter.className}
           />
-
-          {/* Dietary flags (0/1 centered, 2+ list) */}
           <MetricCardMobile
             title="Dietary flags"
             items={recipe.dietary_flags}
@@ -146,52 +191,44 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
 
         {/* Stats desktop */}
         <section className="hidden md:grid md:grid-cols-4 gap-4 mb-6">
-          {/* Creation date */}
           <MetricCard
             title="Creation date"
             value={formatDateToLocal(recipe.recipe_created_at!)}
             fontClassName={inter.className}
           />
-          {/* Last edit */}
           <MetricCard
             title="Last edit"
             value={formatDateToLocal(recipe.recipe_updated_at!)}
             fontClassName={inter.className}
           />
-          {/* Recipe type */}
           <MetricCard
             title="Recipe type"
             value={capitalizeFirst(recipe.recipe_type)}
             fontClassName={inter.className}
           />
-          {/* Preparation difficulty */}
           <MetricCard
             title="Preparation difficulty"
             value={capitalizeFirst(recipe.difficulty)}
             fontClassName={inter.className}
           />
-          {/* Servings */}
           <MetricCard
             title="Servings"
             value={recipe.servings}
             unit="servings"
             fontClassName={inter.className}
           />
-          {/* Prep time */}
           <MetricCard
             title="Prep time"
             value={recipe.prep_time_min}
             unit="min"
             fontClassName={inter.className}
           />
-          {/* Recipe calories (total) */}
           <MetricCard
             title="Recipe calories"
             value={recipe.calories_total}
             unit="kcal"
             fontClassName={inter.className}
           />
-          {/* Recipe cost (total) */}
           <MetricCard
             title="Recipe cost"
             value={
@@ -203,21 +240,18 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             unitPosition="left"
             fontClassName={inter.className}
           />
-          {/* Allergens (0/1 centered, 2+ list) */}
           <MetricCard
             title="Allergens"
             items={recipe.allergens}
             emptyLabel="No allergens."
             fontClassName={inter.className}
           />
-          {/* Dietary flags (0/1 centered, 2+ list) */}
           <MetricCard
             title="Dietary flags"
             items={recipe.dietary_flags}
             emptyLabel="No dietary flags."
             fontClassName={inter.className}
           />
-          {/* Calories per serving */}
           <MetricCard
             title="Calories / serving"
             value={
@@ -230,7 +264,6 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             unit="kcal"
             fontClassName={inter.className}
           />
-          {/* Cost per serving */}
           <MetricCard
             title="Cost / serving"
             value={
@@ -248,20 +281,18 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             fontClassName={inter.className}
           />
         </section>
-        {/* Stats third row */}
+
         {/* Ingredients & Steps */}
         <section className="mb-6 grid gap-3 items-stretch sm:grid-cols-2">
-          {/* Left: Ingredients (stretches to natural height) */}
           <MetricCard
             title="Ingredients"
-            items={recipe.recipe_ingredients}
+            items={ingredientLines}
             emptyLabel="No ingredients."
             listStyle="disc"
             fontClassName={inter.className}
             className="h-full"
           />
 
-          {/* Right: Steps + Equipment (even heights) */}
           <div className="flex h-full flex-col gap-3">
             <MetricCard
               title="Steps"
@@ -269,7 +300,7 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
               emptyLabel="No steps."
               listStyle="decimal"
               fontClassName={inter.className}
-              className="flex-1" // <-- take half
+              className="flex-1"
             />
             <MetricCard
               title="Equipment"
@@ -277,7 +308,7 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
               emptyLabel="No equipment."
               listStyle="disc"
               fontClassName={inter.className}
-              className="flex-1" // <-- take the other half
+              className="flex-1"
             />
           </div>
         </section>

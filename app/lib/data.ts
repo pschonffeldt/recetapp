@@ -97,6 +97,60 @@ export async function fetchLatestRecipes() {
   return data;
 }
 
+// Full recipe row used by viewer / editor
+export type DbRecipeRow = {
+  id: string;
+  recipe_name: string;
+  recipe_ingredients: string[] | null;
+  recipe_ingredients_structured: any | null;
+  recipe_steps: string[] | null;
+  recipe_type: string | null;
+  servings: number | null;
+  prep_time_min: number | null;
+  difficulty: string | null;
+  status: string | null;
+  dietary_flags: string[] | null;
+  allergens: string[] | null;
+  calories_total: number | null;
+  estimated_cost_total: number | null;
+  equipment: string[] | null;
+  recipe_created_at: Date;
+  recipe_updated_at: Date | null;
+  user_id: string;
+};
+
+export async function getRecipeById(id: string): Promise<DbRecipeRow | null> {
+  const userId = await requireUserId();
+
+  const rows = await sql<DbRecipeRow[]>/* sql */ `
+    SELECT
+      r.id,
+      r.recipe_name,
+      r.recipe_ingredients,
+      r.recipe_ingredients_structured,
+      r.recipe_steps,
+      r.recipe_type,
+      r.servings,
+      r.prep_time_min,
+      r.difficulty,
+      r.status,
+      r.dietary_flags,
+      r.allergens,
+      r.calories_total,
+      r.estimated_cost_total,
+      r.equipment,
+      r.recipe_created_at,
+      r.recipe_updated_at,
+      r.user_id
+    FROM public.recipes AS r
+    WHERE r.id = ${id}::uuid
+      AND r.user_id = ${userId}::uuid
+    LIMIT 1
+  `;
+
+  return rows[0] ?? null;
+}
+
 /* =======================================================
  * Dashboard KPI
  * Fetch dashboard KPI card data (counts + totals by status).
@@ -497,6 +551,7 @@ export async function fetchRecipeByIdForOwner(
       id,
       recipe_name,
       recipe_ingredients,
+      recipe_ingredients_structured,
       recipe_steps,
       recipe_type,
       servings,

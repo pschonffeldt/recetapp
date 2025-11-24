@@ -98,6 +98,7 @@ export type RecipeForm = {
   equipment?: string[]; // text[]
   recipe_updated_at?: string;
   recipe_created_at: string;
+  recipe_ingredients_structured?: string | null; // JSON from DB
 };
 
 /* =======================================================
