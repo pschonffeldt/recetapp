@@ -145,9 +145,9 @@ export async function createRecipe(
   formData: FormData
 ): Promise<RecipeFormState> {
   // 1) Enforce auth via helper
-  const userId = await requireUserId(); // throws if not logged in
+  const userId = await requireUserId();
 
-  // ✅ Read structured ingredients coming from IngredientsEditor
+  // 2) Read structured ingredients coming from IngredientsEditor
   const rawIngredients = formData.get("ingredientsJson");
 
   let structuredIngredients: IncomingIngredientPayload[] = [];
@@ -159,24 +159,20 @@ export async function createRecipe(
       ) as IncomingIngredientPayload[];
     } catch (e) {
       console.error("Failed to parse ingredientsJson:", e);
-      // you can choose to return a form error here if you want
       structuredIngredients = [];
     }
   }
 
-  // For now we store only the ingredient names in recipe_ingredients (text[])
+  // We still keep the text[] names for legacy UI / stats
   const ingredientNames = structuredIngredients.map(
     (ing) => ing.ingredientName
   );
 
-  // 2) Validate & normalize
+  // 3) Validate & normalize main recipe fields
   const parsed = RecipeSchema.safeParse({
     recipe_name: formData.get("recipe_name"),
     recipe_type: formData.get("recipe_type"),
-
-    // ⬇️ use structured ingredient names instead of the old textarea
     recipe_ingredients: ingredientNames,
-
     recipe_steps: toLines(formData.get("recipe_steps")) ?? [],
     servings: toInt(formData.get("servings")),
     prep_time_min: toInt(formData.get("prep_time_min")),
@@ -202,13 +198,30 @@ export async function createRecipe(
 
   const d = parsed.data;
 
+  // Serialize structured ingredients once, with a clear null fallback
+  const structuredJson =
+    structuredIngredients.length > 0
+      ? JSON.stringify(structuredIngredients)
+      : null;
+
   try {
     await sql/* sql */ `
       INSERT INTO public.recipes (
-        recipe_name, recipe_ingredients, recipe_steps, recipe_type,
-        servings, prep_time_min, difficulty, status,
-        dietary_flags, allergens, calories_total, estimated_cost_total, equipment,
-        user_id
+        recipe_name,
+        recipe_ingredients,
+        recipe_steps,
+        recipe_type,
+        servings,
+        prep_time_min,
+        difficulty,
+        status,
+        dietary_flags,
+        allergens,
+        calories_total,
+        estimated_cost_total,
+        equipment,
+        user_id,
+        recipe_ingredients_structured
       ) VALUES (
         ${d.recipe_name},
         ${d.recipe_ingredients}::text[],
@@ -223,19 +236,24 @@ export async function createRecipe(
         ${d.calories_total}::int,
         ${d.estimated_cost_total}::numeric,
         ${d.equipment}::text[],
-        ${userId}::uuid
+        ${userId}::uuid,
+        ${structuredJson}::jsonb
       );
     `;
   } catch (e) {
     console.error("Create recipe failed:", e);
     const msg = (e as any)?.message ?? String(e);
-    if (msg.includes("recipes_user_id_fkey"))
+
+    if (msg.includes("recipes_user_id_fkey")) {
       return {
         message: "Your session expired—please log in again.",
         errors: {},
       };
-    if (msg.includes("invalid input value for enum"))
+    }
+    if (msg.includes("invalid input value for enum")) {
       return { message: "Invalid recipe type or difficulty.", errors: {} };
+    }
+    // Any other DB error ends up here
     return { message: "Failed to create recipe.", errors: {} };
   }
 
