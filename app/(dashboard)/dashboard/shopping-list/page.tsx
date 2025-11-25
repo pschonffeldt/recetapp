@@ -76,7 +76,7 @@ function formatAggregatedItem(item: AggregatedItem): string {
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: { recipes?: string };
+  searchParams?: Promise<{ recipes?: string }>;
 }) {
   const session = await auth();
   const id = (session?.user as any)?.id as string | undefined;
@@ -85,11 +85,9 @@ export default async function Page({
   const user = await fetchUserById(id);
   if (!user) notFound();
 
-  // Fetch all recipes for the picker
-  const recipes = await fetchRecipesForUser(id);
-
-  // Read ?recipes=<id1>,<id2>,<id3>
-  const raw = searchParams?.recipes;
+  // --- NEW: resolve searchParams Promise safely ---
+  const sp = searchParams ? await searchParams : {};
+  const raw = sp.recipes;
   const recipeIds =
     raw && raw.trim().length > 0
       ? raw
@@ -97,6 +95,9 @@ export default async function Page({
           .map((s) => s.trim())
           .filter(Boolean)
       : undefined; // undefined = “all recipes”
+
+  // Fetch all recipes for the picker
+  const recipes = await fetchRecipesForUser(id);
 
   // Get structured ingredients for this user (optionally filtered by recipes)
   const rawIngredients = await fetchIngredientsForUser(id, recipeIds);
@@ -120,7 +121,6 @@ export default async function Page({
       <section className="mt-4 rounded-md bg-gray-50 p-6">
         <h1 className="mb-4 text-xl font-semibold">Shopping list</h1>
 
-        {/* Recipe selector lives on this page */}
         <ShoppingListRecipePicker
           recipes={recipes}
           selectedIds={recipeIds ?? []}
