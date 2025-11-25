@@ -1,6 +1,22 @@
-/* =======================================================
+/**
+ * =============================================================================
+ * Domain Types & Shared Definitions for RecetApp
+ *
+ * This file is the single source of truth for:
+ * - User entities (DB rows, app-safe shapes, roles)
+ * - Recipe entities (table views, forms, helpers)
+ * - Notifications (DB rows, app-safe shapes, inputs)
+ * - Ingredients, units and shopping list aggregation
+ * - Language / country options for forms
+ *
+ * Keep anything that is shared across server/client or multiple modules here.
+ * =============================================================================
+ */
+
+/* =============================================================================
  * User Entities (single source of truth)
- * ======================================================= */
+ * =============================================================================
+ */
 
 /** Allowed roles in the app. Keep this the only role type. */
 export type Role = "user" | "admin";
@@ -17,7 +33,10 @@ export type DbUserRow = {
   user_role: Role; // enum/text in DB
 };
 
-/** Safe shape to use across the app (client/server) and in session. */
+/**
+ * Safe shape to use across the app (client/server) and in session.
+ * This intentionally omits password and other sensitive fields.
+ */
 export type AppUser = {
   id: string;
   name: string | null;
@@ -28,19 +47,28 @@ export type AppUser = {
   user_role: Role; // same property name as DB for simplicity
 };
 
-/** Backwards-compat: many places may import `User`. */
+/**
+ * Backwards-compat alias.
+ * Some places may still import `User`; keep it mapped to AppUser.
+ */
 export type User = AppUser;
 
-/** Narrowing helpers */
+/** Type guard for role strings. */
 export const isAdminRole = (r?: string | null): r is "admin" => r === "admin";
+
+/** Narrowing helper to check if a given user is an admin. */
 export const isUserAdmin = (u?: { user_role?: string | null }) =>
   isAdminRole(u?.user_role);
 
-/* =======================================================
+/* =============================================================================
  * Revenue Entities
- * ======================================================= */
+ * =============================================================================
+ */
 
-/** Aggregated revenue row (e.g., for charts). */
+/**
+ * Aggregated revenue row (e.g., for charts).
+ * Typical usage: monthly revenue for line/bar charts.
+ */
 export type Revenue = {
   /** Month label (e.g., "Jan", "2025-01"). */
   month: string;
@@ -48,11 +76,15 @@ export type Revenue = {
   revenue: number;
 };
 
-/* =======================================================
- * Recipes table
- * ======================================================= */
+/* =============================================================================
+ * Recipes — Table + Form Types
+ * =============================================================================
+ */
 
-/** Recipe row used in paginated table views. */
+/**
+ * Row used in paginated recipes table views.
+ * This is a lightweight projection from the full recipes table.
+ */
 export type RecipesTable = {
   id: string;
   recipe_name: string;
@@ -66,21 +98,27 @@ export type RecipesTable = {
   recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
 };
 
-/* =======================================================
- * Recipe form Helpers (Dropdowns / Forms)
- * ======================================================= */
+/* -----------------------------------------------------------------------------
+ * Recipe form helpers (dropdowns / forms)
+ * -------------------------------------------------------------------------- */
 
-/** Minimal recipe record for selects. */
+/** Minimal recipe record for selects, dropdowns, etc. */
 export type RecipeField = {
   id: string;
   recipe_name: string;
   recipe_type: "breakfast" | "lunch" | "dinner" | "dessert" | "snack";
 };
 
-/** Full recipe shape for edit/create forms. */
+/** Difficulty levels for recipes. */
 export type Difficulty = "easy" | "medium" | "hard";
+
+/** Visibility of a recipe (who can see it). */
 export type Visibility = "private" | "public";
 
+/**
+ * Full recipe shape for edit/create forms.
+ * This is the DTO used by the RecipeForm UI.
+ */
 export type RecipeForm = {
   id: string;
   recipe_name: string;
@@ -98,15 +136,24 @@ export type RecipeForm = {
   equipment?: string[]; // text[]
   recipe_updated_at?: string;
   recipe_created_at: string;
+  /**
+   * Structured ingredients:
+   * - array: current normalized shape
+   * - string: legacy JSON-encoded form
+   * - null: no structured ingredients yet
+   */
   recipe_ingredients_structured?: IncomingIngredientPayload[] | string | null;
 };
 
-/* =======================================================
- * User form Helpers (Dropdowns / Forms)
- * ======================================================= */
+/* =============================================================================
+ * User Form Helpers (Account settings)
+ * =============================================================================
+ */
 
-// Account settings, user form
-
+/**
+ * Shape used by the account settings / user form.
+ * Note: password here is the plain value used for forms, not necessarily DB.
+ */
 export type UserForm = {
   id: string;
   name: string;
@@ -117,17 +164,24 @@ export type UserForm = {
   language: Language;
 };
 
-//  To be organized, used on dashboard latest recipe table
+/* =============================================================================
+ * Dashboard — Latest recipes / Notifications result
+ * =============================================================================
+ */
+
+/**
+ * Raw latest recipe shape used on the dashboard “Latest recipes” table.
+ */
 export type LatestRecipeRaw = {
   id: string;
   recipe_name: string;
-  recipe_created_at: string; // or `created_at` if that's your column
-  recipe_ingredients: string[]; // assuming text[]
-  recipe_steps: string[]; // assuming text[]
+  recipe_created_at: string;
+  recipe_ingredients: string[]; // text[]
+  recipe_steps: string[]; // text[]
   recipe_type: string;
 };
 
-//  For notifications fetch
+/** Raw notification shape (legacy; kept for compatibility if needed). */
 export type NotificationsRaw = {
   id: string;
   title: string;
@@ -135,6 +189,9 @@ export type NotificationsRaw = {
   status: string[]; // assuming text[]
 };
 
+/**
+ * Shared result shape for the notifications listing API.
+ */
 export type FetchNotificationsResult = {
   items: AppNotification[];
   total: number;
@@ -142,10 +199,14 @@ export type FetchNotificationsResult = {
   pageSize: number;
 };
 
-/* =======================================================
- * Dashboard upper OKRs
- * ======================================================= */
+/* =============================================================================
+ * Dashboard — KPI cards
+ * =============================================================================
+ */
 
+/**
+ * KPI metrics for the dashboard “upper” cards.
+ */
 export type CardData = {
   totalRecipes: number;
   avgIngredients: number;
@@ -153,10 +214,15 @@ export type CardData = {
   totalIngredients: number;
 };
 
-/* =======================================================
- * Recipes types and difficulty
- * ======================================================= */
-// this are the recipe types I use on my edit feature
+/* =============================================================================
+ * Recipes — Types and Difficulty helpers
+ * =============================================================================
+ */
+
+/**
+ * Allowed recipe types used across the app.
+ * NOTE: keep in sync with the Postgres enum (if any).
+ */
 export const RECIPE_TYPES = [
   "breakfast",
   "lunch",
@@ -165,13 +231,21 @@ export const RECIPE_TYPES = [
   "snack",
 ] as const;
 
-// this are the recipe dofficulty
+/**
+ * Allowed recipe difficulty levels.
+ * NOTE: keep in sync with the Postgres enum (if any).
+ */
 export const DIFFICULTY = ["easy", "medium", "hard"] as const;
 
-/* =======================================================
+/* =============================================================================
  * Notifications
- * ======================================================= */
+ * =============================================================================
+ */
 
+/**
+ * Raw notifications row from the database.
+ * Matches public.notifications.
+ */
 export type DbNotificationRow = {
   id: string;
   user_id: string | null;
@@ -186,6 +260,10 @@ export type DbNotificationRow = {
   updated_at: string;
 };
 
+/**
+ * App-safe notification representation.
+ * Converts timestamps into Date objects and normalizes names.
+ */
 export type AppNotification = Omit<
   DbNotificationRow,
   "published_at" | "created_at" | "updated_at" | "user_id" | "link_url"
@@ -197,8 +275,12 @@ export type AppNotification = Omit<
   updatedAt: Date;
 };
 
+/**
+ * Map a raw DB notification row into the AppNotification shape.
+ */
 export function toAppNotification(dbRow: DbNotificationRow): AppNotification {
   const toDate = (v?: string | null) => (v ? new Date(v) : null);
+
   return {
     id: dbRow.id,
     userId: dbRow.user_id,
@@ -214,8 +296,12 @@ export function toAppNotification(dbRow: DbNotificationRow): AppNotification {
   };
 }
 
+/**
+ * Input shape for creating a new notification.
+ * Used by server actions / APIs.
+ */
 export type NewNotificationInput = {
-  // null → broadcast; uuid → personal
+  // null → broadcast notification; uuid → personal notification
   userId: string | null;
   title: string;
   body: string;
@@ -228,6 +314,9 @@ export type NewNotificationInput = {
   publishAt?: string | null; // ISO string; server will coerce to timestamptz
 };
 
+/**
+ * Generic result shape for "create notification" operations.
+ */
 export type CreateNotificationResult = {
   ok: boolean;
   message: string | null;
@@ -235,34 +324,37 @@ export type CreateNotificationResult = {
   errors?: Record<string, string[]>;
 };
 
-// ==========================
-// Language (codes must match your Postgres enum: user_language)
-// ==========================
+/* =============================================================================
+ * Language (codes must match your Postgres enum: user_language)
+ * =============================================================================
+ */
 
-// Canonical codes that the DB accepts.
+/** Canonical language codes that the DB accepts. */
 export const LANGUAGE = ["en", "es"] as const;
 export type Language = (typeof LANGUAGE)[number];
 
-// Default language for new users / fallbacks
+/** Default language for new users / fallbacks. */
 export const DEFAULT_LANGUAGE: Language = "en";
 
-// Options for selects (what you wanted)
+/** Options for selects (value/label). */
 export const LANGUAGE_OPTIONS = [
   { value: "en", label: "English" },
   { value: "es", label: "Spanish" },
 ] as const;
+
+/** Shorthand for just the code part of LANGUAGE_OPTIONS. */
 export type LanguageCode = (typeof LANGUAGE_OPTIONS)[number]["value"];
 
-// Quick map from code -> label (handy for badges, etc.)
+/** Quick map from code -> human-friendly label (useful for badges, etc.). */
 export const LANGUAGE_LABEL: Record<Language, string> = {
   en: "English",
   es: "Spanish",
 };
 
-// Fast membership check
+/** Fast membership set for language codes. */
 export const LANGUAGE_SET: ReadonlySet<Language> = new Set(LANGUAGE);
 
-// Type guard
+/** Type guard to check whether a value is a valid Language. */
 export function isLanguage(v: unknown): v is Language {
   return typeof v === "string" && LANGUAGE_SET.has(v as Language);
 }
@@ -287,9 +379,14 @@ export function normalizeLanguage(input: unknown): Language | undefined {
   return undefined;
 }
 
-/* =======================================================
+/* =============================================================================
  * Ingredients
- * ======================================================= */
+ * =============================================================================
+ */
+
+/**
+ * Canonical ingredient row (if you later add an ingredients table).
+ */
 export type Ingredient = {
   id: string;
   name: string;
@@ -298,6 +395,9 @@ export type Ingredient = {
   notes?: string | null;
 };
 
+/**
+ * Relationship table between recipes and ingredients.
+ */
 export type RecipeIngredient = {
   id: string;
   recipeId: string;
@@ -309,6 +409,10 @@ export type RecipeIngredient = {
   position: number;
 };
 
+/**
+ * Payload for incoming structured ingredients.
+ * This is what we expect from the client / parsing layer.
+ */
 export type IncomingIngredientPayload = {
   ingredientName: string;
   quantity: number | null;
@@ -317,9 +421,14 @@ export type IncomingIngredientPayload = {
   position: number;
 };
 
-/* =======================================================
+/* =============================================================================
  * Units
- * ======================================================= */
+ * =============================================================================
+ */
+
+/**
+ * Units supported in RecetApp. Keep in sync with any DB enum you have.
+ */
 export type IngredientUnit =
   | "ml"
   | "l"
@@ -346,6 +455,9 @@ export type IngredientUnit =
   | "fahrenheit"
   | "piece";
 
+/**
+ * Human-readable labels for each unit, for UI display.
+ */
 export const UNIT_LABELS: Record<IngredientUnit, string> = {
   ml: "mL",
   l: "L",
@@ -373,15 +485,20 @@ export const UNIT_LABELS: Record<IngredientUnit, string> = {
   piece: "piece",
 };
 
-// (optional) handy list for selects
+/** Handy list of all units, typically used in selects. */
 export const ALL_UNITS: IngredientUnit[] = Object.keys(
   UNIT_LABELS
 ) as IngredientUnit[];
 
-/* =======================================================
- * Shopping list
- * ======================================================= */
+/* =============================================================================
+ * Shopping list (aggregated ingredients)
+ * =============================================================================
+ */
 
+/**
+ * Aggregated ingredient used in shopping list views.
+ * Multiple occurrences of the same ingredient/unit can be merged into one row.
+ */
 export type AggregatedIngredient = {
   ingredientName: string;
   unit: IngredientUnit | null;
@@ -390,11 +507,15 @@ export type AggregatedIngredient = {
   optionalOccurrences: number;
 };
 
-/* =======================================================
+/* =============================================================================
  * Countries
- * ======================================================= */
+ * =============================================================================
+ */
 
-// Countries list
+/**
+ * Countries list used in select inputs for the user profile.
+ * NOTE: pure UI-level list, not tied to any DB enum.
+ */
 export const COUNTRIES = [
   "Afghanistan",
   "Albania",
@@ -593,4 +714,5 @@ export const COUNTRIES = [
   "Zimbabwe",
 ] as const;
 
+/** Country type inferred from the COUNTRIES list. */
 export type Country = (typeof COUNTRIES)[number];
