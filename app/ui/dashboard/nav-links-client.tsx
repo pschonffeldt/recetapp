@@ -4,7 +4,12 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
 
-import { HomeIcon, MegaphoneIcon, UserIcon } from "@heroicons/react/24/outline";
+import {
+  HomeIcon,
+  MegaphoneIcon,
+  ShoppingCartIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
 import {
   DocumentPlusIcon,
   ShieldCheckIcon,
@@ -30,6 +35,11 @@ export default function NavLinksClient({ isAdmin }: Props) {
       name: "Notifications",
       href: "/dashboard/notifications",
       icon: MegaphoneIcon,
+    },
+    {
+      name: "Shopping list",
+      href: "/dashboard/shopping-list",
+      icon: ShoppingCartIcon,
     },
   ];
 

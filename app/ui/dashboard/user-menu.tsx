@@ -7,6 +7,7 @@ import {
   UserCircleIcon,
   PowerIcon,
   MegaphoneIcon,
+  ShoppingCartIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChartBarIcon,
@@ -20,6 +21,7 @@ type Props = {
   profileHref?: string;
   recipesHref?: string;
   notificationsHref?: string;
+  shoppinglistHref?: string;
 
   /** Admin-only routes */
   isAdmin?: boolean;
@@ -36,6 +38,7 @@ export default function UserSettingsFab({
   profileHref = "/dashboard/account",
   recipesHref = "/dashboard/recipes",
   notificationsHref = "/dashboard/notifications",
+  shoppinglistHref = "/dashboard/shopping-list",
 
   isAdmin = false,
   adminNotificationHref = "/dashboard/admin/notification-center",
@@ -146,6 +149,11 @@ export default function UserSettingsFab({
               icon={<MegaphoneIcon className="h-5 w-5" />}
               label="Notifications"
               onClick={() => go(notificationsHref)}
+            />
+            <MenuItem
+              icon={<ShoppingCartIcon className="h-5 w-5" />}
+              label="Shopping list"
+              onClick={() => go(shoppinglistHref)}
             />
             <MenuItem
               icon={<UserCircleIcon className="h-5 w-5" />}
