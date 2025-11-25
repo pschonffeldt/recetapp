@@ -5,14 +5,58 @@ import { updateRecipe } from "@/app/lib/actions";
 import { Button } from "@/app/ui/button";
 import Link from "next/link";
 import { capitalizeFirst } from "@/app/lib/utils";
-import { DIFFICULTY, RECIPE_TYPES, RecipeForm } from "@/app/lib/definitions";
+import {
+  DIFFICULTY,
+  RECIPE_TYPES,
+  type RecipeForm,
+  type IncomingIngredientPayload,
+} from "@/app/lib/definitions";
 import { RecipeFormState } from "@/app/lib/action-types";
+import IngredientsEditor from "@/app/ui/recipes/ingredients-editor";
 
 // initial state with strong typing
 const initialState: RecipeFormState = { message: null, errors: {} };
 
+/**
+ * Normalize the recipe's ingredients into the shape that IngredientsEditor
+ * expects as its `initial` prop.
+ */
+function getInitialIngredients(
+  recipe: RecipeForm
+): IncomingIngredientPayload[] {
+  const raw = recipe.recipe_ingredients_structured;
+
+  // Case 1: already an array (jsonb parsed by driver)
+  if (Array.isArray(raw)) {
+    return raw as IncomingIngredientPayload[];
+  }
+
+  // Case 2: JSON string
+  if (typeof raw === "string" && raw.trim() !== "") {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed as IncomingIngredientPayload[];
+      }
+    } catch (e) {
+      console.error("Failed to parse structured ingredients JSON:", e);
+    }
+  }
+
+  // Case 3: legacy text[] → minimal structured
+  return (recipe.recipe_ingredients ?? []).map((name, index) => ({
+    ingredientName: name,
+    quantity: null,
+    unit: null,
+    isOptional: false,
+    position: index,
+  }));
+}
+
 export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
   const [state, formAction] = useActionState(updateRecipe, initialState);
+
+  const initialIngredients = getInitialIngredients(recipe);
 
   return (
     <form action={formAction} className="pb-12">
@@ -45,6 +89,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               ))}
             </div>
           </div>
+
           {/* Recipe type */}
           <div className="mb-4">
             <label
@@ -74,6 +119,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               ))}
             </div>
           </div>
+
           {/* Difficulty */}
           <div className="mb-4">
             <label
@@ -106,22 +152,15 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               ))}
             </div>
           </div>
-          {/* Recipe ingredients */}
+
+          {/* Structured Ingredients editor */}
           <div className="mb-4">
-            <label
-              htmlFor="recipe_ingredients"
-              className="mb-2 block text-sm font-medium"
-            >
-              Ingredients (one per line)
-            </label>
-            <textarea
-              id="recipe_ingredients"
-              name="recipe_ingredients"
-              rows={5}
-              defaultValue={recipe.recipe_ingredients.join("\n")}
-              className="block w-full rounded-md border border-gray-200 p-2 text-base"
-              aria-describedby="recipe_ingredients-error"
-            />
+            {/* <label className="mb-2 block text-sm font-medium">
+              Ingredients
+            </label> */}
+
+            <IngredientsEditor initial={initialIngredients} />
+
             <div
               id="recipe_ingredients-error"
               aria-live="polite"
@@ -134,6 +173,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               ))}
             </div>
           </div>
+
           {/* Recipe steps */}
           <div className="mb-4">
             <label
@@ -158,6 +198,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               ))}
             </div>
           </div>
+
           {/* Equipment (array: one per line) */}
           <div className="mb-4">
             <label
@@ -182,7 +223,8 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               ))}
             </div>
           </div>
-          {/* Allergens (array: one per line) */}
+
+          {/* Allergens */}
           <div className="mb-4">
             <label
               htmlFor="allergens"
@@ -206,7 +248,8 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               ))}
             </div>
           </div>
-          {/* Dietary flags (array: one per line) */}
+
+          {/* Dietary flags */}
           <div className="mb-4">
             <label
               htmlFor="dietary_flags"
@@ -231,6 +274,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
             </div>
           </div>
         </div>
+
         {/* Other stats */}
         <div className="mb-6 grid gap-4 sm:grid-cols-4">
           {/* Servings */}
@@ -260,6 +304,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               ))}
             </div>
           </div>
+
           {/* Prep time (minutes) */}
           <div className="mb-4">
             <label
@@ -275,7 +320,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               inputMode="numeric"
               min={0}
               step={1}
-              defaultValue={recipe.prep_time_min ?? ""} // null-safe
+              defaultValue={recipe.prep_time_min ?? ""}
               className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="prep_time_min-error"
             />
@@ -287,6 +332,8 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               ))}
             </div>
           </div>
+
+          {/* Calories */}
           <div className="mb-4">
             <label
               htmlFor="calories_total"
@@ -301,7 +348,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               inputMode="numeric"
               min={0}
               step={1}
-              defaultValue={recipe.calories_total ?? ""} // number | ""
+              defaultValue={recipe.calories_total ?? ""}
               className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="calories_total-error"
             />
@@ -317,6 +364,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               ))}
             </div>
           </div>
+
           {/* Estimated cost (total) */}
           <div className="mb-4">
             <label
@@ -332,7 +380,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
               inputMode="decimal"
               min={0}
               step="0.01"
-              defaultValue={recipe.estimated_cost_total ?? ""} // string | ""
+              defaultValue={recipe.estimated_cost_total ?? ""}
               className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="estimated_cost_total-error"
             />

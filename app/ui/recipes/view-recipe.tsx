@@ -14,14 +14,15 @@ import { IncomingIngredientPayload, UNIT_LABELS } from "@/app/lib/definitions";
 // - an array of objects
 // - or a JSON string
 // This helper normalizes that into `IncomingIngredientPayload[]`.
+// Normalize DB value → array of IncomingIngredientPayload
 function getStructuredIngredientsFromRecipe(
   recipe: RecipeForm
 ): IncomingIngredientPayload[] {
-  const raw = (recipe as any).recipe_ingredients_structured;
+  const raw = recipe.recipe_ingredients_structured;
 
   if (!raw) return [];
 
-  // Already parsed JSON (common with json/jsonb columns)
+  // Already parsed array (common with json/jsonb)
   if (Array.isArray(raw)) {
     return raw as IncomingIngredientPayload[];
   }
@@ -41,7 +42,6 @@ function getStructuredIngredientsFromRecipe(
   return [];
 }
 
-// Turn one structured ingredient into a label string.
 function formatIngredient(ing: IncomingIngredientPayload): string {
   const unitLabel = ing.unit ? UNIT_LABELS[ing.unit] ?? ing.unit : "";
   const qtyPart =
@@ -58,7 +58,6 @@ function formatIngredient(ing: IncomingIngredientPayload): string {
   return ing.isOptional ? `${base} (optional)` : base;
 }
 
-// Build the list of strings to feed into <MetricCard />.
 function buildIngredientLines(recipe: RecipeForm): string[] {
   const structured = getStructuredIngredientsFromRecipe(recipe);
 

@@ -348,24 +348,46 @@ export async function updateRecipe(
   _prev: RecipeFormState,
   formData: FormData
 ): Promise<RecipeFormState> {
-  const session = await auth();
-  const userId = (session?.user as any)?.id as string | undefined;
-  if (!userId) {
-    return { message: "You must be signed in.", errors: {} };
+  const userId = await requireUserId();
+  const id = String(formData.get("id") ?? "");
+
+  if (!id) {
+    return { message: "Missing recipe id.", errors: {} };
   }
 
-  const parsed = UpdateRecipeSchema.safeParse({
-    id: formData.get("id"),
+  // --- 1) Read structured ingredients from IngredientsEditor ---
+  const rawIngredients = formData.get("ingredientsJson");
+  let structuredIngredients: IncomingIngredientPayload[] = [];
+
+  if (typeof rawIngredients === "string" && rawIngredients.trim() !== "") {
+    try {
+      structuredIngredients = JSON.parse(
+        rawIngredients
+      ) as IncomingIngredientPayload[];
+    } catch (e) {
+      console.error("Failed to parse ingredientsJson on update:", e);
+      structuredIngredients = [];
+    }
+  }
+
+  // text[] names for legacy column
+  const ingredientNames = structuredIngredients.map(
+    (ing) => ing.ingredientName
+  );
+
+  // --- 2) Validate & normalize with Zod schema ---
+  const parsed = RecipeSchema.safeParse({
     recipe_name: formData.get("recipe_name"),
     recipe_type: formData.get("recipe_type"),
-    recipe_ingredients: toLines(formData.get("recipe_ingredients")),
-    recipe_steps: toLines(formData.get("recipe_steps")),
+    // we now feed the *names* from the structured payload
+    recipe_ingredients: ingredientNames,
+    recipe_steps: toLines(formData.get("recipe_steps")) ?? [],
     servings: toInt(formData.get("servings")),
     prep_time_min: toInt(formData.get("prep_time_min")),
     difficulty: (formData.get("difficulty") as string | null) ?? null,
     status: (formData.get("status") as string) ?? "private",
-    dietary_flags: toLines(formData.get("dietary_flags")),
-    allergens: toLines(formData.get("allergens")),
+    dietary_flags: toLines(formData.get("dietary_flags")) ?? [],
+    allergens: toLines(formData.get("allergens")) ?? [],
     calories_total: toInt(formData.get("calories_total")),
     estimated_cost_total: toMoney(formData.get("estimated_cost_total")),
     equipment: toLines(formData.get("equipment")),
@@ -377,41 +399,51 @@ export async function updateRecipe(
       const key = issue.path[0] as keyof RecipeFormState["errors"];
       (errors[key] ??= []).push(issue.message);
     }
-    return { message: "Please correct the errors below.", errors };
+    return { message: "Please correct the errors above.", errors };
   }
 
   const d = parsed.data;
 
+  // --- 3) Persist to DB (both text[] + structured jsonb) ---
   try {
-    const rows = await sql/* sql */ `
+    await sql/* sql */ `
       UPDATE public.recipes
       SET
-        recipe_name          = ${d.recipe_name},
-        recipe_type          = ${d.recipe_type}::recipe_type_enum,
-        recipe_ingredients   = ${d.recipe_ingredients}::text[],
-        recipe_steps         = ${d.recipe_steps}::text[],
-        servings             = ${d.servings}::smallint,
-        prep_time_min        = ${d.prep_time_min}::smallint,
-        difficulty           = ${d.difficulty}::difficulty_enum,
-        status               = ${d.status}::status_enum,
-        dietary_flags        = ${d.dietary_flags}::text[],
-        allergens            = ${d.allergens}::text[],
-        calories_total       = ${d.calories_total}::int,
-        estimated_cost_total = ${d.estimated_cost_total}::numeric,
-        equipment            = ${d.equipment}::text[],
-        recipe_updated_at    = now()
-      WHERE id = ${d.id}::uuid
-        AND user_id = ${userId}::uuid
-      RETURNING id;
+        recipe_name                  = ${d.recipe_name},
+        recipe_ingredients           = ${ingredientNames}::text[],
+        recipe_ingredients_structured = ${
+          structuredIngredients.length > 0
+            ? JSON.stringify(structuredIngredients)
+            : null
+        }::jsonb,
+        recipe_steps                 = ${d.recipe_steps}::text[],
+        recipe_type                  = ${d.recipe_type}::recipe_type_enum,
+        servings                     = ${d.servings}::smallint,
+        prep_time_min                = ${d.prep_time_min}::smallint,
+        difficulty                   = ${d.difficulty}::difficulty_enum,
+        status                       = ${d.status}::status_enum,
+        dietary_flags                = ${d.dietary_flags}::text[],
+        allergens                    = ${d.allergens}::text[],
+        calories_total               = ${d.calories_total}::int,
+        estimated_cost_total         = ${d.estimated_cost_total}::numeric,
+        equipment                    = ${d.equipment}::text[]
+      WHERE id = ${id}::uuid
+        AND user_id = ${userId}::uuid;
     `;
-    if (!rows.length) {
+  } catch (e) {
+    console.error("Update recipe failed:", e);
+    const msg = (e as any)?.message ?? String(e);
+
+    if (msg.includes("recipes_user_id_fkey")) {
       return {
-        message: "Recipe not found or you don’t have permission.",
+        message: "Your session expired—please log in again.",
         errors: {},
       };
     }
-  } catch (e) {
-    console.error("Update recipe failed:", e);
+    if (msg.includes("invalid input value for enum")) {
+      return { message: "Invalid recipe type or difficulty.", errors: {} };
+    }
+
     return { message: "Failed to update recipe.", errors: {} };
   }
 

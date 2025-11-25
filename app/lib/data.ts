@@ -515,6 +515,7 @@ export async function fetchRecipeById(id: string) {
         calories_total,
         estimated_cost_total,
         COALESCE(equipment,     ARRAY[]::text[]) AS equipment,
+        recipe_ingredients_structured,
         (recipe_created_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_created_at,
         (recipe_updated_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_updated_at
       FROM public.recipes

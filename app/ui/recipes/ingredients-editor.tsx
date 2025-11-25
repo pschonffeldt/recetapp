@@ -1,28 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { IngredientUnit, RecipeIngredient } from "@/app/lib/definitions";
+import type {
+  IncomingIngredientPayload,
+  IngredientUnit,
+  RecipeIngredient,
+} from "@/app/lib/definitions";
 import { UNIT_LABELS, ALL_UNITS } from "@/app/lib/definitions";
 
 type DraftIngredient = {
-  id: string; // local ID just for React
+  id: string;
   ingredientName: string;
-  quantity: string; // keep as string in UI
+  quantity: string; // keep as string in the UI, we'll parse on submit
   unit: IngredientUnit | "";
   isOptional: boolean;
 };
 
 type Props = {
-  /** Existing ingredients (for edit form); empty for create */
-  initial?: RecipeIngredient[];
+  // now we expect the same shape you use in create/update actions
+  initial: IncomingIngredientPayload[];
 };
 
-export default function IngredientsEditor({ initial = [] }: Props) {
+export default function IngredientsEditor({ initial }: Props) {
   const [rows, setRows] = useState<DraftIngredient[]>([]);
 
-  // Hydrate from server data
+  // hydrate from initial array
   useEffect(() => {
-    if (!initial.length) {
+    if (!initial || initial.length === 0) {
       setRows([
         {
           id: crypto.randomUUID(),
@@ -36,20 +40,22 @@ export default function IngredientsEditor({ initial = [] }: Props) {
     }
 
     setRows(
-      initial.map((ri) => ({
-        id: ri.id,
-        ingredientName: ri.ingredientName,
-        quantity: ri.quantity != null ? String(ri.quantity) : "",
+      initial.map((ri, idx) => ({
+        // if it comes from DB with an id, use it; otherwise generate one
+        id: (ri as any).id ?? `row-${idx}-${crypto.randomUUID()}`,
+        ingredientName: ri.ingredientName ?? "",
+        quantity:
+          ri.quantity !== null && ri.quantity !== undefined
+            ? String(ri.quantity)
+            : "",
         unit: (ri.unit ?? "") as IngredientUnit | "",
-        isOptional: ri.isOptional,
+        isOptional: Boolean(ri.isOptional),
       }))
     );
   }, [initial]);
 
   const updateRow = (id: string, patch: Partial<DraftIngredient>) => {
-    setRows((prev) =>
-      prev.map((row) => (row.id === id ? { ...row, ...patch } : row))
-    );
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   };
 
   const addRow = () => {
@@ -66,9 +72,7 @@ export default function IngredientsEditor({ initial = [] }: Props) {
   };
 
   const removeRow = (id: string) => {
-    setRows((prev) =>
-      prev.length <= 1 ? prev : prev.filter((r) => r.id !== id)
-    );
+    setRows((prev) => prev.filter((r) => r.id !== id));
   };
 
   // Serialize for server
