@@ -379,6 +379,18 @@ export const ALL_UNITS: IngredientUnit[] = Object.keys(
 ) as IngredientUnit[];
 
 /* =======================================================
+ * Shopping list
+ * ======================================================= */
+
+export type AggregatedIngredient = {
+  ingredientName: string;
+  unit: IngredientUnit | null;
+  totalQuantity: number | null;
+  occurrences: number;
+  optionalOccurrences: number;
+};
+
+/* =======================================================
  * Countries
  * ======================================================= */
 
