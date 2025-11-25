@@ -2,7 +2,7 @@
 import { Metadata } from "next";
 import Breadcrumbs from "@/app/ui/recipes/breadcrumbs";
 import { notFound } from "next/navigation";
-import { fetchUserById, fetchAllIngredientsForUser } from "@/app/lib/data";
+import { fetchUserById, fetchIngredientsForUser } from "@/app/lib/data";
 import { auth } from "@/auth";
 import {
   IncomingIngredientPayload,
@@ -26,7 +26,7 @@ function aggregateIngredients(
   const map = new Map<string, AggregatedItem>();
 
   for (const ing of ingredients) {
-    // For now: skip optional items in the shopping list
+    // Skip optional items for now
     if (ing.isOptional) continue;
 
     const name = ing.ingredientName.trim();
@@ -46,12 +46,12 @@ function aggregateIngredients(
     } else if (hasQty && existing.quantity != null) {
       existing.quantity += ing.quantity!;
     } else if (!hasQty) {
-      // keep as “no quantity” item
+      // keep as “no quantity” entry
       existing.quantity = null;
     }
   }
 
-  // Sort a bit for nicer UX
+  // Sort alphabetically for nicer UX
   return Array.from(map.values()).sort((a, b) =>
     a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
   );
@@ -71,7 +71,11 @@ function formatAggregatedItem(item: AggregatedItem): string {
 
 // --- Page -----------------------------------------------------
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams?: { recipes?: string };
+}) {
   const session = await auth();
   const id = (session?.user as any)?.id as string | undefined;
   if (!id) notFound();
@@ -79,8 +83,18 @@ export default async function Page() {
   const user = await fetchUserById(id);
   if (!user) notFound();
 
-  // Get all structured ingredients for this user
-  const rawIngredients = await fetchAllIngredientsForUser(id);
+  // Read ?recipes=<id1>,<id2>,<id3>
+  const raw = searchParams?.recipes;
+  const recipeIds =
+    raw && raw.trim().length > 0
+      ? raw
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : undefined; // undefined = “all recipes”
+
+  // Get structured ingredients for this user (optionally filtered by recipes)
+  const rawIngredients = await fetchIngredientsForUser(id, recipeIds);
 
   // Aggregate + format
   const aggregated = aggregateIngredients(rawIngredients);
@@ -103,7 +117,8 @@ export default async function Page() {
 
         {lines.length === 0 ? (
           <p className="text-sm text-gray-600">
-            No ingredients found yet. Add some recipes first!
+            No ingredients found yet. Add some recipes first, or select recipes
+            to include.
           </p>
         ) : (
           <ul className="list-disc space-y-1 pl-5 text-gray-900">

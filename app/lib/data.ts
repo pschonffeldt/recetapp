@@ -635,11 +635,13 @@ type RecipeIngredientsRow = {
   recipe_ingredients_structured: any;
 };
 
-// Normalize whatever the DB driver gives us (array vs JSON string)
-function normalizeStructuredIngredients(raw: any): IncomingIngredientPayload[] {
+// Small helper: normalize whatever comes from recipe_ingredients_structured
+function normalizeStructuredIngredients(
+  raw: unknown
+): IncomingIngredientPayload[] {
   if (!raw) return [];
 
-  // Already parsed JSON (most common with jsonb)
+  // Already parsed JSON array
   if (Array.isArray(raw)) {
     return raw as IncomingIngredientPayload[];
   }
@@ -660,38 +662,51 @@ function normalizeStructuredIngredients(raw: any): IncomingIngredientPayload[] {
 }
 
 /**
- * Fetch all structured ingredients across all recipes for a given user.
- * Returns a flat array of IncomingIngredientPayload.
+ * Fetch all structured ingredients for a user.
+ * If recipeIds is provided, only those recipes are included.
  */
-export async function fetchAllIngredientsForUser(
-  userId: string
+export async function fetchIngredientsForUser(
+  userId: string,
+  recipeIds?: string[]
 ): Promise<IncomingIngredientPayload[]> {
-  const rows = await sql<RecipeIngredientsRow[]>/* sql */ `
+  // If caller passed an empty list → nothing to show
+  if (recipeIds && recipeIds.length === 0) {
+    return [];
+  }
+
+  // Base query: all recipes for this user
+  if (!recipeIds) {
+    const rows = await sql<
+      { recipe_ingredients_structured: unknown }[]
+    >/* sql */ `
+      SELECT recipe_ingredients_structured
+      FROM public.recipes
+      WHERE user_id = ${userId}::uuid
+    `;
+
+    return rows.flatMap((row) =>
+      normalizeStructuredIngredients(row.recipe_ingredients_structured)
+    );
+  }
+
+  // Filtered by recipe IDs
+  const rows = await sql<
+    { recipe_ingredients_structured: unknown }[]
+  >/* sql */ `
     SELECT recipe_ingredients_structured
     FROM public.recipes
     WHERE user_id = ${userId}::uuid
+      AND id = ANY(${recipeIds}::uuid[])
   `;
 
-  const all: IncomingIngredientPayload[] = [];
-
-  for (const row of rows) {
-    const parsed = normalizeStructuredIngredients(
-      row.recipe_ingredients_structured
-    );
-    if (parsed.length > 0) {
-      all.push(...parsed);
-    }
-  }
-
-  return all;
+  return rows.flatMap((row) =>
+    normalizeStructuredIngredients(row.recipe_ingredients_structured)
+  );
 }
 
 /* =======================================================
  * Notifications
  * ======================================================= */
-
-// ensure `sql` is already defined in this module as your postgres.js client
-
 // Users for notification dropdown
 export type NotificationUserOption = {
   id: string;
