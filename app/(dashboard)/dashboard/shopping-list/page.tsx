@@ -2,13 +2,18 @@
 import { Metadata } from "next";
 import Breadcrumbs from "@/app/ui/recipes/breadcrumbs";
 import { notFound } from "next/navigation";
-import { fetchUserById, fetchIngredientsForUser } from "@/app/lib/data";
+import {
+  fetchUserById,
+  fetchIngredientsForUser,
+  fetchRecipesForUser,
+} from "@/app/lib/data";
 import { auth } from "@/auth";
 import {
   IncomingIngredientPayload,
   IngredientUnit,
   UNIT_LABELS,
 } from "@/app/lib/definitions";
+import ShoppingListRecipePicker from "@/app/ui/shopping-list/recipe-picker";
 
 export const metadata: Metadata = { title: "Shopping list" };
 
@@ -33,7 +38,6 @@ function aggregateIngredients(
     const unit = ing.unit ?? null;
     const hasQty = typeof ing.quantity === "number";
 
-    // Key by name + unit + “has quantity or not”
     const key = `${name.toLowerCase()}|${unit ?? ""}|${hasQty ? "q" : "noq"}`;
 
     const existing = map.get(key);
@@ -46,12 +50,10 @@ function aggregateIngredients(
     } else if (hasQty && existing.quantity != null) {
       existing.quantity += ing.quantity!;
     } else if (!hasQty) {
-      // keep as “no quantity” entry
       existing.quantity = null;
     }
   }
 
-  // Sort alphabetically for nicer UX
   return Array.from(map.values()).sort((a, b) =>
     a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
   );
@@ -82,6 +84,9 @@ export default async function Page({
 
   const user = await fetchUserById(id);
   if (!user) notFound();
+
+  // Fetch all recipes for the picker
+  const recipes = await fetchRecipesForUser(id);
 
   // Read ?recipes=<id1>,<id2>,<id3>
   const raw = searchParams?.recipes;
@@ -114,6 +119,12 @@ export default async function Page({
 
       <section className="mt-4 rounded-md bg-gray-50 p-6">
         <h1 className="mb-4 text-xl font-semibold">Shopping list</h1>
+
+        {/* Recipe selector lives on this page */}
+        <ShoppingListRecipePicker
+          recipes={recipes}
+          selectedIds={recipeIds ?? []}
+        />
 
         {lines.length === 0 ? (
           <p className="text-sm text-gray-600">

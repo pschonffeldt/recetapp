@@ -651,6 +651,30 @@ export async function fetchRecipeByIdForOwner(
   return rows[0] ?? null;
 }
 
+export type ShoppingListRecipe = {
+  id: string;
+  name: string;
+};
+
+export async function fetchRecipesForUser(
+  userId: string
+): Promise<ShoppingListRecipe[]> {
+  // Optional safety – ensure caller user matches session user
+  const currentUserId = await requireUserId();
+  if (currentUserId !== userId) {
+    throw new Error("Not allowed to fetch recipes for another user.");
+  }
+
+  const rows = await sql<ShoppingListRecipe[]>`
+    SELECT id, recipe_name AS name
+    FROM public.recipes
+    WHERE user_id = ${userId}::uuid
+    ORDER BY recipe_name ASC;
+  `;
+
+  return rows;
+}
+
 /* =============================================================================
  * Shopping list / Structured ingredients
  * =============================================================================
