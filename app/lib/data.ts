@@ -9,6 +9,7 @@ import {
   DbNotificationRow,
   AppNotification,
   toAppNotification,
+  IncomingIngredientPayload,
 } from "./definitions";
 
 import { requireUserId } from "@/app/lib/auth-helpers";
@@ -575,6 +576,60 @@ export async function fetchRecipeByIdForOwner(
 }
 
 /* =======================================================
+ * Shopping list
+ * ======================================================= */
+export async function fetchAllStructuredIngredientsForUser(
+  userId: string
+): Promise<IncomingIngredientPayload[]> {
+  const rows = await sql<
+    { recipe_ingredients_structured: unknown }[]
+  >/* sql */ `
+    SELECT recipe_ingredients_structured
+    FROM public.recipes
+    WHERE user_id = ${userId}::uuid
+  `;
+
+  const result: IncomingIngredientPayload[] = [];
+
+  for (const row of rows) {
+    const raw = (row as any).recipe_ingredients_structured;
+    if (!raw) continue;
+
+    // Case 1: column already deserialized as array
+    if (Array.isArray(raw)) {
+      for (const ing of raw) {
+        if (ing && typeof (ing as any).ingredientName === "string") {
+          result.push(ing as IncomingIngredientPayload);
+        }
+      }
+      continue;
+    }
+
+    // Case 2: stored as JSON string
+    if (typeof raw === "string") {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          for (const ing of parsed) {
+            if (ing && typeof (ing as any).ingredientName === "string") {
+              result.push(ing as IncomingIngredientPayload);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(
+          "Failed to parse recipe_ingredients_structured for user %s:",
+          userId,
+          e
+        );
+      }
+    }
+  }
+
+  return result;
+}
+
+/* =======================================================
  * Notifications
  * ======================================================= */
 
@@ -835,3 +890,7 @@ export async function fetchRoadmapGrouped(): Promise<RoadmapGrouped> {
 
   return { planned, inProgress, shipped };
 }
+
+/* =======================================================
+ * Shopping list
+ * ======================================================= */
