@@ -7,40 +7,66 @@ import postgres from "postgres";
 import { signIn } from "@/auth";
 import { auth } from "@/auth";
 import bcrypt from "bcryptjs";
+
 import { UpdateUserProfileSchema } from "./validation";
 import { toInt, toLines, toMoney } from "./form-helpers";
 import { RecipeFormState } from "./action-types";
 import { requireAdmin, requireUserId } from "./auth-helpers";
+
 import type {
   IngredientUnit,
   IncomingIngredientPayload,
 } from "@/app/lib/definitions";
 
-/* ================================
+/**
+ * =============================================================================
+ * Server Actions (RSC) for RecetApp
+ *
+ * Contains all write operations:
+ * - Auth (sign-in, sign-up)
+ * - Recipes (create / update / delete / review)
+ * - Account: profile + password
+ * - Notifications: mark read, create
+ * - Ingredients helpers (structured ingredients sync)
+ *
+ * Conventions:
+ * - All auth-protected actions call requireUserId() / requireAdmin() inside.
+ * - Use zod for validation close to the action.
+ * - Keep DB writes here; reads live in data.ts.
+ * =============================================================================
+ */
+
+/* =============================================================================
  * Database Client
- * - Uses POSTGRES_URL with SSL required
- * ================================ */
+ * =============================================================================
+ */
+
+/** Postgres client (uses POSTGRES_URL with SSL required). */
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
-/* =======================================================
+/* =============================================================================
  * Zod Schemas (Validation)
- * - Keep all form/data validation centralized here
- * ======================================================= */
+ * =============================================================================
+ *
+ * Keep form/data validation centralized here so it’s easy to evolve.
+ */
 
-/** Recipe form schema used for create/update (id added later for updates) */
-
-// visibility & difficulty
+/** Enum for recipe visibility. */
 const StatusEnum = z.enum(["private", "public"]);
+
+/** Enum for recipe difficulty. */
 const DifficultyEnum = z.enum(["easy", "medium", "hard"]);
 
+/**
+ * Base recipe schema used for create/update.
+ * `id` is added by UpdateRecipeSchema when needed.
+ */
 const RecipeSchema = z.object({
   recipe_name: z.string().min(1, "Recipe name is required"),
   recipe_type: z.enum(["breakfast", "lunch", "dinner", "dessert", "snack"]),
 
-  recipe_ingredients: z
-    .array(z.string().min(1)) // elements must be non-empty strings
-    .optional()
-    .default([]),
+  recipe_ingredients: z.array(z.string().min(1)).optional().default([]),
+
   recipe_steps: z.array(z.string().min(1)).min(1, "Enter at least one step"),
 
   servings: z
@@ -49,41 +75,47 @@ const RecipeSchema = z.object({
     .min(1, "Must be 1 or greater")
     .nullable()
     .default(null),
+
   prep_time_min: z
     .number()
     .int()
     .min(0, "Must be 0 or greater")
     .nullable()
     .default(null),
+
   difficulty: DifficultyEnum.nullable().default(null),
   status: StatusEnum.default("private"),
+
   dietary_flags: z.array(z.string().min(1)).default([]),
   allergens: z.array(z.string().min(1)).default([]),
+
   calories_total: z
     .number()
     .int()
     .min(0, "Must be 0 or greater")
     .nullable()
     .default(null),
-  estimated_cost_total: z.string().nullable().default(null), // numeric as string
+
+  // numeric as string
+  estimated_cost_total: z.string().nullable().default(null),
+
   equipment: z.array(z.string().min(1)).default([]),
 });
 
+/** Recipe schema for updates (adds id). */
 const UpdateRecipeSchema = RecipeSchema.extend({
   id: z.string().uuid("Invalid recipe id"),
 });
 
-/* =======================================================
- * Auth
- * ======================================================= */
+/* =============================================================================
+ * Auth — Sign in
+ * =============================================================================
+ */
 
 /**
  * Attempt to sign in using NextAuth credentials provider.
- * Returns a user-friendly string on known auth errors; throws otherwise.
  *
- * @param prevState - Unused previous state (kept for server action signature)
- * @param formData  - FormData containing credentials (e.g., email/password)
- * @returns string | undefined
+ * Returns a user-friendly string on known auth errors; throws otherwise.
  */
 export async function authenticate(
   _prevState: string | undefined,
@@ -92,13 +124,9 @@ export async function authenticate(
   try {
     await signIn("credentials", formData);
   } catch (error) {
-    // NextAuth v5 may throw different shapes; normalize what we show the user
     const e = error as any;
 
-    // Common cases across v5:
-    // - e.type === 'CredentialsSignin'
-    // - e.name === 'AuthError' && e.type === 'CredentialsSignin'
-    // - e.digest may include 'CredentialsSignin'
+    // Normalize all the “credentials sign in failed” shapes from NextAuth v5
     const isCredsError =
       e?.type === "CredentialsSignin" ||
       (e?.name === "AuthError" && e?.type === "CredentialsSignin") ||
@@ -106,50 +134,34 @@ export async function authenticate(
 
     if (isCredsError) return "Invalid credentials.";
 
-    // Unknown error → surface to error boundary/logs (keeps behavior consistent)
+    // Unknown error → bubble up to error boundary/logs
     throw error;
   }
 }
 
-/* =======================================================
+/* =============================================================================
  * Recipes — Create / Update / Delete / Review
- * ======================================================= */
-
-/**
- * Utility: Convert a textarea’s newline-separated value into a clean string[].
- * - Trims whitespace
- * - Drops blank lines
- *
- * @param v - Raw FormDataEntryValue
- * @returns string[]
+ * =============================================================================
  */
-function splitLinesToArray(v: FormDataEntryValue | null): string[] {
-  return String(v ?? "")
-    .split(/\r?\n/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
 
 /**
- * Create a new recipe.
- * - Validates input with Zod (name, type, ingredients[], steps[])
+ * Create a new recipe for the current user.
+ *
+ * - Reads structured ingredients (ingredientsJson) from IngredientsEditor
+ * - Derives legacy text[] ingredient names
+ * - Validates with Zod
  * - Inserts into DB
  * - Revalidates and redirects to /dashboard/recipes on success
- *
- * @param _prevState - Unused previous state (kept for server action signature)
- * @param formData   - FormData from the recipe form
  */
-
 export async function createRecipe(
   _prev: RecipeFormState,
   formData: FormData
 ): Promise<RecipeFormState> {
-  // 1) Enforce auth via helper
+  // 1) Enforce auth
   const userId = await requireUserId();
 
   // 2) Read structured ingredients coming from IngredientsEditor
   const rawIngredients = formData.get("ingredientsJson");
-
   let structuredIngredients: IncomingIngredientPayload[] = [];
 
   if (typeof rawIngredients === "string" && rawIngredients.trim() !== "") {
@@ -163,7 +175,7 @@ export async function createRecipe(
     }
   }
 
-  // We still keep the text[] names for legacy UI / stats
+  // Legacy: keep text[] column with ingredient names for existing UI / stats
   const ingredientNames = structuredIngredients.map(
     (ing) => ing.ingredientName
   );
@@ -204,6 +216,7 @@ export async function createRecipe(
       ? JSON.stringify(structuredIngredients)
       : null;
 
+  // 4) Persist to DB
   try {
     await sql/* sql */ `
       INSERT INTO public.recipes (
@@ -253,7 +266,6 @@ export async function createRecipe(
     if (msg.includes("invalid input value for enum")) {
       return { message: "Invalid recipe type or difficulty.", errors: {} };
     }
-    // Any other DB error ends up here
     return { message: "Failed to create recipe.", errors: {} };
   }
 
@@ -262,10 +274,8 @@ export async function createRecipe(
 }
 
 /**
- * Delete a recipe by id (from list views).
- * - Revalidates recipes page
- *
- * @param id - Recipe id
+ * Delete a recipe by id (from list views) for the current user.
+ * This action **does not redirect** (used by list UI).
  */
 export async function deleteRecipe(id: string) {
   const userId = await requireUserId();
@@ -275,21 +285,21 @@ export async function deleteRecipe(id: string) {
       AND user_id = ${userId}::uuid
     RETURNING id
   `;
+
   if (!rows.length) {
     // nothing matched: either not found or not owned by user
     throw new Error(
       "Recipe not found or you don’t have permission to delete it."
     );
   }
+
   revalidatePath("/dashboard/recipes");
 }
 
 /**
- * Delete a recipe by id (from viewer page) and redirect to recipes index.
- *
- * @param id - Recipe id
+ * Delete a recipe by id (from viewer page) for the current user
+ * and redirect to recipes index.
  */
-// --- Delete from viewer page + redirect back to index ---
 export async function deleteRecipeFromViewer(id: string) {
   const userId = await requireUserId();
   const rows = await sql/* sql */ `
@@ -298,21 +308,22 @@ export async function deleteRecipeFromViewer(id: string) {
       AND user_id = ${userId}::uuid
     RETURNING id
   `;
+
   if (!rows.length) {
     throw new Error(
       "Recipe not found or you don’t have permission to delete it."
     );
   }
+
   revalidatePath("/dashboard/recipes");
   redirect("/dashboard/recipes");
 }
 
 /**
- * Placeholder for a “review recipe” action.
+ * Placeholder “review recipe” action.
+ *
  * NOTE: Currently performs a DELETE and revalidates the review route.
  * Replace with real review logic when implemented.
- *
- * @param id - Recipe id
  */
 export async function reviewRecipe(id: string) {
   const session = await auth();
@@ -324,26 +335,18 @@ export async function reviewRecipe(id: string) {
     WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
     RETURNING id
   `;
+
   revalidatePath(`/dashboard/recipes/${id}/review`);
 }
 
-/** Local alias: same behavior as splitLinesToArray (kept for clarity below) */
-const splitLines = (v: FormDataEntryValue | null) =>
-  String(v ?? "")
-    .split(/\r?\n/)
-    .map((s) => s.trim())
-    .filter(Boolean);
-
 /**
- * Update an existing recipe.
- * - Validates input with Zod (including UUID id)
- * - Casts to proper Postgres types
- * - Revalidates and redirects to /dashboard/recipes on success
+ * Update an existing recipe for the current user.
  *
- * @param _prev    - Unused previous state (kept for server action signature)
- * @param formData - FormData from the recipe edit form
+ * - Reads structured ingredients (ingredientsJson)
+ * - Keeps legacy text[] column in sync
+ * - Validates with Zod
+ * - Updates DB and redirects back to /dashboard/recipes
  */
-
 export async function updateRecipe(
   _prev: RecipeFormState,
   formData: FormData
@@ -379,7 +382,6 @@ export async function updateRecipe(
   const parsed = RecipeSchema.safeParse({
     recipe_name: formData.get("recipe_name"),
     recipe_type: formData.get("recipe_type"),
-    // we now feed the *names* from the structured payload
     recipe_ingredients: ingredientNames,
     recipe_steps: toLines(formData.get("recipe_steps")) ?? [],
     servings: toInt(formData.get("servings")),
@@ -409,24 +411,24 @@ export async function updateRecipe(
     await sql/* sql */ `
       UPDATE public.recipes
       SET
-        recipe_name                  = ${d.recipe_name},
-        recipe_ingredients           = ${ingredientNames}::text[],
+        recipe_name                   = ${d.recipe_name},
+        recipe_ingredients            = ${ingredientNames}::text[],
         recipe_ingredients_structured = ${
           structuredIngredients.length > 0
             ? JSON.stringify(structuredIngredients)
             : null
         }::jsonb,
-        recipe_steps                 = ${d.recipe_steps}::text[],
-        recipe_type                  = ${d.recipe_type}::recipe_type_enum,
-        servings                     = ${d.servings}::smallint,
-        prep_time_min                = ${d.prep_time_min}::smallint,
-        difficulty                   = ${d.difficulty}::difficulty_enum,
-        status                       = ${d.status}::status_enum,
-        dietary_flags                = ${d.dietary_flags}::text[],
-        allergens                    = ${d.allergens}::text[],
-        calories_total               = ${d.calories_total}::int,
-        estimated_cost_total         = ${d.estimated_cost_total}::numeric,
-        equipment                    = ${d.equipment}::text[]
+        recipe_steps                  = ${d.recipe_steps}::text[],
+        recipe_type                   = ${d.recipe_type}::recipe_type_enum,
+        servings                      = ${d.servings}::smallint,
+        prep_time_min                 = ${d.prep_time_min}::smallint,
+        difficulty                    = ${d.difficulty}::difficulty_enum,
+        status                        = ${d.status}::status_enum,
+        dietary_flags                 = ${d.dietary_flags}::text[],
+        allergens                     = ${d.allergens}::text[],
+        calories_total                = ${d.calories_total}::int,
+        estimated_cost_total          = ${d.estimated_cost_total}::numeric,
+        equipment                     = ${d.equipment}::text[]
       WHERE id = ${id}::uuid
         AND user_id = ${userId}::uuid;
     `;
@@ -451,30 +453,27 @@ export async function updateRecipe(
   redirect("/dashboard/recipes");
 }
 
-/**
- * Update an existing user.
- * - Validates input with Zod (including UUID id)
- * - Casts to proper Postgres types
- * - Revalidates and redirects to /dashboard/recipes on success
- *
- * @param _prev    - Unused previous state (kept for server action signature)
- * @param formData - FormData from the recipe edit form
+/* =============================================================================
+ * User Profile & Password
+ * =============================================================================
  */
 
 /**
- * Accepts optional fields; if a field is absent/blank, we don't touch it.
- * - Name/Last name/Country/Language: non-empty string when present
- * - Email: valid email when present
- * - Password: min 6 when present (hashed before saving)
+ * Helper: "" | null -> undefined, otherwise trimmed string.
+ * Used to distinguish “user cleared field” vs “field absent”.
  */
-
-// "" | null -> undefined, otherwise trimmed string
 const toOptional = (v: FormDataEntryValue | null) => {
   const s = (v ?? "").toString().trim();
   return s === "" ? undefined : s;
 };
 
-/** Update name / last_name / email only */
+/**
+ * Update name / last_name / email for the current user.
+ *
+ * - Detects explicitly cleared fields (empty string)
+ * - Validates with zod + some manual checks
+ * - Handles duplicate-email DB errors gracefully
+ */
 export async function updateUserProfile(
   _prev: {
     message: string | null;
@@ -492,19 +491,13 @@ export async function updateUserProfile(
   const rawLast = formData.get("last_name");
   const rawEmail = formData.get("email");
 
-  // Helper: "" | null -> undefined, otherwise trimmed
-  const toOptional = (v: FormDataEntryValue | null) => {
-    const s = (v ?? "").toString().trim();
-    return s === "" ? undefined : s;
-  };
-
   const candidate = {
     name: toOptional(rawName),
     last_name: toOptional(rawLast),
     email: toOptional(rawEmail),
   };
 
-  // Manual validation to catch explicit blanks (these would have become `undefined`)
+  // Manual validation to catch explicit blanks
   const errors: Record<string, string[]> = {};
   if (rawName !== null && String(rawName).trim() === "") {
     errors.name = ["First name cannot be empty."];
@@ -538,7 +531,7 @@ export async function updateUserProfile(
   if (d.email !== undefined) sets.push(sql`email = ${d.email}`);
 
   if (sets.length === 0) {
-    // User submitted, but nothing changed → show a gentle error toast
+    // User submitted, but nothing changed → show a gentle message
     return { message: "No changes to save.", errors: {}, ok: false };
   }
 
@@ -582,7 +575,13 @@ export async function updateUserProfile(
   return { message: null, errors: {}, ok: true, shouldRefresh: true };
 }
 
-/** Update password only */
+/**
+ * Update password only for the current user.
+ *
+ * - Requires both password + confirm
+ * - Enforces min length 6
+ * - Hashes with bcrypt before saving
+ */
 export async function updateUserPassword(
   _prev: {
     message: string | null;
@@ -599,6 +598,7 @@ export async function updateUserPassword(
   const confirm = toOptional(formData.get("confirm_password"));
 
   const errors: Record<string, string[]> = {};
+
   if (!password)
     errors.password = [
       "To change your password, fill in both password fields.",
@@ -626,13 +626,13 @@ export async function updateUserPassword(
   }
 
   // Optional: if using NextAuth sessions DB, invalidate others here.
-  // (You can skip if using JWT without a session store.)
   return { ok: true, message: null, errors: {} };
 }
 
-/* =======================================================
+/* =============================================================================
  * Signup
- * ======================================================= */
+ * =============================================================================
+ */
 
 const SignupSchema = z
   .object({
@@ -650,6 +650,14 @@ const SignupSchema = z
     path: ["confirm"],
   });
 
+/**
+ * Create a new user account and auto sign-in.
+ *
+ * - Validates with zod
+ * - Checks email uniqueness (soft check + DB unique index)
+ * - Hashes password
+ * - Inserts user and then signs them in
+ */
 export async function createAccount(_prev: any, formData: FormData) {
   const parsed = SignupSchema.safeParse({
     name: formData.get("name"),
@@ -707,7 +715,7 @@ export async function createAccount(_prev: any, formData: FormData) {
     await signIn("credentials", {
       email,
       password,
-      redirectTo: "/dashboard", // NextAuth will redirect on the server
+      redirectTo: "/dashboard",
     });
 
     // Fallback: if for any reason no redirect occurred, force it.
@@ -717,8 +725,7 @@ export async function createAccount(_prev: any, formData: FormData) {
     redirect("/login?signup=success");
   }
 
-  // Unreachable after redirect; keep for type completeness if this action is reused.
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  // Unreachable after redirect; kept for completeness.
   return { ok: true, message: null, errors: {}, userId } as const;
 }
 
@@ -729,15 +736,19 @@ export type SignupResult = {
   userId?: string;
 };
 
-/* ================================
+/* =============================================================================
  * Notifications — Actions
- * ================================ */
+ * =============================================================================
+ */
 
-// --- Notifications actions ---
+/** Small shared result shape for notification actions. */
 type ActionResult = { ok: boolean; message: string | null };
 
+/**
+ * Mark a single notification as read for the current user.
+ */
 export async function markNotificationRead(
-  _prev: { ok: boolean; message: string | null } | undefined,
+  _prev: ActionResult | undefined,
   formData: FormData
 ) {
   const userId = await requireUserId();
@@ -752,7 +763,7 @@ export async function markNotificationRead(
       UPDATE public.notifications
       SET status = 'read'::notification_status
       WHERE id = ${id}::uuid
-        AND user_id = ${userId}::uuid  -- 👈 only *this* user's notification
+        AND user_id = ${userId}::uuid  -- only *this* user's notification
     `;
 
     revalidatePath("/dashboard/notifications");
@@ -763,8 +774,11 @@ export async function markNotificationRead(
   }
 }
 
+/**
+ * Mark all notifications as read for the current user.
+ */
 export async function markAllNotificationsRead(
-  _prev: { ok: boolean; message: string | null } | undefined,
+  _prev: ActionResult | undefined,
   _formData: FormData
 ) {
   const userId = await requireUserId();
@@ -785,6 +799,9 @@ export async function markAllNotificationsRead(
   }
 }
 
+/**
+ * Schema for creating a new notification from the admin UI.
+ */
 const NewNotificationSchema = z
   .object({
     // null = broadcast, UUID string = specific user
@@ -800,7 +817,6 @@ const NewNotificationSchema = z
     kind: z.enum(["system", "maintenance", "feature", "message"]),
     level: z.enum(["info", "success", "warning", "error"]),
 
-    // linkUrl: you already normalize to undefined when empty
     linkUrl: z.string().url("Must be a valid URL").optional(),
 
     // "on" / null / boolean → boolean
@@ -838,6 +854,13 @@ const NewNotificationSchema = z
     }
   });
 
+/**
+ * Admin-only action to create a new notification.
+ *
+ * - Supports personal (userId) and broadcast notifications
+ * - Handles linkUrl, publishNow / publishAt scheduling
+ * - Sets initial status: personal = unread, broadcast = read
+ */
 export async function createNotification(
   _prev:
     | { ok: boolean; message: string | null; errors?: Record<string, string[]> }
@@ -849,7 +872,7 @@ export async function createNotification(
   const audience = formData.get("audience");
   const rawUserId = formData.get("userId");
 
-  // Decide who this is for
+  // Decide who this is for: broadcast vs specific user
   const userId =
     audience === "broadcast"
       ? null
@@ -891,12 +914,12 @@ export async function createNotification(
   // - Else -> publish now
   const publishedAt = d.publishAt ? new Date(d.publishAt) : new Date();
 
-  // 🔧 Normalize values for SQL (no `undefined`)
+  // Normalize values for SQL (no `undefined`)
   const userIdParam: string | null = d.userId ?? null;
   const linkUrlParam: string | null = d.linkUrl ?? null;
 
-  // Decide initial status
-  const initialStatus: "unread" | "read" = d.userId ? "unread" : "read"; // personal = unread, broadcast = read
+  // Decide initial status: personal = unread, broadcast = read
+  const initialStatus: "unread" | "read" = d.userId ? "unread" : "read";
 
   try {
     // Cast `sql` to any JUST for this call so TS stops complaining
@@ -911,20 +934,19 @@ export async function createNotification(
         status,
         published_at
       )
-  VALUES (
-    ${userIdParam},
-    ${d.title},
-    ${d.body},
-    ${d.kind}::notification_kind,
-    ${d.level}::notification_level,
-    ${linkUrlParam},
-    ${initialStatus}::notification_status,  -- personal = unread, broadcast = read
-    ${publishedAt}
-  )
-  RETURNING id
-`;
+      VALUES (
+        ${userIdParam},
+        ${d.title},
+        ${d.body},
+        ${d.kind}::notification_kind,
+        ${d.level}::notification_level,
+        ${linkUrlParam},
+        ${initialStatus}::notification_status,
+        ${publishedAt}
+      )
+      RETURNING id
+    `;
 
-    // Most @vercel/postgres-style helpers expose `.rows`
     const id = (result as any).rows?.[0]?.id as string | undefined;
 
     return { ok: true, message: null, id };
@@ -934,11 +956,15 @@ export async function createNotification(
   }
 }
 
-/* =======================================================
+/* =============================================================================
  * Ingredients handling
- * ======================================================= */
+ * =============================================================================
+ */
 
-// A literal list of valid units to validate against
+/**
+ * Literal list of valid units to validate against.
+ * NOTE: currently not enforced in zod (but kept here for future use).
+ */
 const VALID_INGREDIENT_UNITS: IngredientUnit[] = [
   "ml",
   "l",
@@ -966,6 +992,10 @@ const VALID_INGREDIENT_UNITS: IngredientUnit[] = [
   "piece",
 ];
 
+/**
+ * Schema for a single structured ingredient payload.
+ * (Currently used as a reference; main parsing happens in parseIngredientsJson.)
+ */
 const IngredientPayloadSchema = z.object({
   ingredientName: z.string().trim().min(1),
   quantity: z.number().nullable(),
@@ -977,8 +1007,16 @@ const IngredientPayloadSchema = z.object({
   position: z.number().int().nonnegative(),
 });
 
+/** Array-of-ingredients variant (kept for potential direct validation). */
 const IngredientsPayloadSchema = z.array(IngredientPayloadSchema);
 
+/**
+ * Parse and normalize `ingredientsJson` from a FormData payload.
+ *
+ * - Accepts loosely typed array of objects
+ * - Cleans up names, quantities, units, isOptional, position
+ * - Returns a flat IncomingIngredientPayload[] and optional error message
+ */
 export async function parseIngredientsJson(
   formData: FormData
 ): Promise<{ ingredients: IncomingIngredientPayload[]; error?: string }> {
@@ -1034,7 +1072,10 @@ export async function parseIngredientsJson(
   }
 }
 
-// Simple slug helper; replace with your own if you already have one
+/**
+ * Simple slug helper to normalize ingredient names into URL-safe slugs.
+ * Replace with a shared helper if you centralize slugging later.
+ */
 function slugify(name: string): string {
   return name
     .toLowerCase()
@@ -1044,6 +1085,17 @@ function slugify(name: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+/**
+ * Sync structured ingredients with the `recipe_ingredients` join table.
+ *
+ * Strategy:
+ * - Remove all existing rows for the recipe
+ * - Upsert each ingredient into `ingredients` by slug
+ * - Insert into `recipe_ingredients` with quantities/units/flags
+ *
+ * NOTE: Currently not exported. Call from create/update flows
+ * when you’re ready to fully migrate to the join-table model.
+ */
 async function syncRecipeIngredients(
   recipeId: string,
   ingredients: IncomingIngredientPayload[]
