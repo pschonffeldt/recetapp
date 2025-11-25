@@ -16,77 +16,116 @@ import {
 } from "@/app/lib/definitions";
 import { requireUserId } from "@/app/lib/auth-helpers";
 
-/* ================================
+/**
+ * ============================================================================
+ * Data Access Layer (DAL) for RecetApp
+ *
+ * Central place for all DB reads:
+ * - Dashboard KPIs / cards
+ * - Recipe lists + detail + filters
+ * - Shopping list helpers (structured ingredients)
+ * - Notifications
+ * - Release notes + Roadmap
+ *
+ * Conventions:
+ * - All "current user" queries use requireUserId() inside the function.
+ * - Helpers that accept userId explicitly are safe to call from server actions
+ *   that already resolved the user.
+ * - Use postgres.js tagged template (`sql`) everywhere for consistency.
+ * ============================================================================
+ */
+
+/* =============================================================================
  * Database Client
- * ================================ */
+ * =============================================================================
+ */
+
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
-/* ================================
- * Pagination
- * ================================ */
+/* =============================================================================
+ * Pagination constants
+ * =============================================================================
+ */
 
 /** Single source of truth for recipes pagination — keep UI + queries in sync. */
 const RECIPES_PAGE_SIZE = 8;
 
-/* ================================
- * Local Types (helpers)
- * ================================ */
-// Types for the small aggregated queries
+/** Notifications pagination defaults. */
+const NOTIFICATIONS_PAGE_SIZE = 5;
+const NOTIFICATIONS_PAGE_SIZE_MAX = 50;
+
+/* =============================================================================
+ * Local / helper types
+ * =============================================================================
+ */
+
 type TypeCountRow = { recipe_type: string | null; count: number };
+
 type LatestRecipeRow = {
   id: string;
   recipe_name: string;
   recipe_created_at: string;
 };
 
-/* ================================
- * Helper Utilities
- * ================================ */
+/** Row shape for querying only structured ingredients. */
+type RecipeIngredientsRow = {
+  recipe_ingredients_structured: unknown;
+};
+
+/* =============================================================================
+ * Generic helpers
+ * =============================================================================
+ */
 
 /**
  * Normalize driver result shapes:
  * - @vercel/postgres → result.rows
- * - postgres.js → result is already an array
+ * - postgres.js      → result is already an array
  */
 function pickRows<T = any>(result: any): T[] {
-  // Works for both @vercel/postgres (result.rows) and postgres (result is already an array)
   return Array.isArray(result) ? result : result?.rows ?? [];
 }
 
-/** Build "a AND b AND c" without sql.join */
+/**
+ * Build "a AND b AND c" without sql.join.
+ * Returns an empty template when there are no parts.
+ */
 function andAll(parts: any[]) {
-  // Build "a AND b AND c" without sql.join
   if (parts.length === 0) return sql``;
   const [first, ...rest] = parts;
   return rest.reduce((acc, cur) => sql`${acc} AND ${cur}`, first);
 }
 
-/* =======================================================
+/* =============================================================================
  * Revenue
- * ======================================================= */
+ * =============================================================================
+ */
 
 /**
- * Fetch all revenue rows.
- * @returns Promise<Revenue[]>
- * @throws Error if DB query fails
+ * Fetch all rows from the `revenue` table.
+ *
+ * @returns All revenue entries as typed `Revenue[]`.
+ * @throws Error when the DB query fails.
  */
 export async function fetchRevenue() {
   try {
-    // 1) Query all rows from "revenue"
     const data = await sql<Revenue[]>`SELECT * FROM revenue`;
-    // 2) Return as-is (typed)
     return data;
   } catch (error) {
-    // 3) Bubble up a friendly error after logging
     console.error("Database Error:", error);
     throw new Error("Failed to fetch revenue data.");
   }
 }
 
-/* =======================================================
- * Recipes — Latest / Cards for Dashboard
- * ======================================================= */
+/* =============================================================================
+ * Recipes — Latest / single / dashboard cards
+ * =============================================================================
+ */
 
+/**
+ * Latest recipes for the **current user**, newest first.
+ * Used by dashboard “latest” section.
+ */
 export async function fetchLatestRecipes() {
   const userId = await requireUserId();
   const data = await sql<LatestRecipeRaw[]>/* sql */ `
@@ -99,7 +138,10 @@ export async function fetchLatestRecipes() {
   return data;
 }
 
-// Full recipe row used by viewer / editor
+/**
+ * Full recipe row used by viewer / editor.
+ * Mirrors the Postgres schema closely.
+ */
 export type DbRecipeRow = {
   id: string;
   recipe_name: string;
@@ -121,6 +163,10 @@ export type DbRecipeRow = {
   user_id: string;
 };
 
+/**
+ * Fetch a single recipe by id **for the current user**.
+ * Returns null when the recipe does not exist or does not belong to the user.
+ */
 export async function getRecipeById(id: string): Promise<DbRecipeRow | null> {
   const userId = await requireUserId();
 
@@ -153,29 +199,37 @@ export async function getRecipeById(id: string): Promise<DbRecipeRow | null> {
   return rows[0] ?? null;
 }
 
-/* =======================================================
- * Dashboard KPI
- * Fetch dashboard KPI card data (counts + totals by status).
- * Note: Split into parallel queries for demonstration purposes.
- * @returns Promise<{ numberOfCustomers: number; numberOfInvoices: number; totalPaidInvoices: string; totalPendingInvoices: string; }>
- * ======================================================= */
-// Card tiles on the dashboard
+/* =============================================================================
+ * Dashboard KPIs / Cards
+ * =============================================================================
+ */
+
+/**
+ * High-level dashboard card data for recipes:
+ * - totalRecipes
+ * - avgIngredients per recipe
+ * - mostRecurringCategory (recipe_type)
+ * - totalIngredients (distinct ingredient names)
+ */
 export async function fetchCardData(): Promise<CardData> {
   const userId = await requireUserId();
 
   try {
+    // Total recipes created by user
     const totalRecipesPromise = sql/* sql */ `
       SELECT COUNT(*)::int AS count
       FROM public.recipes r
       WHERE r.user_id = ${userId}::uuid
     `;
 
+    // Average number of ingredients per recipe
     const avgIngredientsPromise = sql/* sql */ `
       SELECT COALESCE(AVG(CARDINALITY(r.recipe_ingredients)), 0)::float AS avg_count
       FROM public.recipes r
       WHERE r.user_id = ${userId}::uuid
     `;
 
+    // Most common recipe_type for the user
     const topCategoryPromise = sql/* sql */ `
       SELECT r.recipe_type, COUNT(*)::int AS c
       FROM public.recipes r
@@ -185,6 +239,7 @@ export async function fetchCardData(): Promise<CardData> {
       LIMIT 1
     `;
 
+    // Distinct ingredient names across all recipes
     const totalIngredientsPromise = sql/* sql */ `
       SELECT COALESCE(COUNT(DISTINCT TRIM(LOWER(ing))), 0)::int AS count
       FROM (
@@ -215,7 +270,14 @@ export async function fetchCardData(): Promise<CardData> {
   }
 }
 
-// “Recipe card data” (counts, last 7 days, breakdown, latest)
+/**
+ * “Recipe card data” with a bit more detail:
+ * - total recipes
+ * - recipes created in the last 7 days
+ * - type breakdown (counts per recipe_type)
+ * - topType
+ * - latest recipe
+ */
 export async function fetchRecipeCardData() {
   const userId = await requireUserId();
 
@@ -286,13 +348,23 @@ export async function fetchRecipeCardData() {
   }
 }
 
-/* =======================================================
- * Recipes — Filtered List, Paging, Single, List
- * ======================================================= */
+/* =============================================================================
+ * Recipes — Filtered list, paging, basic lists, by-id
+ * =============================================================================
+ */
 
 type SortCol = "name" | "date" | "type";
 type SortDir = "asc" | "desc";
 
+/**
+ * Fetch a filtered, paginated recipe list for the **current user**.
+ *
+ * Supports two calling styles:
+ *  - (query: string, page?: number, opts?: { type, sort, order })
+ *  - ({ query?, type?, sort?, order?, page? })
+ *
+ * This is the main query backing the recipes table UI.
+ */
 export async function fetchFilteredRecipes(
   arg1:
     | string
@@ -308,7 +380,7 @@ export async function fetchFilteredRecipes(
 ) {
   const userId = await requireUserId();
 
-  // Normalize args
+  // Normalize arguments
   let searchQuery = "";
   let page = 1;
   let type = "";
@@ -329,13 +401,14 @@ export async function fetchFilteredRecipes(
     order = arg1.order ?? "desc";
   }
 
-  // Clamp page
+  // Clamp page and compute offset
   page = Number.isFinite(page) && page > 0 ? page : 1;
   const offset = (page - 1) * RECIPES_PAGE_SIZE;
 
-  // WHERE predicates (seed with owner)
+  // Base predicate: recipe belongs to current user
   const predicates: any[] = [sql`r.user_id = ${userId}::uuid`];
 
+  // Free-text search across name, ingredients, steps, type
   if (searchQuery) {
     const pat = `%${searchQuery}%`;
     const nameLike = sql`r.recipe_name ILIKE ${pat}`;
@@ -347,8 +420,8 @@ export async function fetchFilteredRecipes(
     );
   }
 
+  // Optional recipe_type filter (enum exact match)
   if (type) {
-    // exact match (enum)
     predicates.push(sql`r.recipe_type = ${type}`);
   }
 
@@ -385,11 +458,9 @@ export async function fetchFilteredRecipes(
 
 /**
  * Count total recipes matching the SAME filters as fetchFilteredRecipes.
- * Accepts:
- *  - query?: string (preferred)
- *  - type?: string  (exact match)
+ * This is used for pagination (total rows).
  *
- * Keeping this in sync with the list query prevents pagination drift.
+ * Keeping it in sync with the list query prevents pagination drift.
  */
 export async function fetchRecipesTotal(params: {
   query?: string;
@@ -427,12 +498,6 @@ export async function fetchRecipesTotal(params: {
   return rows[0]?.count ?? 0;
 }
 
-/**
- * Compute total pages for recipes given a filter query.
- *
- * @param query - Search string for filter
- * @returns Promise<number> totalPages
- */
 /**
  * Compute total pages for recipes given the same filters as the list query.
  *
@@ -479,8 +544,7 @@ export async function fetchRecipesPages(
 
 /**
  * Fetch a minimal list of recipes (id, name, type) ordered by name.
- * Useful for select dropdowns.
- * @returns Promise<RecipeField[]>
+ * Useful for select dropdowns, multiselects, etc.
  */
 export async function fetchRecipes() {
   const userId = await requireUserId();
@@ -498,6 +562,12 @@ export async function fetchRecipes() {
   }
 }
 
+/**
+ * Fetch a recipe by id for the **current user**, returning a shape
+ * designed for the RecipeForm UI.
+ *
+ * Null when not found / unauthorized.
+ */
 export async function fetchRecipeById(id: string) {
   const userId = await requireUserId();
   try {
@@ -531,6 +601,10 @@ export async function fetchRecipeById(id: string) {
   }
 }
 
+/**
+ * Fetch a user by id.
+ * Helper for forms / admin UI; throws if id is missing.
+ */
 export async function fetchUserById(id: string) {
   if (!id) throw new Error("fetchUserById: id is required");
   const rows = await sql<UserForm[]>`
@@ -541,9 +615,10 @@ export async function fetchUserById(id: string) {
   return rows[0] ?? null;
 }
 
-/* =======================================================
- * Specific recipe and scope by owner.
- * ======================================================= */
+/**
+ * Fetch a specific recipe by id **for the current owner**.
+ * Similar to fetchRecipeById but always resolves user via requireUserId().
+ */
 export async function fetchRecipeByIdForOwner(
   id: string
 ): Promise<RecipeForm | null> {
@@ -576,15 +651,22 @@ export async function fetchRecipeByIdForOwner(
   return rows[0] ?? null;
 }
 
-/* =======================================================
- * Shopping list
- * ======================================================= */
+/* =============================================================================
+ * Shopping list / Structured ingredients
+ * =============================================================================
+ */
+
+/**
+ * Legacy helper: fetch all structured ingredients for a user.
+ *
+ * NOTE: This function is tolerant to two storage formats:
+ *  - JSON array already deserialized by postgres.js
+ *  - JSON string stored in the column
+ */
 export async function fetchAllStructuredIngredientsForUser(
   userId: string
 ): Promise<IncomingIngredientPayload[]> {
-  const rows = await sql<
-    { recipe_ingredients_structured: unknown }[]
-  >/* sql */ `
+  const rows = await sql<RecipeIngredientsRow[]>/* sql */ `
     SELECT recipe_ingredients_structured
     FROM public.recipes
     WHERE user_id = ${userId}::uuid
@@ -593,7 +675,7 @@ export async function fetchAllStructuredIngredientsForUser(
   const result: IncomingIngredientPayload[] = [];
 
   for (const row of rows) {
-    const raw = (row as any).recipe_ingredients_structured;
+    const raw = row.recipe_ingredients_structured;
     if (!raw) continue;
 
     // Case 1: column already deserialized as array
@@ -630,12 +712,13 @@ export async function fetchAllStructuredIngredientsForUser(
   return result;
 }
 
-// Row shape for querying only structured ingredients
-type RecipeIngredientsRow = {
-  recipe_ingredients_structured: any;
-};
-
-// Small helper: normalize whatever comes from recipe_ingredients_structured
+/**
+ * Normalize whatever comes from recipe_ingredients_structured
+ * into a plain array of IncomingIngredientPayload.
+ *
+ * - Accepts: null/undefined, already-parsed arrays, or JSON strings.
+ * - Fails soft and returns [] on parse errors or unexpected shapes.
+ */
 function normalizeStructuredIngredients(
   raw: unknown
 ): IncomingIngredientPayload[] {
@@ -663,7 +746,10 @@ function normalizeStructuredIngredients(
 
 /**
  * Fetch all structured ingredients for a user.
- * If recipeIds is provided, only those recipes are included.
+ *
+ * If `recipeIds` is provided, only those recipes are included.
+ * This is the main entry point for the shopping list aggregation:
+ * it returns a flat list of ingredients ready to be grouped/merged by the UI.
  */
 export async function fetchIngredientsForUser(
   userId: string,
@@ -676,9 +762,7 @@ export async function fetchIngredientsForUser(
 
   // Base query: all recipes for this user
   if (!recipeIds) {
-    const rows = await sql<
-      { recipe_ingredients_structured: unknown }[]
-    >/* sql */ `
+    const rows = await sql<RecipeIngredientsRow[]>/* sql */ `
       SELECT recipe_ingredients_structured
       FROM public.recipes
       WHERE user_id = ${userId}::uuid
@@ -690,9 +774,7 @@ export async function fetchIngredientsForUser(
   }
 
   // Filtered by recipe IDs
-  const rows = await sql<
-    { recipe_ingredients_structured: unknown }[]
-  >/* sql */ `
+  const rows = await sql<RecipeIngredientsRow[]>/* sql */ `
     SELECT recipe_ingredients_structured
     FROM public.recipes
     WHERE user_id = ${userId}::uuid
@@ -704,10 +786,11 @@ export async function fetchIngredientsForUser(
   );
 }
 
-/* =======================================================
+/* =============================================================================
  * Notifications
- * ======================================================= */
-// Users for notification dropdown
+ * =============================================================================
+ */
+
 export type NotificationUserOption = {
   id: string;
   name: string;
@@ -715,6 +798,10 @@ export type NotificationUserOption = {
   email: string;
 };
 
+/**
+ * Fetch users for the notifications “recipient” dropdown.
+ * Sorted by last_name, name for nicer UX.
+ */
 export async function fetchNotificationUsers(): Promise<
   NotificationUserOption[]
 > {
@@ -739,7 +826,10 @@ export async function fetchNotificationUsers(): Promise<
   }));
 }
 
-// Unread count (personal-only; broadcasts are not “readable”)
+/**
+ * Unread personal notifications count for the **current user**.
+ * Broadcasts are intentionally excluded from the “unread” count.
+ */
 export async function fetchUnreadCount() {
   const userId = await requireUserId();
   const rows = await sql<{ c: number }[]>/* sql */ `
@@ -752,12 +842,20 @@ export async function fetchUnreadCount() {
   return rows[0]?.c ?? 0;
 }
 
-const NOTIFICATIONS_PAGE_SIZE = 5;
-const NOTIFICATIONS_PAGE_SIZE_MAX = 50;
-
+/**
+ * Fetch notifications for the **current user**, with:
+ * - Pagination (page, pageSize)
+ * - Filters: only (all | personal | broadcasts), status, kind
+ * - Publish window guard: respects published_at <= now()
+ *
+ * Returns:
+ * - items: mapped to `AppNotification` using toAppNotification
+ * - total: total items matching filters (for pagination)
+ * - page / pageSize: echo inputs for convenience
+ */
 export async function fetchNotifications(opts?: {
   page?: number;
-  pageSize?: number; // default 10
+  pageSize?: number; // default 5
   only?: "all" | "personal" | "broadcasts"; // default "all"
   status?: "unread" | "read" | "archived" | "any"; // default "any"
   kind?: "all" | "system" | "maintenance" | "feature" | "message";
@@ -775,7 +873,7 @@ export async function fetchNotifications(opts?: {
   const status = opts?.status ?? "any";
   const kind = opts?.kind ?? "all";
 
-  // status filters
+  // Status filters (aliased vs bare used in subqueries)
   const personalStatusSqlAliased =
     status === "any"
       ? sql`TRUE`
@@ -784,14 +882,14 @@ export async function fetchNotifications(opts?: {
   const personalStatusSqlBare =
     status === "any" ? sql`TRUE` : sql`status = ${status}::notification_status`;
 
-  // 👇 NEW kind filters
+  // Kind filters (aliased vs bare)
   const kindSqlAliased =
     kind === "all" ? sql`TRUE` : sql`n.kind = ${kind}::notification_kind`;
 
   const kindSqlBare =
     kind === "all" ? sql`TRUE` : sql`kind = ${kind}::notification_kind`;
 
-  // publish window guards
+  // Publish window guards (aliased vs bare)
   const publishGuardAliased = sql/* sql */ `
     (n.published_at IS NULL OR n.published_at <= now())
   `;
@@ -818,7 +916,7 @@ export async function fetchNotifications(opts?: {
       AND ${publishGuardAliased}
   `;
 
-  // Compose union
+  // Compose union depending on "only" flag
   const unionSql =
     only === "personal"
       ? personalSql
@@ -834,7 +932,7 @@ export async function fetchNotifications(opts?: {
     LIMIT ${pageSize} OFFSET ${offset}
   `;
 
-  // Total for pagination (also respects status, kind, published_at)
+  // Total for pagination (respects status, kind, published_at, only)
   const [{ count: total }] = await sql<{ count: number }[]>/* sql */ `
     SELECT (
       CASE
@@ -875,9 +973,11 @@ export async function fetchNotifications(opts?: {
   return { items, total, page, pageSize };
 }
 
-/* =======================================================
+/* =============================================================================
  * Release notes + Roadmap
- * ======================================================= */
+ * =============================================================================
+ */
+
 export type ReleaseNote = {
   id: string;
   title: string;
@@ -901,7 +1001,10 @@ export type RoadmapGrouped = {
   shipped: RoadmapItem[];
 };
 
-/** Fetch all release notes, newest first */
+/**
+ * Fetch all release notes, newest first.
+ * Used by the /release-notes page.
+ */
 export async function fetchReleaseNotes(): Promise<ReleaseNote[]> {
   const rows = await sql<
     {
@@ -916,7 +1019,6 @@ export async function fetchReleaseNotes(): Promise<ReleaseNote[]> {
     ORDER BY released_at DESC, created_at DESC
   `;
 
-  // rows is already an array – no .rows
   return rows.map((r) => ({
     id: r.id,
     title: r.title,
@@ -925,7 +1027,14 @@ export async function fetchReleaseNotes(): Promise<ReleaseNote[]> {
   }));
 }
 
-/** Fetch roadmap items grouped by status */
+/**
+ * Fetch roadmap items and group them by status:
+ * - planned
+ * - in_progress
+ * - shipped
+ *
+ * Items are ordered by (status, order_index, created_at).
+ */
 export async function fetchRoadmapGrouped(): Promise<RoadmapGrouped> {
   const rows = await sql<
     {
@@ -945,7 +1054,6 @@ export async function fetchRoadmapGrouped(): Promise<RoadmapGrouped> {
   const inProgress: RoadmapItem[] = [];
   const shipped: RoadmapItem[] = [];
 
-  // rows is an array, so just for-of over it
   for (const r of rows) {
     const item: RoadmapItem = {
       id: r.id,
@@ -962,7 +1070,3 @@ export async function fetchRoadmapGrouped(): Promise<RoadmapGrouped> {
 
   return { planned, inProgress, shipped };
 }
-
-/* =======================================================
- * Shopping list
- * ======================================================= */
