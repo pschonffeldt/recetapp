@@ -107,7 +107,7 @@ export default function IngredientsEditor({ initial }: Props) {
                 <span className="text-xs text-gray-500">Ingredient</span>
                 <input
                   type="text"
-                  className="rounded-md border border-gray-200 px-2 py-1 text-sm"
+                  className="rounded-md border border-gray-200 px-2 py-1 text-base"
                   placeholder="e.g. Tomato"
                   value={row.ingredientName}
                   onChange={(e) =>
@@ -124,7 +124,7 @@ export default function IngredientsEditor({ initial }: Props) {
                   type="number"
                   min="0"
                   step="0.01"
-                  className="rounded-md border border-gray-200 px-2 py-1 text-sm"
+                  className="rounded-md border border-gray-200 px-2 py-1 text-base"
                   placeholder="e.g. 2"
                   value={row.quantity}
                   onChange={(e) =>
@@ -137,7 +137,7 @@ export default function IngredientsEditor({ initial }: Props) {
               <div className="flex flex-col">
                 <span className="text-xs text-gray-500">Unit</span>
                 <select
-                  className="rounded-md border border-gray-200 px-2 py-1 text-sm"
+                  className="rounded-md border border-gray-200 px-2 py-1 text-base"
                   value={row.unit}
                   onChange={(e) =>
                     updateRow(row.id, {
