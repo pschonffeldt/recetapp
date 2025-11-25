@@ -9,11 +9,12 @@ import {
   DbNotificationRow,
   AppNotification,
   toAppNotification,
-  IncomingIngredientPayload,
 } from "./definitions";
-
+import {
+  type FetchNotificationsResult,
+  type IncomingIngredientPayload,
+} from "@/app/lib/definitions";
 import { requireUserId } from "@/app/lib/auth-helpers";
-import { type FetchNotificationsResult } from "@/app/lib/definitions";
 
 /* ================================
  * Database Client
@@ -627,6 +628,62 @@ export async function fetchAllStructuredIngredientsForUser(
   }
 
   return result;
+}
+
+// Row shape for querying only structured ingredients
+type RecipeIngredientsRow = {
+  recipe_ingredients_structured: any;
+};
+
+// Normalize whatever the DB driver gives us (array vs JSON string)
+function normalizeStructuredIngredients(raw: any): IncomingIngredientPayload[] {
+  if (!raw) return [];
+
+  // Already parsed JSON (most common with jsonb)
+  if (Array.isArray(raw)) {
+    return raw as IncomingIngredientPayload[];
+  }
+
+  // Stringified JSON
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed as IncomingIngredientPayload[];
+      }
+    } catch (e) {
+      console.error("Failed to parse recipe_ingredients_structured:", e);
+    }
+  }
+
+  return [];
+}
+
+/**
+ * Fetch all structured ingredients across all recipes for a given user.
+ * Returns a flat array of IncomingIngredientPayload.
+ */
+export async function fetchAllIngredientsForUser(
+  userId: string
+): Promise<IncomingIngredientPayload[]> {
+  const rows = await sql<RecipeIngredientsRow[]>/* sql */ `
+    SELECT recipe_ingredients_structured
+    FROM public.recipes
+    WHERE user_id = ${userId}::uuid
+  `;
+
+  const all: IncomingIngredientPayload[] = [];
+
+  for (const row of rows) {
+    const parsed = normalizeStructuredIngredients(
+      row.recipe_ingredients_structured
+    );
+    if (parsed.length > 0) {
+      all.push(...parsed);
+    }
+  }
+
+  return all;
 }
 
 /* =======================================================

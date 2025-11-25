@@ -1,58 +1,75 @@
+// app/dashboard/shopping-list/page.tsx
 import { Metadata } from "next";
 import Breadcrumbs from "@/app/ui/recipes/breadcrumbs";
 import { notFound } from "next/navigation";
-import {
-  fetchUserById,
-  fetchAllStructuredIngredientsForUser,
-} from "@/app/lib/data";
+import { fetchUserById, fetchAllIngredientsForUser } from "@/app/lib/data";
 import { auth } from "@/auth";
-import { IncomingIngredientPayload, UNIT_LABELS } from "@/app/lib/definitions";
+import {
+  IncomingIngredientPayload,
+  IngredientUnit,
+  UNIT_LABELS,
+} from "@/app/lib/definitions";
 
 export const metadata: Metadata = { title: "Shopping list" };
 
-// Helper: aggregate all ingredients across recipes
-function aggregateIngredients(items: IncomingIngredientPayload[]) {
-  type Aggregated = {
-    name: string;
-    unitLabel: string | null;
-    quantity: number | null;
-    hasOptional: boolean;
-  };
+// --- Helpers --------------------------------------------------
 
-  const map = new Map<string, Aggregated>();
+type AggregatedItem = {
+  name: string;
+  unit: IngredientUnit | null;
+  quantity: number | null;
+};
 
-  for (const ing of items) {
-    const name = ing.ingredientName?.trim();
-    if (!name) continue;
+function aggregateIngredients(
+  ingredients: IncomingIngredientPayload[]
+): AggregatedItem[] {
+  const map = new Map<string, AggregatedItem>();
 
-    const unitLabel = ing.unit ? UNIT_LABELS[ing.unit] ?? ing.unit : null;
-    const key = `${name.toLowerCase()}||${unitLabel ?? ""}`;
+  for (const ing of ingredients) {
+    // For now: skip optional items in the shopping list
+    if (ing.isOptional) continue;
 
-    const existing = map.get(key) ?? {
-      name,
-      unitLabel,
-      quantity: 0,
-      hasOptional: false,
-    };
+    const name = ing.ingredientName.trim();
+    const unit = ing.unit ?? null;
+    const hasQty = typeof ing.quantity === "number";
 
-    if (typeof ing.quantity === "number" && !Number.isNaN(ing.quantity)) {
-      existing.quantity = (existing.quantity ?? 0) + ing.quantity;
-    } else if (existing.quantity === 0) {
-      // if we never had a numeric quantity, keep it null
+    // Key by name + unit + “has quantity or not”
+    const key = `${name.toLowerCase()}|${unit ?? ""}|${hasQty ? "q" : "noq"}`;
+
+    const existing = map.get(key);
+    if (!existing) {
+      map.set(key, {
+        name,
+        unit,
+        quantity: hasQty ? ing.quantity! : null,
+      });
+    } else if (hasQty && existing.quantity != null) {
+      existing.quantity += ing.quantity!;
+    } else if (!hasQty) {
+      // keep as “no quantity” item
       existing.quantity = null;
     }
-
-    if (ing.isOptional) {
-      existing.hasOptional = true;
-    }
-
-    map.set(key, existing);
   }
 
-  return Array.from(map.entries())
-    .sort((a, b) => a[1].name.localeCompare(b[1].name))
-    .map(([key, value]) => ({ key, ...value }));
+  // Sort a bit for nicer UX
+  return Array.from(map.values()).sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+  );
 }
+
+function formatAggregatedItem(item: AggregatedItem): string {
+  const unitLabel = item.unit ? UNIT_LABELS[item.unit] ?? item.unit : "";
+  const qtyPart =
+    item.quantity != null
+      ? unitLabel
+        ? `${item.quantity} ${unitLabel}`
+        : String(item.quantity)
+      : "";
+
+  return qtyPart ? `${qtyPart} ${item.name}` : item.name;
+}
+
+// --- Page -----------------------------------------------------
 
 export default async function Page() {
   const session = await auth();
@@ -62,11 +79,12 @@ export default async function Page() {
   const user = await fetchUserById(id);
   if (!user) notFound();
 
-  // 1) Fetch all structured ingredients for this user
-  const rawIngredients = await fetchAllStructuredIngredientsForUser(id);
+  // Get all structured ingredients for this user
+  const rawIngredients = await fetchAllIngredientsForUser(id);
 
-  // 2) Aggregate them for the shopping list
+  // Aggregate + format
   const aggregated = aggregateIngredients(rawIngredients);
+  const lines = aggregated.map(formatAggregatedItem);
 
   return (
     <main>
@@ -80,36 +98,17 @@ export default async function Page() {
         ]}
       />
 
-      <section className="mt-6 rounded-md bg-gray-50 p-4 md:p-6">
-        <h1 className="text-xl font-semibold mb-4">Shopping list</h1>
+      <section className="mt-4 rounded-md bg-gray-50 p-6">
+        <h1 className="mb-4 text-xl font-semibold">Shopping list</h1>
 
-        {aggregated.length === 0 ? (
+        {lines.length === 0 ? (
           <p className="text-sm text-gray-600">
-            You don&apos;t have any recipes with structured ingredients yet.
+            No ingredients found yet. Add some recipes first!
           </p>
         ) : (
-          <ul className="space-y-2 text-sm">
-            {aggregated.map((item) => (
-              <li key={item.key} className="flex items-start gap-2">
-                <span
-                  className="mt-1 h-1.5 w-1.5 rounded-full bg-gray-400"
-                  aria-hidden="true"
-                />
-                <span>
-                  {item.quantity != null && (
-                    <>
-                      <strong>{item.quantity}</strong>{" "}
-                    </>
-                  )}
-                  {item.unitLabel && <>{item.unitLabel} </>}
-                  {item.name}
-                  {item.hasOptional && (
-                    <span className="ml-1 text-xs text-gray-500">
-                      (includes optional)
-                    </span>
-                  )}
-                </span>
-              </li>
+          <ul className="list-disc space-y-1 pl-5 text-gray-900">
+            {lines.map((line, idx) => (
+              <li key={idx}>{line}</li>
             ))}
           </ul>
         )}
