@@ -15,6 +15,7 @@ import {
   type IncomingIngredientPayload,
 } from "@/app/lib/definitions";
 import { requireUserId } from "@/app/lib/auth-helpers";
+import { parseStructuredIngredients } from "./ingredients";
 
 /**
  * ============================================================================
@@ -42,6 +43,8 @@ import { requireUserId } from "@/app/lib/auth-helpers";
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: "require" });
 
+const UUID_OID = 2950; // Postgres OID for uuid
+
 /* =============================================================================
  * Pagination constants
  * =============================================================================
@@ -68,6 +71,10 @@ type LatestRecipeRow = {
 };
 
 /** Row shape for querying only structured ingredients. */
+// type RecipeIngredientsRow = {
+//   recipe_ingredients_structured: IncomingIngredientPayload[] | string | null;
+// };
+
 type RecipeIngredientsRow = {
   recipe_ingredients_structured: unknown;
 };
@@ -779,35 +786,29 @@ export async function fetchIngredientsForUser(
   userId: string,
   recipeIds?: string[]
 ): Promise<IncomingIngredientPayload[]> {
-  // If caller passed an empty list → nothing to show
-  if (recipeIds && recipeIds.length === 0) {
-    return [];
-  }
-
-  // Base query: all recipes for this user
-  if (!recipeIds) {
-    const rows = await sql<RecipeIngredientsRow[]>/* sql */ `
-      SELECT recipe_ingredients_structured
-      FROM public.recipes
-      WHERE user_id = ${userId}::uuid
-    `;
-
-    return rows.flatMap((row) =>
-      normalizeStructuredIngredients(row.recipe_ingredients_structured)
-    );
-  }
-
-  // Filtered by recipe IDs
-  const rows = await sql<RecipeIngredientsRow[]>/* sql */ `
+  const rows = await sql<RecipeIngredientsRow[]>`
     SELECT recipe_ingredients_structured
     FROM public.recipes
     WHERE user_id = ${userId}::uuid
-      AND id = ANY(${recipeIds}::uuid[])
+    ${
+      recipeIds && recipeIds.length > 0
+        ? sql`AND id IN ${sql(recipeIds)}`
+        : sql``
+    }
   `;
 
-  return rows.flatMap((row) =>
-    normalizeStructuredIngredients(row.recipe_ingredients_structured)
-  );
+  const all: IncomingIngredientPayload[] = [];
+
+  for (const row of rows) {
+    const parsed = parseStructuredIngredients(
+      row.recipe_ingredients_structured
+    );
+    if (parsed.length > 0) {
+      all.push(...parsed);
+    }
+  }
+
+  return all;
 }
 
 /* =============================================================================

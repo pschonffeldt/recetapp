@@ -8,68 +8,10 @@ import { inter } from "../branding/fonts";
 import { MetricCard, MetricCardMobile } from "./recipe-indicators";
 import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils";
 import { RecipeFormState } from "@/app/lib/action-types";
-import { IncomingIngredientPayload, UNIT_LABELS } from "@/app/lib/definitions";
+import { buildIngredientLines } from "@/app/lib/ingredients"; // 👈 NEW
 
-// If your column is jsonb, the driver may give you:
-// - an array of objects
-// - or a JSON string
-// This helper normalizes that into `IncomingIngredientPayload[]`.
-// Normalize DB value → array of IncomingIngredientPayload
-function getStructuredIngredientsFromRecipe(
-  recipe: RecipeForm
-): IncomingIngredientPayload[] {
-  const raw = recipe.recipe_ingredients_structured;
-
-  if (!raw) return [];
-
-  // Already parsed array (common with json/jsonb)
-  if (Array.isArray(raw)) {
-    return raw as IncomingIngredientPayload[];
-  }
-
-  // Stringified JSON
-  if (typeof raw === "string") {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        return parsed as IncomingIngredientPayload[];
-      }
-    } catch (e) {
-      console.error("Failed to parse structured ingredients JSON:", e);
-    }
-  }
-
-  return [];
-}
-
-function formatIngredient(ing: IncomingIngredientPayload): string {
-  const unitLabel = ing.unit ? UNIT_LABELS[ing.unit] ?? ing.unit : "";
-  const qtyPart =
-    ing.quantity != null
-      ? unitLabel
-        ? `${ing.quantity} ${unitLabel}`
-        : String(ing.quantity)
-      : "";
-
-  const base = qtyPart
-    ? `${qtyPart} ${ing.ingredientName}`
-    : ing.ingredientName;
-
-  return ing.isOptional ? `${base} (optional)` : base;
-}
-
-function buildIngredientLines(recipe: RecipeForm): string[] {
-  const structured = getStructuredIngredientsFromRecipe(recipe);
-
-  if (structured.length === 0) {
-    // Fallback to legacy plain-text ingredients
-    return recipe.recipe_ingredients ?? [];
-  }
-
-  return [...structured]
-    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
-    .map(formatIngredient);
-}
+// (you can keep asDate if you still use it somewhere)
+const asDate = (d: string | Date) => (d instanceof Date ? d : new Date(d));
 
 export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
   const initial: RecipeFormState = { message: null, errors: {} };
@@ -77,12 +19,10 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
   async function handleOnClick() {
     const html2pdf = await require("html2pdf.js");
     const element = document.querySelector("#print");
-    html2pdf(element, {
-      margin: 20,
-    });
+    html2pdf(element, { margin: 20 });
   }
 
-  // ---------- Structured ingredients → pretty strings ----------
+  // 🔹 New: use shared helper
   const ingredientLines = buildIngredientLines(recipe);
 
   return (
