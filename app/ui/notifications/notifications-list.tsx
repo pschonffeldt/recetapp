@@ -153,14 +153,14 @@ export default function NotificationsList({
                 {isUnread && (
                   <form action={markOne} className="shrink-0">
                     <input type="hidden" name="id" value={n.id} />
-                    <button
+                    <Button
                       className="rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
                       type="submit"
                       aria-disabled={oneState?.pending}
                       disabled={oneState?.pending}
                     >
                       {oneState?.pending ? "Marking…" : "Mark read"}
-                    </button>
+                    </Button>
                   </form>
                 )}
               </div>
