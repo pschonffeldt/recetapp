@@ -175,32 +175,44 @@ export default function NotificationsList({
           Page {page} of {totalPages} • {total} total
         </p>
         <div className="flex gap-2">
-          <Link
-            prefetch={false}
-            aria-disabled={prevDisabled}
-            tabIndex={prevDisabled ? -1 : 0}
-            href={prevDisabled ? "#" : hrefForPage(page - 1)}
-            className={`rounded-md border px-3 py-2 text-sm ${
-              prevDisabled
-                ? "pointer-events-none opacity-50"
-                : "hover:bg-gray-100"
-            }`}
+          {/* Previous button */}
+          <Button
+            className={`rounded-md bg-blue-600 px-3 py-2 text-sm text-white disabled:opacity-50 
+              ${
+                prevDisabled
+                  ? "pointer-events-none opacity-50"
+                  : "hover:bg-blue-400"
+              }
+            `}
           >
-            ← Previous
-          </Link>
-          <Link
-            prefetch={false}
-            aria-disabled={nextDisabled}
-            tabIndex={nextDisabled ? -1 : 0}
-            href={nextDisabled ? "#" : hrefForPage(page + 1)}
-            className={`rounded-md border px-3 py-2 text-sm ${
-              nextDisabled
-                ? "pointer-events-none opacity-50"
-                : "hover:bg-gray-100"
-            }`}
+            <Link
+              prefetch={false}
+              aria-disabled={prevDisabled}
+              tabIndex={prevDisabled ? -1 : 0}
+              href={prevDisabled ? "#" : hrefForPage(page - 1)}
+            >
+              ← Previous
+            </Link>
+          </Button>
+          {/* Previous button */}
+          <Button
+            className={`rounded-md bg-blue-600 px-3 py-2 text-sm text-white disabled:opacity-50 
+              ${
+                nextDisabled
+                  ? "pointer-events-none opacity-50"
+                  : "hover:bg-blue-400"
+              }
+            `}
           >
-            Next →
-          </Link>
+            <Link
+              prefetch={false}
+              aria-disabled={nextDisabled}
+              tabIndex={nextDisabled ? -1 : 0}
+              href={nextDisabled ? "#" : hrefForPage(page + 1)}
+            >
+              Next →
+            </Link>
+          </Button>
         </div>
       </div>
     </div>
