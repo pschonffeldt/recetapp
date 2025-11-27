@@ -79,7 +79,7 @@ export default function NewNotificationForm({ users }: Props) {
               </label>
               <select
                 name="userId"
-                className="w-full max-w-md rounded-md border border-gray-200 px-3 py-2 text-sm"
+                className="w-full max-w-md rounded-md border border-gray-200 px-3 py-2 text-base"
                 disabled={audience !== "user"}
                 defaultValue=""
               >
@@ -102,7 +102,7 @@ export default function NewNotificationForm({ users }: Props) {
           <input
             name="title"
             type="text"
-            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+            className="w-full rounded-md border border-gray-200 px-3 py-2 text-base"
             placeholder="What’s new?"
             required
           />
@@ -116,7 +116,7 @@ export default function NewNotificationForm({ users }: Props) {
           <textarea
             name="body"
             rows={5}
-            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+            className="w-full rounded-md border border-gray-200 px-3 py-2 text-base"
             placeholder="Details for users…"
             required
           />
@@ -131,7 +131,7 @@ export default function NewNotificationForm({ users }: Props) {
             <select
               name="kind"
               defaultValue="system"
-              className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-gray-200 px-3 py-2 text-base"
             >
               <option value="system">System</option>
               <option value="maintenance">Maintenance</option>
@@ -147,7 +147,7 @@ export default function NewNotificationForm({ users }: Props) {
             <select
               name="level"
               defaultValue="info"
-              className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+              className="w-full rounded-md border border-gray-200 px-3 py-2 text-base"
             >
               <option value="info">Info</option>
               <option value="success">Success</option>
@@ -161,14 +161,14 @@ export default function NewNotificationForm({ users }: Props) {
         </div>
         {/* Notification or message optional link */}
         <div className="mb-4">
-          <label className="mb-2 block text-sm font-medium">
+          <label className="mb-2 block text-base font-medium">
             Link URL (optional)
           </label>
           <input
             name="linkUrl"
             type="url"
             placeholder="https://example.com/changelog"
-            className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+            className="w-full rounded-md border border-gray-200 px-3 py-2 text-base"
           />
           {err("linkUrl") && (
             <p className="mt-1 text-sm text-red-500">{err("linkUrl")}</p>
@@ -212,7 +212,7 @@ export default function NewNotificationForm({ users }: Props) {
                 <input
                   name="publishAt"
                   type="datetime-local"
-                  className="w-full rounded-md border border-gray-200 px-3 py-2 text-sm disabled:bg-gray-50"
+                  className="w-full rounded-md border border-gray-200 px-3 py-2 text-base disabled:bg-gray-50"
                   disabled={publishNow} // only enabled when "Schedule for later"
                 />
                 {err("publishAt") && (
