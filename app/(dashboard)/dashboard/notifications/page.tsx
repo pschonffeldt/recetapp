@@ -73,6 +73,7 @@ export default async function Page({
     pageSize,
   } = await fetchNotifications({
     page,
+    // Here we set the max number of notifications per page
     pageSize: 10,
     only,
     status,
@@ -95,7 +96,7 @@ export default async function Page({
       </div>
 
       {/* Tabs */}
-      <div className="mb-4 flex items-center flex-wrap gap-2 p-4">
+      <div className="ml-4 flex items-center flex-wrap gap-2">
         {TABS.map((t) => {
           const isActive = t.key === activeTab;
 
@@ -106,16 +107,16 @@ export default async function Page({
           if (page !== 1) params.set("page", String(page));
 
           const href = `/dashboard/notifications?${params.toString()}`;
-
+          // Returning the and highlighting the active filter tab
           return (
             <Link
               key={t.key}
               href={href}
               className={
-                "rounded-full px-3 py-1 text-xs font-medium " +
+                "rounded-t-md px-4 py-2 text-xs font-medium " +
                 (isActive
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200")
+                  ? "bg-blue-600 text-white"
+                  : "bg-blue-500 text-white hover:bg-blue-400 opacity-50")
               }
             >
               {t.label}
