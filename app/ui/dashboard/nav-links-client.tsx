@@ -5,6 +5,7 @@ import Link from "next/link";
 import clsx from "clsx";
 
 import {
+  ArrowDownIcon,
   HomeIcon,
   MegaphoneIcon,
   ShoppingCartIcon,
@@ -43,7 +44,6 @@ export default function NavLinksClient({ isAdmin }: Props) {
     },
   ];
 
-  // Add as many admin-only links as you want here
   const adminLinks: NavItem[] = [
     {
       name: "New notification",
@@ -51,30 +51,43 @@ export default function NavLinksClient({ isAdmin }: Props) {
       icon: ShieldCheckIcon,
     },
     { name: "Users", href: "/dashboard/admin/users", icon: UsersIcon },
-    // { name: "System",        href: "/dashboard/admin/system",       icon: Cog6ToothIcon },
   ];
 
-  const links = isAdmin ? [...baseLinks, ...adminLinks] : baseLinks;
+  const renderLink = (link: NavItem) => {
+    const LinkIcon = link.icon;
+    const active = pathname === link.href;
+
+    return (
+      <Link
+        key={link.name}
+        href={link.href}
+        className={clsx(
+          "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 lg:flex-none lg:justify-start lg:p-2 lg:px-3",
+          active && "bg-sky-100 text-blue-600"
+        )}
+      >
+        <LinkIcon className="w-6" />
+        <p className="hidden lg:block">{link.name}</p>
+      </Link>
+    );
+  };
 
   return (
     <>
-      {links.map((link) => {
-        const LinkIcon = link.icon;
-        const active = pathname === link.href;
-        return (
-          <Link
-            key={link.name}
-            href={link.href}
-            className={clsx(
-              "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 lg:flex-none lg:justify-start lg:p-2 lg:px-3",
-              active && "bg-sky-100 text-blue-600"
-            )}
-          >
-            <LinkIcon className="w-6" />
-            <p className="hidden lg:block">{link.name}</p>
-          </Link>
-        );
-      })}
+      {/* Regular user links */}
+      {baseLinks.map(renderLink)}
+
+      {/* Admin section */}
+      {isAdmin && (
+        <>
+          <div className="flex flex-row items-center gap-2 mt-4 mb-1 rounded-md bg-blue-400 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+            <ArrowDownIcon className="w-3"></ArrowDownIcon>
+            <p>Admin tools</p>
+          </div>
+
+          {adminLinks.map(renderLink)}
+        </>
+      )}
     </>
   );
 }
