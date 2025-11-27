@@ -8,6 +8,7 @@ import {
   PowerIcon,
   MegaphoneIcon,
   ShoppingCartIcon,
+  ArrowDownIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChartBarIcon,
@@ -146,36 +147,42 @@ export default function UserSettingsFab({
               onClick={() => go(recipesHref)}
             />
             <MenuItem
-              icon={<MegaphoneIcon className="h-5 w-5" />}
-              label="Notifications"
-              onClick={() => go(notificationsHref)}
-            />
-            <MenuItem
               icon={<ShoppingCartIcon className="h-5 w-5" />}
               label="Shopping list"
               onClick={() => go(shoppinglistHref)}
+            />
+            {/* Divider before logout */}
+            <div className="my-2 h-px bg-gray-200/60" />
+            <MenuItem
+              icon={<MegaphoneIcon className="h-5 w-5" />}
+              label="Notifications"
+              onClick={() => go(notificationsHref)}
             />
             <MenuItem
               icon={<UserCircleIcon className="h-5 w-5" />}
               label="Account"
               onClick={() => go(profileHref)}
             />
-
+            {/* Divider before admin tools */}
+            <div className="my-2 h-px bg-gray-200/60" />
             {/* Admin-only section */}
             {isAdmin && (
-              <>
-                <div className="my-2 h-px bg-gray-200/70" />
+              <div>
+                <div className="flex flex-row items-center gap-2 mt-4 mb-1 rounded-md bg-blue-400 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+                  <ArrowDownIcon className="ml-1 w-3"></ArrowDownIcon>
+                  <span>Admin tools</span>
+                </div>
                 <MenuItem
                   icon={<ShieldCheckIcon className="h-5 w-5" />}
-                  label="Admin · Notifications"
+                  label="Notifications center"
                   onClick={() => go(adminNotificationHref)}
                 />
                 <MenuItem
                   icon={<UsersIcon className="h-5 w-5" />}
-                  label="Admin · Users"
+                  label="Users management"
                   onClick={() => go(adminUsersHref)}
                 />
-              </>
+              </div>
             )}
 
             {/* Divider before logout */}

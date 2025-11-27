@@ -31,17 +31,17 @@ export default function NavLinksClient({ isAdmin }: Props) {
   const baseLinks: NavItem[] = [
     { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
     { name: "Recipes", href: "/dashboard/recipes", icon: DocumentPlusIcon },
-    { name: "Account", href: "/dashboard/account", icon: UserIcon },
-    {
-      name: "Notifications",
-      href: "/dashboard/notifications",
-      icon: MegaphoneIcon,
-    },
     {
       name: "Shopping list",
       href: "/dashboard/shopping-list",
       icon: ShoppingCartIcon,
     },
+    {
+      name: "Notifications",
+      href: "/dashboard/notifications",
+      icon: MegaphoneIcon,
+    },
+    { name: "Account", href: "/dashboard/account", icon: UserIcon },
   ];
 
   const adminLinks: NavItem[] = [
