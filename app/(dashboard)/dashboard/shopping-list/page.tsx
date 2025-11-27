@@ -147,9 +147,10 @@ export default async function Page({
             />
           </div>
         </div>
-
+      </section>
+      <section className="mt-4 space-y-4 p-4 md:p-4 lg:p-0">
         {/* Bottom card: actual list */}
-        <div className="rounded-md border bg-white p-4 shadow-sm md:p-6">
+        <div className="rounded-md border bg-white p-4 shadow-sm overflow-auto md:p-6 md:max-h-80">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
               Items
