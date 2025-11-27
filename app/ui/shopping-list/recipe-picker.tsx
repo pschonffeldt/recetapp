@@ -22,7 +22,7 @@ export default function ShoppingListRecipePicker({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // 👇 use the correct API from the provider
+  // Use toast provider
   const { push } = useToast();
 
   const [selected, setSelected] = useState<Set<string>>(
