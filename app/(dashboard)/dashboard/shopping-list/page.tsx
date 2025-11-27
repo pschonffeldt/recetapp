@@ -142,7 +142,8 @@ export default async function Page({
           <div className="mt-4">
             <ShoppingListRecipePicker
               recipes={recipes}
-              selectedIds={recipeIds}
+              selectedIds={recipeIds ?? []}
+              lines={lines}
             />
           </div>
         </div>
