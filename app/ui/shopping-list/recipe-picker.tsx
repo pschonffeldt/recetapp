@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ShoppingListRecipe } from "@/app/lib/data";
 import { Button } from "../button";
-import { useToast } from "../toast/toast-provider";
-
-const APP_URL = "https://recetapp-mu.vercel.app/";
+import ShoppingListActions from "./shopping-list-actions";
 
 type Props = {
   recipes: ShoppingListRecipe[];
@@ -21,9 +19,6 @@ export default function ShoppingListRecipePicker({
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  // Use toast provider
-  const { push } = useToast();
 
   const [selected, setSelected] = useState<Set<string>>(
     () => new Set(selectedIds ?? [])
@@ -93,57 +88,6 @@ export default function ShoppingListRecipePicker({
     );
   }
 
-  const handleCopy = async () => {
-    if (typeof navigator === "undefined" || !navigator.clipboard) {
-      console.warn("Clipboard API not available");
-      push({
-        variant: "error",
-        message: "Clipboard is not available in this browser.",
-      });
-      return;
-    }
-
-    // Recipes that are currently applied (from the URL / server)
-    const appliedIds = selectedIds ?? [];
-    const appliedRecipes = recipes.filter((r) => appliedIds.includes(r.id));
-
-    const recipeLines =
-      appliedRecipes.length > 0 ? appliedRecipes.map((r) => `- ${r.name}`) : [];
-
-    const ingredientLines =
-      lines.length > 0 ? lines.map((line) => `- ${line}`) : [];
-
-    const sections: string[] = [];
-    sections.push("Shopping list");
-
-    if (recipeLines.length > 0) {
-      sections.push("\nRecipes:\n" + recipeLines.join("\n"));
-    }
-
-    if (ingredientLines.length > 0) {
-      sections.push("\nIngredients:\n" + ingredientLines.join("\n"));
-    }
-
-    // Footer with branding + URL
-    sections.push("", "Generated with RecetApp", `Try it here: ${APP_URL}`);
-
-    const text = sections.join("\n");
-
-    try {
-      await navigator.clipboard.writeText(text);
-      push({
-        variant: "success",
-        message: "Shopping list copied to clipboard.",
-      });
-    } catch (err) {
-      console.error("Failed to copy shopping list:", err);
-      push({
-        variant: "error",
-        message: "Could not copy shopping list. Please try again.",
-      });
-    }
-  };
-
   return (
     <div className="min-h-20">
       <div className="mb-4 rounded-md border border-gray-200 bg-white p-4">
@@ -168,6 +112,7 @@ export default function ShoppingListRecipePicker({
             </Button>
           </div>
         </div>
+
         <ul className="mt-2 min-h-80 max-h-160 space-y-1 overflow-auto text-sm p-1">
           {recipes.map((r) => (
             <li key={r.id} className="flex items-center gap-2">
@@ -184,6 +129,8 @@ export default function ShoppingListRecipePicker({
           ))}
         </ul>
       </div>
+
+      {/* Bottom actions: Update + Copy + Export PDF */}
       <div className="mt-3 flex flex-wrap justify-end gap-2">
         <Button
           className="rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
@@ -193,14 +140,11 @@ export default function ShoppingListRecipePicker({
           Update shopping list
         </Button>
 
-        <Button
-          className="rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
-          type="button"
-          onClick={handleCopy}
-          disabled={selectedIds.length === 0 || lines.length === 0}
-        >
-          Copy list
-        </Button>
+        <ShoppingListActions
+          recipes={recipes}
+          selectedIds={selectedIds}
+          lines={lines}
+        />
       </div>
     </div>
   );
