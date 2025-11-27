@@ -9,6 +9,7 @@ import {
 } from "@/app/lib/actions";
 import type { AppNotification } from "@/app/lib/definitions";
 import { capitalizeFirst } from "@/app/lib/utils";
+import { Button } from "../button";
 
 function formatDateTime(value?: string | null) {
   if (!value) return "";
@@ -74,14 +75,14 @@ export default function NotificationsList({
         <h2 className="text-xl font-semibold">Your notifications</h2>
 
         <form action={markAll}>
-          <button
-            className="rounded-md bg-gray-900 px-3 py-2 text-sm text-white hover:bg-black/80 disabled:opacity-50"
+          <Button
+            className="mt-4 w-full"
             type="submit"
             aria-disabled={allState?.pending}
             disabled={allState?.pending}
           >
             {allState?.pending ? "Marking…" : "Mark all as read"}
-          </button>
+          </Button>
         </form>
       </div>
 
