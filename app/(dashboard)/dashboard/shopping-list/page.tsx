@@ -1,4 +1,4 @@
-// app/dashboard/shopping-list/page.tsx
+// app/(dashboard)/dashboard/shopping-list/page.tsx
 import { Metadata } from "next";
 import Breadcrumbs from "@/app/ui/recipes/breadcrumbs";
 import { notFound } from "next/navigation";
@@ -85,26 +85,32 @@ export default async function Page({
   const user = await fetchUserById(id);
   if (!user) notFound();
 
-  // --- NEW: resolve searchParams Promise safely ---
+  // Resolve searchParams Promise (Next 15 style)
   const sp = searchParams ? await searchParams : {};
-  const raw = sp.recipes;
+  const raw = sp.recipes ?? "";
+
+  // NEW: empty or missing `recipes` => "no selection"
   const recipeIds =
-    raw && raw.trim().length > 0
+    raw.trim().length > 0
       ? raw
           .split(",")
           .map((s) => s.trim())
           .filter(Boolean)
-      : undefined; // undefined = “all recipes”
+      : []; // <-- no selection
 
-  // Fetch all recipes for the picker
+  // Fetch all recipes for the picker (so the checkboxes always have data)
   const recipes = await fetchRecipesForUser(id);
 
-  // Get structured ingredients for this user (optionally filtered by recipes)
-  const rawIngredients = await fetchIngredientsForUser(id, recipeIds);
+  // Get structured ingredients only when there are selected recipes
+  const rawIngredients =
+    recipeIds.length === 0 ? [] : await fetchIngredientsForUser(id, recipeIds);
 
   // Aggregate + format
   const aggregated = aggregateIngredients(rawIngredients);
   const lines = aggregated.map(formatAggregatedItem);
+
+  const selectedCount = recipeIds.length;
+  const hasRecipes = recipes.length > 0;
 
   return (
     <main>
@@ -118,26 +124,61 @@ export default async function Page({
         ]}
       />
 
-      <section className="mt-4 rounded-md bg-gray-50 p-6">
-        <h1 className="mb-4 text-xl font-semibold">Shopping list</h1>
+      <section className="mt-4 space-y-4">
+        {/* Top card: context + picker */}
+        <div className="rounded-md bg-gray-50 p-4 md:p-6">
+          <h1 className="text-xl font-semibold">Shopping list</h1>
 
-        <ShoppingListRecipePicker
-          recipes={recipes}
-          selectedIds={recipeIds ?? []}
-        />
-
-        {lines.length === 0 ? (
-          <p className="text-sm text-gray-600">
-            No ingredients found yet. Add some recipes first, or select recipes
-            to include.
+          <p className="mt-1 text-sm text-gray-600">
+            {!hasRecipes
+              ? "You don't have any recipes yet. Create a recipe to start building a shopping list."
+              : selectedCount === 0
+              ? "Select one or more recipes below to generate your shopping list."
+              : `Based on ${selectedCount} selected recipe${
+                  selectedCount > 1 ? "s" : ""
+                }.`}
           </p>
-        ) : (
-          <ul className="list-disc space-y-1 pl-5 text-gray-900">
-            {lines.map((line, idx) => (
-              <li key={idx}>{line}</li>
-            ))}
-          </ul>
-        )}
+
+          <div className="mt-4">
+            <ShoppingListRecipePicker
+              recipes={recipes}
+              selectedIds={recipeIds}
+            />
+          </div>
+        </div>
+
+        {/* Bottom card: actual list */}
+        <div className="rounded-md border bg-white p-4 shadow-sm md:p-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
+              Items
+            </h2>
+            <p className="text-xs text-gray-500">
+              {lines.length === 0
+                ? "No items yet"
+                : `${lines.length} item${
+                    lines.length === 1 ? "" : "s"
+                  } in your list`}
+            </p>
+          </div>
+
+          {lines.length === 0 ? (
+            <p className="text-sm text-gray-600">
+              {!hasRecipes
+                ? "No ingredients found yet. Add some recipes first."
+                : "Select recipes above and click “Update shopping list” to generate your items."}
+            </p>
+          ) : (
+            <ul className="space-y-1 text-sm text-gray-900">
+              {lines.map((line, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="mt-[6px] h-1.5 w-1.5 rounded-full bg-gray-400" />
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </section>
     </main>
   );

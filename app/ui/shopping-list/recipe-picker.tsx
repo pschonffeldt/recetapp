@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ShoppingListRecipe } from "@/app/lib/data";
+import { Button } from "../button";
 
 type Props = {
   recipes: ShoppingListRecipe[];
@@ -19,16 +20,19 @@ export default function ShoppingListRecipePicker({
 
   // If there are selectedIds in the URL, use those.
   // Otherwise default to "all recipes selected".
+  // Default: ONLY what comes from the URL (or nothing)
   const [selected, setSelected] = useState<Set<string>>(
-    () =>
-      new Set(selectedIds.length > 0 ? selectedIds : recipes.map((r) => r.id))
+    () => new Set(selectedIds ?? [])
   );
 
   useEffect(() => {
-    // If the URL changes externally, keep in sync (not strictly required,
-    // but nice if user manipulates query manually).
     const fromUrl = searchParams.get("recipes");
-    if (!fromUrl) return;
+
+    // If there's no ?recipes= in the URL, treat it as "no selection"
+    if (!fromUrl) {
+      setSelected(new Set());
+      return;
+    }
 
     const ids = fromUrl
       .split(",")
@@ -79,44 +83,44 @@ export default function ShoppingListRecipePicker({
   }
 
   return (
-    <div className="mb-4 rounded-md border border-gray-200 bg-white p-4">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-medium text-gray-800">
-          Recipes to include
-        </h2>
-        <button
-          type="button"
-          onClick={toggleAll}
-          className="text-xs font-medium text-blue-600 hover:underline"
-        >
-          {allSelected ? "Clear selection" : "Select all"}
-        </button>
+    <div className="min-h-20">
+      <div className="mb-4 rounded-md border border-gray-200 bg-white p-4">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-medium text-gray-800">
+            Recipes to include
+          </h2>
+          <button
+            type="button"
+            onClick={toggleAll}
+            className="text-xs font-medium text-blue-600 hover:underline"
+          >
+            {allSelected ? "Clear selection" : "Select all"}
+          </button>
+        </div>
+        <ul className="mt-2 max-h-60 space-y-1 overflow-auto text-sm p-1">
+          {recipes.map((r) => (
+            <li key={r.id} className="flex items-center gap-2">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-gray-300"
+                  checked={selected.has(r.id)}
+                  onChange={() => toggleOne(r.id)}
+                />
+                <span className="text-gray-800">{r.name}</span>
+              </label>
+            </li>
+          ))}
+        </ul>
       </div>
-
-      <ul className="mt-2 max-h-60 space-y-1 overflow-auto text-sm">
-        {recipes.map((r) => (
-          <li key={r.id} className="flex items-center gap-2">
-            <label className="flex cursor-pointer items-center gap-2">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300"
-                checked={selected.has(r.id)}
-                onChange={() => toggleOne(r.id)}
-              />
-              <span className="text-gray-800">{r.name}</span>
-            </label>
-          </li>
-        ))}
-      </ul>
-
       <div className="mt-3 flex justify-end">
-        <button
+        <Button
+          className="rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
           type="button"
           onClick={applyFilter}
-          className="rounded-md bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-black/80"
         >
           Update shopping list
-        </button>
+        </Button>
       </div>
     </div>
   );
