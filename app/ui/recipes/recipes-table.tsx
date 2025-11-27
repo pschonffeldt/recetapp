@@ -98,13 +98,34 @@ export default async function RecipesTable({
                     </div>
 
                     {/* Steps list (comma-joined) */}
-                    {/* TODO: If `recipe_steps` can be null/undefined from DB,
-                             consider `recipe.recipe_steps?.length` to avoid runtime errors. */}
                     <div>
                       <span className="font-medium">Steps: </span>
                       <span>
-                        {recipe.recipe_steps.length
+                        {/* {recipe.recipe_steps.length
                           ? recipe.recipe_steps.join(", ")
+                          : "—"} */}
+                        {recipe.recipe_steps?.length
+                          ? (() => {
+                              const fullText =
+                                recipe.recipe_steps
+                                  .map((step: string) =>
+                                    step
+                                      .replace(/[^\p{L}\p{N}\s]/gu, "") // keep only letters, numbers, spaces
+                                      .replace(/\s+/g, " ") // collapse multiple spaces
+                                      .trim()
+                                  )
+                                  .join(". ") + "."; // join with ". " and final "."
+
+                              const MAX_CHARS = 200;
+
+                              if (fullText.length <= MAX_CHARS) {
+                                return fullText;
+                              }
+
+                              return (
+                                fullText.slice(0, MAX_CHARS).trimEnd() + "…"
+                              );
+                            })()
                           : "—"}
                       </span>
                     </div>
@@ -127,17 +148,9 @@ export default async function RecipesTable({
                         <p>{formatDateToLocal(recipe.recipe_updated_at)}</p>
                       </div>
                     </div>
-                    {/* Opción de chips abajo */}
-                    {/* <div className="flex flex-row place-items-start text-gray-500 gap-2">
-                      <p>Type:</p>
-                      <RecipesType type={recipe.recipe_type} />
-                      <p>Difficulty:</p>
-                      <RecipesDifficulty type={recipe.difficulty} />
-                    </div> */}
                   </div>
 
                   {/* Actions: view / edit / delete */}
-                  {/* A11y: The icon-only buttons have aria-label/sr-only text inside their components. */}
                   <div className="mt-4 flex justify-end gap-2 border-t pt-3">
                     <ViewRecipe id={recipe.id} />
                     <UpdateRecipe id={recipe.id} />
@@ -221,7 +234,25 @@ export default async function RecipesTable({
                     {/* Steps (wrap long text) */}
                     <td className="px-3 py-3 whitespace-normal break-words">
                       {recipe.recipe_steps?.length
-                        ? recipe.recipe_steps.join(", ")
+                        ? (() => {
+                            const fullText =
+                              recipe.recipe_steps
+                                .map((step: string) =>
+                                  step
+                                    .replace(/[^\p{L}\p{N}\s]/gu, "") // keep only letters, numbers, spaces
+                                    .replace(/\s+/g, " ") // collapse multiple spaces
+                                    .trim()
+                                )
+                                .join(". ") + "."; // join with ". " and final "."
+
+                            const MAX_CHARS = 200;
+
+                            if (fullText.length <= MAX_CHARS) {
+                              return fullText;
+                            }
+
+                            return fullText.slice(0, MAX_CHARS).trimEnd() + "…";
+                          })()
                         : "—"}
                     </td>
 
