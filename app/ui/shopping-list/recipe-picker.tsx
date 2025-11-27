@@ -85,19 +85,19 @@ export default function ShoppingListRecipePicker({
   return (
     <div className="min-h-20">
       <div className="mb-4 rounded-md border border-gray-200 bg-white p-4">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between gap-2 border-b p-2">
           <h2 className="text-sm font-medium text-gray-800">
             Recipes to include
           </h2>
-          <button
+          <Button
+            className="rounded-md bg-blue-600 px-3 py-4 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
             type="button"
             onClick={toggleAll}
-            className="text-xs font-medium text-blue-600 hover:underline"
           >
             {allSelected ? "Clear selection" : "Select all"}
-          </button>
+          </Button>
         </div>
-        <ul className="mt-2 max-h-60 space-y-1 overflow-auto text-sm p-1">
+        <ul className="mt-2 min-h-80 max-h-160 space-y-1 overflow-auto text-sm p-1">
           {recipes.map((r) => (
             <li key={r.id} className="flex items-center gap-2">
               <label className="flex cursor-pointer items-center gap-2">
