@@ -4,8 +4,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@/app/ui/button";
 import { useToast } from "@/app/ui/toast/toast-provider";
 import type { ShoppingListRecipe } from "@/app/lib/data";
-
-const APP_URL = "https://recetapp-mu.vercel.app/";
+import { RECETAPP_BRAND_NAME, RECETAPP_PUBLIC_URL } from "@/app/lib/constants";
 
 type Props = {
   recipes: ShoppingListRecipe[];
@@ -38,6 +37,10 @@ export default function ShoppingListActions({
       return;
     }
 
+    // Recipes that are currently applied (from the URL / server)
+    const appliedIds = selectedIds ?? [];
+    const appliedRecipes = recipes.filter((r) => appliedIds.includes(r.id));
+
     const recipeLines =
       appliedRecipes.length > 0 ? appliedRecipes.map((r) => `- ${r.name}`) : [];
 
@@ -55,7 +58,12 @@ export default function ShoppingListActions({
       sections.push("\nIngredients:\n" + ingredientLines.join("\n"));
     }
 
-    sections.push("", "Generated with RecetApp", `Try it here: ${APP_URL}`);
+    // Footer with brand + URL from constants
+    sections.push(
+      "",
+      `Generated with ${RECETAPP_BRAND_NAME}`,
+      `Try it: ${RECETAPP_PUBLIC_URL}`
+    );
 
     const text = sections.join("\n");
 
@@ -108,7 +116,7 @@ export default function ShoppingListActions({
           ${ingredientsListHtml}
 
           <p style="margin-top: 16px; font-size: 11px; color: #555;">
-            Generated with RecetApp · <a href="${APP_URL}">${APP_URL}</a>
+            Generated with ${RECETAPP_BRAND_NAME} · <a href="${RECETAPP_PUBLIC_URL}">${RECETAPP_PUBLIC_URL}</a>
           </p>
         </div>
       `;
