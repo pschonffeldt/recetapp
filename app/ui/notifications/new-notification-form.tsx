@@ -4,6 +4,8 @@ import { useActionState, useEffect, useState } from "react";
 import { createNotification } from "@/app/lib/actions";
 import { useToast } from "@/app/ui/toast/toast-provider";
 import { NotificationUserOption } from "@/app/lib/data";
+import { Button } from "../button";
+import Link from "next/link";
 
 type ActionState = {
   ok: boolean;
@@ -224,20 +226,19 @@ export default function NewNotificationForm({ users }: Props) {
         </div>
       </div>
 
-      {/* Actions */}
+      {/* Action buttons */}
       <div className="flex justify-end gap-3">
-        <a
-          href="/dashboard/notifications"
-          className="rounded-md bg-gray-100 px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"
-        >
-          Cancel
-        </a>
-        <button
+        {/* Discard notification button */}
+        <Button className="rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-500 disabled:opacity-50">
+          <Link href="/dashboard/notifications">Cancel</Link>
+        </Button>
+        {/* Create notification button */}
+        <Button
+          className="rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
           type="submit"
-          className="rounded-md bg-gray-900 px-4 py-2 text-sm text-white hover:bg-black/80"
         >
           Create notification
-        </button>
+        </Button>
       </div>
 
       {state?.message && (
