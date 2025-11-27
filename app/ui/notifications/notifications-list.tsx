@@ -76,10 +76,17 @@ export default function NotificationsList({
 
         <form action={markAll}>
           <Button
-            className="mt-4 w-full"
+            className={`mt-4 w-full 
+              ${
+                !allState
+                  ? "pointer-events-none opacity-50"
+                  : "hover:bg-blue-400"
+              }
+            `}
             type="submit"
             aria-disabled={allState?.pending}
-            disabled={allState?.pending}
+            // disabled={allState?.pending}
+            disabled={!allState}
           >
             {allState?.pending ? "Marking…" : "Mark all as read"}
           </Button>
