@@ -53,6 +53,9 @@ export default function NotificationsList({
     } as any
   );
 
+  // true if there is at least one unread notification
+  const hasUnread = items.some((n) => n.status === "unread");
+
   // --- Pagination helpers (URLSearchParams) ---
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -76,17 +79,10 @@ export default function NotificationsList({
 
         <form action={markAll}>
           <Button
-            className={`mt-4 w-full 
-              ${
-                !allState
-                  ? "pointer-events-none opacity-50"
-                  : "hover:bg-blue-400"
-              }
-            `}
+            className="rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
             type="submit"
-            aria-disabled={allState?.pending}
-            // disabled={allState?.pending}
-            disabled={!allState}
+            aria-disabled={!hasUnread || allState?.pending}
+            disabled={!hasUnread || allState?.pending}
           >
             {allState?.pending ? "Marking…" : "Mark all as read"}
           </Button>
