@@ -49,7 +49,7 @@ export function MetricCard({
         className={`relative rounded-md bg-white shadow-md border border-gray-100
  ${heightClassName ?? "h-24 sm:h-28"} ${className}`}
       >
-        <span className="absolute left-4 top-3 text-xs font-medium text-gray-500">
+        <span className="absolute left-2 top-2 text-xs font-medium text-gray-500">
           {title}
         </span>
 
@@ -57,7 +57,7 @@ export function MetricCard({
           className={`${fontClassName} flex h-full items-center justify-center`}
         >
           {hasValue ? (
-            <div className="flex items-baseline">
+            <div className="flex items-baseline mt-4">
               {rest.unit && unitPos === "left" && (
                 <span className="mr-2 text-sm text-gray-500">{rest.unit}</span>
               )}
@@ -90,7 +90,7 @@ export function MetricCard({
           heightClassName ?? "h-24 sm:h-28"
         } ${className}`}
       >
-        <span className="absolute left-4 top-3 text-xs font-medium text-gray-500">
+        <span className="absolute left-2 top-2 text-xs font-medium text-gray-500">
           {title}
         </span>
         <div className="flex h-full items-center justify-center">
@@ -110,7 +110,7 @@ export function MetricCard({
           heightClassName ?? "h-24 sm:h-28"
         } ${className}`}
       >
-        <span className="absolute left-4 top-3 text-xs font-medium text-gray-500">
+        <span className="absolute left-2 top-2 text-xs font-medium text-gray-500">
           {title}
         </span>
         <div
@@ -134,7 +134,7 @@ export function MetricCard({
     <div
       className={`relative rounded-md bg-white shadow-md border border-gray-100 ${className}`}
     >
-      <span className="absolute left-4 top-3 text-xs font-medium text-gray-500">
+      <span className="absolute left-2 top-2 text-xs font-medium text-gray-500">
         {title}
       </span>
 
