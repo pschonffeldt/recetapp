@@ -1,18 +1,27 @@
+import clsx from "clsx";
+
 // Loading animation
 const shimmer =
   "before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent";
 
-export function CardSkeleton() {
+type CardSkeletonProps = {
+  /** Allows us to reuse the same skeleton for desktop + mobile */
+  heightClassName?: string;
+};
+
+export function CardSkeleton({
+  heightClassName = "h-24 sm:h-28",
+}: CardSkeletonProps) {
   return (
     <div
-      className={`${shimmer} relative overflow-hidden rounded-xl bg-gray-100 p-2 shadow-sm`}
+      className={`${shimmer} relative rounded-md bg-white shadow-md border border-gray-100 ${heightClassName}`}
     >
-      <div className="flex p-4">
-        <div className="h-5 w-5 rounded-md bg-gray-200" />
-        <div className="ml-2 h-6 w-16 rounded-md bg-gray-200 text-sm font-medium" />
-      </div>
-      <div className="flex items-center justify-center truncate rounded-xl bg-white px-4 py-8">
-        <div className="h-7 w-20 rounded-md bg-gray-200" />
+      {/* Title line (top-left label) */}
+      <div className="absolute left-2 top-2 h-3 w-24 rounded-md bg-gray-200" />
+
+      {/* Centered value */}
+      <div className="flex h-full items-center justify-center">
+        <div className="h-7 w-16 rounded-md bg-gray-200" />
       </div>
     </div>
   );
@@ -20,12 +29,23 @@ export function CardSkeleton() {
 
 export function CardsSkeleton() {
   return (
-    <>
-      <CardSkeleton />
-      <CardSkeleton />
-      <CardSkeleton />
-      <CardSkeleton />
-    </>
+    <div>
+      {/* Desktop indicators skeleton (md and up) */}
+      <div className="hidden md:grid md:grid-cols-4 gap-6">
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+
+      {/* Mobile indicators skeleton (below md) */}
+      <div className="mb-6 grid gap-4 sm:grid-cols-4 md:hidden grid-cols-2">
+        <CardSkeleton heightClassName="h-16" />
+        <CardSkeleton heightClassName="h-16" />
+        <CardSkeleton heightClassName="h-16" />
+        <CardSkeleton heightClassName="h-16" />
+      </div>
+    </div>
   );
 }
 
@@ -44,16 +64,24 @@ export function RevenueChartSkeleton() {
   );
 }
 
-export function RecipesSkeleton() {
+function LatestRecipeRowSkeleton({ withBorder }: { withBorder?: boolean }) {
   return (
-    <div className="flex flex-row items-center justify-between border-b border-gray-100 py-4">
-      <div className="flex items-center">
-        <div className="min-w-60">
-          <div className="h-5 w-20 rounded-md bg-gray-200" />
-          <div className="mt-2 h-4 w-60 rounded-md bg-gray-200" />
-        </div>
+    <div
+      className={clsx(
+        "flex flex-row items-center justify-between py-4",
+        withBorder && "border-t border-gray-100"
+      )}
+    >
+      {/* Left: recipe name + ingredients */}
+      <div className="flex min-w-0 flex-col gap-2">
+        {/* Recipe name */}
+        <div className="h-4 w-48 rounded-md bg-gray-200" />
+        {/* Ingredients line */}
+        <div className="h-3 w-64 max-w-full rounded-md bg-gray-100" />
       </div>
-      <div className="mt-2 h-4 w-12 rounded-md bg-gray-200" />
+
+      {/* Right: type pill */}
+      <div className="ml-4 h-6 w-16 rounded-full bg-gray-200" />
     </div>
   );
 }
@@ -63,18 +91,17 @@ export function LatestRecipesSkeleton() {
     <div
       className={`${shimmer} relative flex w-full flex-col overflow-hidden md:col-span-4`}
     >
-      <div className="mb-4 h-8 w-36 rounded-md bg-gray-100" />
-      <div className="flex grow flex-col justify-between rounded-xl bg-gray-100 p-4">
+      {/* Title skeleton (replaces "Latest Recipes") */}
+      <div className="mb-4 h-7 w-40 rounded-md bg-gray-100" />
+
+      {/* Card */}
+      <div className="flex grow flex-col justify-between rounded-xl bg-gray-50 p-4">
         <div className="bg-white px-6">
-          <RecipesSkeleton />
-          <RecipesSkeleton />
-          <RecipesSkeleton />
-          <RecipesSkeleton />
-          <RecipesSkeleton />
-        </div>
-        <div className="flex items-center pb-2 pt-6">
-          <div className="h-5 w-5 rounded-full bg-gray-200" />
-          <div className="ml-2 h-4 w-20 rounded-md bg-gray-200" />
+          <LatestRecipeRowSkeleton />
+          <LatestRecipeRowSkeleton withBorder />
+          <LatestRecipeRowSkeleton withBorder />
+          <LatestRecipeRowSkeleton withBorder />
+          <LatestRecipeRowSkeleton withBorder />
         </div>
       </div>
     </div>

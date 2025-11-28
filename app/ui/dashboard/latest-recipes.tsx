@@ -1,13 +1,19 @@
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import Image from "next/image";
 import { inter } from "@/app/ui/branding/fonts";
 import { fetchLatestRecipes } from "@/app/lib/data";
 import RecipesType from "../recipes/recipes-status";
 
+const MAX_INGREDIENT_CHARS = 100;
+
+function formatIngredients(ingredients: string[] | null | undefined) {
+  const text = ingredients && ingredients.length ? ingredients.join(", ") : "—";
+
+  if (text.length <= MAX_INGREDIENT_CHARS) return text;
+  return text.slice(0, MAX_INGREDIENT_CHARS - 3) + "...";
+}
+
 export default async function LatestRecipes() {
   const latestRecipes = await fetchLatestRecipes();
-  // Simple empty-state check
   const isEmpty = !latestRecipes || latestRecipes.length === 0;
 
   return (
@@ -27,9 +33,7 @@ export default async function LatestRecipes() {
                 key={recipe.id}
                 className={clsx(
                   "flex flex-row items-center justify-between py-4",
-                  {
-                    "border-t": i !== 0,
-                  }
+                  { "border-t": i !== 0 }
                 )}
               >
                 <div className="flex items-center flex-wrap">
@@ -38,9 +42,7 @@ export default async function LatestRecipes() {
                       {recipe.recipe_name}
                     </p>
                     <p className="hidden text-sm text-wrap text-gray-500 sm:block">
-                      {recipe.recipe_ingredients.length
-                        ? recipe.recipe_ingredients.join(", ")
-                        : "—"}
+                      {formatIngredients(recipe.recipe_ingredients)}
                     </p>
                   </div>
                 </div>
