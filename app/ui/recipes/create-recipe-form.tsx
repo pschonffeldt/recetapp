@@ -109,7 +109,7 @@ export default function RecipeForm() {
           </div>
         </div>
 
-        {/* ✅ NEW: Structured ingredients editor */}
+        {/* Structured ingredients editor */}
         <IngredientsEditor initial={[]} />
 
         {/* Steps (one per line) */}
@@ -141,26 +141,19 @@ export default function RecipeForm() {
 
         {/* Equipment (one per line) */}
         <div className="mb-4">
-          <label
-            htmlFor="recipe_equipment"
-            className="mb-2 block text-sm font-medium"
-          >
+          <label htmlFor="equipment" className="mb-2 block text-sm font-medium">
             Equipment (one per line)
           </label>
           <textarea
-            id="recipe_equipment"
-            name="recipe_equipment"
+            id="equipment"
+            name="equipment"
             rows={6}
             placeholder={"Horno\nSartén\nCuchillo\nTabla para picar"}
             className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base placeholder:text-gray-500"
-            aria-describedby="recipe_equipment-error"
+            aria-describedby="equipment-error"
           />
-          <div
-            id="recipe_equipment-error"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {state.errors?.recipe_steps?.map((e) => (
+          <div id="equipment-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.equipment?.map((e) => (
               <p className="mt-2 text-sm text-red-500" key={e}>
                 {e}
               </p>
@@ -216,11 +209,11 @@ export default function RecipeForm() {
         </div>
 
         {/* Servings, prep time, calories & cost */}
-        <div className="grid gap-4 md:grid-cols-4  sm:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-4 sm:grid-cols-2">
           {/* Servings */}
           <div className="mb-4">
             <label
-              htmlFor="dietary_flags"
+              htmlFor="servings"
               className="mb-2 block text-sm font-medium"
             >
               Servings
@@ -228,7 +221,11 @@ export default function RecipeForm() {
             <input
               id="servings"
               name="servings"
-              placeholder={""}
+              type="number"
+              inputMode="numeric"
+              min={1}
+              step={1}
+              placeholder=""
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base placeholder:text-gray-500"
               aria-describedby="servings-error"
             />
@@ -252,7 +249,11 @@ export default function RecipeForm() {
             <input
               id="prep_time_min"
               name="prep_time_min"
-              placeholder={""}
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step={1}
+              placeholder=""
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base placeholder:text-gray-500"
               aria-describedby="prep_time_min-error"
             />
@@ -276,7 +277,11 @@ export default function RecipeForm() {
             <input
               id="calories_total"
               name="calories_total"
-              placeholder={""}
+              type="number"
+              inputMode="numeric"
+              min={0}
+              step={1}
+              placeholder=""
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base placeholder:text-gray-500"
               aria-describedby="calories_total-error"
             />
@@ -304,7 +309,11 @@ export default function RecipeForm() {
             <input
               id="estimated_cost_total"
               name="estimated_cost_total"
-              placeholder={""}
+              type="number"
+              inputMode="decimal"
+              min={0}
+              step="0.01"
+              placeholder=""
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base placeholder:text-gray-500"
               aria-describedby="estimated_cost_total-error"
             />
@@ -333,7 +342,6 @@ export default function RecipeForm() {
         <Button type="submit">Create Recipe</Button>
       </div>
 
-      {/* Top-level form error */}
       {state.message && (
         <p className="mt-3 text-sm text-red-600" role="alert">
           {state.message}

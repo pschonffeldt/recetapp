@@ -108,3 +108,32 @@ export function buildIngredientLines(recipe: RecipeForm): string[] {
 
   return buildIngredientLinesFromPayload(structured);
 }
+
+/**
+ * Build the initial list of ingredients for the editor component.
+ * - Prefer structured json/jsonb
+ * - Fallback to legacy text[] (recipe_ingredients)
+ */
+export function buildInitialIngredientsForEditor(
+  recipe: RecipeForm
+): IncomingIngredientPayload[] {
+  // Reuse the shared parser – it already handles:
+  // - array of objects
+  // - JSON string
+  const structured = parseStructuredIngredients(
+    (recipe as any).recipe_ingredients_structured
+  );
+
+  if (structured.length > 0) {
+    return structured;
+  }
+
+  // Fallback: legacy text[] → minimal structured shape
+  return (recipe.recipe_ingredients ?? []).map((name, index) => ({
+    ingredientName: name,
+    quantity: null,
+    unit: null,
+    isOptional: false,
+    position: index,
+  }));
+}

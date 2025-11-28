@@ -8,7 +8,7 @@ import { inter } from "../branding/fonts";
 import { MetricCard, MetricCardMobile } from "./recipe-indicators";
 import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils";
 import { RecipeFormState } from "@/app/lib/action-types";
-import { buildIngredientLines } from "@/app/lib/ingredients"; // 👈 NEW
+import { buildIngredientLines } from "@/app/lib/ingredients";
 
 // (you can keep asDate if you still use it somewhere)
 const asDate = (d: string | Date) => (d instanceof Date ? d : new Date(d));
@@ -22,7 +22,7 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
     html2pdf(element, { margin: 20 });
   }
 
-  // 🔹 New: use shared helper
+  // Use shared helper
   const ingredientLines = buildIngredientLines(recipe);
 
   return (

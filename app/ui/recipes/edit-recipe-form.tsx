@@ -9,10 +9,10 @@ import {
   DIFFICULTY,
   RECIPE_TYPES,
   type RecipeForm,
-  type IncomingIngredientPayload,
 } from "@/app/lib/definitions";
 import { RecipeFormState } from "@/app/lib/action-types";
 import IngredientsEditor from "@/app/ui/recipes/ingredients-editor";
+import { buildInitialIngredientsForEditor } from "@/app/lib/ingredients";
 
 // initial state with strong typing
 const initialState: RecipeFormState = { message: null, errors: {} };
@@ -21,42 +21,11 @@ const initialState: RecipeFormState = { message: null, errors: {} };
  * Normalize the recipe's ingredients into the shape that IngredientsEditor
  * expects as its `initial` prop.
  */
-function getInitialIngredients(
-  recipe: RecipeForm
-): IncomingIngredientPayload[] {
-  const raw = recipe.recipe_ingredients_structured;
-
-  // Case 1: already an array (jsonb parsed by driver)
-  if (Array.isArray(raw)) {
-    return raw as IncomingIngredientPayload[];
-  }
-
-  // Case 2: JSON string
-  if (typeof raw === "string" && raw.trim() !== "") {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        return parsed as IncomingIngredientPayload[];
-      }
-    } catch (e) {
-      console.error("Failed to parse structured ingredients JSON:", e);
-    }
-  }
-
-  // Case 3: legacy text[] → minimal structured
-  return (recipe.recipe_ingredients ?? []).map((name, index) => ({
-    ingredientName: name,
-    quantity: null,
-    unit: null,
-    isOptional: false,
-    position: index,
-  }));
-}
 
 export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
   const [state, formAction] = useActionState(updateRecipe, initialState);
 
-  const initialIngredients = getInitialIngredients(recipe);
+  const initialIngredients = buildInitialIngredientsForEditor(recipe);
 
   return (
     <form action={formAction} className="pb-12">
