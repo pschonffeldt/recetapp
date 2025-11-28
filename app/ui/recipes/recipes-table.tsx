@@ -1,35 +1,10 @@
-// ============================================
-// Recipes Table (RSC)
-// - Server component that fetches a paginated, filtered list of recipes
-// - Responsive rendering: mobile “cards” and desktop “table”
-// - Assumes caller clamps `currentPage` to a valid value (1..totalPages)
-// ============================================
-
-/* ================================
- * Imports (as provided)
- * ================================ */
 import { fetchFilteredRecipes } from "@/app/lib/data";
 import { formatDateToLocal } from "@/app/lib/utils";
 import RecipesType from "./recipes-status";
-import SortButton from "./sort-button";
+import SortButton from "./recipes-sort-button";
 import { ViewRecipe, UpdateRecipe, DeleteRecipe } from "./recipes-buttons";
 import RecipesDifficulty from "./recipes-difficulty";
 
-/* ================================
- * Component
- * ================================ */
-/**
- * Props:
- * - query: free-text search across name/ingredients/steps/type
- * - currentPage: 1-based page index (caller must clamp to valid range)
- * - sort/order: server-side sort key and direction
- * - type: exact recipe_type filter (expects canonical value)
- *
- * Data flow:
- * - Calls DAL `fetchFilteredRecipes(query, currentPage, { sort, order, type })`
- *   which applies LIMIT/OFFSET and identical predicates to count/pages logic.
- * - Renders a mobile card layout (md:hidden) and a desktop table (md:table).
- */
 export default async function RecipesTable({
   query,
   currentPage,

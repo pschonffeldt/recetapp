@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button } from "@/app/ui/button";
+import { Button } from "@/app/ui/general/button";
 import { useToast } from "@/app/ui/toast/toast-provider";
 import type { ShoppingListRecipe } from "@/app/lib/data";
 import { RECETAPP_BRAND_NAME, RECETAPP_PUBLIC_URL } from "@/app/lib/constants";

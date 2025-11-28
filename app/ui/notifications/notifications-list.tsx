@@ -9,7 +9,7 @@ import {
 } from "@/app/lib/actions";
 import type { AppNotification } from "@/app/lib/definitions";
 import { capitalizeFirst } from "@/app/lib/utils";
-import { Button } from "../button";
+import { Button } from "../general/button";
 
 function formatDateTime(value?: string | null) {
   if (!value) return "";

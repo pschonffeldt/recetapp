@@ -1,15 +1,5 @@
 "use client";
 
-// ============================================
-// Recipe Action Buttons (Client UI fragments)
-// - Icon-only controls with accessible labels
-// - Keep public API: CreateRecipe, ViewRecipe, UpdateRecipe,
-//   UpdateRecipeOnViewer, DeleteRecipeOnViewer, DeleteRecipe
-// ============================================
-
-/* ================================
- * Imports (grouped by role)
- * ================================ */
 import { deleteRecipe, deleteRecipeFromViewer } from "@/app/lib/actions";
 import {
   MagnifyingGlassCircleIcon,
@@ -22,19 +12,6 @@ import { useToast } from "../toast/toast-provider";
 import { useRouter } from "next/navigation";
 import { useRef, useTransition } from "react";
 
-/* ================================
- * A11y notes for icon-only controls
- * ================================
- * - Provide a programmatic name via aria-label.
- * - Mark icons as decorative with aria-hidden="true".
- * - Optional title attribute for mouse users (tooltip).
- * - Buttons/links keep native keyboard semantics.
- */
-
-/* ================================
- * Create (link button)
- * Visible text → aria-label is optional, kept for consistency.
- * ================================ */
 export function CreateRecipe() {
   return (
     <Link

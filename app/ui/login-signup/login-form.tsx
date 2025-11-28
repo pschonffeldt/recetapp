@@ -1,6 +1,6 @@
 "use client";
 
-import { inter } from "@/app/ui/branding/fonts";
+import { inter } from "@/app/ui/branding/branding-fonts";
 import {
   AtSymbolIcon,
   KeyIcon,
@@ -11,7 +11,7 @@ import { useActionState } from "react";
 import { authenticate } from "@/app/lib/actions";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Button } from "../button";
+import { Button } from "../general/button";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();

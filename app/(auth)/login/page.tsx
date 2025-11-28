@@ -1,4 +1,4 @@
-import Logo from "@/app/ui/branding/recetapp-logo";
+import Logo from "@/app/ui/branding/branding-recetapp-logo";
 import { Suspense } from "react";
 import { Metadata } from "next";
 import LoginForm from "@/app/ui/login-signup/login-form";
