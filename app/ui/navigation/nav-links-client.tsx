@@ -6,6 +6,7 @@ import clsx from "clsx";
 
 import {
   ArrowDownIcon,
+  GlobeAltIcon,
   HomeIcon,
   MegaphoneIcon,
   ShoppingCartIcon,
@@ -35,6 +36,11 @@ export default function NavLinksClient({ isAdmin }: Props) {
       name: "Shopping list",
       href: "/dashboard/shopping-list",
       icon: ShoppingCartIcon,
+    },
+    {
+      name: "Discover",
+      href: "/dashboard/discover",
+      icon: GlobeAltIcon,
     },
     {
       name: "Notifications",

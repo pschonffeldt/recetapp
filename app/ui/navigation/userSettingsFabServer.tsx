@@ -1,4 +1,3 @@
-// app/components/UserSettingsFabServer.tsx
 import { logout } from "@/app/lib/logout";
 import { auth } from "@/auth";
 import UserSettingsFab from "./user-menu";

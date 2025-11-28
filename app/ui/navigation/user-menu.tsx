@@ -1,4 +1,3 @@
-// app/components/UserSettingsFab.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -9,6 +8,7 @@ import {
   MegaphoneIcon,
   ShoppingCartIcon,
   ArrowDownIcon,
+  GlobeAltIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChartBarIcon,
@@ -23,6 +23,7 @@ type Props = {
   recipesHref?: string;
   notificationsHref?: string;
   shoppinglistHref?: string;
+  discoverHref?: string;
 
   /** Admin-only routes */
   isAdmin?: boolean;
@@ -40,6 +41,7 @@ export default function UserSettingsFab({
   recipesHref = "/dashboard/recipes",
   notificationsHref = "/dashboard/notifications",
   shoppinglistHref = "/dashboard/shopping-list",
+  discoverHref = "/dashboard/discover",
 
   isAdmin = false,
   adminNotificationHref = "/dashboard/admin/notification-center",
@@ -150,6 +152,11 @@ export default function UserSettingsFab({
               icon={<ShoppingCartIcon className="h-5 w-5" />}
               label="Shopping list"
               onClick={() => go(shoppinglistHref)}
+            />
+            <MenuItem
+              icon={<GlobeAltIcon className="h-5 w-5" />}
+              label="Discover"
+              onClick={() => go(discoverHref)}
             />
             {/* Divider before logout */}
             <div className="my-2 h-px bg-gray-200/60" />

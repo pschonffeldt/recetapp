@@ -1,7 +1,7 @@
 import { brand } from "@/app/ui/branding/branding";
 import Logo from "@/app/ui/branding/recetapp-logo";
-import SideNav from "@/app/ui/dashboard/sidenav";
-import UserSettingsFabServer from "@/app/ui/dashboard/userSettingsFabServer";
+import SideNav from "@/app/ui/navigation/sidenav";
+import UserSettingsFabServer from "@/app/ui/navigation/userSettingsFabServer";
 import { ToastProvider } from "@/app/ui/toast/toast-provider";
 
 export default function Layout({ children }: { children: React.ReactNode }) {

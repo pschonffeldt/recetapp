@@ -1,9 +1,9 @@
 import Link from "next/link";
-import NavLinks from "@/app/ui/dashboard/nav-links";
 import Logo from "@/app/ui/branding/recetapp-logo";
 import { brand } from "../branding/branding";
 import { signOut } from "@/auth";
 import { PowerIcon } from "@heroicons/react/24/outline";
+import NavLinks from "./nav-links";
 
 export default function SideNav() {
   return (
@@ -23,7 +23,6 @@ export default function SideNav() {
         </div>
       </Link>
       {/* Box containing everything lower than the logo */}
-      {/* <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2"> */}
       <div className="flex grow flex-row justify-between space-x-2 px-2 lg:px-0 lg:flex-col lg:space-x-0 lg:space-y-2">
         {/* Navigation buttons */}
         <NavLinks />
