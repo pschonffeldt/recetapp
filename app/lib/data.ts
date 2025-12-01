@@ -1074,7 +1074,7 @@ export async function fetchRoadmapGrouped(): Promise<RoadmapGrouped> {
   >/* sql */ `
     SELECT id, title, description, status, order_index
     FROM public.roadmap_items
-    ORDER BY status, order_index, created_at
+    ORDER BY created_at DESC
   `;
 
   const planned: RoadmapItem[] = [];
@@ -1138,7 +1138,7 @@ export async function fetchDiscoverRecipes(): Promise<DiscoverRecipeCard[]> {
       r.servings,
       r.prep_time_min,
       r.recipe_created_at,
-      u.user_name AS created_by_display_name  -- 👈 from users.user_name
+      u.user_name AS created_by_display_name  -- from users.user_name
     FROM public.recipes r
     LEFT JOIN public.users u ON u.id = r.user_id
     WHERE r.status = 'public'
