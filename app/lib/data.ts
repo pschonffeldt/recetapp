@@ -9,6 +9,7 @@ import {
   DbNotificationRow,
   AppNotification,
   toAppNotification,
+  PublicRecipeDetail,
 } from "./definitions";
 import {
   type FetchNotificationsResult,
@@ -16,6 +17,8 @@ import {
 } from "@/app/lib/definitions";
 import { requireUserId } from "@/app/lib/auth-helpers";
 import { parseStructuredIngredients } from "./ingredients";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 /**
  * ============================================================================
@@ -372,95 +375,87 @@ type SortDir = "asc" | "desc";
  *
  * This is the main query backing the recipes table UI.
  */
+type FetchFilteredArgs = {
+  userId: string;
+  query: string;
+  page: number;
+  sort: "name" | "date" | "type";
+  order: "asc" | "desc";
+  type: string;
+};
+
+type SortKey = "name" | "date" | "type";
+type SortOrder = "asc" | "desc";
+
 export async function fetchFilteredRecipes(
-  arg1:
-    | string
-    | {
-        query?: string;
-        type?: string;
-        sort?: SortCol;
-        order?: SortDir;
-        page?: number;
-      },
-  pageMaybe?: number,
-  opts: { type?: string; sort?: SortCol; order?: SortDir } = {}
-) {
-  const userId = await requireUserId();
+  userId: string,
+  query: string,
+  currentPage: number,
+  options: { sort: SortKey; order: SortOrder; type: string | null }
+): Promise<RecipeForm[]> {
+  let { sort, order, type } = options;
+  const searchTerm = `%${query}%`;
+  const offset = (currentPage - 1) * RECIPES_PAGE_SIZE;
 
-  // Normalize arguments
-  let searchQuery = "";
-  let page = 1;
-  let type = "";
-  let sort: SortCol = "date";
-  let order: SortDir = "desc";
+  // 👇 extra guard: treat "" as no filter
+  const effectiveType = type && type.trim().length > 0 ? type : null;
 
-  if (typeof arg1 === "string") {
-    searchQuery = arg1 ?? "";
-    page = pageMaybe ?? 1;
-    type = opts.type ?? "";
-    sort = opts.sort ?? "date";
-    order = opts.order ?? "desc";
-  } else {
-    searchQuery = arg1.query ?? "";
-    page = arg1.page ?? 1;
-    type = arg1.type ?? "";
-    sort = arg1.sort ?? "date";
-    order = arg1.order ?? "desc";
-  }
-
-  // Clamp page and compute offset
-  page = Number.isFinite(page) && page > 0 ? page : 1;
-  const offset = (page - 1) * RECIPES_PAGE_SIZE;
-
-  // Base predicate: recipe belongs to current user
-  const predicates: any[] = [sql`r.user_id = ${userId}::uuid`];
-
-  // Free-text search across name, ingredients, steps, type
-  if (searchQuery) {
-    const pat = `%${searchQuery}%`;
-    const nameLike = sql`r.recipe_name ILIKE ${pat}`;
-    const ingredientsLike = sql`EXISTS (SELECT 1 FROM unnest(r.recipe_ingredients) AS ing WHERE ing ILIKE ${pat})`;
-    const stepsLike = sql`EXISTS (SELECT 1 FROM unnest(r.recipe_steps)       AS st  WHERE st  ILIKE ${pat})`;
-    const typeLike = sql`r.recipe_type::text ILIKE ${pat}`;
-    predicates.push(
-      sql`(${nameLike} OR ${ingredientsLike} OR ${stepsLike} OR ${typeLike})`
-    );
-  }
-
-  // Optional recipe_type filter (enum exact match)
-  if (type) {
-    predicates.push(sql`r.recipe_type = ${type}`);
-  }
-
-  const whereSql = sql`WHERE ${andAll(predicates)}`;
-
-  // Sort mapping
-  const sortCol =
-    sort === "name"
-      ? sql`r.recipe_name`
-      : sort === "type"
-      ? sql`r.recipe_type`
-      : sql`r.recipe_created_at`; // "date"
-
-  const dir = order === "asc" ? sql`ASC` : sql`DESC`;
-
-  const rows = await sql/* sql */ `
+  const rows = await sql<RecipeRowWithSavedBy[]>`
     SELECT
-      r.id,
-      r.recipe_name,
-      r.recipe_ingredients,
-      r.recipe_steps,
-      r.recipe_created_at,
-      r.recipe_type,
-      r.difficulty,
-      r.recipe_updated_at
-    FROM public.recipes AS r
-    ${whereSql}
-    ORDER BY ${sortCol} ${dir} NULLS LAST
+      id,
+      user_id,
+      recipe_name,
+      recipe_type,
+      difficulty,
+      recipe_ingredients,
+      recipe_ingredients_structured,
+      recipe_steps,
+      equipment,
+      allergens,
+      dietary_flags,
+      servings,
+      prep_time_min,
+      calories_total,
+      estimated_cost_total,
+      status,
+      recipe_created_at,
+      recipe_updated_at,
+      saved_by_user_ids
+    FROM public.recipes r
+    WHERE
+      (
+        r.user_id = ${userId}::uuid
+        OR ${userId}::uuid = ANY(r.saved_by_user_ids)
+      )
+      AND (
+        ${searchTerm} = '%%'
+        OR r.recipe_name ILIKE ${searchTerm}
+      )
+      AND (
+        ${effectiveType}::recipe_type_enum IS NULL
+        OR r.recipe_type = ${effectiveType}::recipe_type_enum
+      )
+    ORDER BY
+      CASE WHEN ${sort} = 'name' THEN r.recipe_name END ${
+    order === "asc" ? sql`ASC` : sql`DESC`
+  },
+      CASE WHEN ${sort} = 'date' THEN r.recipe_created_at END ${
+    order === "asc" ? sql`ASC` : sql`DESC`
+  },
+      CASE WHEN ${sort} = 'type' THEN r.recipe_type END ${
+    order === "asc" ? sql`ASC` : sql`DESC`
+  }
     LIMIT ${RECIPES_PAGE_SIZE} OFFSET ${offset}
   `;
 
-  return pickRows(rows);
+  return rows.map(({ saved_by_user_ids, ...r }) => ({
+    ...r,
+    recipe_ingredients: r.recipe_ingredients ?? [],
+    recipe_steps: r.recipe_steps ?? [],
+    equipment: r.equipment ?? [],
+    allergens: r.allergens ?? [],
+    dietary_flags: r.dietary_flags ?? [],
+  }));
 }
 
 /**
@@ -514,38 +509,37 @@ export async function fetchRecipesTotal(params: {
  *
  * Uses RECIPES_PAGE_SIZE to compute Math.ceil(count / size).
  */
-export async function fetchRecipesPages(
-  arg: string | { query?: string; type?: string }
-) {
-  const userId = await requireUserId();
-  const searchQuery = typeof arg === "string" ? arg : arg.query ?? "";
-  const type = typeof arg === "string" ? "" : arg.type ?? "";
 
-  const parts: any[] = [sql`r.user_id = ${userId}::uuid`];
+export async function fetchRecipesPages({
+  query,
+  type,
+  userId,
+}: {
+  query: string;
+  type: string | null;
+  userId: string;
+}): Promise<number> {
+  const searchTerm = `%${query}%`;
 
-  if (searchQuery) {
-    const pat = `%${searchQuery}%`;
-    parts.push(sql`
-      (
-        r.recipe_name ILIKE ${pat}
-        OR r.recipe_type::text ILIKE ${pat}
-        OR EXISTS (SELECT 1 FROM unnest(r.recipe_ingredients) AS ing WHERE ing ILIKE ${pat})
-        OR EXISTS (SELECT 1 FROM unnest(r.recipe_steps)       AS st  WHERE st  ILIKE ${pat})
-      )
-    `);
-  }
-
-  if (type) parts.push(sql`r.recipe_type = ${type}`);
-
-  const whereSql = sql`WHERE ${andAll(parts)}`;
-
-  const res = await sql<{ count: number }[]>/* sql */ `
+  const rows = await sql<{ count: number }[]>`
     SELECT COUNT(*)::int AS count
-    FROM public.recipes AS r
-    ${whereSql}
+    FROM public.recipes r
+    WHERE
+      (
+        r.user_id = ${userId}::uuid
+        OR ${userId}::uuid = ANY(r.saved_by_user_ids)
+      )
+      AND (
+        ${searchTerm} = '%%'
+        OR r.recipe_name ILIKE ${searchTerm}
+      )
+      AND (
+        ${type}::recipe_type_enum IS NULL      
+        OR r.recipe_type = ${type}::recipe_type_enum
+      )
   `;
 
-  const count = pickRows<{ count: number }>(res)[0]?.count ?? 0;
+  const count = rows[0]?.count ?? 0;
   return Math.ceil(count / RECIPES_PAGE_SIZE);
 }
 
@@ -626,60 +620,109 @@ export async function fetchUserById(id: string) {
  * Fetch a specific recipe by id **for the current owner**.
  * Similar to fetchRecipeById but always resolves user via requireUserId().
  */
-export async function fetchRecipeByIdForOwner(
-  id: string
-): Promise<RecipeForm | null> {
-  const userId = await requireUserId();
 
-  const rows = await sql<RecipeForm[]>`
+// Row type used when we also select saved_by_user_ids
+type RecipeRowWithSavedBy = RecipeForm & {
+  saved_by_user_ids: string[] | null;
+};
+
+export async function fetchRecipeByIdForOwner(
+  recipeId: string,
+  userId: string
+): Promise<RecipeForm | null> {
+  const rows = await sql<RecipeRowWithSavedBy[]>`
     SELECT
       id,
+      user_id,
       recipe_name,
+      recipe_type,
+      difficulty,
       recipe_ingredients,
       recipe_ingredients_structured,
       recipe_steps,
-      recipe_type,
+      equipment,
+      allergens,
+      dietary_flags,
       servings,
       prep_time_min,
-      difficulty,
-      status,
-      COALESCE(dietary_flags, ARRAY[]::text[]) AS dietary_flags,
-      COALESCE(allergens,     ARRAY[]::text[]) AS allergens,
       calories_total,
       estimated_cost_total,
-      COALESCE(equipment,     ARRAY[]::text[]) AS equipment,
-      (recipe_created_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_created_at,
-      (recipe_updated_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_updated_at
-    FROM public.recipes
-    WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
-    LIMIT 1;
+      status,
+      recipe_created_at,
+      recipe_updated_at,
+      saved_by_user_ids
+    FROM public.recipes r
+    WHERE
+      r.id = ${recipeId}::uuid
+      AND (
+        r.user_id = ${userId}::uuid
+        OR ${userId}::uuid = ANY(r.saved_by_user_ids)
+      )
+    LIMIT 1
   `;
 
-  return rows[0] ?? null;
+  if (rows.length === 0) return null;
+
+  const { saved_by_user_ids, ...r } = rows[0];
+
+  return {
+    ...r,
+    recipe_ingredients: r.recipe_ingredients ?? [],
+    recipe_steps: r.recipe_steps ?? [],
+    equipment: r.equipment ?? [],
+    allergens: r.allergens ?? [],
+    dietary_flags: r.dietary_flags ?? [],
+  };
 }
 
-export type ShoppingListRecipe = {
-  id: string;
-  name: string;
+// Local row type for this query only
+type RecipeRowForUser = RecipeForm & {
+  saved_by_user_ids: string[] | null;
 };
 
 export async function fetchRecipesForUser(
   userId: string
-): Promise<ShoppingListRecipe[]> {
-  // Optional safety – ensure caller user matches session user
-  const currentUserId = await requireUserId();
-  if (currentUserId !== userId) {
-    throw new Error("Not allowed to fetch recipes for another user.");
-  }
+): Promise<RecipeForm[]> {
+  console.log("fetchRecipesForUser userId =", userId); // TEMP debug log
 
-  const rows = await sql<ShoppingListRecipe[]>`
-    SELECT id, recipe_name AS name
-    FROM public.recipes
-    WHERE user_id = ${userId}::uuid
-    ORDER BY recipe_name ASC;
+  const rows = await sql<RecipeRowForUser[]>`
+    SELECT
+      id,
+      user_id,
+      recipe_name,
+      recipe_type,
+      difficulty,
+      recipe_ingredients,
+      recipe_ingredients_structured,
+      recipe_steps,
+      equipment,
+      allergens,
+      dietary_flags,
+      servings,
+      prep_time_min,
+      calories_total,
+      estimated_cost_total,
+      status,
+      recipe_created_at,
+      recipe_updated_at,
+      saved_by_user_ids
+    FROM public.recipes r
+    WHERE
+      r.user_id = ${userId}::uuid
+      OR ${userId}::uuid = ANY(r.saved_by_user_ids)
+    ORDER BY r.recipe_created_at DESC
   `;
 
-  return rows;
+  console.log("fetchRecipesForUser rows length =", rows.length); // TEMP debug
+
+  return rows.map(({ saved_by_user_ids, ...r }) => ({
+    ...r,
+    recipe_ingredients: r.recipe_ingredients ?? [],
+    recipe_steps: r.recipe_steps ?? [],
+    equipment: r.equipment ?? [],
+    allergens: r.allergens ?? [],
+    dietary_flags: r.dietary_flags ?? [],
+  }));
 }
 
 /* =============================================================================
@@ -1128,7 +1171,9 @@ type DiscoverRecipeRow = {
 };
 
 // 3) List of public recipes for Discover grid
-export async function fetchDiscoverRecipes(): Promise<DiscoverRecipeCard[]> {
+export async function fetchDiscoverRecipes(
+  currentUserId?: string | null
+): Promise<DiscoverRecipeCard[]> {
   const rows = await sql<DiscoverRecipeRow[]>`
     SELECT
       r.id,
@@ -1142,6 +1187,11 @@ export async function fetchDiscoverRecipes(): Promise<DiscoverRecipeCard[]> {
     FROM public.recipes r
     LEFT JOIN public.users u ON u.id = r.user_id
     WHERE r.status = 'public'
+      ${
+        currentUserId
+          ? sql`AND (r.user_id IS NULL OR r.user_id <> ${currentUserId}::uuid)`
+          : sql``
+      }
     ORDER BY r.recipe_created_at DESC
   `;
 
@@ -1163,30 +1213,32 @@ export async function fetchDiscoverRecipes(): Promise<DiscoverRecipeCard[]> {
 // 4) Single public recipe, used on Discover detail page
 export async function fetchPublicRecipeById(
   id: string
-): Promise<RecipeForm | null> {
-  const rows = await sql<RecipeForm[]>`
+): Promise<PublicRecipeDetail | null> {
+  const rows = await sql<PublicRecipeDetail[]>`
     SELECT
-      id,
-      user_id,
-      recipe_name,
-      recipe_type,
-      difficulty,
-      recipe_ingredients,
-      recipe_ingredients_structured,
-      recipe_steps,
-      equipment,
-      allergens,
-      dietary_flags,
-      servings,
-      prep_time_min,
-      calories_total,
-      estimated_cost_total,
-      status,
-      recipe_created_at,
-      recipe_updated_at
-    FROM public.recipes
-    WHERE id = ${id}::uuid
-      AND status = 'public'
+      r.id,
+      r.user_id,
+      r.recipe_name,
+      r.recipe_type,
+      r.difficulty,
+      r.recipe_ingredients,
+      r.recipe_ingredients_structured,
+      r.recipe_steps,
+      r.equipment,
+      r.allergens,
+      r.dietary_flags,
+      r.servings,
+      r.prep_time_min,
+      r.calories_total,
+      r.estimated_cost_total,
+      r.status,
+      r.recipe_created_at,
+      r.recipe_updated_at,
+      u.user_name AS created_by_display_name
+    FROM public.recipes r
+    LEFT JOIN public.users u ON u.id = r.user_id
+    WHERE r.id = ${id}::uuid
+      AND r.status = 'public'
     LIMIT 1
   `;
 

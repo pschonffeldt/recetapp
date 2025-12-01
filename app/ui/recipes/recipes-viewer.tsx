@@ -2,18 +2,36 @@
 
 import { Button } from "@/app/ui/general/button";
 import Link from "next/link";
-import { DeleteRecipeOnViewer, UpdateRecipeOnViewer } from "./recipes-buttons";
+import {
+  DeleteRecipeOnViewer,
+  ImportRecipeFromDiscover,
+  UpdateRecipeOnViewer,
+} from "./recipes-buttons";
 import { RecipeForm } from "@/app/lib/definitions";
 import { inter } from "../branding/branding-fonts";
 import { MetricCard, MetricCardMobile } from "./recipes-indicators";
 import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils";
 import { RecipeFormState } from "@/app/lib/action-types";
 import { buildIngredientLines } from "@/app/lib/ingredients";
+import clsx from "clsx";
 
 // (you can keep asDate if you still use it somewhere)
 const asDate = (d: string | Date) => (d instanceof Date ? d : new Date(d));
 
-export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
+type ViewerMode = "dashboard" | "discover" | "imported";
+
+export default function ViewerRecipe({
+  recipe,
+  mode = "dashboard",
+}: {
+  recipe: RecipeForm;
+  mode?: ViewerMode;
+}) {
+  const backHref =
+    mode === "discover" ? "/dashboard/discover" : "/dashboard/recipes";
+
+  const canEdit = mode === "dashboard"; // imported + discover = read-only
+
   const initial: RecipeFormState = { message: null, errors: {} };
 
   async function handleOnClick() {
@@ -33,6 +51,20 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
             {recipe.recipe_name}
           </h1>
+
+          {/* Status chip: public / private */}
+          <div className="mt-2 flex items-center gap-2">
+            <span
+              className={clsx(
+                "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                recipe.status === "public"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-gray-200 bg-gray-100 text-gray-700"
+              )}
+            >
+              {recipe.status === "public" ? "Public recipe" : "Private recipe"}
+            </span>
+          </div>
         </header>
 
         {/* Stats mobile */}
@@ -114,6 +146,7 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
             unitPosition="left"
             fontClassName={inter.className}
           />
+
           <MetricCardMobile
             title="Allergens"
             items={recipe.allergens}
@@ -255,16 +288,26 @@ export default function ViewerRecipe({ recipe }: { recipe: RecipeForm }) {
 
       {/* Buttons */}
       <section className="pb-10">
-        <div className="mt-6 flex justify-center gap-4 px-6 lg:justify-end lg:px-0">
+        <div className="mt-6 flex flex-wrap justify-center gap-4 px-6 lg:justify-end lg:px-0">
           <Link
-            href="/dashboard/recipes"
+            href={backHref}
             className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
           >
             Return
           </Link>
+
           <Button onClick={handleOnClick}>Share</Button>
-          <UpdateRecipeOnViewer id={recipe.id} />
-          <DeleteRecipeOnViewer id={recipe.id} />
+
+          {/* In discover mode, allow importing */}
+          {mode === "discover" && <ImportRecipeFromDiscover id={recipe.id} />}
+
+          {/* Only allow edit/delete in dashboard mode */}
+          {canEdit && (
+            <>
+              <UpdateRecipeOnViewer id={recipe.id} />
+              <DeleteRecipeOnViewer id={recipe.id} />
+            </>
+          )}
         </div>
       </section>
     </div>

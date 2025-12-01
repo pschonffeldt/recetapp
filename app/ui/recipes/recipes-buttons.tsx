@@ -1,6 +1,10 @@
 "use client";
 
-import { deleteRecipe, deleteRecipeFromViewer } from "@/app/lib/actions";
+import {
+  deleteRecipe,
+  deleteRecipeFromViewer,
+  importRecipeFromDiscover,
+} from "@/app/lib/actions";
 import {
   MagnifyingGlassCircleIcon,
   PencilIcon,
@@ -11,6 +15,7 @@ import Link from "next/link";
 import { useToast } from "../toast/toast-provider";
 import { useRouter } from "next/navigation";
 import { useRef, useTransition } from "react";
+import { Button } from "../general/button";
 
 export function CreateRecipe() {
   return (
@@ -41,7 +46,6 @@ export function ViewRecipe({ id }: { id: string }) {
       title="View recipe details"
     >
       <MagnifyingGlassCircleIcon className="w-5" aria-hidden="true" />
-      {/* Redundant for some AT; safe to keep */}
       <span className="sr-only">View recipe</span>
     </Link>
   );
@@ -189,5 +193,15 @@ export function DeleteRecipe({ id }: { id: string }) {
       <span className="sr-only">Delete</span>
       <TrashIcon className="w-5" aria-hidden="true" />
     </button>
+  );
+}
+
+export function ImportRecipeFromDiscover({ id }: { id: string }) {
+  const importAction = importRecipeFromDiscover.bind(null, id);
+
+  return (
+    <form action={importAction}>
+      <Button>Import to my recipes</Button>
+    </form>
   );
 }
