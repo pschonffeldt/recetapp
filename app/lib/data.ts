@@ -1102,3 +1102,104 @@ export async function fetchRoadmapGrouped(): Promise<RoadmapGrouped> {
  * Discover recipes
  * =============================================================================
  */
+
+// 1) Shape used by the Discover UI cards
+export type DiscoverRecipeCard = {
+  id: string;
+  recipe_name: string;
+  recipe_type: RecipeForm["recipe_type"];
+  difficulty: RecipeForm["difficulty"];
+  servings: number | null;
+  prep_time_min: number | null;
+  created_by_display_name: string | null; // from users.user_name
+  recipe_created_at: string;
+};
+
+// 2) Internal row shape for the SQL query
+type DiscoverRecipeRow = {
+  id: string;
+  recipe_name: string;
+  recipe_type: RecipeForm["recipe_type"];
+  difficulty: RecipeForm["difficulty"];
+  servings: number | null;
+  prep_time_min: number | null;
+  recipe_created_at: string | Date;
+  created_by_display_name: string | null; // users.user_name
+};
+
+// 3) List of public recipes for Discover grid
+export async function fetchDiscoverRecipes(): Promise<DiscoverRecipeCard[]> {
+  const rows = await sql<DiscoverRecipeRow[]>`
+    SELECT
+      r.id,
+      r.recipe_name,
+      r.recipe_type,
+      r.difficulty,
+      r.servings,
+      r.prep_time_min,
+      r.recipe_created_at,
+      u.user_name AS created_by_display_name  -- 👈 from users.user_name
+    FROM public.recipes r
+    LEFT JOIN public.users u ON u.id = r.user_id
+    WHERE r.status = 'public'
+    ORDER BY r.recipe_created_at DESC
+  `;
+
+  return rows.map((r) => ({
+    id: r.id,
+    recipe_name: r.recipe_name,
+    recipe_type: r.recipe_type,
+    difficulty: r.difficulty,
+    servings: r.servings,
+    prep_time_min: r.prep_time_min,
+    created_by_display_name: r.created_by_display_name,
+    recipe_created_at:
+      typeof r.recipe_created_at === "string"
+        ? r.recipe_created_at
+        : r.recipe_created_at.toISOString(),
+  }));
+}
+
+// 4) Single public recipe, used on Discover detail page
+export async function fetchPublicRecipeById(
+  id: string
+): Promise<RecipeForm | null> {
+  const rows = await sql<RecipeForm[]>`
+    SELECT
+      id,
+      user_id,
+      recipe_name,
+      recipe_type,
+      difficulty,
+      recipe_ingredients,
+      recipe_ingredients_structured,
+      recipe_steps,
+      equipment,
+      allergens,
+      dietary_flags,
+      servings,
+      prep_time_min,
+      calories_total,
+      estimated_cost_total,
+      status,
+      recipe_created_at,
+      recipe_updated_at
+    FROM public.recipes
+    WHERE id = ${id}::uuid
+      AND status = 'public'
+    LIMIT 1
+  `;
+
+  if (rows.length === 0) return null;
+
+  const r = rows[0];
+
+  return {
+    ...r,
+    recipe_ingredients: r.recipe_ingredients ?? [],
+    recipe_steps: r.recipe_steps ?? [],
+    equipment: r.equipment ?? [],
+    allergens: r.allergens ?? [],
+    dietary_flags: r.dietary_flags ?? [],
+  };
+}
