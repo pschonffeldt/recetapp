@@ -4,6 +4,7 @@ import { z } from "zod";
 export const UpdateUserProfileSchema = z
   .object({
     name: z.string().min(1, "First name is required").optional(),
+    user_name: z.string().min(1, "USer name is required").optional(),
     last_name: z.string().min(1, "Last name is required").optional(),
     email: z.string().email("Invalid email").optional(),
   })
@@ -11,6 +12,7 @@ export const UpdateUserProfileSchema = z
   .refine(
     (v) =>
       v.name !== undefined ||
+      v.user_name !== undefined ||
       v.last_name !== undefined ||
       v.email !== undefined,
     { message: "Nothing to update", path: ["_form"] }

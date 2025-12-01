@@ -13,6 +13,7 @@ type UserFormState = {
 
 export type UserErrorKey =
   | "name"
+  | "user_name"
   | "last_name"
   | "email"
   | "password"

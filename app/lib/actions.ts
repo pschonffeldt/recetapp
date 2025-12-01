@@ -488,11 +488,13 @@ export async function updateUserProfile(
 
   // Read raw values to detect “user explicitly cleared the field”
   const rawName = formData.get("name");
+  const rawUserName = formData.get("user_name");
   const rawLast = formData.get("last_name");
   const rawEmail = formData.get("email");
 
   const candidate = {
     name: toOptional(rawName),
+    user_name: toOptional(rawUserName),
     last_name: toOptional(rawLast),
     email: toOptional(rawEmail),
   };
@@ -501,6 +503,9 @@ export async function updateUserProfile(
   const errors: Record<string, string[]> = {};
   if (rawName !== null && String(rawName).trim() === "") {
     errors.name = ["First name cannot be empty."];
+  }
+  if (rawUserName !== null && String(rawUserName).trim() === "") {
+    errors.user_name = ["User name cannot be empty."];
   }
   if (rawLast !== null && String(rawLast).trim() === "") {
     errors.last_name = ["Last name cannot be empty."];
@@ -527,6 +532,7 @@ export async function updateUserProfile(
   // Build dynamic SETs from provided fields
   const sets: any[] = [];
   if (d.name !== undefined) sets.push(sql`name = ${d.name}`);
+  if (d.user_name !== undefined) sets.push(sql`user_name = ${d.user_name}`);
   if (d.last_name !== undefined) sets.push(sql`last_name = ${d.last_name}`);
   if (d.email !== undefined) sets.push(sql`email = ${d.email}`);
 
@@ -637,6 +643,7 @@ export async function updateUserPassword(
 const SignupSchema = z
   .object({
     name: z.string().trim().min(1, "First name is required"),
+    user_name: z.string().trim().min(1, "User name is required"),
     last_name: z.string().trim().optional().default(""),
     email: z
       .string()
@@ -661,6 +668,7 @@ const SignupSchema = z
 export async function createAccount(_prev: any, formData: FormData) {
   const parsed = SignupSchema.safeParse({
     name: formData.get("name"),
+    user_name: formData.get("user_name"),
     last_name: formData.get("last_name"),
     email: formData.get("email"),
     password: formData.get("password"),
@@ -676,7 +684,7 @@ export async function createAccount(_prev: any, formData: FormData) {
     return { ok: false, message: "Fix errors and try again.", errors };
   }
 
-  const { name, last_name, email, password } = parsed.data;
+  const { name, user_name, last_name, email, password } = parsed.data;
 
   // UX check (unique index still guarantees at DB level)
   const existing = await sql/* sql */ `
@@ -695,8 +703,8 @@ export async function createAccount(_prev: any, formData: FormData) {
   let userId: string | null = null;
   try {
     const rows = await sql<{ id: string }[]>/* sql */ `
-      INSERT INTO public.users (name, last_name, email, password, password_changed_at)
-      VALUES (${name}, ${last_name}, ${email}, ${hash}, NOW())
+      INSERT INTO public.users (name, user_name, last_name, email, password, password_changed_at)
+      VALUES (${name},${user_name}, ${last_name}, ${email}, ${hash}, NOW())
       RETURNING id`;
     userId = rows[0]?.id ?? null;
   } catch (e: any) {

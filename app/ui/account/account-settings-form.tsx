@@ -24,12 +24,14 @@ function pickFirstError(errors: Record<string, string[]>): string | null {
   return null;
 }
 
+// Toast handling
 function resultToToastError(state: ActionResult): string | null {
   // prefer first field error; otherwise use top-level message
   const fieldMsg = pickFirstError(state.errors);
   return fieldMsg ?? state.message ?? null;
 }
 
+// Edit user account info
 export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
   const { push } = useToast();
 
@@ -43,7 +45,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     emptyState
   );
 
-  // Success toasts
+  // General success toasts
   useEffect(() => {
     if (profileState.ok) {
       push({
@@ -54,6 +56,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     }
   }, [profileState.ok, push]);
 
+  // Passwprd success toasts
   useEffect(() => {
     if (pwdState.ok) {
       push({
@@ -64,7 +67,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     }
   }, [pwdState.ok, push]);
 
-  // Error toasts
+  // General error toasts
   useEffect(() => {
     if (!profileState.ok) {
       const msg = resultToToastError(profileState);
@@ -77,7 +80,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
       }
     }
   }, [profileState, push]);
-
+  // Password error toasts
   useEffect(() => {
     if (!pwdState.ok) {
       const msg = resultToToastError(pwdState);
@@ -105,6 +108,36 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
               Personal information
             </h2>
 
+            {/* Public name - user name */}
+            <div className="gap-6 rounded-md p-2">
+              <div>
+                <label
+                  htmlFor="user_name"
+                  className="mb-2 block text-sm font-medium"
+                >
+                  User name
+                </label>
+                <input
+                  id="user_name"
+                  name="user_name"
+                  type="text"
+                  defaultValue={user.user_name}
+                  autoComplete="user-name"
+                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
+                  aria-invalid={hasErr(profileState, "user_name")}
+                  aria-describedby={
+                    hasErr(profileState, "user_name")
+                      ? "user_name-error"
+                      : undefined
+                  }
+                />
+                {profileState.errors?.user_name?.length ? (
+                  <p id="user_name-error" className="mt-2 text-sm text-red-500">
+                    {profileState.errors.user_name[0]}
+                  </p>
+                ) : null}
+              </div>
+            </div>
             <div className="mb-6 grid gap-6 rounded-md p-2 sm:grid-cols-2">
               {/* First name */}
               <div>

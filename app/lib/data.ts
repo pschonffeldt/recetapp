@@ -615,7 +615,7 @@ export async function fetchRecipeById(id: string) {
 export async function fetchUserById(id: string) {
   if (!id) throw new Error("fetchUserById: id is required");
   const rows = await sql<UserForm[]>`
-    SELECT id, name, last_name, email, password, country, language
+    SELECT id, name, user_name, last_name, email, password, country, language
     FROM public.users
     WHERE id = ${id}::uuid
   `;
@@ -834,11 +834,12 @@ export async function fetchNotificationUsers(): Promise<
     {
       id: string;
       name: string;
+      user_name: string;
       last_name: string;
       email: string;
     }[]
   >/* sql */ `
-    SELECT id, name, last_name, email
+    SELECT id, name, user_name, last_name, email
     FROM public.users
     ORDER BY last_name, name
   `;
@@ -846,6 +847,7 @@ export async function fetchNotificationUsers(): Promise<
   return rows.map((r) => ({
     id: r.id,
     name: r.name,
+    user_name: r.user_name,
     lastName: r.last_name,
     email: r.email,
   }));
@@ -1095,3 +1097,8 @@ export async function fetchRoadmapGrouped(): Promise<RoadmapGrouped> {
 
   return { planned, inProgress, shipped };
 }
+
+/* =============================================================================
+ * Discover recipes
+ * =============================================================================
+ */

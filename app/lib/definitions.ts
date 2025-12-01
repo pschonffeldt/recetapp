@@ -25,6 +25,7 @@ export type Role = "user" | "admin";
 export type DbUserRow = {
   id: string;
   name: string | null;
+  user_name: string | null;
   last_name: string | null;
   email: string;
   password: string | null; // hashed; NEVER send to client
@@ -40,6 +41,7 @@ export type DbUserRow = {
 export type AppUser = {
   id: string;
   name: string | null;
+  user_name: string | null;
   last_name: string | null;
   email: string;
   country: string | null;
@@ -157,6 +159,7 @@ export type RecipeForm = {
 export type UserForm = {
   id: string;
   name: string;
+  user_name: string;
   last_name: string;
   email: string;
   password: string;
