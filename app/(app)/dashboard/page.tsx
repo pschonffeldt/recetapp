@@ -3,7 +3,7 @@ import CardWrapper from "@/app/ui/general/cards";
 import PieChart from "@/app/ui/dashboard/dashboard-pie-chart";
 import { inter } from "@/app/ui/branding/branding-fonts";
 import { Suspense } from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import {
   LatestRecipesSkeleton,
   CardsSkeleton,
@@ -21,7 +21,13 @@ const recipeBreakdown = [
   { label: "Dessert", value: 7, color: "#ef4444" },
 ];
 
-export default async function Page() {
+type DashboardSearchParams = {
+  [key: string]: string | string[] | undefined;
+};
+
+export default async function Page(_props: {
+  searchParams?: Promise<DashboardSearchParams>;
+}) {
   return (
     <main>
       {/* Page title */}
@@ -46,7 +52,6 @@ export default async function Page() {
       {/* Each chart uses the same static dataset for now, gotta find a cool use for this :) */}
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
         <div className="rounded-lg">
-          {" "}
           <PieChart
             data={recipeBreakdown}
             title="Recipe types breakdown"
@@ -56,7 +61,6 @@ export default async function Page() {
           />
         </div>
         <div className="rounded-lg">
-          {" "}
           <PieChart
             data={recipeBreakdown}
             title="Recipe types breakdown"
