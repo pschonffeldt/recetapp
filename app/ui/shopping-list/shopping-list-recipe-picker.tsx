@@ -123,7 +123,7 @@ export default function ShoppingListRecipePicker({
                   checked={selected.has(r.id)}
                   onChange={() => toggleOne(r.id)}
                 />
-                <span className="text-gray-800">{r.name}</span>
+                <span className="text-gray-800">{r.recipe_name}</span>
               </label>
             </li>
           ))}
