@@ -1155,6 +1155,7 @@ export type DiscoverRecipeCard = {
   recipe_name: string;
   recipe_type: RecipeForm["recipe_type"];
   difficulty: RecipeForm["difficulty"];
+  recipe_ingredients: string[] | null;
   servings: number | null;
   prep_time_min: number | null;
   created_by_display_name: string | null; // from users.user_name
@@ -1167,6 +1168,7 @@ type DiscoverRecipeRow = {
   recipe_name: string;
   recipe_type: RecipeForm["recipe_type"];
   difficulty: RecipeForm["difficulty"];
+  recipe_ingredients: string[] | null;
   servings: number | null;
   prep_time_min: number | null;
   recipe_created_at: string | Date;
@@ -1182,6 +1184,7 @@ export async function fetchDiscoverRecipes(
       r.id,
       r.recipe_name,
       r.recipe_type,
+      r.recipe_ingredients,
       r.difficulty,
       r.servings,
       r.prep_time_min,
@@ -1202,6 +1205,7 @@ export async function fetchDiscoverRecipes(
     id: r.id,
     recipe_name: r.recipe_name,
     recipe_type: r.recipe_type,
+    recipe_ingredients: r.recipe_ingredients,
     difficulty: r.difficulty,
     servings: r.servings,
     prep_time_min: r.prep_time_min,

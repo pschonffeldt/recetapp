@@ -6,6 +6,7 @@ import {
   importRecipeFromDiscover,
 } from "@/app/lib/actions";
 import {
+  ArrowDownCircleIcon,
   MagnifyingGlassCircleIcon,
   PencilIcon,
   PlusIcon,
@@ -48,6 +49,38 @@ export function ViewRecipe({ id }: { id: string }) {
       <MagnifyingGlassCircleIcon className="w-5" aria-hidden="true" />
       <span className="sr-only">View recipe</span>
     </Link>
+  );
+}
+
+/* ================================
+ * Discover view (icon-only link)
+ * Keeps unused bind as-is (no behavior change).
+ * ================================ */
+export function ViewPublicRecipe({ id }: { id: string }) {
+  return (
+    <Link
+      href={`/dashboard/discover/${id}`}
+      className="rounded-md border p-2 hover:bg-gray-100"
+      aria-label="View recipe details"
+      title="View recipe details"
+    >
+      <MagnifyingGlassCircleIcon className="w-5" aria-hidden="true" />
+      <span className="sr-only">View recipe</span>
+    </Link>
+  );
+}
+
+/* ================================
+ * Discover import (icon-only link)
+ * Keeps unused bind as-is (no behavior change).
+ * ================================ */
+export function ImportRecipeFromDiscover({ id }: { id: string }) {
+  const importAction = importRecipeFromDiscover.bind(null, id);
+
+  return (
+    <form action={importAction}>
+      <Button>Import to my recipes</Button>
+    </form>
   );
 }
 
@@ -193,15 +226,5 @@ export function DeleteRecipe({ id }: { id: string }) {
       <span className="sr-only">Delete</span>
       <TrashIcon className="w-5" aria-hidden="true" />
     </button>
-  );
-}
-
-export function ImportRecipeFromDiscover({ id }: { id: string }) {
-  const importAction = importRecipeFromDiscover.bind(null, id);
-
-  return (
-    <form action={importAction}>
-      <Button>Import to my recipes</Button>
-    </form>
   );
 }

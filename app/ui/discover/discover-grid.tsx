@@ -1,5 +1,3 @@
-// app/ui/discover/discover-grid.tsx (or similar)
-import Link from "next/link";
 import DiscoverCard from "./discover-card";
 import { DiscoverRecipeCard } from "@/app/lib/data";
 
@@ -28,7 +26,7 @@ export default function DiscoverGrid({ recipes }: Props) {
           Explore recipes shared by the Recetapp community.
         </p>
       </header>
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
         {recipes.map((recipe) => (
           <DiscoverCard recipe={recipe} key={recipe.id} />
         ))}

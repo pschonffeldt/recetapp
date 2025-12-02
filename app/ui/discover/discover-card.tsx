@@ -1,86 +1,63 @@
 import { DiscoverRecipeCard } from "@/app/lib/data";
-import clsx from "clsx";
-import Link from "next/link";
-import { Button } from "../general/button";
-import { capitalizeFirst } from "@/app/lib/utils";
+import { formatDateToLocal } from "@/app/lib/utils";
 import RecipesType from "../recipes/recipes-status";
+import RecipesDifficulty from "../recipes/recipes-difficulty";
+import { ViewPublicRecipe } from "../recipes/recipes-buttons";
 
 type Props = {
   recipe: DiscoverRecipeCard;
 };
 
-const difficultyColors = {
-  easy: "bg-green-50 text-green-700 border-green-200",
-  medium: "bg-amber-50 text-amber-700 border-amber-200",
-  hard: "bg-red-50 text-red-700 border-red-200",
-} as const;
-
-type DifficultyKey = keyof typeof difficultyColors;
-
-// Reusable chip
-function Chip({
-  className,
-  children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium",
-        className
-      )}
-    >
-      {children}
-    </span>
-  );
-}
-
 export default function DiscoverCard({ recipe }: Props) {
   const creator = recipe.created_by_display_name ?? "RecetApp cook";
-  const difficultyKey = (recipe.difficulty ?? "easy") as DifficultyKey;
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-      {/* Header and creator */}
-      <header className="px-4 py-3">
-        <h2 className="line-clamp-2 text-base font-semibold">
-          {recipe.recipe_name}
-        </h2>
-        <p className="mt-1 text-xs">
-          by <span className="font-medium">{creator}</span>
-        </p>
-      </header>
-
-      {/* Content */}
-      <div className="flex flex-1 flex-col p-4">
-        {/* Chips */}
-        <div className="mb-4 flex flex-wrap gap-2">
+    <div className="relative rounded-md bg-white shadow-md border p-4 border-gray-100">
+      {/* Header row: name + type and difficulty chip */}
+      <div className="flex flex-col place-items-start justify-between border-b pb-2 gap-1">
+        <p className="font-medium">{recipe.recipe_name}</p>
+        <div className="flex items-center justify-between text-gray-500 text-sm gap-2">
+          <p>Type:</p>
           <RecipesType type={recipe.recipe_type} />
-
-          <Chip className={clsx("border", difficultyColors[difficultyKey])}>
-            {capitalizeFirst(recipe.difficulty ?? "easy")}
-          </Chip>
-
-          {recipe.servings && (
-            <Chip className="bg-gray-50 text-gray-600">
-              {recipe.servings} Servings
-            </Chip>
-          )}
-
-          {recipe.prep_time_min && (
-            <Chip className="bg-gray-50 text-gray-600">
-              ~{recipe.prep_time_min} Min
-            </Chip>
-          )}
+          <p className="pl-4">Difficulty:</p>
+          <RecipesDifficulty type={recipe.difficulty} />
         </div>
+      </div>
 
-        {/* Button pinned to bottom */}
-        <div className="mt-auto">
-          <Link href={`/dashboard/discover/${recipe.id}`}>
-            <Button>View recipe</Button>
-          </Link>
+      {/* Body fields */}
+      <div className="mt-3 space-y-2 text-sm text-gray-700">
+        {/* Ingredients */}
+        <div className="min-h-16">
+          <span className="font-medium">Ingredients: </span>
+          <span>
+            {recipe.recipe_ingredients?.length
+              ? (() => {
+                  const fullText = recipe.recipe_ingredients.join(", ") + ".";
+
+                  const MAX_CHARS = 100;
+                  if (fullText.length <= MAX_CHARS) return fullText;
+                  return fullText.slice(0, MAX_CHARS).trimEnd() + "…";
+                })()
+              : "—"}
+          </span>
+        </div>
+        {/* Date and creator */}
+        <div className="flex flex-col gap-1 text-gray-500">
+          <div className="flex flex-row">
+            <p className="pr-1">Created at -</p>
+            <time dateTime={new Date(recipe.recipe_created_at!).toISOString()}>
+              {formatDateToLocal(recipe.recipe_created_at!)}
+            </time>
+          </div>
+          <div className="flex flex-row">
+            <p className="pr-1">
+              Created by: <span className="font-medium">{creator}</span>
+            </p>
+          </div>
+        </div>
+        {/* Button to view recipe */}
+        <div className="mt-4 flex justify-end gap-2 border-t pt-3">
+          <ViewPublicRecipe id={recipe.id} />
         </div>
       </div>
     </div>
