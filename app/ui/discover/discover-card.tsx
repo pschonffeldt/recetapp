@@ -1,11 +1,14 @@
 import { DiscoverRecipeCard } from "@/app/lib/data";
 import clsx from "clsx";
+import Link from "next/link";
+import { Button } from "../general/button";
+import { capitalizeFirst } from "@/app/lib/utils";
+import RecipesType from "../recipes/recipes-status";
 
 type Props = {
   recipe: DiscoverRecipeCard;
 };
 
-// Define the map without tying it to the DiscoverRecipeCard type
 const difficultyColors = {
   easy: "bg-green-50 text-green-700 border-green-200",
   medium: "bg-amber-50 text-amber-700 border-amber-200",
@@ -14,49 +17,72 @@ const difficultyColors = {
 
 type DifficultyKey = keyof typeof difficultyColors;
 
-export default function DiscoverCard({ recipe }: Props) {
-  const creator = recipe.created_by_display_name ?? "Recetapp cook";
+// Reusable chip
+function Chip({
+  className,
+  children,
+}: {
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      className={clsx(
+        "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium",
+        className
+      )}
+    >
+      {children}
+    </span>
+  );
+}
 
-  // Fallback to "easy" if difficulty is undefined/null
+export default function DiscoverCard({ recipe }: Props) {
+  const creator = recipe.created_by_display_name ?? "RecetApp cook";
   const difficultyKey = (recipe.difficulty ?? "easy") as DifficultyKey;
 
   return (
-    <article className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <header className="mb-2">
+    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+      {/* Header and creator */}
+      <header className="px-4 py-3">
         <h2 className="line-clamp-2 text-base font-semibold">
           {recipe.recipe_name}
         </h2>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs">
           by <span className="font-medium">{creator}</span>
         </p>
       </header>
 
-      <div className="mt-2 flex flex-wrap gap-2 text-xs">
-        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-gray-700">
-          {recipe.recipe_type}
-        </span>
+      {/* Content */}
+      <div className="flex flex-1 flex-col p-4">
+        {/* Chips */}
+        <div className="mb-4 flex flex-wrap gap-2">
+          <RecipesType type={recipe.recipe_type} />
 
-        <span
-          className={clsx(
-            "rounded-full border px-2 py-0.5 text-xs font-medium",
-            difficultyColors[difficultyKey]
+          <Chip className={clsx("border", difficultyColors[difficultyKey])}>
+            {capitalizeFirst(recipe.difficulty ?? "easy")}
+          </Chip>
+
+          {recipe.servings && (
+            <Chip className="bg-gray-50 text-gray-600">
+              {recipe.servings} Servings
+            </Chip>
           )}
-        >
-          {recipe.difficulty ?? "easy"}
-        </span>
 
-        {recipe.servings && (
-          <span className="rounded-full bg-gray-50 px-2 py-0.5 text-gray-600">
-            {recipe.servings} servings
-          </span>
-        )}
+          {recipe.prep_time_min && (
+            <Chip className="bg-gray-50 text-gray-600">
+              ~{recipe.prep_time_min} Min
+            </Chip>
+          )}
+        </div>
 
-        {recipe.prep_time_min && (
-          <span className="rounded-full bg-gray-50 px-2 py-0.5 text-gray-600">
-            ~{recipe.prep_time_min} min
-          </span>
-        )}
+        {/* Button pinned to bottom */}
+        <div className="mt-auto">
+          <Link href={`/dashboard/discover/${recipe.id}`}>
+            <Button>View recipe</Button>
+          </Link>
+        </div>
       </div>
-    </article>
+    </div>
   );
 }

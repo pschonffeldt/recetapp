@@ -15,16 +15,12 @@ export default async function Page() {
   const recipes = await fetchDiscoverRecipes(userId);
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Discover public recipes
-        </h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Explore recipes shared by the Recetapp community.
-        </p>
-      </header>
-
+    <main>
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: "Discover", href: "/dashboard/discover", active: true },
+        ]}
+      />
       <DiscoverGrid recipes={recipes} />
     </main>
   );
