@@ -4,13 +4,13 @@ import ViewerRecipe from "@/app/ui/recipes/recipes-viewer";
 import { notFound } from "next/navigation";
 
 type DiscoverRecipePageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export default async function DiscoverRecipePage({
   params,
 }: DiscoverRecipePageProps) {
-  const { id } = params;
+  const { id } = await params;
 
   const recipe = await fetchPublicRecipeById(id);
   if (!recipe) {
@@ -29,8 +29,6 @@ export default async function DiscoverRecipePage({
           },
         ]}
       />
-
-      {/* Re-use the main recipe viewer in discover mode */}
       <ViewerRecipe recipe={recipe} mode="discover" />
     </main>
   );
