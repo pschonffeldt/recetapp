@@ -4,7 +4,7 @@ import RecipesTable from "@/app/ui/recipes/recipes-table";
 import { CreateRecipe } from "@/app/ui/recipes/recipes-buttons";
 import { inter } from "@/app/ui/branding/branding-fonts";
 import { Suspense } from "react";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { RecipesTableSkeleton } from "@/app/ui/dashboard/dashboard-skeletons";
 import { fetchRecipesPages } from "@/app/lib/data";
 import { requireUserId } from "@/app/lib/auth-helpers";
@@ -21,26 +21,27 @@ type SearchParams = {
   type?: string;
 };
 
-export default async function Page({
-  searchParams,
-}: {
-  searchParams?: SearchParams;
+export default async function Page(props: {
+  searchParams?: Promise<SearchParams>;
 }) {
   const userId = await requireUserId();
 
-  const query = searchParams?.query ?? "";
-  const pageFromUrl = Math.max(1, Number(searchParams?.page) || 1);
-  const sort = (searchParams?.sort as "name" | "date" | "type") || "date";
-  const order = (searchParams?.order as "asc" | "desc") || "desc";
+  // Works whether Next passes a Promise or a plain object
+  const raw = props.searchParams ? await props.searchParams : undefined;
+  const searchParams: SearchParams = raw ?? {};
+
+  const query = searchParams.query ?? "";
+  const pageFromUrl = Math.max(1, Number(searchParams.page) || 1);
+  const sort: "name" | "date" | "type" = searchParams.sort || "date";
+  const order: "asc" | "desc" = searchParams.order || "desc";
 
   // Normalize type: treat undefined, empty string or whitespace as null
-  const rawType = searchParams?.type;
+  const rawType = searchParams.type;
   const type: string | null =
     rawType && rawType.trim().length > 0 ? rawType : null;
 
   // Total pages for current filters (includes owned + saved recipes)
   const totalPages = await fetchRecipesPages({ query, type, userId });
-
   const safePage = totalPages === 0 ? 1 : Math.min(pageFromUrl, totalPages);
 
   return (
