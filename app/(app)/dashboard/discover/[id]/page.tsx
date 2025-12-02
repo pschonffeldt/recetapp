@@ -3,11 +3,13 @@ import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import ViewerRecipe from "@/app/ui/recipes/recipes-viewer";
 import { notFound } from "next/navigation";
 
+type DiscoverRecipePageProps = {
+  params: { id: string };
+};
+
 export default async function DiscoverRecipePage({
   params,
-}: {
-  params: { id: string };
-}) {
+}: DiscoverRecipePageProps) {
   const { id } = params;
 
   const recipe = await fetchPublicRecipeById(id);
@@ -28,7 +30,7 @@ export default async function DiscoverRecipePage({
         ]}
       />
 
-      {/* Main viewer, but in discover mode (read-only + import button) */}
+      {/* Re-use the main recipe viewer in discover mode */}
       <ViewerRecipe recipe={recipe} mode="discover" />
     </main>
   );
