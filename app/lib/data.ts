@@ -132,6 +132,12 @@ export async function fetchRevenue() {
  * =============================================================================
  */
 
+// Used by the Shopping List UI to represent a recipe option
+export type ShoppingListRecipe = {
+  id: string;
+  name: string;
+};
+
 /**
  * Latest recipes for the **current user**, newest first.
  * Used by dashboard “latest” section.
