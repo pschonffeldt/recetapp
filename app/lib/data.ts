@@ -132,11 +132,8 @@ export async function fetchRevenue() {
  * =============================================================================
  */
 
-// Used by the Shopping List UI to represent a recipe option
-export type ShoppingListRecipe = {
-  id: string;
-  name: string;
-};
+// Minimal shape used by the shopping list UI
+export type ShoppingListRecipe = Pick<RecipeForm, "id" | "recipe_name">;
 
 /**
  * Latest recipes for the **current user**, newest first.

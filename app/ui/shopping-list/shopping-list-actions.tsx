@@ -42,7 +42,9 @@ export default function ShoppingListActions({
     const appliedRecipes = recipes.filter((r) => appliedIds.includes(r.id));
 
     const recipeLines =
-      appliedRecipes.length > 0 ? appliedRecipes.map((r) => `- ${r.name}`) : [];
+      appliedRecipes.length > 0
+        ? appliedRecipes.map((r) => `- ${r.recipe_name}`)
+        : [];
 
     const ingredientLines =
       lines.length > 0 ? lines.map((line) => `- ${line}`) : [];
@@ -92,7 +94,7 @@ export default function ShoppingListActions({
       const recipeListHtml =
         appliedRecipes.length > 0
           ? `<ul>${appliedRecipes
-              .map((r) => `<li>${r.name}</li>`)
+              .map((r) => `<li>${r.recipe_name}</li>`)
               .join("")}</ul>`
           : "<p>(no specific recipes selected)</p>";
 
