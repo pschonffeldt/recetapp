@@ -3,21 +3,27 @@ import { fetchRecipeByIdForOwner } from "@/app/lib/data";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import ViewerRecipe from "@/app/ui/recipes/recipes-viewer";
 import { notFound } from "next/navigation";
+import type { RecipeForm } from "@/app/lib/definitions";
 
-type PageProps = {
-  params: { id: string };
+type ViewerPageProps = {
+  params: Promise<{ id: string }>;
 };
 
-export default async function Page({ params }: PageProps) {
-  const { id } = params;
+type RecipeWithOwner = RecipeForm & {
+  user_id: string;
+};
+
+export default async function Page({ params }: ViewerPageProps) {
+  const { id } = await params;
 
   const userId = await requireUserId();
   const recipe = await fetchRecipeByIdForOwner(id, userId);
 
   if (!recipe) notFound();
 
-  const isOwner = recipe.id === userId;
-  const mode = isOwner ? "dashboard" : "imported"; // imported = in my library but not mine
+  const recipeWithOwner = recipe as RecipeWithOwner;
+  const isOwner = recipeWithOwner.user_id === userId;
+  const mode = isOwner ? "dashboard" : "imported";
 
   return (
     <main>
