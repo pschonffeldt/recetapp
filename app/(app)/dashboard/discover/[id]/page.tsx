@@ -1,31 +1,34 @@
 import { fetchPublicRecipeById } from "@/app/lib/data";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import ViewerRecipe from "@/app/ui/recipes/recipes-viewer";
 import { notFound } from "next/navigation";
 
-type PageProps = {
+export default async function DiscoverRecipePage({
+  params,
+}: {
   params: { id: string };
-};
+}) {
+  const { id } = params;
 
-export default async function DiscoverRecipePage({ params }: PageProps) {
-  const recipe = await fetchPublicRecipeById(params.id);
-
+  const recipe = await fetchPublicRecipeById(id);
   if (!recipe) {
     notFound();
   }
 
-  const creator = recipe.created_by_display_name ?? "Recetapp cook";
-
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
-      <header className="mb-4">
-        <p className="text-xs uppercase tracking-wide text-gray-500">
-          Discover recipe
-        </p>
-        <p className="mt-1 text-sm text-gray-600">
-          by <span className="font-medium">{creator}</span>
-        </p>
-      </header>
+    <main>
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: "Discover", href: "/dashboard/discover" },
+          {
+            label: "View public recipe",
+            href: `/dashboard/discover/${id}`,
+            active: true,
+          },
+        ]}
+      />
 
+      {/* Main viewer, but in discover mode (read-only + import button) */}
       <ViewerRecipe recipe={recipe} mode="discover" />
     </main>
   );
