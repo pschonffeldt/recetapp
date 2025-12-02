@@ -17,9 +17,10 @@ export default async function Page(props: any) {
   const userId = await requireUserId();
 
   // Handle both cases:
-  // - searchParams is a Promise (as Next's PageProps suggests)
-  // - searchParams is a plain object (local dev / future behavior)
-  const rawSearchParams = props?.searchParams ? await props.searchParams : {};
+  // - searchParams is a Promise (as Next's generated PageProps suggests)
+  // - searchParams is a plain object (local dev / different tooling)
+  const rawSearchParams =
+    props && "searchParams" in props ? await props.searchParams : {};
 
   const searchParams = (rawSearchParams || {}) as {
     query?: string;
@@ -31,8 +32,8 @@ export default async function Page(props: any) {
 
   const query = searchParams.query ?? "";
   const pageFromUrl = Math.max(1, Number(searchParams.page) || 1);
-  const sort = searchParams.sort || "date";
-  const order = searchParams.order || "desc";
+  const sort: "name" | "date" | "type" = searchParams.sort || "date";
+  const order: "asc" | "desc" = searchParams.order || "desc";
 
   // Normalize type: undefined / "" / whitespace => null
   const rawType = searchParams.type;
