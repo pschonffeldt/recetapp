@@ -3,6 +3,7 @@ import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { fetchRecipeByIdForOwner } from "@/app/lib/data";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { requireUserId } from "@/app/lib/auth-helpers";
 
 export const metadata: Metadata = { title: "Edit Recipe" };
 
@@ -12,7 +13,10 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const recipe = await fetchRecipeByIdForOwner(id);
+
+  const userId = await requireUserId();
+  const recipe = await fetchRecipeByIdForOwner(id, userId);
+
   if (!recipe) notFound();
 
   return (
