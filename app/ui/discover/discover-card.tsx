@@ -1,8 +1,8 @@
 import { DiscoverRecipeCard } from "@/app/lib/data";
-import { formatDateToLocal } from "@/app/lib/utils";
 import RecipesType from "../recipes/recipes-status";
 import RecipesDifficulty from "../recipes/recipes-difficulty";
 import { ViewPublicRecipe } from "../recipes/recipes-buttons";
+import { formatDateToLocal } from "@/app/lib/utils/format";
 
 type Props = {
   recipe: DiscoverRecipeCard;

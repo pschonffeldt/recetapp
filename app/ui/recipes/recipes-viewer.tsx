@@ -10,10 +10,10 @@ import {
 import { RecipeForm } from "@/app/lib/types/definitions";
 import { inter } from "../branding/branding-fonts";
 import { MetricCard, MetricCardMobile } from "./recipes-indicators";
-import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils";
 import { RecipeFormState } from "@/app/lib/forms/state";
 import { buildIngredientLines } from "@/app/lib/ingredients";
 import clsx from "clsx";
+import { formatDateToLocal, capitalizeFirst } from "@/app/lib/utils/format";
 
 // (you can keep asDate if you still use it somewhere)
 const asDate = (d: string | Date) => (d instanceof Date ? d : new Date(d));

@@ -1,5 +1,6 @@
 "use client";
 
+import { generatePagination } from "@/app/lib/utils/format";
 // ============================================
 // Pagination (Client Component, a11y-enhanced)
 // - Same logic as your current component
@@ -11,7 +12,6 @@
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Link from "next/link";
-import { generatePagination } from "@/app/lib/utils";
 import { usePathname, useSearchParams } from "next/navigation";
 
 export default function Pagination({

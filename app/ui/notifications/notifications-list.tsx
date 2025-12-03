@@ -5,12 +5,12 @@ import { useActionState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import type { AppNotification } from "@/app/lib/types/definitions";
-import { capitalizeFirst } from "@/app/lib/utils";
 import { Button } from "../general/button";
 import {
   markNotificationRead,
   markAllNotificationsRead,
 } from "@/app/lib/notifications/actions";
+import { capitalizeFirst } from "@/app/lib/utils/format";
 
 function formatDateTime(value?: string | null) {
   if (!value) return "";

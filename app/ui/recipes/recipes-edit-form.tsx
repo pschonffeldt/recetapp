@@ -3,7 +3,6 @@
 import { useActionState } from "react";
 import { Button } from "@/app/ui/general/button";
 import Link from "next/link";
-import { capitalizeFirst } from "@/app/lib/utils";
 import {
   DIFFICULTY,
   RECIPE_TYPES,
@@ -13,6 +12,7 @@ import { RecipeFormState } from "@/app/lib/forms/state";
 import IngredientsEditor from "@/app/ui/recipes/recipes-ingredients-editor";
 import { buildInitialIngredientsForEditor } from "@/app/lib/ingredients";
 import { updateRecipe } from "@/app/lib/recipes/actions";
+import { capitalizeFirst } from "@/app/lib/utils/format";
 
 // initial state with strong typing
 const initialState: RecipeFormState = { message: null, errors: {} };

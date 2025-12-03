@@ -1,9 +1,9 @@
 import { fetchFilteredRecipes } from "@/app/lib/data";
-import { formatDateToLocal } from "@/app/lib/utils";
 import RecipesType from "./recipes-status";
 import SortButton from "./recipes-sort-button";
 import { ViewRecipe, UpdateRecipe, DeleteRecipe } from "./recipes-buttons";
 import RecipesDifficulty from "./recipes-difficulty";
+import { formatDateToLocal } from "@/app/lib/utils/format";
 
 type RecipesTableProps = {
   userId: string;
