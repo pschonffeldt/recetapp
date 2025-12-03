@@ -1,9 +1,9 @@
 import { requireUserId } from "@/app/lib/auth/helpers";
-import { fetchRecipeByIdForOwner } from "@/app/lib/data";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import ViewerRecipe from "@/app/ui/recipes/recipes-viewer";
 import { notFound } from "next/navigation";
 import type { RecipeForm } from "@/app/lib/types/definitions";
+import { fetchRecipeByIdForOwner } from "@/app/lib/recipes/data";
 
 type ViewerPageProps = {
   params: Promise<{ id: string }>;

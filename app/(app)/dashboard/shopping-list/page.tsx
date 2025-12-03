@@ -1,11 +1,7 @@
 import { Metadata } from "next";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { notFound } from "next/navigation";
-import {
-  fetchUserById,
-  fetchIngredientsForUser,
-  fetchRecipesForUser,
-} from "@/app/lib/data";
+
 import { auth } from "@/auth";
 import {
   IncomingIngredientPayload,
@@ -13,6 +9,11 @@ import {
   UNIT_LABELS,
 } from "@/app/lib/types/definitions";
 import ShoppingListRecipePicker from "@/app/ui/shopping-list/shopping-list-recipe-picker";
+import {
+  fetchUserById,
+  fetchRecipesForUser,
+  fetchIngredientsForUser,
+} from "@/app/lib/recipes/data";
 
 export const metadata: Metadata = { title: "Shopping list" };
 

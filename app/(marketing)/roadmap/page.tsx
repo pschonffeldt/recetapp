@@ -1,4 +1,4 @@
-import { fetchRoadmapGrouped } from "@/app/lib/data";
+import { fetchRoadmapGrouped } from "@/app/lib/marketing/data";
 
 export const metadata = {
   title: "Roadmap – RecetApp",

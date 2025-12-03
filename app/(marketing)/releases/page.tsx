@@ -1,5 +1,4 @@
-import { fetchReleaseNotes } from "@/app/lib/data";
-import { brand } from "@/app/ui/branding/branding";
+import { fetchReleaseNotes } from "@/app/lib/marketing/data";
 
 function formatReleaseDate(value: string) {
   const d = new Date(value);
