@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import NotificationsList from "@/app/ui/notifications/notifications-list";
-import { fetchNotifications } from "@/app/lib/data";
+import { fetchNotifications } from "@/app/lib/notifications/data";
 
 export const metadata: Metadata = { title: "Notifications" };
 

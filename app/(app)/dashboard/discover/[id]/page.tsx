@@ -1,4 +1,4 @@
-import { fetchPublicRecipeById } from "@/app/lib/data";
+import { fetchPublicRecipeById } from "@/app/lib/discover/data";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import ViewerRecipe from "@/app/ui/recipes/recipes-viewer";
 import { notFound } from "next/navigation";

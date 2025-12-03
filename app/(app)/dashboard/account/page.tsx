@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import EditAccountSettingsForm from "@/app/ui/account/account-settings-form";
 import { notFound } from "next/navigation";
-import { fetchUserById } from "@/app/lib/data";
 import { auth } from "@/auth";
+import { fetchUserById } from "@/app/lib/recipes/data";
 
 export const metadata: Metadata = { title: "Account Settings" };
 

@@ -1,9 +1,8 @@
 import { Metadata } from "next";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
-import { notFound } from "next/navigation";
-import { fetchDiscoverRecipes, fetchUserById } from "@/app/lib/data";
 import { auth } from "@/auth";
 import DiscoverGrid from "@/app/ui/discover/discover-grid";
+import { fetchDiscoverRecipes } from "@/app/lib/discover/data";
 
 export const metadata: Metadata = { title: "Discover" };
 export const dynamic = "force-dynamic";
