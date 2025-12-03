@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState } from "react";
-import { updateRecipe } from "@/app/lib/actions";
 import { Button } from "@/app/ui/general/button";
 import Link from "next/link";
 import { capitalizeFirst } from "@/app/lib/utils";
@@ -13,6 +12,7 @@ import {
 import { RecipeFormState } from "@/app/lib/action-types";
 import IngredientsEditor from "@/app/ui/recipes/recipes-ingredients-editor";
 import { buildInitialIngredientsForEditor } from "@/app/lib/ingredients";
+import { updateRecipe } from "@/app/lib/recipes/actions";
 
 // initial state with strong typing
 const initialState: RecipeFormState = { message: null, errors: {} };

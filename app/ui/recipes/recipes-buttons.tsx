@@ -1,12 +1,6 @@
 "use client";
 
 import {
-  deleteRecipe,
-  deleteRecipeFromViewer,
-  importRecipeFromDiscover,
-} from "@/app/lib/actions";
-import {
-  ArrowDownCircleIcon,
   MagnifyingGlassCircleIcon,
   PencilIcon,
   PlusIcon,
@@ -17,6 +11,11 @@ import { useToast } from "../toast/toast-provider";
 import { useRouter } from "next/navigation";
 import { useRef, useTransition } from "react";
 import { Button } from "../general/button";
+import { importRecipeFromDiscover } from "@/app/lib/discover/actions";
+import {
+  deleteRecipe,
+  deleteRecipeFromViewer,
+} from "@/app/lib/recipes/actions";
 
 export function CreateRecipe() {
   return (

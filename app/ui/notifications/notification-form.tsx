@@ -1,11 +1,11 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { createNotification } from "@/app/lib/actions";
 import { useToast } from "@/app/ui/toast/toast-provider";
 import { NotificationUserOption } from "@/app/lib/data";
 import { Button } from "../general/button";
 import Link from "next/link";
+import { createNotification } from "@/app/lib/notifications/actions";
 
 type ActionState = {
   ok: boolean;

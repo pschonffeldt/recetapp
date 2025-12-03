@@ -10,7 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { inter } from "@/app/ui/branding/branding-fonts";
 import { Button } from "@/app/ui/general/button";
-import { createAccount } from "@/app/lib/actions";
+import { createAccount } from "@/app/lib/auth/actions";
 
 type SignupState = {
   ok: boolean;

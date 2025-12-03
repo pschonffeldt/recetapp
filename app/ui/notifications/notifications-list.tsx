@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import {
-  markNotificationRead,
-  markAllNotificationsRead,
-} from "@/app/lib/actions";
+
 import type { AppNotification } from "@/app/lib/definitions";
 import { capitalizeFirst } from "@/app/lib/utils";
 import { Button } from "../general/button";
+import {
+  markNotificationRead,
+  markAllNotificationsRead,
+} from "@/app/lib/notifications/actions";
 
 function formatDateTime(value?: string | null) {
   if (!value) return "";
