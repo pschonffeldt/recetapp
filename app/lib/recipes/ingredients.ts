@@ -1,6 +1,29 @@
-import z from "zod";
-import { IncomingIngredientPayload, IngredientUnit } from "../definitions";
+/* =============================================================================
+ * Recipe Ingredients Utilities
+ * =============================================================================
+ * - parseIngredientsJson: parse & normalize ingredientsJson from FormData
+ * - VALID_INGREDIENT_UNITS: reference list of allowed units
+ * - IngredientPayloadSchema / IngredientsPayloadSchema: zod schemas for payloads
+ * - slugify: normalize ingredient names into URL-safe slugs
+ * - syncRecipeIngredients: sync structured ingredients to join table (internal)
+ *
+ * Notes:
+ * - This is a server-only module due to the DB write in syncRecipeIngredients.
+ * - parseIngredientsJson is safe/pure and used from recipe server actions.
+ * =============================================================================
+ */
+
+"use server";
+
+import { z } from "zod";
+
+import type { IncomingIngredientPayload, IngredientUnit } from "../definitions";
 import { sql } from "../db";
+
+/* =============================================================================
+ * Parsing & Normalization
+ * =============================================================================
+ */
 
 /**
  * Parse and normalize `ingredientsJson` from a FormData payload.
@@ -65,7 +88,7 @@ export async function parseIngredientsJson(
 }
 
 /* =============================================================================
- * Ingredients handling
+ * Schemas & Static Data
  * =============================================================================
  */
 
@@ -73,7 +96,7 @@ export async function parseIngredientsJson(
  * Literal list of valid units to validate against.
  * NOTE: currently not enforced in zod (but kept here for future use).
  */
-const VALID_INGREDIENT_UNITS: IngredientUnit[] = [
+export const VALID_INGREDIENT_UNITS: IngredientUnit[] = [
   "ml",
   "l",
   "tsp",
@@ -104,7 +127,7 @@ const VALID_INGREDIENT_UNITS: IngredientUnit[] = [
  * Schema for a single structured ingredient payload.
  * (Currently used as a reference; main parsing happens in parseIngredientsJson.)
  */
-const IngredientPayloadSchema = z.object({
+export const IngredientPayloadSchema = z.object({
   ingredientName: z.string().trim().min(1),
   quantity: z.number().nullable(),
   unit: z
@@ -116,7 +139,12 @@ const IngredientPayloadSchema = z.object({
 });
 
 /** Array-of-ingredients variant (kept for potential direct validation). */
-const IngredientsPayloadSchema = z.array(IngredientPayloadSchema);
+export const IngredientsPayloadSchema = z.array(IngredientPayloadSchema);
+
+/* =============================================================================
+ * DB Sync Helpers
+ * =============================================================================
+ */
 
 /**
  * Simple slug helper to normalize ingredient names into URL-safe slugs.
@@ -145,7 +173,7 @@ function slugify(name: string): string {
 async function syncRecipeIngredients(
   recipeId: string,
   ingredients: IncomingIngredientPayload[]
-) {
+): Promise<void> {
   // Remove previous structured ingredients
   await sql/* sql */ `
     DELETE FROM public.recipe_ingredients

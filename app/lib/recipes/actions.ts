@@ -1,17 +1,91 @@
+/* =============================================================================
+ * Recipe Actions
+ * =============================================================================
+ * - createRecipe: create a new recipe for the current user
+ * - updateRecipe: update an existing recipe
+ * - deleteRecipe: delete from list views (no redirect in the action)
+ * - deleteRecipeFromViewer: delete from detail page + redirect
+ * - reviewRecipe: placeholder review logic (currently a delete)
+ *
+ * Notes:
+ * - All actions are server-only and work with useFormState on the client.
+ * - Validation is done with Zod (RecipeSchema / UpdateRecipeSchema).
+ * - Ingredients are stored both as:
+ *   - text[] (legacy / simple views / stats)
+ *   - jsonb (structured ingredients)
+ * =============================================================================
+ */
+
 "use server";
 
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import type { ZodIssue } from "zod";
+
+import { sql } from "../db";
 import { RecipeFormState } from "../action-types";
 import { requireUserId } from "../auth-helpers";
-import { IncomingIngredientPayload } from "../definitions";
+import type { IncomingIngredientPayload } from "../definitions";
 import { toLines, toInt, toMoney } from "../form-helpers";
-import { sql } from "../db";
 import { RecipeSchema, UpdateRecipeSchema } from "./validation";
 
 /* =============================================================================
- * Recipes — Create / Update / Delete / Review
+ * Types
+ * =============================================================================
+ */
+
+type RecipeFormErrors = RecipeFormState["errors"];
+
+/* =============================================================================
+ * Helpers
+ * =============================================================================
+ */
+
+/**
+ * Extract and parse structured ingredients from the form.
+ * Reads `ingredientsJson` (stringified array of IncomingIngredientPayload).
+ */
+function parseStructuredIngredients(
+  formData: FormData
+): IncomingIngredientPayload[] {
+  const raw = formData.get("ingredientsJson");
+
+  if (typeof raw !== "string" || raw.trim() === "") return [];
+
+  try {
+    return JSON.parse(raw) as IncomingIngredientPayload[];
+  } catch (e) {
+    console.error("Failed to parse ingredientsJson:", e);
+    return [];
+  }
+}
+
+/** Map structured ingredient payloads to plain ingredient name strings. */
+function toIngredientNames(ingredients: IncomingIngredientPayload[]): string[] {
+  return ingredients.map((ing) => ing.ingredientName);
+}
+
+/** Convert Zod issues into the RecipeFormState["errors"] shape. */
+function mapZodErrorsToFormErrors(issues: ZodIssue[]): RecipeFormErrors {
+  const errors: RecipeFormErrors = {};
+  for (const issue of issues) {
+    const key = issue.path[0] as keyof RecipeFormErrors;
+    (errors[key] ??= []).push(issue.message);
+  }
+  return errors;
+}
+
+/** Small helper to build a RecipeFormState with message + errors. */
+function recipeFormError(
+  message: string,
+  errors: RecipeFormErrors = {}
+): RecipeFormState {
+  return { message, errors };
+}
+
+/* =============================================================================
+ * Actions
  * =============================================================================
  */
 
@@ -32,24 +106,8 @@ export async function createRecipe(
   const userId = await requireUserId();
 
   // 2) Read structured ingredients coming from IngredientsEditor
-  const rawIngredients = formData.get("ingredientsJson");
-  let structuredIngredients: IncomingIngredientPayload[] = [];
-
-  if (typeof rawIngredients === "string" && rawIngredients.trim() !== "") {
-    try {
-      structuredIngredients = JSON.parse(
-        rawIngredients
-      ) as IncomingIngredientPayload[];
-    } catch (e) {
-      console.error("Failed to parse ingredientsJson:", e);
-      structuredIngredients = [];
-    }
-  }
-
-  // Legacy: keep text[] column with ingredient names for existing UI / stats
-  const ingredientNames = structuredIngredients.map(
-    (ing) => ing.ingredientName
-  );
+  const structuredIngredients = parseStructuredIngredients(formData);
+  const ingredientNames = toIngredientNames(structuredIngredients);
 
   // 3) Validate & normalize main recipe fields
   const parsed = RecipeSchema.safeParse({
@@ -71,12 +129,10 @@ export async function createRecipe(
   });
 
   if (!parsed.success) {
-    const errors: RecipeFormState["errors"] = {};
-    for (const issue of parsed.error.issues) {
-      const key = issue.path[0] as keyof RecipeFormState["errors"];
-      (errors[key] ??= []).push(issue.message);
-    }
-    return { message: "Please correct the errors above.", errors };
+    return recipeFormError(
+      "Please correct the errors above.",
+      mapZodErrorsToFormErrors(parsed.error.issues)
+    );
   }
 
   const d = parsed.data;
@@ -129,15 +185,12 @@ export async function createRecipe(
     const msg = (e as any)?.message ?? String(e);
 
     if (msg.includes("recipes_user_id_fkey")) {
-      return {
-        message: "Your session expired—please log in again.",
-        errors: {},
-      };
+      return recipeFormError("Your session expired—please log in again.", {});
     }
     if (msg.includes("invalid input value for enum")) {
-      return { message: "Invalid recipe type or difficulty.", errors: {} };
+      return recipeFormError("Invalid recipe type or difficulty.", {});
     }
-    return { message: "Failed to create recipe.", errors: {} };
+    return recipeFormError("Failed to create recipe.", {});
   }
 
   revalidatePath("/dashboard/recipes");
@@ -149,7 +202,7 @@ export async function createRecipe(
  *
  * - Reads structured ingredients (ingredientsJson)
  * - Keeps legacy text[] column in sync
- * - Validates with Zod
+ * - Validates with Zod (UpdateRecipeSchema)
  * - Updates DB and redirects back to /dashboard/recipes
  */
 export async function updateRecipe(
@@ -160,31 +213,16 @@ export async function updateRecipe(
   const id = String(formData.get("id") ?? "");
 
   if (!id) {
-    return { message: "Missing recipe id.", errors: {} };
+    return recipeFormError("Missing recipe id.");
   }
 
-  // --- 1) Read structured ingredients from IngredientsEditor ---
-  const rawIngredients = formData.get("ingredientsJson");
-  let structuredIngredients: IncomingIngredientPayload[] = [];
+  // 1) Read structured ingredients from IngredientsEditor
+  const structuredIngredients = parseStructuredIngredients(formData);
+  const ingredientNames = toIngredientNames(structuredIngredients);
 
-  if (typeof rawIngredients === "string" && rawIngredients.trim() !== "") {
-    try {
-      structuredIngredients = JSON.parse(
-        rawIngredients
-      ) as IncomingIngredientPayload[];
-    } catch (e) {
-      console.error("Failed to parse ingredientsJson on update:", e);
-      structuredIngredients = [];
-    }
-  }
-
-  // text[] names for legacy column
-  const ingredientNames = structuredIngredients.map(
-    (ing) => ing.ingredientName
-  );
-
-  // --- 2) Validate & normalize with Zod schema ---
-  const parsed = RecipeSchema.safeParse({
+  // 2) Validate & normalize with Zod schema
+  const parsed = UpdateRecipeSchema.safeParse({
+    id,
     recipe_name: formData.get("recipe_name"),
     recipe_type: formData.get("recipe_type"),
     recipe_ingredients: ingredientNames,
@@ -201,23 +239,21 @@ export async function updateRecipe(
   });
 
   if (!parsed.success) {
-    const errors: RecipeFormState["errors"] = {};
-    for (const issue of parsed.error.issues) {
-      const key = issue.path[0] as keyof RecipeFormState["errors"];
-      (errors[key] ??= []).push(issue.message);
-    }
-    return { message: "Please correct the errors above.", errors };
+    return recipeFormError(
+      "Please correct the errors above.",
+      mapZodErrorsToFormErrors(parsed.error.issues)
+    );
   }
 
   const d = parsed.data;
 
-  // --- 3) Persist to DB (both text[] + structured jsonb) ---
+  // 3) Persist to DB (both text[] + structured jsonb)
   try {
     await sql/* sql */ `
       UPDATE public.recipes
       SET
         recipe_name                   = ${d.recipe_name},
-        recipe_ingredients            = ${ingredientNames}::text[],
+        recipe_ingredients            = ${d.recipe_ingredients}::text[],
         recipe_ingredients_structured = ${
           structuredIngredients.length > 0
             ? JSON.stringify(structuredIngredients)
@@ -234,7 +270,7 @@ export async function updateRecipe(
         calories_total                = ${d.calories_total}::int,
         estimated_cost_total          = ${d.estimated_cost_total}::numeric,
         equipment                     = ${d.equipment}::text[]
-      WHERE id = ${id}::uuid
+      WHERE id = ${d.id}::uuid
         AND user_id = ${userId}::uuid;
     `;
   } catch (e) {
@@ -242,16 +278,13 @@ export async function updateRecipe(
     const msg = (e as any)?.message ?? String(e);
 
     if (msg.includes("recipes_user_id_fkey")) {
-      return {
-        message: "Your session expired—please log in again.",
-        errors: {},
-      };
+      return recipeFormError("Your session expired—please log in again.", {});
     }
     if (msg.includes("invalid input value for enum")) {
-      return { message: "Invalid recipe type or difficulty.", errors: {} };
+      return recipeFormError("Invalid recipe type or difficulty.", {});
     }
 
-    return { message: "Failed to update recipe.", errors: {} };
+    return recipeFormError("Failed to update recipe.", {});
   }
 
   revalidatePath("/dashboard/recipes");
@@ -262,7 +295,7 @@ export async function updateRecipe(
  * Delete a recipe by id (from list views) for the current user.
  * This action **does not redirect** (used by list UI).
  */
-export async function deleteRecipe(id: string) {
+export async function deleteRecipe(id: string): Promise<void> {
   const userId = await requireUserId();
   const rows = await sql/* sql */ `
     DELETE FROM public.recipes
@@ -285,7 +318,7 @@ export async function deleteRecipe(id: string) {
  * Delete a recipe by id (from viewer page) for the current user
  * and redirect to recipes index.
  */
-export async function deleteRecipeFromViewer(id: string) {
+export async function deleteRecipeFromViewer(id: string): Promise<never> {
   const userId = await requireUserId();
   const rows = await sql/* sql */ `
     DELETE FROM public.recipes
@@ -310,7 +343,7 @@ export async function deleteRecipeFromViewer(id: string) {
  * NOTE: Currently performs a DELETE and revalidates the review route.
  * Replace with real review logic when implemented.
  */
-export async function reviewRecipe(id: string) {
+export async function reviewRecipe(id: string): Promise<void> {
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
   if (!userId) return;

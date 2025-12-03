@@ -1,26 +1,54 @@
 /* =============================================================================
- * Discover recipes
+ * Discover Actions
+ * =============================================================================
+ * - importRecipeFromDiscover: save a public recipe to the current user's list
+ *
+ * Rules:
+ * - Only works for recipes with status = 'public'.
+ * - If the user already owns or saved the recipe, we just redirect back.
+ * - Uses a saved_by_user_ids uuid[] column on recipes.
  * =============================================================================
  */
 
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+
 import { requireUserId } from "../auth-helpers";
 import { sql } from "../db";
-import { revalidatePath } from "next/cache";
 
-export async function importRecipeFromDiscover(recipeId: string) {
+/* =============================================================================
+ * Types
+ * =============================================================================
+ */
+
+export type DiscoverOwnershipRow = {
+  id: string;
+  user_id: string | null;
+  saved_by_user_ids: string[] | null;
+};
+
+/* =============================================================================
+ * Actions
+ * =============================================================================
+ */
+
+/**
+ * Save a public recipe (found via Discover) to the current user's list.
+ *
+ * - Ensures user is logged in
+ * - Ensures recipe exists and is public
+ * - If already owned or saved, just redirects back to /dashboard/recipes
+ * - Otherwise appends userId to saved_by_user_ids[] and redirects
+ */
+export async function importRecipeFromDiscover(
+  recipeId: string
+): Promise<never> {
   const userId = await requireUserId(); // ensure logged in
 
-  type OwnershipRow = {
-    id: string;
-    user_id: string | null;
-    saved_by_user_ids: string[] | null;
-  };
-
   // 1) Check that recipe exists and is public
-  const rows = await sql<OwnershipRow[]>`
+  const rows = await sql<DiscoverOwnershipRow[]>`
     SELECT
       id,
       user_id,

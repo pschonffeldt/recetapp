@@ -1,45 +1,43 @@
+/* =============================================================================
+ * Auth Actions
+ * =============================================================================
+ * - authenticate: sign in via NextAuth credentials provider
+ * - createAccount: sign up + auto sign-in
+ *
+ * Conventions:
+ * - Server-only file (`"use server"`).
+ * - Designed to be used with useFormState on the client.
+ * - Validation with zod close to the edge.
+ * =============================================================================
+ */
+
 "use server";
 
 import { signIn } from "@/auth";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
-import z from "zod";
+import { z } from "zod";
+
 import { sql } from "../db";
 
 /* =============================================================================
- * Auth — Sign in
+ * Types
  * =============================================================================
  */
 
 /**
- * Attempt to sign in using NextAuth credentials provider.
- *
- * Returns a user-friendly string on known auth errors; throws otherwise.
+ * Shared result shape for the signup flow.
+ * Returned shape is compatible with useFormState.
  */
-export async function authenticate(
-  _prevState: string | undefined,
-  formData: FormData
-) {
-  try {
-    await signIn("credentials", formData);
-  } catch (error) {
-    const e = error as any;
-
-    // Normalize all the “credentials sign in failed” shapes from NextAuth v5
-    const isCredsError =
-      e?.type === "CredentialsSignin" ||
-      (e?.name === "AuthError" && e?.type === "CredentialsSignin") ||
-      (typeof e?.digest === "string" && e.digest.includes("CredentialsSignin"));
-
-    if (isCredsError) return "Invalid credentials.";
-
-    // Unknown error → bubble up to error boundary/logs
-    throw error;
-  }
-}
+export type SignupResult = {
+  ok: boolean;
+  message: string | null;
+  errors: Record<string, string[]>;
+  userId?: string;
+};
 
 /* =============================================================================
- * Signup
+ * Schemas
  * =============================================================================
  */
 
@@ -60,6 +58,38 @@ const SignupSchema = z
     path: ["confirm"],
   });
 
+/* =============================================================================
+ * Actions
+ * =============================================================================
+ */
+
+/**
+ * Attempt to sign in using NextAuth credentials provider.
+ *
+ * Returns a user-friendly string on known auth errors; throws otherwise.
+ */
+export async function authenticate(
+  _prevState: string | undefined,
+  formData: FormData
+): Promise<string | undefined> {
+  try {
+    await signIn("credentials", formData);
+  } catch (error) {
+    const e = error as any;
+
+    // Normalize all the “credentials sign in failed” shapes from NextAuth v5
+    const isCredsError =
+      e?.type === "CredentialsSignin" ||
+      (e?.name === "AuthError" && e?.type === "CredentialsSignin") ||
+      (typeof e?.digest === "string" && e.digest.includes("CredentialsSignin"));
+
+    if (isCredsError) return "Invalid credentials.";
+
+    // Unknown error → bubble up to error boundary/logs
+    throw error;
+  }
+}
+
 /**
  * Create a new user account and auto sign-in.
  *
@@ -68,7 +98,10 @@ const SignupSchema = z
  * - Hashes password
  * - Inserts user and then signs them in
  */
-export async function createAccount(_prev: any, formData: FormData) {
+export async function createAccount(
+  _prev: SignupResult,
+  formData: FormData
+): Promise<SignupResult> {
   const parsed = SignupSchema.safeParse({
     name: formData.get("name"),
     user_name: formData.get("user_name"),
@@ -91,7 +124,8 @@ export async function createAccount(_prev: any, formData: FormData) {
 
   // UX check (unique index still guarantees at DB level)
   const existing = await sql/* sql */ `
-    SELECT 1 FROM public.users WHERE LOWER(email) = ${email} LIMIT 1`;
+    SELECT 1 FROM public.users WHERE LOWER(email) = ${email} LIMIT 1
+  `;
   if (existing.length) {
     return {
       ok: false,
@@ -106,9 +140,12 @@ export async function createAccount(_prev: any, formData: FormData) {
   let userId: string | null = null;
   try {
     const rows = await sql<{ id: string }[]>/* sql */ `
-      INSERT INTO public.users (name, user_name, last_name, email, password, password_changed_at)
-      VALUES (${name},${user_name}, ${last_name}, ${email}, ${hash}, NOW())
-      RETURNING id`;
+      INSERT INTO public.users
+        (name, user_name, last_name, email, password, password_changed_at)
+      VALUES
+        (${name}, ${user_name}, ${last_name}, ${email}, ${hash}, NOW())
+      RETURNING id
+    `;
     userId = rows[0]?.id ?? null;
   } catch (e: any) {
     const msg = String(e?.message || e);
@@ -136,13 +173,6 @@ export async function createAccount(_prev: any, formData: FormData) {
     redirect("/login?signup=success");
   }
 
-  // Unreachable after redirect; kept for completeness.
-  return { ok: true, message: null, errors: {}, userId } as const;
+  // Unreachable after redirect; kept for completeness / typing.
+  return { ok: true, message: null, errors: {}, userId } as SignupResult;
 }
-
-export type SignupResult = {
-  ok: boolean;
-  message: string | null;
-  errors: Record<string, string[]>;
-  userId?: string;
-};

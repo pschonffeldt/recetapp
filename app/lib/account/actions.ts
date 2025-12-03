@@ -1,5 +1,13 @@
 /* =============================================================================
- * User Profile & Password
+ * Account Actions (Profile & Password)
+ * =============================================================================
+ * - updateUserProfile: update name / user_name / last_name / email
+ * - updateUserPassword: change the current user's password
+ *
+ * Conventions:
+ * - All actions require a logged-in user (via auth()).
+ * - Designed to be used with useFormState on the client.
+ * - Validation happens close to the edge (here), using zod + manual checks.
  * =============================================================================
  */
 
@@ -8,36 +16,69 @@
 import { auth } from "@/auth";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
+
 import { sql } from "../db";
 import { UpdateUserProfileSchema } from "../validation";
 
-/**
- * Helper: "" | null -> undefined, otherwise trimmed string.
- * Used to distinguish “user cleared field” vs “field absent”.
+/* =============================================================================
+ * Types
+ * =============================================================================
  */
-const toOptional = (v: FormDataEntryValue | null) => {
-  const s = (v ?? "").toString().trim();
-  return s === "" ? undefined : s;
-};
 
 /**
- * Update name / last_name / email for the current user.
+ * Shared form state for account-related actions.
+ * Returned shape is compatible with useFormState.
+ */
+export type AccountFormState = {
+  message: string | null;
+  errors: Record<string, string[]>;
+  ok: boolean;
+  /**
+   * Optional hint for callers that a full refresh/revalidation
+   * would be a good idea after a successful action.
+   */
+  shouldRefresh?: boolean;
+};
+
+/* =============================================================================
+ * Helpers
+ * =============================================================================
+ */
+
+/**
+ * "" | null -> undefined, otherwise trimmed string.
+ *
+ * Used to distinguish:
+ * - user explicitly cleared a field (empty string)  → undefined
+ * - field was never present                        → undefined
+ * - field has value                                → trimmed string
+ */
+function toOptional(v: FormDataEntryValue | null): string | undefined {
+  const s = (v ?? "").toString().trim();
+  return s === "" ? undefined : s;
+}
+
+/* =============================================================================
+ * Actions
+ * =============================================================================
+ */
+
+/**
+ * Update name / user_name / last_name / email for the current user.
  *
  * - Detects explicitly cleared fields (empty string)
- * - Validates with zod + some manual checks
+ * - Validates with zod + manual checks for empties
  * - Handles duplicate-email DB errors gracefully
  */
 export async function updateUserProfile(
-  _prev: {
-    message: string | null;
-    errors: Record<string, string[]>;
-    ok: boolean;
-  },
+  _prev: AccountFormState,
   formData: FormData
-) {
+): Promise<AccountFormState> {
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
-  if (!userId) return { message: "Unauthorized.", errors: {}, ok: false };
+  if (!userId) {
+    return { message: "Unauthorized.", errors: {}, ok: false };
+  }
 
   // Read raw values to detect “user explicitly cleared the field”
   const rawName = formData.get("name");
@@ -142,30 +183,34 @@ export async function updateUserProfile(
  * - Hashes with bcrypt before saving
  */
 export async function updateUserPassword(
-  _prev: {
-    message: string | null;
-    errors: Record<string, string[]>;
-    ok: boolean;
-  },
+  _prev: AccountFormState,
   formData: FormData
-) {
+): Promise<AccountFormState> {
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
-  if (!userId) return { ok: false, message: "Unauthorized.", errors: {} };
+  if (!userId) {
+    return { ok: false, message: "Unauthorized.", errors: {} };
+  }
 
   const password = toOptional(formData.get("password"));
   const confirm = toOptional(formData.get("confirm_password"));
 
   const errors: Record<string, string[]> = {};
 
-  if (!password)
+  if (!password) {
     errors.password = [
       "To change your password, fill in both password fields.",
     ];
-  if (!confirm) errors.confirm_password = ["Confirm password is required."];
-  if (password && password.length < 6) errors.password = ["Min 6 characters."];
-  if (password && confirm && password !== confirm)
+  }
+  if (!confirm) {
+    errors.confirm_password = ["Confirm password is required."];
+  }
+  if (password && password.length < 6) {
+    errors.password = ["Min 6 characters."];
+  }
+  if (password && confirm && password !== confirm) {
     errors.confirm_password = ["Passwords do not match."];
+  }
 
   if (Object.keys(errors).length) {
     return { ok: false, message: "Please correct the errors.", errors };

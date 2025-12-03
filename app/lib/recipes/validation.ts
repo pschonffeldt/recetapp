@@ -1,10 +1,21 @@
+/* =============================================================================
+ * Recipe Validation (Zod Schemas)
+ * =============================================================================
+ * - StatusEnum, DifficultyEnum: enums mirroring DB enums
+ * - RecipeSchema: base schema for create/update forms (no id)
+ * - UpdateRecipeSchema: extends RecipeSchema with id
+ *
+ * Notes:
+ * - Use RecipeSchema / UpdateRecipeSchema in server actions.
+ * - Use RecipeFormValues / RecipeUpdateValues for TypeScript types in UI.
+ * =============================================================================
+ */
+
 import { z } from "zod";
 
 /* =============================================================================
- * Zod Schemas (Validation)
+ * Enums
  * =============================================================================
- *
- * Keep form/data validation centralized here so it’s easy to evolve.
  */
 
 /** Enum for recipe visibility. */
@@ -12,6 +23,11 @@ export const StatusEnum = z.enum(["private", "public"]);
 
 /** Enum for recipe difficulty. */
 export const DifficultyEnum = z.enum(["easy", "medium", "hard"]);
+
+/* =============================================================================
+ * Schemas
+ * =============================================================================
+ */
 
 /**
  * Base recipe schema used for create/update.
@@ -52,7 +68,7 @@ export const RecipeSchema = z.object({
     .nullable()
     .default(null),
 
-  // numeric as string
+  // numeric as string (handled by toMoney before hitting DB)
   estimated_cost_total: z.string().nullable().default(null),
 
   equipment: z.array(z.string().min(1)).default([]),
@@ -62,3 +78,11 @@ export const RecipeSchema = z.object({
 export const UpdateRecipeSchema = RecipeSchema.extend({
   id: z.string().uuid("Invalid recipe id"),
 });
+
+/* =============================================================================
+ * Types
+ * =============================================================================
+ */
+
+export type RecipeFormValues = z.infer<typeof RecipeSchema>;
+export type RecipeUpdateValues = z.infer<typeof UpdateRecipeSchema>;
