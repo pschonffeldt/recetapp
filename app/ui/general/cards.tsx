@@ -1,7 +1,7 @@
 import { inter } from "@/app/ui/branding/branding-fonts";
-import { fetchCardData } from "@/app/lib/data";
 import { MetricCard, MetricCardMobile } from "../recipes/recipes-indicators";
 import { capitalizeFirst } from "@/app/lib/utils/format";
+import { fetchCardData } from "@/app/lib/recipes/data";
 
 export default async function CardWrapper() {
   const {

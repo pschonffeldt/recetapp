@@ -1,6 +1,6 @@
 import { CalendarIcon } from "@heroicons/react/24/outline";
 import { inter } from "@/app/ui/branding/branding-fonts";
-import { fetchRevenue } from "@/app/lib/data";
+import { fetchRevenue } from "@/app/lib/recipes/data";
 import { generateYAxis } from "@/app/lib/utils/format";
 
 export default async function RevenueChart() {
