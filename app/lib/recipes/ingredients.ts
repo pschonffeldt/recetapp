@@ -17,7 +17,10 @@
 
 import { z } from "zod";
 
-import type { IncomingIngredientPayload, IngredientUnit } from "../definitions";
+import type {
+  IncomingIngredientPayload,
+  IngredientUnit,
+} from "../types/definitions";
 import { sql } from "../db";
 
 /* =============================================================================

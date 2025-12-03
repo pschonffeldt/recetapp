@@ -3,7 +3,7 @@ import {
   IngredientUnit,
   UNIT_LABELS,
   RecipeForm,
-} from "@/app/lib/definitions";
+} from "@/app/lib/types/definitions";
 
 /**
  * Safely normalise any unknown value (jsonb, stringified JSON, etc.)

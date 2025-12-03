@@ -1,4 +1,4 @@
-import { Revenue } from "./definitions";
+import { Revenue } from "../types/definitions";
 
 // Currency formatter, making sure it uses USD and cents
 export const formatCurrency = (amount: number) => {

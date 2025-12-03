@@ -11,7 +11,7 @@ import {
   IncomingIngredientPayload,
   IngredientUnit,
   UNIT_LABELS,
-} from "@/app/lib/definitions";
+} from "@/app/lib/types/definitions";
 import ShoppingListRecipePicker from "@/app/ui/shopping-list/shopping-list-recipe-picker";
 
 export const metadata: Metadata = { title: "Shopping list" };

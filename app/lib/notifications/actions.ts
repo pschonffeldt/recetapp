@@ -16,7 +16,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { requireAdmin, requireUserId } from "../auth-helpers";
+import { requireAdmin, requireUserId } from "../auth/helpers";
 import { sql } from "../db";
 
 /* =============================================================================

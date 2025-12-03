@@ -15,7 +15,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { requireUserId } from "../auth-helpers";
+import { requireUserId } from "../auth/helpers";
 import { sql } from "../db";
 
 /* =============================================================================

@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import type {
   IncomingIngredientPayload,
   IngredientUnit,
-} from "@/app/lib/definitions";
-import { UNIT_LABELS, ALL_UNITS } from "@/app/lib/definitions";
+} from "@/app/lib/types/definitions";
+import { UNIT_LABELS, ALL_UNITS } from "@/app/lib/types/definitions";
 
 type DraftIngredient = {
   id: string;

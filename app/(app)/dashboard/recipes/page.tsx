@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { RecipesTableSkeleton } from "@/app/ui/dashboard/dashboard-skeletons";
 import { fetchRecipesPages } from "@/app/lib/data";
-import { requireUserId } from "@/app/lib/auth-helpers";
+import { requireUserId } from "@/app/lib/auth/helpers";
 
 export const metadata: Metadata = {
   title: "Recipes",

@@ -8,8 +8,8 @@ import {
   DIFFICULTY,
   RECIPE_TYPES,
   type RecipeForm,
-} from "@/app/lib/definitions";
-import { RecipeFormState } from "@/app/lib/action-types";
+} from "@/app/lib/types/definitions";
+import { RecipeFormState } from "@/app/lib/forms/state";
 import IngredientsEditor from "@/app/ui/recipes/recipes-ingredients-editor";
 import { buildInitialIngredientsForEditor } from "@/app/lib/ingredients";
 import { updateRecipe } from "@/app/lib/recipes/actions";

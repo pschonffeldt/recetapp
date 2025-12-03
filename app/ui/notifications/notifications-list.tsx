@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-import type { AppNotification } from "@/app/lib/definitions";
+import type { AppNotification } from "@/app/lib/types/definitions";
 import { capitalizeFirst } from "@/app/lib/utils";
 import { Button } from "../general/button";
 import {

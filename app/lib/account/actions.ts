@@ -18,7 +18,7 @@ import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 
 import { sql } from "../db";
-import { UpdateUserProfileSchema } from "../validation";
+import { UpdateUserProfileSchema } from "./validation";
 
 /* =============================================================================
  * Types

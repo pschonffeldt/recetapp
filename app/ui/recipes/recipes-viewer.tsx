@@ -7,11 +7,11 @@ import {
   ImportRecipeFromDiscover,
   UpdateRecipeOnViewer,
 } from "./recipes-buttons";
-import { RecipeForm } from "@/app/lib/definitions";
+import { RecipeForm } from "@/app/lib/types/definitions";
 import { inter } from "../branding/branding-fonts";
 import { MetricCard, MetricCardMobile } from "./recipes-indicators";
 import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils";
-import { RecipeFormState } from "@/app/lib/action-types";
+import { RecipeFormState } from "@/app/lib/forms/state";
 import { buildIngredientLines } from "@/app/lib/ingredients";
 import clsx from "clsx";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
-import { type UserForm } from "@/app/lib/definitions";
+import { type UserForm } from "@/app/lib/types/definitions";
 import { inter } from "../branding/branding-fonts";
 import Link from "next/link";
 import { Button } from "../general/button";

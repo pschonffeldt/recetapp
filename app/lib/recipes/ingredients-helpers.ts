@@ -3,7 +3,7 @@ import {
   IncomingIngredientPayload,
   IngredientUnit,
   AggregatedIngredient,
-} from "@/app/lib/definitions";
+} from "@/app/lib/types/definitions";
 
 /**
  * Normalize structured ingredients for a recipe.

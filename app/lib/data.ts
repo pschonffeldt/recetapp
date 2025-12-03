@@ -10,12 +10,12 @@ import {
   AppNotification,
   toAppNotification,
   PublicRecipeDetail,
-} from "./definitions";
+} from "./types/definitions";
 import {
   type FetchNotificationsResult,
   type IncomingIngredientPayload,
-} from "@/app/lib/definitions";
-import { requireUserId } from "@/app/lib/auth-helpers";
+} from "@/app/lib/types/definitions";
+import { requireUserId } from "@/app/lib/auth/helpers";
 import { parseStructuredIngredients } from "./ingredients";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";

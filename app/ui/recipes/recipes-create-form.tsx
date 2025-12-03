@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { Button } from "@/app/ui/general/button";
 import { capitalizeFirst } from "@/app/lib/utils";
-import { RECIPE_TYPES, DIFFICULTY } from "@/app/lib/definitions";
-import { RecipeFormState } from "@/app/lib/action-types";
+import { RECIPE_TYPES, DIFFICULTY } from "@/app/lib/types/definitions";
+import { RecipeFormState } from "@/app/lib/forms/state";
 import IngredientsEditor from "@/app/ui/recipes/recipes-ingredients-editor";
 import { createRecipe } from "@/app/lib/recipes/actions";
 

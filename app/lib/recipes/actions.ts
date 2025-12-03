@@ -24,10 +24,10 @@ import { redirect } from "next/navigation";
 import type { ZodIssue } from "zod";
 
 import { sql } from "../db";
-import { RecipeFormState } from "../action-types";
-import { requireUserId } from "../auth-helpers";
-import type { IncomingIngredientPayload } from "../definitions";
-import { toLines, toInt, toMoney } from "../form-helpers";
+import { RecipeFormState } from "../forms/state";
+import { requireUserId } from "../auth/helpers";
+import type { IncomingIngredientPayload } from "../types/definitions";
+import { toLines, toInt, toMoney } from "../forms/helpers";
 import { RecipeSchema, UpdateRecipeSchema } from "./validation";
 
 /* =============================================================================
