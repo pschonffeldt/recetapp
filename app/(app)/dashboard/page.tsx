@@ -8,6 +8,7 @@ import {
   LatestRecipesSkeleton,
   CardsSkeleton,
 } from "@/app/ui/dashboard/dashboard-skeletons";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 
 // Set title for metadata
 export const metadata: Metadata = {
@@ -25,9 +26,10 @@ export default async function Page() {
   return (
     <main>
       {/* Page title */}
-      <h1 className={`${inter.className} mb-4 pl-6 text-xl md:text-2xl`}>
-        Dashboard
-      </h1>
+
+      <Breadcrumbs
+        breadcrumbs={[{ label: "Dashboard", href: "/dashboard", active: true }]}
+      />
 
       {/* KPI Cards section */}
       <div className="rounded-md border-gray-200 bg-gray-50 p-6 shadow-sm">

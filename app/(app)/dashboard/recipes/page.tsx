@@ -8,6 +8,7 @@ import type { Metadata } from "next";
 import { RecipesTableSkeleton } from "@/app/ui/dashboard/dashboard-skeletons";
 import { requireUserId } from "@/app/lib/auth/helpers";
 import { fetchRecipesPages } from "@/app/lib/recipes/data";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 
 export const metadata: Metadata = {
   title: "Recipes",
@@ -46,15 +47,15 @@ export default async function Page(props: {
 
   return (
     <div className="w-full min-h-0">
-      <div className="flex w-full items-center justify-between">
-        <h1 className={`${inter.className} text-xl pl-6 lg:pl-0`}>Recipes</h1>
-      </div>
-
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: "Recipes", href: "/dashboard/recipes", active: true },
+        ]}
+      />
       <div className="mt-4 flex items-center px-2 justify-between gap-2 md:mt-8 lg:px-0">
         <Search placeholder="Search recipes, ingredients or type ..." />
         <CreateRecipe />
       </div>
-
       <Suspense
         key={`${query}|${type}|${sort}|${order}|${safePage}`}
         fallback={<RecipesTableSkeleton />}
