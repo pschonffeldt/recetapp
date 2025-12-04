@@ -16,6 +16,10 @@ import "server-only";
 import { sql } from "../db";
 import { requireUserId } from "../auth/helpers";
 
+export type RecipeListItem = RecipeForm & {
+  owner_relationship: "owned" | "imported";
+};
+
 import type {
   Revenue,
   RecipeField,
@@ -68,11 +72,6 @@ type DbRecipeRow = {
   status: RecipeForm["status"];
   recipe_created_at: string;
   recipe_updated_at: string | null;
-};
-
-/** Recipe row plus `saved_by_user_ids` for “owner OR saved” views. */
-type RecipeRowWithSavedBy = RecipeForm & {
-  saved_by_user_ids: string[] | null;
 };
 
 /** Local row type for fetchRecipesForUser (same shape as above). */
@@ -216,10 +215,20 @@ export async function fetchRecipeById(id: string) {
  *
  * Used by the Discover → “import / view” flows.
  */
+
+/** Recipe row plus `saved_by_user_ids` for “owner OR saved” views. */
+export type RecipeWithOwner = RecipeForm & {
+  user_id: string;
+};
+
+type RecipeRowWithSavedBy = RecipeWithOwner & {
+  saved_by_user_ids: string[] | null;
+};
+
 export async function fetchRecipeByIdForOwner(
   recipeId: string,
   userId: string
-): Promise<RecipeForm | null> {
+): Promise<RecipeWithOwner | null> {
   const rows = await sql<RecipeRowWithSavedBy[]>`
     SELECT
       id,
@@ -255,24 +264,14 @@ export async function fetchRecipeByIdForOwner(
 
   const { saved_by_user_ids, ...r } = rows[0];
 
-  // Build a RecipeForm explicitly; cast the base and normalize arrays.
-  const recipe: RecipeForm = {
-    ...(r as Omit<
-      RecipeForm,
-      | "recipe_ingredients"
-      | "recipe_steps"
-      | "equipment"
-      | "allergens"
-      | "dietary_flags"
-    >),
+  return {
+    ...r,
     recipe_ingredients: r.recipe_ingredients ?? [],
     recipe_steps: r.recipe_steps ?? [],
     equipment: r.equipment ?? [],
     allergens: r.allergens ?? [],
     dietary_flags: r.dietary_flags ?? [],
   };
-
-  return recipe;
 }
 
 /* =============================================================================
@@ -439,18 +438,28 @@ type SortOrder = "asc" | "desc";
  * This powers the main recipes table UI.
  */
 export async function fetchFilteredRecipes(
-  userId: string,
   query: string,
   currentPage: number,
-  options: { sort: SortKey; order: SortOrder; type: string | null }
-): Promise<RecipeForm[]> {
-  const { sort, order, type } = options;
-  const searchTerm = `%${query}%`;
+  {
+    sort,
+    order,
+    type,
+    userId,
+  }: {
+    sort: "name" | "date" | "type";
+    order: "asc" | "desc";
+    type: string | null;
+    userId: string;
+  }
+): Promise<RecipeListItem[]> {
   const offset = (currentPage - 1) * RECIPES_PAGE_SIZE;
+  const searchTerm = `%${query}%`;
 
-  const effectiveType = type && type.trim().length > 0 ? type : null;
+  type Row = RecipeForm & {
+    user_id: string;
+  };
 
-  const rows = await sql<RecipeRowWithSavedBy[]>`
+  const rows = await sql<Row[]>`
     SELECT
       id,
       user_id,
@@ -469,8 +478,7 @@ export async function fetchFilteredRecipes(
       estimated_cost_total,
       status,
       recipe_created_at,
-      recipe_updated_at,
-      saved_by_user_ids
+      recipe_updated_at
     FROM public.recipes r
     WHERE
       (
@@ -482,29 +490,29 @@ export async function fetchFilteredRecipes(
         OR r.recipe_name ILIKE ${searchTerm}
       )
       AND (
-        ${effectiveType}::recipe_type_enum IS NULL
-        OR r.recipe_type = ${effectiveType}::recipe_type_enum
+        ${type}::recipe_type_enum IS NULL
+        OR r.recipe_type = ${type}::recipe_type_enum
       )
     ORDER BY
-      CASE WHEN ${sort} = 'name' THEN r.recipe_name END ${
-    order === "asc" ? sql`ASC` : sql`DESC`
-  },
-      CASE WHEN ${sort} = 'date' THEN r.recipe_created_at END ${
-    order === "asc" ? sql`ASC` : sql`DESC`
-  },
-      CASE WHEN ${sort} = 'type' THEN r.recipe_type END ${
-    order === "asc" ? sql`ASC` : sql`DESC`
-  }
-    LIMIT ${RECIPES_PAGE_SIZE} OFFSET ${offset}
+      ${
+        sort === "name"
+          ? sql`r.recipe_name`
+          : sort === "type"
+          ? sql`r.recipe_type`
+          : sql`r.recipe_created_at`
+      } ${order === "asc" ? sql`ASC` : sql`DESC`}
+    LIMIT ${RECIPES_PAGE_SIZE}
+    OFFSET ${offset}
   `;
 
-  return rows.map(({ saved_by_user_ids, ...r }) => ({
+  return rows.map((r) => ({
     ...r,
     recipe_ingredients: r.recipe_ingredients ?? [],
     recipe_steps: r.recipe_steps ?? [],
     equipment: r.equipment ?? [],
     allergens: r.allergens ?? [],
     dietary_flags: r.dietary_flags ?? [],
+    owner_relationship: r.user_id === userId ? "owned" : "imported",
   }));
 }
 

@@ -54,16 +54,15 @@ export default function ViewerRecipe({
 
           {/* Status chip: public / private */}
           <div className="mt-2 flex items-center gap-2">
-            <span
-              className={clsx(
-                "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
-                recipe.status === "public"
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                  : "border-gray-200 bg-gray-100 text-gray-700"
-              )}
-            >
+            <span className={clsx(/* existing status chip styles */)}>
               {recipe.status === "public" ? "Public recipe" : "Private recipe"}
             </span>
+
+            {mode === "imported" && (
+              <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+                Imported into your library
+              </span>
+            )}
           </div>
         </header>
 
