@@ -589,7 +589,7 @@ export async function fetchRecipesPages({
   query: string;
   type: string | null;
   userId: string;
-}): Promise<number> {
+}): Promise<{ pages: number; total: number }> {
   const searchTerm = `%${query}%`;
 
   const rows = await sql<{ count: number }[]>`
@@ -610,8 +610,10 @@ export async function fetchRecipesPages({
       )
   `;
 
-  const count = rows[0]?.count ?? 0;
-  return Math.ceil(count / RECIPES_PAGE_SIZE);
+  const total = rows[0]?.count ?? 0;
+  const pages = Math.ceil(total / RECIPES_PAGE_SIZE);
+
+  return { pages, total };
 }
 
 /**

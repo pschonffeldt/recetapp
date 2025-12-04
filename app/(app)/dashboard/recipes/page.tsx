@@ -2,13 +2,13 @@ import Pagination from "@/app/ui/recipes/recipes-pagination";
 import Search from "@/app/ui/recipes/recipes-search";
 import RecipesTable from "@/app/ui/recipes/recipes-table";
 import { CreateRecipe } from "@/app/ui/recipes/recipes-buttons";
-import { inter } from "@/app/ui/branding/branding-fonts";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { RecipesTableSkeleton } from "@/app/ui/dashboard/dashboard-skeletons";
 import { requireUserId } from "@/app/lib/auth/helpers";
 import { fetchRecipesPages } from "@/app/lib/recipes/data";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
+import RecipesFiltersToolbar from "@/app/ui/filters/filters-toolbar";
 
 export const metadata: Metadata = {
   title: "Recipes",
@@ -41,8 +41,16 @@ export default async function Page(props: {
   const type: string | null =
     rawType && rawType.trim().length > 0 ? rawType : null;
 
+  // Are any filters active on this page? (for the Clear button + subtitle)
+  const hasFilters = !!query || !!type;
+
   // Total pages for current filters (includes owned + saved recipes)
-  const totalPages = await fetchRecipesPages({ query, type, userId });
+  const { pages: totalPages, total: totalCount } = await fetchRecipesPages({
+    query,
+    type,
+    userId,
+  });
+
   const safePage = totalPages === 0 ? 1 : Math.min(pageFromUrl, totalPages);
 
   return (
@@ -52,10 +60,33 @@ export default async function Page(props: {
           { label: "Recipes", href: "/dashboard/recipes", active: true },
         ]}
       />
-      <div className="mt-4 flex items-center px-2 justify-between gap-2 md:mt-8 lg:px-0">
-        <Search placeholder="Search recipes, ingredients or type ..." />
-        <CreateRecipe />
+      {/* Action bar */}
+      <div className="flex flex-col rounded-md bg-gray-50">
+        {/* Search bar and create button */}
+        <div className="flex items-center justify-between mt-6 gap-2 px-6 lg:px-6">
+          <Search placeholder="Search recipes, ingredients or type ..." />
+          <CreateRecipe />
+        </div>
+        {/* Filter */}
+        <RecipesFiltersToolbar
+          basePath="/dashboard/recipes"
+          query={query}
+          type={rawType ?? ""}
+          difficultyRaw=""
+          maxPrepRaw=""
+          sort="newest"
+          hasFilters={hasFilters}
+          title="Your recipes"
+          contextLabel="recipes"
+          totalCount={totalCount}
+          showSearch={false}
+          showType={true}
+          showDifficulty={true}
+          showMaxPrep={true}
+          showSort={false}
+        />
       </div>
+
       <Suspense
         key={`${query}|${type}|${sort}|${order}|${safePage}`}
         fallback={<RecipesTableSkeleton />}
