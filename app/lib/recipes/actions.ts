@@ -356,3 +356,23 @@ export async function reviewRecipe(id: string): Promise<void> {
 
   revalidatePath(`/dashboard/recipes/${id}/review`);
 }
+
+/**
+ * Removes imported recipe from recipe list.
+ */
+export async function removeRecipeFromLibrary(recipeId: string) {
+  const userId = await requireUserId();
+
+  await sql`
+    UPDATE public.recipes
+    SET saved_by_user_ids = array_remove(saved_by_user_ids, ${userId}::uuid)
+    WHERE id = ${recipeId}::uuid
+  `;
+
+  // Refresh list + viewer
+  revalidatePath("/dashboard/recipes");
+  revalidatePath(`/dashboard/recipes/${recipeId}/viewer`);
+
+  // Send user back to their recipes
+  redirect("/dashboard/recipes");
+}

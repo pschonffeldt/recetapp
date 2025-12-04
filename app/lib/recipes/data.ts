@@ -805,3 +805,45 @@ function andAll(parts: any[]) {
   const [first, ...rest] = parts;
   return rest.reduce((acc, cur) => sql`${acc} AND ${cur}`, first);
 }
+
+/** Row used by the viewer: same as RecipeForm + user_id to detect ownership */
+export type RecipeViewerItem = RecipeForm & {
+  user_id: string;
+};
+
+export async function fetchRecipeByIdForOwnerOrSaved(
+  id: string,
+  userId: string
+): Promise<RecipeViewerItem | null> {
+  const rows = await sql<RecipeViewerItem[]>`
+    SELECT
+      r.id,
+      r.user_id,
+      r.recipe_name,
+      r.recipe_type,
+      r.difficulty,
+      r.recipe_ingredients,
+      r.recipe_ingredients_structured,
+      r.recipe_steps,
+      r.equipment,
+      r.allergens,
+      r.dietary_flags,
+      r.servings,
+      r.prep_time_min,
+      r.calories_total,
+      r.estimated_cost_total,
+      r.status,
+      r.recipe_created_at,
+      r.recipe_updated_at
+    FROM public.recipes r
+    WHERE
+      r.id = ${id}::uuid
+      AND (
+        r.user_id = ${userId}::uuid
+        OR ${userId}::uuid = ANY(r.saved_by_user_ids)
+      )
+    LIMIT 1
+  `;
+
+  return rows[0] ?? null;
+}

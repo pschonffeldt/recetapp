@@ -14,6 +14,7 @@ import { RecipeFormState } from "@/app/lib/forms/state";
 import { buildIngredientLines } from "@/app/lib/ingredients";
 import clsx from "clsx";
 import { formatDateToLocal, capitalizeFirst } from "@/app/lib/utils/format";
+import { removeRecipeFromLibrary } from "@/app/lib/recipes/actions";
 
 // (you can keep asDate if you still use it somewhere)
 const asDate = (d: string | Date) => (d instanceof Date ? d : new Date(d));
@@ -43,23 +44,31 @@ export default function ViewerRecipe({
   // Use shared helper
   const ingredientLines = buildIngredientLines(recipe);
 
+  const isPublic = recipe.status === "public";
+  const primaryLabel = isPublic ? "Public recipe" : "Private recipe";
+  const isImported = mode === "imported";
+  const isOwned = mode === "dashboard"; // we only pass "dashboard" for recipes you own
+
   return (
     <div>
       <div id="print" className="rounded-md border-gray-200 bg-gray-50 p-6">
         {/* Recipe name and type */}
         <header className="mb-6">
-          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+          <h1 className="text-2xl font-semibold tracking-tight">
             {recipe.recipe_name}
           </h1>
 
-          {/* Status chip: public / private */}
-          <div className="mt-2 flex items-center gap-2">
-            <span className={clsx(/* existing status chip styles */)}>
-              {recipe.status === "public" ? "Public recipe" : "Private recipe"}
-            </span>
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+            <span>{primaryLabel}</span>
 
-            {mode === "imported" && (
-              <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+            {isOwned && (
+              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                Created by you
+              </span>
+            )}
+
+            {isImported && (
+              <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
                 Imported into your library
               </span>
             )}
@@ -288,6 +297,7 @@ export default function ViewerRecipe({
       {/* Buttons */}
       <section className="pb-10">
         <div className="mt-6 flex flex-wrap justify-center gap-4 px-6 lg:justify-end lg:px-0">
+          {/* Return */}
           <Link
             href={backHref}
             className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
@@ -295,17 +305,28 @@ export default function ViewerRecipe({
             Return
           </Link>
 
+          {/* Share / export */}
           <Button onClick={handleOnClick}>Share</Button>
 
           {/* In discover mode, allow importing */}
           {mode === "discover" && <ImportRecipeFromDiscover id={recipe.id} />}
 
-          {/* Only allow edit/delete in dashboard mode */}
-          {canEdit && (
+          {/* Owned recipes (dashboard): edit + delete */}
+          {mode === "dashboard" && (
             <>
               <UpdateRecipeOnViewer id={recipe.id} />
               <DeleteRecipeOnViewer id={recipe.id} />
             </>
+          )}
+
+          {/* Imported recipes: remove from your library */}
+          {mode === "imported" && (
+            <form
+              action={removeRecipeFromLibrary.bind(null, recipe.id)}
+              className="contents"
+            >
+              <Button type="submit">Remove from your library</Button>
+            </form>
           )}
         </div>
       </section>

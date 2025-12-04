@@ -1,19 +1,18 @@
 import { requireUserId } from "@/app/lib/auth/helpers";
-import { fetchRecipeByIdForOwner } from "@/app/lib/recipes/data";
+import { fetchRecipeByIdForOwnerOrSaved } from "@/app/lib/recipes/data";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import ViewerRecipe from "@/app/ui/recipes/recipes-viewer";
 import { notFound } from "next/navigation";
 
 type PageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export default async function Page({ params }: PageProps) {
-  const { id } = params;
-
+  const { id } = await params;
   const userId = await requireUserId();
-  const recipe = await fetchRecipeByIdForOwner(id, userId);
 
+  const recipe = await fetchRecipeByIdForOwnerOrSaved(id, userId);
   if (!recipe) notFound();
 
   const isOwner = recipe.user_id === userId;
