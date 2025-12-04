@@ -36,7 +36,7 @@ export type RoadmapItem = {
 
 export type RoadmapGrouped = {
   planned: RoadmapItem[];
-  in_progress: RoadmapItem[];
+  inProgress: RoadmapItem[];
   shipped: RoadmapItem[];
 };
 

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { ShoppingListRecipe } from "@/app/lib/data";
 import { Button } from "../general/button";
 import ShoppingListActions from "./shopping-list-actions";
+import { ShoppingListRecipe } from "@/app/lib/recipes/data";
 
 type Props = {
   recipes: ShoppingListRecipe[];

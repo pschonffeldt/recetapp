@@ -1,5 +1,5 @@
+import { DiscoverRecipeCard } from "@/app/lib/discover/data";
 import DiscoverCard from "./discover-card";
-import { DiscoverRecipeCard } from "@/app/lib/data";
 
 type Props = {
   recipes: DiscoverRecipeCard[];

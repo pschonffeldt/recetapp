@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { inter } from "@/app/ui/branding/branding-fonts";
-import { fetchLatestRecipes } from "@/app/lib/data";
 import RecipesType from "../recipes/recipes-status";
+import { fetchLatestRecipes } from "@/app/lib/recipes/data";
 
 const MAX_INGREDIENT_CHARS = 100;
 
