@@ -44,10 +44,52 @@ type DiscoverRecipeRow = {
   created_by_display_name: string | null; // users.user_name
 };
 
-// 3) List of public recipes for Discover grid
-export async function fetchDiscoverRecipes(
-  currentUserId?: string | null
-): Promise<DiscoverRecipeCard[]> {
+// 3) Filters for Discover grid
+export type DiscoverRecipeFilters = {
+  currentUserId?: string | null; // viewer: hide own recipes
+  search?: string | null; // search in recipe_name
+  type?: RecipeForm["recipe_type"] | null; // recipe_type filter
+  difficulty?: RecipeForm["difficulty"] | null; // difficulty filter
+  maxPrep?: number | null; // max prep time in minutes
+  sort?: "newest" | "oldest" | "shortest"; // sort mode
+};
+
+/**
+ * List of public recipes for Discover grid, with filters + sort.
+ */
+export async function fetchDiscoverRecipes({
+  currentUserId,
+  search,
+  type,
+  difficulty,
+  maxPrep,
+  sort,
+}: DiscoverRecipeFilters = {}): Promise<DiscoverRecipeCard[]> {
+  // -----------------------------
+  // Normalize filters
+  // -----------------------------
+  const searchTerm =
+    search && search.trim().length > 0 ? `%${search.trim()}%` : null;
+
+  const typeFilter =
+    type && typeof type === "string" && type.trim().length > 0
+      ? type.trim()
+      : "";
+
+  const difficultyFilter =
+    difficulty && typeof difficulty === "string" && difficulty.trim().length > 0
+      ? difficulty.trim()
+      : "";
+
+  const maxPrepFilter =
+    typeof maxPrep === "number" && !Number.isNaN(maxPrep) ? maxPrep : null;
+
+  const sortKey: "newest" | "oldest" | "shortest" =
+    sort === "oldest" || sort === "shortest" ? sort : "newest";
+
+  // -----------------------------
+  // Query
+  // -----------------------------
   const rows = await sql<DiscoverRecipeRow[]>`
     SELECT
       r.id,
@@ -58,16 +100,31 @@ export async function fetchDiscoverRecipes(
       r.servings,
       r.prep_time_min,
       r.recipe_created_at,
-      u.user_name AS created_by_display_name  -- from users.user_name
+      u.user_name AS created_by_display_name
     FROM public.recipes r
     LEFT JOIN public.users u ON u.id = r.user_id
-    WHERE r.status = 'public'
+    WHERE
+      r.status = 'public'
       ${
         currentUserId
           ? sql`AND (r.user_id IS NULL OR r.user_id <> ${currentUserId}::uuid)`
           : sql``
       }
-    ORDER BY r.recipe_created_at DESC
+      ${searchTerm ? sql`AND r.recipe_name ILIKE ${searchTerm}` : sql``}
+      ${typeFilter ? sql`AND r.recipe_type = ${typeFilter}` : sql``}
+      ${difficultyFilter ? sql`AND r.difficulty = ${difficultyFilter}` : sql``}
+      ${
+        maxPrepFilter !== null
+          ? sql`AND (r.prep_time_min IS NOT NULL AND r.prep_time_min <= ${maxPrepFilter})`
+          : sql``
+      }
+    ${
+      sortKey === "oldest"
+        ? sql`ORDER BY r.recipe_created_at ASC`
+        : sortKey === "shortest"
+        ? sql`ORDER BY r.prep_time_min ASC NULLS LAST, r.recipe_created_at DESC`
+        : sql`ORDER BY r.recipe_created_at DESC`
+    }
   `;
 
   return rows.map((r) => ({
