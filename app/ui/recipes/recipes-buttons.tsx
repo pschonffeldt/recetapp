@@ -10,7 +10,7 @@ import {
 import Link from "next/link";
 import { useToast } from "../toast/toast-provider";
 import { useRouter } from "next/navigation";
-import { useRef, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { Button } from "../general/button";
 import { importRecipeFromDiscover } from "@/app/lib/discover/actions";
 import {
@@ -239,27 +239,36 @@ export function DeleteRecipe({ id }: { id: string }) {
  * ================================ */
 
 export function RemoveImportedRecipe({ id }: { id: string }) {
+  const { confirm, push } = useToast();
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const { push } = useToast();
 
-  const handleRemove = () => {
-    const confirmed = window.confirm(
-      "Remove this recipe from your library? The original public recipe will still be available in Discover."
-    );
-    if (!confirmed) return;
+  const handleRemove = async () => {
+    const ok = await confirm({
+      // "Remove this recipe from your library? The original public recipe will still be available in Discover."
+      title: "Remove recipe?",
+      message: "This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      variant: "destructive",
+    });
+
+    if (!ok) return; // user cancelled
 
     startTransition(async () => {
       try {
         await removeRecipeFromLibrary(id);
+        router.refresh(); // refresh list
         push({
           variant: "success",
+          title: "Removed",
           message: "Recipe removed from your library.",
         });
       } catch (err) {
-        console.error("Failed to remove imported recipe:", err);
         push({
           variant: "error",
-          message: "Could not remove recipe. Please try again.",
+          title: "Remove failed",
+          message: "We couldn’t remove the recipe. Try again.",
         });
       }
     });
@@ -277,5 +286,63 @@ export function RemoveImportedRecipe({ id }: { id: string }) {
       <span className="sr-only">Remove imported recipe</span>
       <MinusCircleIcon className="w-5" aria-hidden="true" />
     </button>
+  );
+}
+
+/* ================================
+ * Remove imported (viewer context)
+ * - Same UX pattern as DeleteRecipeOnViewer
+ * - Uses toast.confirm + toast messages
+ * - Uses server action via form submit
+ * ================================ */
+export function RemoveImportedRecipeOnViewer({ id }: { id: string }) {
+  // bind the server action so it can be used as a form action
+  const removeAction = removeRecipeFromLibrary.bind(null, id);
+
+  const formRef = useRef<HTMLFormElement>(null);
+  const [isPending, startTransition] = useTransition();
+  const { confirm, push } = useToast();
+
+  const onClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    const ok = await confirm({
+      title: "Remove from your recipes?",
+      message:
+        "This will remove the imported copy from your library. The original public recipe will still be available in Discover.",
+      confirmText: "Remove",
+      cancelText: "Cancel",
+      variant: "destructive",
+    });
+
+    if (!ok) return;
+
+    // Submit the server action (will redirect to /dashboard/recipes)
+    startTransition(() => {
+      formRef.current?.requestSubmit();
+    });
+
+    // Optional success toast (shown briefly before / after redirect,
+    // depending on where your ToastProvider lives)
+    push({
+      variant: "success",
+      title: "Recipe removed",
+      message: "The recipe was removed from your library.",
+    });
+  };
+
+  return (
+    <form ref={formRef} action={removeAction}>
+      <button
+        type="submit"
+        onClick={onClick}
+        disabled={isPending}
+        className="flex h-10 items-center rounded-lg bg-blue-500 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+        aria-label="Remove imported recipe"
+        title="Remove imported recipe"
+      >
+        {isPending ? "Removing…" : "Remove from my recipes"}
+      </button>
+    </form>
   );
 }

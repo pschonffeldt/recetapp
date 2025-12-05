@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   DeleteRecipeOnViewer,
   ImportRecipeFromDiscover,
+  RemoveImportedRecipeOnViewer,
   UpdateRecipeOnViewer,
 } from "./recipes-buttons";
 import { RecipeForm } from "@/app/lib/types/definitions";
@@ -12,12 +13,10 @@ import { inter } from "../branding/branding-fonts";
 import { MetricCard, MetricCardMobile } from "./recipes-indicators";
 import { RecipeFormState } from "@/app/lib/forms/state";
 import { buildIngredientLines } from "@/app/lib/ingredients";
-import clsx from "clsx";
 import { formatDateToLocal, capitalizeFirst } from "@/app/lib/utils/format";
-import { removeRecipeFromLibrary } from "@/app/lib/recipes/actions";
 
 // (you can keep asDate if you still use it somewhere)
-const asDate = (d: string | Date) => (d instanceof Date ? d : new Date(d));
+// const asDate = (d: string | Date) => (d instanceof Date ? d : new Date(d));
 
 type ViewerMode = "dashboard" | "discover" | "imported";
 
@@ -297,7 +296,6 @@ export default function ViewerRecipe({
       {/* Buttons */}
       <section className="pb-10">
         <div className="mt-6 flex flex-wrap justify-center gap-4 px-6 lg:justify-end lg:px-0">
-          {/* Return */}
           <Link
             href={backHref}
             className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
@@ -305,28 +303,22 @@ export default function ViewerRecipe({
             Return
           </Link>
 
-          {/* Share / export */}
           <Button onClick={handleOnClick}>Share</Button>
+
+          {/* When viewing an imported recipe, allow removing from library */}
+          {mode === "imported" && (
+            <RemoveImportedRecipeOnViewer id={recipe.id} />
+          )}
 
           {/* In discover mode, allow importing */}
           {mode === "discover" && <ImportRecipeFromDiscover id={recipe.id} />}
 
-          {/* Owned recipes (dashboard): edit + delete */}
-          {mode === "dashboard" && (
+          {/* Only allow edit/delete in dashboard mode (owned recipes) */}
+          {canEdit && (
             <>
               <UpdateRecipeOnViewer id={recipe.id} />
               <DeleteRecipeOnViewer id={recipe.id} />
             </>
-          )}
-
-          {/* Imported recipes: remove from your library */}
-          {mode === "imported" && (
-            <form
-              action={removeRecipeFromLibrary.bind(null, recipe.id)}
-              className="contents"
-            >
-              <Button type="submit">Remove from your library</Button>
-            </form>
           )}
         </div>
       </section>
