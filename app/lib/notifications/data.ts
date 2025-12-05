@@ -102,8 +102,14 @@ export async function fetchNotifications(opts?: {
   page?: number;
   pageSize?: number; // default 5
   only?: "all" | "personal" | "broadcasts"; // default "all"
-  status?: "unread" | "read" | "archived" | "any"; // default "any"
-  kind?: "all" | "system" | "maintenance" | "feature" | "message";
+  status?: "any" | "unread" | "read" | "archived"; // default "any"
+  kind:
+    | "all"
+    | "announcement"
+    | "maintenance"
+    | "support"
+    | "alert"
+    | "compliance";
 }): Promise<FetchNotificationsResult> {
   const userId = await requireUserId();
 

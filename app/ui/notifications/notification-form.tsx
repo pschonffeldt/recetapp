@@ -130,20 +130,32 @@ export default function NewNotificationForm({ users }: Props) {
             <label className="mb-2 block text-sm font-medium">Kind</label>
             <select
               name="kind"
-              defaultValue="system"
+              defaultValue="Announcement"
               className="w-full rounded-md border border-gray-200 px-3 py-2 text-base"
             >
-              <option value="system">System</option>
-              <option value="maintenance">Maintenance</option>
-              <option value="feature">Feature</option>
-              <option value="message">Message</option>
+              {/* Used for marketing and informing users about product improvements. Examples: "New! Meal Planner is now live," "Improvements to Discovery." */}
+              <option value="announcement">Announcement</option>
+
+              {/* Clearly communicates downtime or planned work. Examples: "Scheduled Maintenance tonight at 2:00 AM UTC," "Service Status Update." */}
+              <option value="maintenance">Scheduled Maintenance</option>
+
+              {/* For communications tied specifically to a user's action or a support ticket. Examples: Reply to a support ticket, Custom message from the admin team (rarely used). */}
+              <option value="support">Support</option>
+
+              {/* For critical, non-scheduled communications. Examples: Changes to Terms & Conditions, Payment Issues, Security Warnings, Account Lockouts. */}
+              <option value="alert">Alert</option>
+
+              {/* For critical, non-scheduled communications. Examples: Changes to Terms & Conditions, Payment Issues, Security Warnings, Account Lockouts. */}
+              <option value="compliance">Compliance</option>
             </select>
             {err("kind") && (
               <p className="mt-1 text-sm text-red-500">{err("kind")}</p>
             )}
           </div>
           <div>
-            <label className="mb-2 block text-sm font-medium">Level</label>
+            <label className="mb-2 block text-sm font-medium">
+              Level (users can't see this)
+            </label>
             <select
               name="level"
               defaultValue="info"

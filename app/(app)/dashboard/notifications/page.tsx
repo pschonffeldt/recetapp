@@ -1,4 +1,3 @@
-import { auth } from "@/auth";
 import { Metadata } from "next";
 import Link from "next/link";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
@@ -14,29 +13,42 @@ type Search = {
   tab?: string;
 };
 
+/* =============================================================================
+ * Filter
+ * =============================================================================
+ */
+
 // Tabs we show in the UI
-type TabKey = "all" | "unread" | "announcements" | "maintenance" | "features";
+type TabKey =
+  | "all"
+  | "announcement"
+  | "maintenance"
+  | "support"
+  | "alert"
+  | "compliance";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "all", label: "All" },
-  { key: "unread", label: "Unread" },
-  { key: "announcements", label: "Announcements" },
+  { key: "announcement", label: "Announcement" },
   { key: "maintenance", label: "Maintenance" },
-  { key: "features", label: "New Features" },
+  { key: "support", label: "Support" },
+  { key: "alert", label: "Alert" },
+  { key: "compliance", label: "Compliance" },
 ];
 
-// Map a tab to the filters we pass into fetchNotifications
+// Maps a tab to the filters we pass into fetchNotifications
 function mapTabToFilters(tab: TabKey) {
   switch (tab) {
-    case "unread":
-      return { status: "unread" as const, kind: "all" as const };
+    case "announcement":
+      return { status: "any" as const, kind: "announcement" as const };
     case "maintenance":
       return { status: "any" as const, kind: "maintenance" as const };
-    case "features":
-      return { status: "any" as const, kind: "feature" as const };
-    case "announcements":
-      // For now, “Announcements” maps to the generic `message` kind
-      return { status: "any" as const, kind: "message" as const };
+    case "support":
+      return { status: "any" as const, kind: "support" as const };
+    case "alert":
+      return { status: "any" as const, kind: "alert" as const };
+    case "compliance":
+      return { status: "any" as const, kind: "compliance" as const };
     case "all":
     default:
       return { status: "any" as const, kind: "all" as const };
@@ -49,18 +61,15 @@ export default async function Page({
   // NOTE: in this repo, searchParams is a Promise
   searchParams: Promise<Search>;
 }) {
-  const sp = await searchParams;
+  const awaitedSearchParams = await searchParams;
 
-  // Admin check (show “New notification” button)
-  const session = await auth();
-  const role = (session?.user as any)?.user_role ?? "user";
-  const isAdmin = role === "admin";
-
-  const page = Math.max(1, Number(sp?.page ?? 1));
-  const only = (sp?.only ?? "all") as NonNullable<Search["only"]>;
+  const page = Math.max(1, Number(awaitedSearchParams?.page ?? 1));
+  const only = (awaitedSearchParams?.only ?? "all") as NonNullable<
+    Search["only"]
+  >;
 
   // Decide active tab
-  const tabParam = sp?.tab as TabKey | undefined;
+  const tabParam = awaitedSearchParams?.tab as TabKey | undefined;
   const activeTab: TabKey =
     tabParam && TABS.some((t) => t.key === tabParam) ? tabParam : "all";
 

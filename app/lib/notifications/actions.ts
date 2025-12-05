@@ -52,7 +52,13 @@ const NewNotificationSchema = z
     title: z.string().trim().min(1, "Title is required"),
     body: z.string().trim().min(1, "Body is required"),
 
-    kind: z.enum(["system", "maintenance", "feature", "message"]),
+    kind: z.enum([
+      "announcement",
+      "maintenance",
+      "support",
+      "alert",
+      "compliance",
+    ]),
     level: z.enum(["info", "success", "warning", "error"]),
 
     linkUrl: z.string().url("Must be a valid URL").optional(),

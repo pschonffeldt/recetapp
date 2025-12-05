@@ -254,13 +254,33 @@ export type DbNotificationRow = {
   user_id: string | null;
   title: string;
   body: string;
-  kind: "system" | "maintenance" | "feature" | "message";
+  // kind: "system" | "maintenance" | "feature" | "message";
+  kind: "announcement" | "maintenance" | "support" | "alert" | "compliance";
   level: "info" | "success" | "warning" | "error";
   link_url: string | null;
   status: "unread" | "read" | "archived";
   published_at: string | null;
   created_at: string;
   updated_at: string;
+};
+
+/**
+ * Input shape for creating a new notification.
+ * Used by server actions / APIs.
+ */
+export type NewNotificationInput = {
+  // null → broadcast notification; uuid → personal notification
+  userId: string | null;
+  title: string;
+  body: string;
+  // kind: "system" | "maintenance" | "feature" | "message";
+  kind: "announcement" | "maintenance" | "support" | "alert" | "compliance";
+  level: "info" | "success" | "warning" | "error";
+  linkUrl?: string | null;
+
+  // when to publish
+  publishNow?: boolean;
+  publishAt?: string | null; // ISO string; server will coerce to timestamptz
 };
 
 /**
@@ -276,6 +296,16 @@ export type AppNotification = Omit<
   publishedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+};
+
+/**
+ * Generic result shape for "create notification" operations.
+ */
+export type CreateNotificationResult = {
+  ok: boolean;
+  message: string | null;
+  id?: string;
+  errors?: Record<string, string[]>;
 };
 
 /**
@@ -298,34 +328,6 @@ export function toAppNotification(dbRow: DbNotificationRow): AppNotification {
     updatedAt: new Date(dbRow.updated_at),
   };
 }
-
-/**
- * Input shape for creating a new notification.
- * Used by server actions / APIs.
- */
-export type NewNotificationInput = {
-  // null → broadcast notification; uuid → personal notification
-  userId: string | null;
-  title: string;
-  body: string;
-  kind: "system" | "maintenance" | "feature" | "message";
-  level: "info" | "success" | "warning" | "error";
-  linkUrl?: string | null;
-
-  // when to publish
-  publishNow?: boolean;
-  publishAt?: string | null; // ISO string; server will coerce to timestamptz
-};
-
-/**
- * Generic result shape for "create notification" operations.
- */
-export type CreateNotificationResult = {
-  ok: boolean;
-  message: string | null;
-  id?: string;
-  errors?: Record<string, string[]>;
-};
 
 /* =============================================================================
  * Language (codes must match your Postgres enum: user_language)
