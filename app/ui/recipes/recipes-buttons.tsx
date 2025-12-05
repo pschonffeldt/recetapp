@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowDownTrayIcon,
   MagnifyingGlassCircleIcon,
   MinusCircleIcon,
   PencilIcon,
@@ -16,7 +15,6 @@ import { useRef, useTransition } from "react";
 import { Button } from "../general/button";
 import {
   importRecipeFromDiscover,
-  importRecipeFromDiscoverInline,
   importRecipeFromDiscoverSoft,
 } from "@/app/lib/discover/actions";
 import {
@@ -79,23 +77,23 @@ export function ViewPublicRecipe({ id }: { id: string }) {
 }
 
 /* ================================
- * Discover import (icon-only link)
- * Keeps unused bind as-is (no behavior change).
+ * Discover import (viewer context — full button)
+ * Used on /dashboard/discover/[id] viewer
+ * - Uses server action that redirects to /dashboard/recipes
  * ================================ */
 export function ImportRecipeFromDiscover({ id }: { id: string }) {
   const importAction = importRecipeFromDiscover.bind(null, id);
 
   return (
     <form action={importAction}>
-      <Button>Import to my recipes</Button>
+      <Button type="submit">Import to my recipes</Button>
     </form>
   );
 }
 
 /* ================================
  * Import from Discover (icon-only, card)
- * - Used in Discover grid cards
- * - Calls soft action (no redirect), just revalidates + toast
+ * Used in Discover grid cards; no redirect, uses toast
  * ================================ */
 export function ImportRecipeFromDiscoverCard({ id }: { id: string }) {
   const { push } = useToast();
@@ -110,7 +108,7 @@ export function ImportRecipeFromDiscoverCard({ id }: { id: string }) {
           push({
             variant: "success",
             title: "Already in your recipes",
-            message: "This recipe is already available in your library.",
+            message: "This recipe is already in your library.",
           });
         } else {
           push({
