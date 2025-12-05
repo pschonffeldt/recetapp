@@ -122,7 +122,7 @@ export default async function Page({
               key={t.key}
               href={href}
               className={
-                "rounded-t-md px-4 py-2 text-xs font-medium " +
+                "rounded-t-md px-2 py-2 text-xs font-medium " +
                 (isActive
                   ? "bg-blue-600 text-white"
                   : "bg-blue-500 text-white hover:bg-blue-400 opacity-50")
