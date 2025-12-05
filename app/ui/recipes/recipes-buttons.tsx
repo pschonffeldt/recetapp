@@ -10,12 +10,13 @@ import {
 import Link from "next/link";
 import { useToast } from "../toast/toast-provider";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition } from "react";
+import { useRef, useTransition } from "react";
 import { Button } from "../general/button";
 import { importRecipeFromDiscover } from "@/app/lib/discover/actions";
 import {
   deleteRecipe,
   deleteRecipeFromViewer,
+  removeImportedRecipeInline,
   removeRecipeFromLibrary,
 } from "@/app/lib/recipes/actions";
 
@@ -238,33 +239,34 @@ export function DeleteRecipe({ id }: { id: string }) {
  * - Confirmation dialog + toast feedback
  * ================================ */
 
+// Remove imported recipes from table
 export function RemoveImportedRecipe({ id }: { id: string }) {
   const { confirm, push } = useToast();
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const handleRemove = async () => {
     const ok = await confirm({
-      // "Remove this recipe from your library? The original public recipe will still be available in Discover."
       title: "Remove recipe?",
-      message: "This action cannot be undone.",
-      confirmText: "Delete",
+      message:
+        "This will remove the imported copy from your library. The original public recipe will still be available in Discover.",
+      confirmText: "Remove",
       cancelText: "Cancel",
       variant: "destructive",
     });
 
-    if (!ok) return; // user cancelled
+    if (!ok) return;
 
     startTransition(async () => {
       try {
-        await removeRecipeFromLibrary(id);
-        router.refresh(); // refresh list
+        await removeImportedRecipeInline(id);
+
         push({
           variant: "success",
           title: "Removed",
           message: "Recipe removed from your library.",
         });
       } catch (err) {
+        console.error("Failed to remove imported recipe:", err);
         push({
           variant: "error",
           title: "Remove failed",
@@ -296,7 +298,6 @@ export function RemoveImportedRecipe({ id }: { id: string }) {
  * - Uses server action via form submit
  * ================================ */
 export function RemoveImportedRecipeOnViewer({ id }: { id: string }) {
-  // bind the server action so it can be used as a form action
   const removeAction = removeRecipeFromLibrary.bind(null, id);
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -317,13 +318,10 @@ export function RemoveImportedRecipeOnViewer({ id }: { id: string }) {
 
     if (!ok) return;
 
-    // Submit the server action (will redirect to /dashboard/recipes)
     startTransition(() => {
       formRef.current?.requestSubmit();
     });
 
-    // Optional success toast (shown briefly before / after redirect,
-    // depending on where your ToastProvider lives)
     push({
       variant: "success",
       title: "Recipe removed",

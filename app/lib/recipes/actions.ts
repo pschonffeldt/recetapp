@@ -358,7 +358,36 @@ export async function reviewRecipe(id: string): Promise<void> {
 }
 
 /**
- * Removes imported recipe from recipe library or table.
+ * Removes an imported recipe from the current user's library
+ * **without redirecting**.
+ *
+ * Removes an imported recipe from the current user's library **without redirecting**.
+ * Used by the table/list icon button.
+ */
+export async function removeImportedRecipeInline(
+  recipeId: string
+): Promise<void> {
+  const userId = await requireUserId();
+
+  const rows = await sql<{ id: string }[]>`
+    UPDATE public.recipes
+    SET saved_by_user_ids = array_remove(saved_by_user_ids, ${userId}::uuid)
+    WHERE id = ${recipeId}::uuid
+      AND ${userId}::uuid = ANY(saved_by_user_ids)
+    RETURNING id
+  `;
+
+  if (rows.length === 0) {
+    throw new Error("Recipe not found in your library.");
+  }
+
+  // Just refresh the list; caller stays on the same page
+  revalidatePath("/dashboard/recipes");
+}
+
+/**
+ * Removes an imported recipe and then **redirects** back to /dashboard/recipes.
+ * Used by the viewer button.
  */
 export async function removeRecipeFromLibrary(recipeId: string) {
   const userId = await requireUserId();
@@ -367,12 +396,11 @@ export async function removeRecipeFromLibrary(recipeId: string) {
     UPDATE public.recipes
     SET saved_by_user_ids = array_remove(saved_by_user_ids, ${userId}::uuid)
     WHERE id = ${recipeId}::uuid
+      AND ${userId}::uuid = ANY(saved_by_user_ids)
   `;
 
-  // Refresh list + viewer
   revalidatePath("/dashboard/recipes");
   revalidatePath(`/dashboard/recipes/${recipeId}/viewer`);
 
-  // Send user back to their recipes
   redirect("/dashboard/recipes");
 }
