@@ -1,6 +1,10 @@
 import RecipesType from "../recipes/recipes-status";
 import RecipesDifficulty from "../recipes/recipes-difficulty";
-import { ViewPublicRecipe } from "../recipes/recipes-buttons";
+import {
+  ImportRecipeFromDiscover,
+  ImportRecipeFromDiscoverCard,
+  ViewPublicRecipe,
+} from "../recipes/recipes-buttons";
 import { formatDateToLocal } from "@/app/lib/utils/format";
 import { DiscoverRecipeCard } from "@/app/lib/discover/data";
 
@@ -55,8 +59,9 @@ export default function DiscoverCard({ recipe }: Props) {
             </p>
           </div>
         </div>
-        {/* Button to view recipe */}
+        {/* Actions: Import + View */}
         <div className="mt-4 flex justify-end gap-2 border-t pt-3">
+          <ImportRecipeFromDiscoverCard id={recipe.id} />
           <ViewPublicRecipe id={recipe.id} />
         </div>
       </div>

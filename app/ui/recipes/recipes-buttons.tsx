@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowDownTrayIcon,
   MagnifyingGlassCircleIcon,
   MinusCircleIcon,
   PencilIcon,
@@ -12,7 +13,10 @@ import { useToast } from "../toast/toast-provider";
 import { useRouter } from "next/navigation";
 import { useRef, useTransition } from "react";
 import { Button } from "../general/button";
-import { importRecipeFromDiscover } from "@/app/lib/discover/actions";
+import {
+  importRecipeFromDiscover,
+  importRecipeFromDiscoverInline,
+} from "@/app/lib/discover/actions";
 import {
   deleteRecipe,
   deleteRecipeFromViewer,
@@ -83,6 +87,52 @@ export function ImportRecipeFromDiscover({ id }: { id: string }) {
     <form action={importAction}>
       <Button>Import to my recipes</Button>
     </form>
+  );
+}
+
+/* =========================================
+ * Discover import (icon-only for cards)
+ * - Calls inline action (no redirect)
+ * - Shows toast feedback
+ * ========================================= */
+export function ImportRecipeFromDiscoverCard({ id }: { id: string }) {
+  const [isPending, startTransition] = useTransition();
+  const { push } = useToast();
+
+  const handleImport = () => {
+    startTransition(async () => {
+      try {
+        await importRecipeFromDiscoverInline(id);
+
+        push({
+          variant: "success",
+          title: "Recipe imported",
+          message: "The recipe was added to your library.",
+        });
+      } catch (err) {
+        console.error("Failed to import recipe from Discover:", err);
+        push({
+          variant: "error",
+          title: "Import failed",
+          message:
+            "We couldn’t import this recipe. It might already be in your library.",
+        });
+      }
+    });
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleImport}
+      disabled={isPending}
+      className="inline-flex items-center justify-center rounded-md border p-2 hover:bg-gray-100 disabled:opacity-50"
+      aria-label="Import recipe to my recipes"
+      title="Import recipe to my recipes"
+    >
+      <ArrowDownTrayIcon className="w-5" aria-hidden="true" />
+      <span className="sr-only">Import recipe</span>
+    </button>
   );
 }
 

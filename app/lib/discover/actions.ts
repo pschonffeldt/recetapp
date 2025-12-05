@@ -82,3 +82,47 @@ export async function importRecipeFromDiscover(
   revalidatePath("/dashboard/recipes");
   redirect("/dashboard/recipes");
 }
+
+export async function importRecipeFromDiscoverInline(
+  recipeId: string
+): Promise<void> {
+  const userId = await requireUserId(); // ensure logged in
+
+  // 1) Check that recipe exists and is public
+  const rows = await sql<DiscoverOwnershipRow[]>`
+    SELECT
+      id,
+      user_id,
+      saved_by_user_ids
+    FROM public.recipes
+    WHERE id = ${recipeId}::uuid
+      AND status = 'public'
+    LIMIT 1
+  `;
+
+  if (rows.length === 0) {
+    throw new Error("Recipe not found or not public");
+  }
+
+  const row = rows[0];
+  const savedBy = row.saved_by_user_ids ?? [];
+
+  // 2) If the user already owns or saved the recipe, just no-op
+  if (row.user_id === userId || savedBy.includes(userId)) {
+    // still refresh recipes so badges etc. are up to date
+    revalidatePath("/dashboard/recipes");
+    revalidatePath("/dashboard/discover");
+    return;
+  }
+
+  // 3) Add this user to saved_by_user_ids
+  await sql`
+    UPDATE public.recipes
+    SET saved_by_user_ids = coalesce(saved_by_user_ids, '{}') || ${userId}::uuid
+    WHERE id = ${recipeId}::uuid
+  `;
+
+  // Refresh lists, but **no redirect**
+  revalidatePath("/dashboard/recipes");
+  revalidatePath("/dashboard/discover");
+}
