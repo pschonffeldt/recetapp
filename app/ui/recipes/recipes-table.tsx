@@ -1,6 +1,11 @@
 import RecipesType from "./recipes-status";
 import SortButton from "./recipes-sort-button";
-import { ViewRecipe, UpdateRecipe, DeleteRecipe } from "./recipes-buttons";
+import {
+  ViewRecipe,
+  UpdateRecipe,
+  DeleteRecipe,
+  RemoveImportedRecipe,
+} from "./recipes-buttons";
 import RecipesDifficulty from "./recipes-difficulty";
 import { formatDateToLocal } from "@/app/lib/utils/format";
 import {
@@ -146,11 +151,13 @@ export default async function RecipesTable({
 
                   <div className="mt-4 flex justify-end gap-2 border-t pt-3">
                     <ViewRecipe id={recipe.id} />
-                    {recipe.owner_relationship === "owned" && (
+                    {recipe.owner_relationship === "owned" ? (
                       <>
                         <UpdateRecipe id={recipe.id} />
                         <DeleteRecipe id={recipe.id} />
                       </>
+                    ) : (
+                      <RemoveImportedRecipe id={recipe.id} />
                     )}
                   </div>
                 </div>
@@ -253,11 +260,14 @@ export default async function RecipesTable({
                     <td className="whitespace-nowrap py-3 pl-3 pr-6 align-middle">
                       <div className="flex justify-end gap-2">
                         <ViewRecipe id={recipe.id} />
-                        {recipe.owner_relationship === "owned" && (
+
+                        {recipe.owner_relationship === "owned" ? (
                           <>
                             <UpdateRecipe id={recipe.id} />
                             <DeleteRecipe id={recipe.id} />
                           </>
+                        ) : (
+                          <RemoveImportedRecipe id={recipe.id} />
                         )}
                       </div>
                     </td>

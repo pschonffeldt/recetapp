@@ -358,7 +358,7 @@ export async function reviewRecipe(id: string): Promise<void> {
 }
 
 /**
- * Removes imported recipe from recipe list.
+ * Removes imported recipe from recipe library or table.
  */
 export async function removeRecipeFromLibrary(recipeId: string) {
   const userId = await requireUserId();

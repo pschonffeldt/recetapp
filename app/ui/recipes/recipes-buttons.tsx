@@ -2,6 +2,7 @@
 
 import {
   MagnifyingGlassCircleIcon,
+  MinusCircleIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
@@ -15,6 +16,7 @@ import { importRecipeFromDiscover } from "@/app/lib/discover/actions";
 import {
   deleteRecipe,
   deleteRecipeFromViewer,
+  removeRecipeFromLibrary,
 } from "@/app/lib/recipes/actions";
 
 export function CreateRecipe() {
@@ -224,6 +226,56 @@ export function DeleteRecipe({ id }: { id: string }) {
     >
       <span className="sr-only">Delete</span>
       <TrashIcon className="w-5" aria-hidden="true" />
+    </button>
+  );
+}
+
+/* ================================
+ * RemoveImportedRecipe (icon-only)
+ * - Used for imported recipes in table/list
+ * - Same size as Delete icon button (border + p-2 + w-5 icon)
+ * - Calls removeRecipeFromLibrary server action
+ * - Confirmation dialog + toast feedback
+ * ================================ */
+
+export function RemoveImportedRecipe({ id }: { id: string }) {
+  const [isPending, startTransition] = useTransition();
+  const { push } = useToast();
+
+  const handleRemove = () => {
+    const confirmed = window.confirm(
+      "Remove this recipe from your library? The original public recipe will still be available in Discover."
+    );
+    if (!confirmed) return;
+
+    startTransition(async () => {
+      try {
+        await removeRecipeFromLibrary(id);
+        push({
+          variant: "success",
+          message: "Recipe removed from your library.",
+        });
+      } catch (err) {
+        console.error("Failed to remove imported recipe:", err);
+        push({
+          variant: "error",
+          message: "Could not remove recipe. Please try again.",
+        });
+      }
+    });
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleRemove}
+      disabled={isPending}
+      className="rounded-md border p-2 hover:bg-red-100 disabled:opacity-60"
+      aria-label="Remove imported recipe"
+      title="Remove imported recipe"
+    >
+      <span className="sr-only">Remove imported recipe</span>
+      <MinusCircleIcon className="w-5" aria-hidden="true" />
     </button>
   );
 }
