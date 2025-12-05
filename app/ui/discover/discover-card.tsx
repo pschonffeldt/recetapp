@@ -1,7 +1,6 @@
 import RecipesType from "../recipes/recipes-status";
 import RecipesDifficulty from "../recipes/recipes-difficulty";
 import {
-  ImportRecipeFromDiscover,
   ImportRecipeFromDiscoverCard,
   ViewPublicRecipe,
 } from "../recipes/recipes-buttons";

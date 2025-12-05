@@ -5,6 +5,7 @@ import {
   MagnifyingGlassCircleIcon,
   MinusCircleIcon,
   PencilIcon,
+  PlusCircleIcon,
   PlusIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
@@ -16,6 +17,7 @@ import { Button } from "../general/button";
 import {
   importRecipeFromDiscover,
   importRecipeFromDiscoverInline,
+  importRecipeFromDiscoverSoft,
 } from "@/app/lib/discover/actions";
 import {
   deleteRecipe,
@@ -90,32 +92,39 @@ export function ImportRecipeFromDiscover({ id }: { id: string }) {
   );
 }
 
-/* =========================================
- * Discover import (icon-only for cards)
- * - Calls inline action (no redirect)
- * - Shows toast feedback
- * ========================================= */
+/* ================================
+ * Import from Discover (icon-only, card)
+ * - Used in Discover grid cards
+ * - Calls soft action (no redirect), just revalidates + toast
+ * ================================ */
 export function ImportRecipeFromDiscoverCard({ id }: { id: string }) {
-  const [isPending, startTransition] = useTransition();
   const { push } = useToast();
+  const [isPending, startTransition] = useTransition();
 
   const handleImport = () => {
     startTransition(async () => {
       try {
-        await importRecipeFromDiscoverInline(id);
+        const result = await importRecipeFromDiscoverSoft(id);
 
-        push({
-          variant: "success",
-          title: "Recipe imported",
-          message: "The recipe was added to your library.",
-        });
+        if (result === "already") {
+          push({
+            variant: "success",
+            title: "Already in your recipes",
+            message: "This recipe is already available in your library.",
+          });
+        } else {
+          push({
+            variant: "success",
+            title: "Recipe imported",
+            message: "The recipe was added to your recipes.",
+          });
+        }
       } catch (err) {
-        console.error("Failed to import recipe from Discover:", err);
+        console.error("Failed to import recipe:", err);
         push({
           variant: "error",
           title: "Import failed",
-          message:
-            "We couldn’t import this recipe. It might already be in your library.",
+          message: "We couldn’t import the recipe. Please try again.",
         });
       }
     });
@@ -126,12 +135,12 @@ export function ImportRecipeFromDiscoverCard({ id }: { id: string }) {
       type="button"
       onClick={handleImport}
       disabled={isPending}
-      className="inline-flex items-center justify-center rounded-md border p-2 hover:bg-gray-100 disabled:opacity-50"
+      className="rounded-md border p-2 hover:bg-blue-100 disabled:opacity-60"
       aria-label="Import recipe to my recipes"
       title="Import recipe to my recipes"
     >
-      <ArrowDownTrayIcon className="w-5" aria-hidden="true" />
       <span className="sr-only">Import recipe</span>
+      <PlusCircleIcon className="w-5" aria-hidden="true" />
     </button>
   );
 }

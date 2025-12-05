@@ -126,3 +126,51 @@ export async function importRecipeFromDiscoverInline(
   revalidatePath("/dashboard/recipes");
   revalidatePath("/dashboard/discover");
 }
+
+/**
+ * Soft import:
+ * - Same rules as importRecipeFromDiscover
+ * - DOES NOT redirect
+ * - Returns "already" if user already owns/saved it
+ * - Returns "imported" if we actually add it
+ */
+export async function importRecipeFromDiscoverSoft(
+  recipeId: string
+): Promise<"already" | "imported"> {
+  const userId = await requireUserId();
+
+  const rows = await sql<DiscoverOwnershipRow[]>`
+    SELECT
+      id,
+      user_id,
+      saved_by_user_ids
+    FROM public.recipes
+    WHERE id = ${recipeId}::uuid
+      AND status = 'public'
+    LIMIT 1
+  `;
+
+  if (rows.length === 0) {
+    throw new Error("Recipe not found or not public");
+  }
+
+  const row = rows[0];
+  const savedBy = row.saved_by_user_ids ?? [];
+
+  // Already owned or already saved in library
+  if (row.user_id === userId || savedBy.includes(userId)) {
+    // keep recipes list fresh, but NO redirect
+    revalidatePath("/dashboard/recipes");
+    return "already";
+  }
+
+  // Append current user to saved_by_user_ids
+  await sql`
+    UPDATE public.recipes
+    SET saved_by_user_ids = coalesce(saved_by_user_ids, '{}') || ${userId}::uuid
+    WHERE id = ${recipeId}::uuid
+  `;
+
+  revalidatePath("/dashboard/recipes");
+  return "imported";
+}
