@@ -27,7 +27,6 @@ export default async function Page(props: {
 }) {
   const userId = await requireUserId();
 
-  // Works whether Next passes a Promise or a plain object
   const raw = props.searchParams ? await props.searchParams : undefined;
   const searchParams: SearchParams = raw ?? {};
 
@@ -36,15 +35,10 @@ export default async function Page(props: {
   const sort: "name" | "date" | "type" = searchParams.sort || "date";
   const order: "asc" | "desc" = searchParams.order || "desc";
 
-  // Normalize type: treat undefined, empty string or whitespace as null
   const rawType = searchParams.type;
   const type: string | null =
     rawType && rawType.trim().length > 0 ? rawType : null;
 
-  // Are any filters active on this page? (for the Clear button + subtitle)
-  const hasFilters = !!query || !!type;
-
-  // Total pages for current filters (includes owned + saved recipes)
   const { pages: totalPages, total: totalCount } = await fetchRecipesPages({
     query,
     type,
@@ -53,6 +47,8 @@ export default async function Page(props: {
 
   const safePage = totalPages === 0 ? 1 : Math.min(pageFromUrl, totalPages);
 
+  const hasFilters = !!query || !!type;
+
   return (
     <div className="w-full min-h-0">
       <Breadcrumbs
@@ -60,32 +56,29 @@ export default async function Page(props: {
           { label: "Recipes", href: "/dashboard/recipes", active: true },
         ]}
       />
-      {/* Action bar */}
-      <div className="flex flex-col rounded-md bg-gray-50">
-        {/* Search bar and create button */}
-        <div className="flex items-center justify-between mt-6 gap-2 px-6 lg:px-6">
-          <Search placeholder="Search recipes, ingredients or type ..." />
-          <CreateRecipe />
-        </div>
-        {/* Filter */}
-        <RecipesFiltersToolbar
-          basePath="/dashboard/recipes"
-          query={query}
-          type={rawType ?? ""}
-          difficultyRaw=""
-          maxPrepRaw=""
-          sort="newest"
-          hasFilters={hasFilters}
-          title="Your recipes"
-          contextLabel="recipes"
-          totalCount={totalCount}
-          showSearch={false}
-          showType={true}
-          showDifficulty={true}
-          showMaxPrep={true}
-          showSort={false}
-        />
+
+      <div className="mt-4 flex items-center px-2 justify-between gap-2 md:mt-8 lg:px-0">
+        <Search placeholder="Search recipes, ingredients or type ..." />
+        <CreateRecipe />
       </div>
+
+      <RecipesFiltersToolbar
+        basePath="/dashboard/recipes"
+        query={query}
+        type={rawType ?? ""}
+        difficultyRaw=""
+        maxPrepRaw=""
+        sort="newest" // ignored when showSort={false}
+        hasFilters={hasFilters}
+        title="Your recipes"
+        contextLabel="recipes"
+        totalCount={totalCount}
+        showSearch={false}
+        showType={true}
+        showDifficulty={false}
+        showMaxPrep={false}
+        showSort={false}
+      />
 
       <Suspense
         key={`${query}|${type}|${sort}|${order}|${safePage}`}

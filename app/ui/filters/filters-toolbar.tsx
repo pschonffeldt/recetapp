@@ -1,8 +1,7 @@
-// app/ui/recipes/recipes-filters-toolbar.tsx (or wherever you put it)
 "use client";
 
 import Link from "next/link";
-import { Button } from "../general/button";
+import clsx from "clsx";
 
 type Props = {
   basePath: string;
@@ -18,7 +17,7 @@ type Props = {
 
   // UX / text
   title?: string; // e.g. "Discover" / "Your recipes"
-  contextLabel?: string; // e.g. "recipes"
+  contextLabel?: string; // e.g. "community recipes" / "recipes"
   totalCount?: number; // optional – if absent, we show text without a number
 
   // Feature flags – turn fields on/off per page
@@ -28,6 +27,19 @@ type Props = {
   showMaxPrep?: boolean;
   showSort?: boolean;
 };
+
+function FilterChip({ label }: { label: string }) {
+  return (
+    <span className="inline-flex items-center rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[11px] font-medium text-gray-600 shadow-sm">
+      {label}
+    </span>
+  );
+}
+
+function prettyLabel(value: string) {
+  if (!value) return "";
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
 
 export default function RecipesFiltersToolbar(props: Props) {
   const {
@@ -39,7 +51,7 @@ export default function RecipesFiltersToolbar(props: Props) {
     sort = "newest",
     hasFilters,
     title = "Discover",
-    contextLabel = "recipes",
+    contextLabel = "community recipes",
     totalCount,
 
     showSearch = true,
@@ -49,8 +61,23 @@ export default function RecipesFiltersToolbar(props: Props) {
     showSort = true,
   } = props;
 
+  const countText = (() => {
+    const label = contextLabel;
+    if (totalCount == null) {
+      return hasFilters
+        ? `Found results matching your filters`
+        : `Showing ${label}`;
+    }
+
+    const plural = totalCount === 1 ? "" : "s";
+
+    return hasFilters
+      ? `Found ${totalCount} ${label}${plural}`
+      : `Showing ${totalCount} ${label}${plural}`;
+  })();
+
   return (
-    <section className="rounded-md bg-gray-50 p-4 md:p-6">
+    <section className="mt-4 rounded-md bg-gray-50 p-4 md:p-6">
       <form className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end">
         {/* Search */}
         {showSearch && (
@@ -67,7 +94,7 @@ export default function RecipesFiltersToolbar(props: Props) {
               type="text"
               defaultValue={query}
               placeholder="Search by recipe name..."
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
         )}
@@ -85,7 +112,7 @@ export default function RecipesFiltersToolbar(props: Props) {
               id="discover-type"
               name="type"
               defaultValue={type}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="">All types</option>
               <option value="breakfast">Breakfast</option>
@@ -110,7 +137,7 @@ export default function RecipesFiltersToolbar(props: Props) {
               id="discover-difficulty"
               name="difficulty"
               defaultValue={difficultyRaw}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="">All levels</option>
               <option value="easy">Easy</option>
@@ -136,7 +163,7 @@ export default function RecipesFiltersToolbar(props: Props) {
               min={0}
               defaultValue={maxPrepRaw}
               placeholder="e.g. 30"
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-base shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
         )}
@@ -163,34 +190,49 @@ export default function RecipesFiltersToolbar(props: Props) {
           </div>
         )}
 
-        {/* Actions */}
+        {/* Actions (Apply) */}
         <div className="flex w-full items-center justify-end gap-2 md:w-auto md:self-end">
-          {hasFilters && (
-            <Link
-              href={basePath}
-              //   className="rounded-md border border-gray-300 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100"
-            >
-              {/* Clear */}
-              <Button type="submit">Clear</Button>
-            </Link>
-          )}
-          {/* <button
+          <button
             type="submit"
             className="rounded-md bg-blue-600 px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-blue-500"
           >
             Apply filters
-          </button> */}
-          <Button type="submit">Apply filters</Button>
+          </button>
         </div>
       </form>
 
-      {/* Footer text – uses numbers when provided */}
-      <p className="mt-2 text-xs text-gray-500">
-        {title}:{" "}
-        {totalCount != null
-          ? `showing ${totalCount} ${contextLabel}`
-          : `showing ${contextLabel}`}
-      </p>
+      {/* Summary + chips (always rendered to avoid layout jump) */}
+      <div className="mt-2 flex min-h-[28px] flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
+        <p>{countText}</p>
+
+        <div
+          className={clsx(
+            "flex flex-wrap items-center gap-2",
+            !hasFilters && "opacity-0 pointer-events-none"
+          )}
+        >
+          {/* Active filter chips */}
+          {hasFilters && (
+            <>
+              {query && <FilterChip label={`Search: "${query}"`} />}
+              {type && <FilterChip label={`Type: ${prettyLabel(type)}`} />}
+              {difficultyRaw && (
+                <FilterChip
+                  label={`Difficulty: ${prettyLabel(difficultyRaw)}`}
+                />
+              )}
+              {maxPrepRaw && <FilterChip label={`Max ${maxPrepRaw} min`} />}
+
+              <Link
+                href={basePath}
+                className="rounded-md border border-gray-300 px-2 py-1 text-[11px] font-medium text-gray-600 hover:bg-gray-100"
+              >
+                Clear filters
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
     </section>
   );
 }

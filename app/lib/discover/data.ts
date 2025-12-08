@@ -11,7 +11,11 @@
 import "server-only";
 
 import { sql } from "../db";
-import type { RecipeForm, PublicRecipeDetail } from "../types/definitions";
+import type {
+  RecipeForm,
+  PublicRecipeDetail,
+  Difficulty,
+} from "../types/definitions";
 
 /* =============================================================================
  * Types
@@ -54,42 +58,82 @@ export type DiscoverRecipeFilters = {
   sort?: "newest" | "oldest" | "shortest"; // sort mode
 };
 
-/**
- * List of public recipes for Discover grid, with filters + sort.
- */
+/* ========================================================================== */
+/* Helpers                                                                    */
+/* ========================================================================== */
+
+function andAll(parts: any[]) {
+  if (parts.length === 0) return sql``;
+  const [first, ...rest] = parts;
+  return rest.reduce((acc, cur) => sql`${acc} AND ${cur}`, first);
+}
+
+/* ========================================================================== */
+/* Discover list with filters                                                 */
+/* ========================================================================== */
+
+type DiscoverFilters = {
+  currentUserId?: string | null;
+  search?: string | null;
+  type?: RecipeForm["recipe_type"] | null;
+  difficulty?: Difficulty | null;
+  maxPrep?: number | null;
+  sort?: "newest" | "oldest" | "shortest";
+};
+
 export async function fetchDiscoverRecipes({
   currentUserId,
   search,
   type,
   difficulty,
   maxPrep,
-  sort,
-}: DiscoverRecipeFilters = {}): Promise<DiscoverRecipeCard[]> {
-  // -----------------------------
-  // Normalize filters
-  // -----------------------------
-  const searchTerm =
-    search && search.trim().length > 0 ? `%${search.trim()}%` : null;
+  sort = "newest",
+}: DiscoverFilters): Promise<DiscoverRecipeCard[]> {
+  const whereParts: any[] = [sql`r.status = 'public'`];
 
-  const typeFilter =
-    type && typeof type === "string" && type.trim().length > 0
-      ? type.trim()
-      : "";
+  if (currentUserId) {
+    // don’t show recipes owned by the current user
+    whereParts.push(
+      sql`(r.user_id IS NULL OR r.user_id <> ${currentUserId}::uuid)`
+    );
+  }
 
-  const difficultyFilter =
-    difficulty && typeof difficulty === "string" && difficulty.trim().length > 0
-      ? difficulty.trim()
-      : "";
+  if (search && search.trim()) {
+    const term = `%${search.trim()}%`;
+    whereParts.push(sql`
+      (
+        r.recipe_name ILIKE ${term}
+        OR EXISTS (
+          SELECT 1 FROM unnest(r.recipe_ingredients) AS ing
+          WHERE ing ILIKE ${term}
+        )
+      )
+    `);
+  }
 
-  const maxPrepFilter =
-    typeof maxPrep === "number" && !Number.isNaN(maxPrep) ? maxPrep : null;
+  if (type) {
+    whereParts.push(sql`r.recipe_type = ${type}::recipe_type_enum`);
+  }
 
-  const sortKey: "newest" | "oldest" | "shortest" =
-    sort === "oldest" || sort === "shortest" ? sort : "newest";
+  if (difficulty) {
+    whereParts.push(sql`r.difficulty = ${difficulty}::difficulty_enum`);
+  }
 
-  // -----------------------------
-  // Query
-  // -----------------------------
+  if (maxPrep != null) {
+    whereParts.push(
+      sql`r.prep_time_min IS NOT NULL AND r.prep_time_min <= ${maxPrep}`
+    );
+  }
+
+  const whereSql = andAll(whereParts);
+
+  const orderSql =
+    sort === "oldest"
+      ? sql`r.recipe_created_at ASC`
+      : sort === "shortest"
+      ? sql`r.prep_time_min ASC NULLS LAST, r.recipe_created_at DESC`
+      : sql`r.recipe_created_at DESC`;
+
   const rows = await sql<DiscoverRecipeRow[]>`
     SELECT
       r.id,
@@ -103,28 +147,8 @@ export async function fetchDiscoverRecipes({
       u.user_name AS created_by_display_name
     FROM public.recipes r
     LEFT JOIN public.users u ON u.id = r.user_id
-    WHERE
-      r.status = 'public'
-      ${
-        currentUserId
-          ? sql`AND (r.user_id IS NULL OR r.user_id <> ${currentUserId}::uuid)`
-          : sql``
-      }
-      ${searchTerm ? sql`AND r.recipe_name ILIKE ${searchTerm}` : sql``}
-      ${typeFilter ? sql`AND r.recipe_type = ${typeFilter}` : sql``}
-      ${difficultyFilter ? sql`AND r.difficulty = ${difficultyFilter}` : sql``}
-      ${
-        maxPrepFilter !== null
-          ? sql`AND (r.prep_time_min IS NOT NULL AND r.prep_time_min <= ${maxPrepFilter})`
-          : sql``
-      }
-    ${
-      sortKey === "oldest"
-        ? sql`ORDER BY r.recipe_created_at ASC`
-        : sortKey === "shortest"
-        ? sql`ORDER BY r.prep_time_min ASC NULLS LAST, r.recipe_created_at DESC`
-        : sql`ORDER BY r.recipe_created_at DESC`
-    }
+    WHERE ${whereSql}
+    ORDER BY ${orderSql}
   `;
 
   return rows.map((r) => ({
@@ -143,30 +167,92 @@ export async function fetchDiscoverRecipes({
   }));
 }
 
-// 4) Single public recipe, used on Discover detail page
+/* ========================================================================== */
+/* Count for “X community recipes” text                                       */
+/* ========================================================================== */
+
+export async function fetchDiscoverCount(
+  filters: DiscoverFilters
+): Promise<number> {
+  const { currentUserId, search, type, difficulty, maxPrep } = filters;
+
+  const whereParts: any[] = [sql`r.status = 'public'`];
+
+  if (currentUserId) {
+    whereParts.push(
+      sql`(r.user_id IS NULL OR r.user_id <> ${currentUserId}::uuid)`
+    );
+  }
+
+  if (search && search.trim()) {
+    const term = `%${search.trim()}%`;
+    whereParts.push(sql`
+      (
+        r.recipe_name ILIKE ${term}
+        OR EXISTS (
+          SELECT 1 FROM unnest(r.recipe_ingredients) AS ing
+          WHERE ing ILIKE ${term}
+        )
+      )
+    `);
+  }
+
+  if (type) {
+    whereParts.push(sql`r.recipe_type = ${type}::recipe_type_enum`);
+  }
+
+  if (difficulty) {
+    whereParts.push(sql`r.difficulty = ${difficulty}::difficulty_enum`);
+  }
+
+  if (maxPrep != null) {
+    whereParts.push(
+      sql`r.prep_time_min IS NOT NULL AND r.prep_time_min <= ${maxPrep}`
+    );
+  }
+
+  const whereSql = andAll(whereParts);
+
+  const rows = await sql<{ count: number }[]>`
+    SELECT COUNT(*)::int AS count
+    FROM public.recipes r
+    WHERE ${whereSql}
+  `;
+
+  return rows[0]?.count ?? 0;
+}
+
+/** Shape used by the public-recipe viewer */
+export type PublicRecipeWithCreator = RecipeForm & {
+  created_by_display_name: string | null;
+};
+
+/**
+ * Fetch a single **public** recipe by id, including the creator’s public name.
+ * Used by /dashboard/discover/[id] → ViewerRecipe.
+ */
 export async function fetchPublicRecipeById(
   id: string
-): Promise<PublicRecipeDetail | null> {
-  const rows = await sql<PublicRecipeDetail[]>`
+): Promise<PublicRecipeWithCreator | null> {
+  const rows = await sql<PublicRecipeWithCreator[]>`
     SELECT
       r.id,
-      r.user_id,
       r.recipe_name,
-      r.recipe_type,
-      r.difficulty,
       r.recipe_ingredients,
       r.recipe_ingredients_structured,
       r.recipe_steps,
-      r.equipment,
-      r.allergens,
-      r.dietary_flags,
+      r.recipe_type,
       r.servings,
       r.prep_time_min,
+      r.difficulty,
+      r.status,
+      COALESCE(r.dietary_flags, ARRAY[]::text[]) AS dietary_flags,
+      COALESCE(r.allergens,     ARRAY[]::text[]) AS allergens,
       r.calories_total,
       r.estimated_cost_total,
-      r.status,
-      r.recipe_created_at,
-      r.recipe_updated_at,
+      COALESCE(r.equipment,     ARRAY[]::text[]) AS equipment,
+      (r.recipe_created_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_created_at,
+      (r.recipe_updated_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_updated_at,
       u.user_name AS created_by_display_name
     FROM public.recipes r
     LEFT JOIN public.users u ON u.id = r.user_id
@@ -175,16 +261,16 @@ export async function fetchPublicRecipeById(
     LIMIT 1
   `;
 
-  if (rows.length === 0) return null;
+  const row = rows[0];
+  if (!row) return null;
 
-  const r = rows[0];
-
+  // Arrays are already normalized via COALESCE above, but this keeps the type happy
   return {
-    ...r,
-    recipe_ingredients: r.recipe_ingredients ?? [],
-    recipe_steps: r.recipe_steps ?? [],
-    equipment: r.equipment ?? [],
-    allergens: r.allergens ?? [],
-    dietary_flags: r.dietary_flags ?? [],
+    ...row,
+    recipe_ingredients: row.recipe_ingredients ?? [],
+    recipe_steps: row.recipe_steps ?? [],
+    equipment: row.equipment ?? [],
+    allergens: row.allergens ?? [],
+    dietary_flags: row.dietary_flags ?? [],
   };
 }

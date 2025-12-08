@@ -1,9 +1,11 @@
 import { Metadata } from "next";
-import Link from "next/link";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { auth } from "@/auth";
 import DiscoverGrid from "@/app/ui/discover/discover-grid";
-import { fetchDiscoverRecipes } from "@/app/lib/discover/data";
+import {
+  fetchDiscoverCount,
+  fetchDiscoverRecipes,
+} from "@/app/lib/discover/data";
 import type { Difficulty } from "@/app/lib/types/definitions";
 import RecipesFiltersToolbar from "@/app/ui/filters/filters-toolbar";
 
@@ -36,7 +38,7 @@ export default async function Page({
 
   const difficultyRaw = sp.difficulty ?? "";
 
-  // Narrow to Difficulty | null so TS is happy
+  // Narrow difficulty
   const difficulty: Difficulty | null =
     difficultyRaw === "easy" ||
     difficultyRaw === "medium" ||
@@ -59,6 +61,15 @@ export default async function Page({
     sort,
   });
 
+  const totalCount = await fetchDiscoverCount({
+    currentUserId: userId,
+    search: query || null,
+    type: type || null,
+    difficulty,
+    maxPrep,
+    sort,
+  });
+
   const hasFilters =
     !!query || !!type || !!difficulty || maxPrep !== null || sort !== "newest";
 
@@ -70,7 +81,7 @@ export default async function Page({
         ]}
       />
 
-      {/* Filters toolbar */}
+      {/* Re-usable filters toolbar */}
       <RecipesFiltersToolbar
         basePath="/dashboard/discover"
         query={query}
@@ -79,12 +90,18 @@ export default async function Page({
         maxPrepRaw={maxPrepRaw}
         sort={sort}
         hasFilters={hasFilters}
-        totalCount={recipes.length}
         title="Discover"
         contextLabel="community recipes"
+        totalCount={totalCount}
+        // Discover uses the full filter set
+        showSearch={true}
+        showType={true}
+        showDifficulty={true}
+        showMaxPrep={true}
+        showSort={true}
       />
 
-      {/* Discover grid */}
+      {/* Discover grid + empty states */}
       <section className="mt-4">
         <DiscoverGrid recipes={recipes} hasFilters={hasFilters} />
       </section>
