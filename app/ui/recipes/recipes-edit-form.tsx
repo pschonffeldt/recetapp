@@ -117,9 +117,14 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
             </div>
           </div>
 
-          {/* Visibility (status) – NEW */}
+          {/* Visibility (status) */}
           <div className="mb-4">
-            <span className="mb-2 block text-sm font-medium">Visibility</span>
+            <span className="mb-1 block text-sm font-medium">Visibility</span>
+            <p className="mb-2 text-xs text-gray-500">
+              Choose who can see this recipe. You can change this setting at any
+              time.
+            </p>
+
             <div className="space-y-1 text-sm">
               <label className="flex items-center gap-2">
                 <input
