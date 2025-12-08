@@ -17,11 +17,6 @@ import { capitalizeFirst } from "@/app/lib/utils/format";
 // initial state with strong typing
 const initialState: RecipeFormState = { message: null, errors: {} };
 
-/**
- * Normalize the recipe's ingredients into the shape that IngredientsEditor
- * expects as its `initial` prop.
- */
-
 export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
   const [state, formAction] = useActionState(updateRecipe, initialState);
 
@@ -122,12 +117,54 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
             </div>
           </div>
 
+          {/* Visibility (status) – NEW */}
+          <div className="mb-4">
+            <span className="mb-2 block text-sm font-medium">Visibility</span>
+            <div className="space-y-1 text-sm">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="status"
+                  value="private"
+                  defaultChecked={recipe.status !== "public"}
+                  className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span>
+                  <span className="font-medium">Private</span>{" "}
+                  <span className="text-gray-500">
+                    (only you can see this recipe)
+                  </span>
+                </span>
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="status"
+                  value="public"
+                  defaultChecked={recipe.status === "public"}
+                  className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span>
+                  <span className="font-medium">Public</span>{" "}
+                  <span className="text-gray-500">
+                    (shared with the community in Discover)
+                  </span>
+                </span>
+              </label>
+            </div>
+
+            <div id="status-error" aria-live="polite" aria-atomic="true">
+              {state.errors.status?.map((e) => (
+                <p className="mt-2 text-sm text-red-500" key={e}>
+                  {e}
+                </p>
+              ))}
+            </div>
+          </div>
+
           {/* Structured Ingredients editor */}
           <div className="mb-4">
-            {/* <label className="mb-2 block text-sm font-medium">
-              Ingredients
-            </label> */}
-
             <IngredientsEditor initial={initialIngredients} />
 
             <div
@@ -168,7 +205,7 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
             </div>
           </div>
 
-          {/* Equipment (array: one per line) */}
+          {/* Equipment */}
           <div className="mb-4">
             <label
               htmlFor="equipment"

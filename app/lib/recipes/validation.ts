@@ -68,7 +68,7 @@ export const RecipeSchema = z.object({
     .nullable()
     .default(null),
 
-  // numeric as string (handled by toMoney before hitting DB)
+  // numeric money value (already normalized by toMoney)
   estimated_cost_total: z
     .number()
     .min(0, "Must be 0 or greater")
