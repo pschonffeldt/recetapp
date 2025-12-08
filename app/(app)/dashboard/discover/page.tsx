@@ -86,7 +86,7 @@ export default async function Page({
 
       {/* Discover grid */}
       <section className="mt-4">
-        <DiscoverGrid recipes={recipes} />
+        <DiscoverGrid recipes={recipes} hasFilters={hasFilters} />
       </section>
     </main>
   );
