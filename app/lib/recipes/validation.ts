@@ -69,7 +69,11 @@ export const RecipeSchema = z.object({
     .default(null),
 
   // numeric as string (handled by toMoney before hitting DB)
-  estimated_cost_total: z.string().nullable().default(null),
+  estimated_cost_total: z
+    .number()
+    .min(0, "Must be 0 or greater")
+    .nullable()
+    .default(null),
 
   equipment: z.array(z.string().min(1)).default([]),
 });

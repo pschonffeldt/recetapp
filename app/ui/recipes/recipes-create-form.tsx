@@ -109,6 +109,59 @@ export default function RecipeForm() {
           </div>
         </div>
 
+        {/* Visibility / Status */}
+        <fieldset className="mb-6">
+          <legend className="mb-1 block text-sm font-medium">Visibility</legend>
+          <p className="text-xs text-gray-500">
+            Private recipes are only visible to you. Public recipes can appear
+            in Discover for other RecetApp cooks.
+          </p>
+
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            {/* Private */}
+            <label className="flex cursor-pointer items-start gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm hover:border-gray-300">
+              <input
+                type="radio"
+                name="status"
+                value="private"
+                defaultChecked
+                className="mt-1 h-3 w-3 text-blue-600 focus:ring-blue-500"
+              />
+              <span>
+                <span className="font-medium">Private</span>
+                <span className="block text-xs text-gray-500">
+                  Only you can see this recipe in your library.
+                </span>
+              </span>
+            </label>
+
+            {/* Public */}
+            <label className="flex cursor-pointer items-start gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm hover:border-gray-300">
+              <input
+                type="radio"
+                name="status"
+                value="public"
+                className="mt-1 h-3 w-3 text-blue-600 focus:ring-blue-500"
+              />
+              <span>
+                <span className="font-medium">Public</span>
+                <span className="block text-xs text-gray-500">
+                  Other users may discover this recipe in the community Discover
+                  section.
+                </span>
+              </span>
+            </label>
+          </div>
+
+          <div id="status-error" aria-live="polite" aria-atomic="true">
+            {state.errors?.status?.map((e) => (
+              <p className="mt-2 text-sm text-red-500" key={e}>
+                {e}
+              </p>
+            ))}
+          </div>
+        </fieldset>
+
         {/* Structured ingredients editor */}
         <IngredientsEditor initial={[]} />
 
