@@ -453,11 +453,14 @@ export async function fetchFilteredRecipes(
   }
 ): Promise<RecipeListItem[]> {
   const offset = (currentPage - 1) * RECIPES_PAGE_SIZE;
-  const searchTerm = `%${query}%`;
+  const searchQuery = query.trim();
 
   type Row = RecipeForm & {
     user_id: string;
   };
+
+  const hasSearch = searchQuery.length > 0;
+  const searchTerm = `%${searchQuery}%`;
 
   const rows = await sql<Row[]>`
     SELECT
@@ -486,8 +489,19 @@ export async function fetchFilteredRecipes(
         OR ${userId}::uuid = ANY(r.saved_by_user_ids)
       )
       AND (
-        ${searchTerm} = '%%'
+        ${!hasSearch}
         OR r.recipe_name ILIKE ${searchTerm}
+        OR r.recipe_type::text ILIKE ${searchTerm}
+        OR EXISTS (
+          SELECT 1
+          FROM unnest(r.recipe_ingredients) AS ing
+          WHERE ing ILIKE ${searchTerm}
+        )
+        OR EXISTS (
+          SELECT 1
+          FROM unnest(r.recipe_steps) AS st
+          WHERE st ILIKE ${searchTerm}
+        )
       )
       AND (
         ${type}::recipe_type_enum IS NULL
@@ -586,8 +600,6 @@ export async function fetchRecipesForUser(
 /**
  * Compute the total number of recipes for **pagination**, matching the
  * same filters as `fetchFilteredRecipes`.
- *
- * Note: this uses the “owner OR saved” logic, same as the list query.
  */
 export async function fetchRecipesPages({
   query,
@@ -598,7 +610,9 @@ export async function fetchRecipesPages({
   type: string | null;
   userId: string;
 }): Promise<{ pages: number; total: number }> {
-  const searchTerm = `%${query}%`;
+  const searchQuery = query.trim();
+  const hasSearch = searchQuery.length > 0;
+  const searchTerm = `%${searchQuery}%`;
 
   const rows = await sql<{ count: number }[]>`
     SELECT COUNT(*)::int AS count
@@ -609,8 +623,19 @@ export async function fetchRecipesPages({
         OR ${userId}::uuid = ANY(r.saved_by_user_ids)
       )
       AND (
-        ${searchTerm} = '%%'
+        ${!hasSearch}
         OR r.recipe_name ILIKE ${searchTerm}
+        OR r.recipe_type::text ILIKE ${searchTerm}
+        OR EXISTS (
+          SELECT 1
+          FROM unnest(r.recipe_ingredients) AS ing
+          WHERE ing ILIKE ${searchTerm}
+        )
+        OR EXISTS (
+          SELECT 1
+          FROM unnest(r.recipe_steps) AS st
+          WHERE st ILIKE ${searchTerm}
+        )
       )
       AND (
         ${type}::recipe_type_enum IS NULL
@@ -619,7 +644,7 @@ export async function fetchRecipesPages({
   `;
 
   const total = rows[0]?.count ?? 0;
-  const pages = Math.ceil(total / RECIPES_PAGE_SIZE);
+  const pages = Math.ceil(total / RECIPES_PAGE_SIZE) || 1;
 
   return { pages, total };
 }

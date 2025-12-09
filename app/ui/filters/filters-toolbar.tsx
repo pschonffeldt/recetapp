@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import clsx from "clsx";
+import { Button } from "../general/button";
+import { useRouter } from "next/navigation";
 
 type Props = {
   basePath: string;
@@ -75,6 +76,7 @@ export default function RecipesFiltersToolbar(props: Props) {
       ? `Found ${totalCount} ${label}${plural}`
       : `Showing ${totalCount} ${label}${plural}`;
   })();
+  const router = useRouter();
 
   return (
     <section className="mt-4 rounded-md bg-gray-50 p-4 md:p-6">
@@ -192,19 +194,13 @@ export default function RecipesFiltersToolbar(props: Props) {
 
         {/* Actions (Apply) */}
         <div className="flex w-full items-center justify-end gap-2 md:w-auto md:self-end">
-          <button
-            type="submit"
-            className="rounded-md bg-blue-600 px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-blue-500"
-          >
-            Apply filters
-          </button>
+          <Button type="submit">Apply filters</Button>
         </div>
       </form>
 
       {/* Summary + chips (always rendered to avoid layout jump) */}
       <div className="mt-2 flex min-h-[28px] flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
         <p>{countText}</p>
-
         <div
           className={clsx(
             "flex flex-wrap items-center gap-2",
@@ -223,12 +219,13 @@ export default function RecipesFiltersToolbar(props: Props) {
               )}
               {maxPrepRaw && <FilterChip label={`Max ${maxPrepRaw} min`} />}
 
-              <Link
-                href={basePath}
-                className="rounded-md border border-gray-300 px-2 py-1 text-[11px] font-medium text-gray-600 hover:bg-gray-100"
+              <Button
+                type="button"
+                onClick={() => router.push(basePath)}
+                className="h-8"
               >
                 Clear filters
-              </Link>
+              </Button>
             </>
           )}
         </div>

@@ -1,5 +1,4 @@
 import Pagination from "@/app/ui/recipes/recipes-pagination";
-import Search from "@/app/ui/recipes/recipes-search";
 import RecipesTable from "@/app/ui/recipes/recipes-table";
 import { CreateRecipe } from "@/app/ui/recipes/recipes-buttons";
 import { Suspense } from "react";
@@ -20,6 +19,8 @@ type SearchParams = {
   sort?: "name" | "date" | "type";
   order?: "asc" | "desc";
   type?: string;
+  difficulty?: string;
+  maxPrep?: string;
 };
 
 export default async function Page(props: {
@@ -39,6 +40,10 @@ export default async function Page(props: {
   const type: string | null =
     rawType && rawType.trim().length > 0 ? rawType : null;
 
+  // Extra filters for UI (not yet wired into DB queries)
+  const difficultyRaw = searchParams.difficulty ?? "";
+  const maxPrepRaw = searchParams.maxPrep ?? "";
+
   const { pages: totalPages, total: totalCount } = await fetchRecipesPages({
     query,
     type,
@@ -47,7 +52,7 @@ export default async function Page(props: {
 
   const safePage = totalPages === 0 ? 1 : Math.min(pageFromUrl, totalPages);
 
-  const hasFilters = !!query || !!type;
+  const hasFilters = !!query || !!type || !!difficultyRaw || !!maxPrepRaw;
 
   return (
     <div className="w-full min-h-0">
@@ -57,31 +62,34 @@ export default async function Page(props: {
         ]}
       />
 
-      <div className="mt-4 flex items-center px-2 justify-between gap-2 md:mt-8 lg:px-0">
-        <Search placeholder="Search recipes, ingredients or type ..." />
+      {/* Header row: title is in breadcrumbs; keep only Create button here */}
+      <div className="mt-4 flex items-center px-2 justify-end gap-2 md:mt-8 lg:px-0">
         <CreateRecipe />
       </div>
 
-      <RecipesFiltersToolbar
-        basePath="/dashboard/recipes"
-        query={query}
-        type={rawType ?? ""}
-        difficultyRaw=""
-        maxPrepRaw=""
-        sort="newest" // ignored when showSort={false}
-        hasFilters={hasFilters}
-        title="Your recipes"
-        contextLabel="recipes"
-        totalCount={totalCount}
-        showSearch={false}
-        showType={true}
-        showDifficulty={false}
-        showMaxPrep={false}
-        showSort={false}
-      />
+      {/* Filters toolbar – same layout as Discover */}
+      <section className="mt-4">
+        <RecipesFiltersToolbar
+          basePath="/dashboard/recipes"
+          query={query}
+          type={rawType ?? ""}
+          difficultyRaw={difficultyRaw}
+          maxPrepRaw={maxPrepRaw}
+          sort="newest" // sort dropdown hidden, table headers handle sorting
+          hasFilters={hasFilters}
+          title="Your recipes"
+          contextLabel="recipes"
+          totalCount={totalCount}
+          showSearch={true}
+          showType={true}
+          showDifficulty={true}
+          showMaxPrep={true}
+          showSort={true}
+        />
+      </section>
 
       <Suspense
-        key={`${query}|${type}|${sort}|${order}|${safePage}`}
+        key={`${query}|${type}|${difficultyRaw}|${maxPrepRaw}|${sort}|${order}|${safePage}`}
         fallback={<RecipesTableSkeleton />}
       >
         <RecipesTable

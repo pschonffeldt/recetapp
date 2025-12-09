@@ -1,4 +1,3 @@
-// app/(app)/dashboard/discover/page.tsx
 import { Metadata } from "next";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { auth } from "@/auth";
