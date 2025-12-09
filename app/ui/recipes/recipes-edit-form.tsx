@@ -3,24 +3,27 @@
 import { useActionState } from "react";
 import { Button } from "@/app/ui/general/button";
 import Link from "next/link";
-import {
-  DIFFICULTY,
-  RECIPE_TYPES,
-  type RecipeForm,
-} from "@/app/lib/types/definitions";
+import { DIFFICULTY, RECIPE_TYPES } from "@/app/lib/types/definitions";
 import { RecipeFormState } from "@/app/lib/forms/state";
 import IngredientsEditor from "@/app/ui/recipes/recipes-ingredients-editor";
 import { buildInitialIngredientsForEditor } from "@/app/lib/ingredients";
 import { updateRecipe } from "@/app/lib/recipes/actions";
 import { capitalizeFirst } from "@/app/lib/utils/format";
+import { RecipeWithOwner } from "@/app/lib/recipes/data";
 
 // initial state with strong typing
 const initialState: RecipeFormState = { message: null, errors: {} };
 
-export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
+export default function EditRecipeForm({
+  recipe,
+}: {
+  recipe: RecipeWithOwner;
+}) {
   const [state, formAction] = useActionState(updateRecipe, initialState);
 
   const initialIngredients = buildInitialIngredientsForEditor(recipe);
+  const savedByCount = recipe.saved_by_count ?? 0;
+  const isPublic = recipe.status === "public";
 
   return (
     <form action={formAction} className="pb-12">
@@ -119,13 +122,13 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
 
           {/* Visibility (status) */}
           <div className="mb-4">
-            <span className="mb-1 block text-sm font-medium">Visibility</span>
-            <p className="mb-2 text-xs text-gray-500">
-              Choose who can see this recipe. You can change this setting at any
-              time.
+            <span className="mb-2 block text-sm font-medium">Visibility</span>
+            <p className="text-xs text-gray-500">
+              Private recipes are only visible to you. Public recipes can appear
+              in Discover for other RecetApp cooks.
             </p>
 
-            <div className="space-y-1 text-sm">
+            <div className="mt-3 space-y-1 text-sm">
               <label className="flex items-center gap-2">
                 <input
                   type="radio"
@@ -158,6 +161,19 @@ export default function EditRecipeForm({ recipe }: { recipe: RecipeForm }) {
                 </span>
               </label>
             </div>
+
+            {/* Guard-rail microcopy when switching from public */}
+            {isPublic && savedByCount > 0 && (
+              <p className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                This recipe is currently public and has been saved by{" "}
+                <span className="font-semibold">
+                  {savedByCount} other cook{savedByCount === 1 ? "" : "s"}
+                </span>
+                . If you make it private, it will stop appearing in Discover for
+                new users. People who already saved it will still see it in
+                their library.
+              </p>
+            )}
 
             <div id="status-error" aria-live="polite" aria-atomic="true">
               {state.errors.status?.map((e) => (

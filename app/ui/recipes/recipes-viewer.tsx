@@ -14,17 +14,24 @@ import { MetricCard, MetricCardMobile } from "./recipes-indicators";
 import { RecipeFormState } from "@/app/lib/forms/state";
 import { buildIngredientLines } from "@/app/lib/ingredients";
 import { formatDateToLocal, capitalizeFirst } from "@/app/lib/utils/format";
-
-// (you can keep asDate if you still use it somewhere)
-// const asDate = (d: string | Date) => (d instanceof Date ? d : new Date(d));
+import clsx from "clsx";
 
 type ViewerMode = "dashboard" | "discover" | "imported";
+
+/**
+ * Viewer recipe type:
+ * - works with existing RecipeForm
+ * - optionally supports saved_by_count (for “saved by X cooks” text)
+ */
+type ViewerRecipeData = RecipeForm & {
+  saved_by_count?: number | null;
+};
 
 export default function ViewerRecipe({
   recipe,
   mode = "dashboard",
 }: {
-  recipe: RecipeForm;
+  recipe: ViewerRecipeData;
   mode?: ViewerMode;
 }) {
   const backHref =
@@ -44,30 +51,55 @@ export default function ViewerRecipe({
   const ingredientLines = buildIngredientLines(recipe);
 
   const isPublic = recipe.status === "public";
-  const primaryLabel = isPublic ? "Public recipe" : "Private recipe";
   const isImported = mode === "imported";
   const isOwned = mode === "dashboard"; // we only pass "dashboard" for recipes you own
+  const savedByCount =
+    typeof recipe.saved_by_count === "number" ? recipe.saved_by_count : null;
 
   return (
     <div>
       <div id="print" className="rounded-md border-gray-200 bg-gray-50 p-6">
-        {/* Recipe name and type */}
+        {/* Recipe name and visibility */}
         <header className="mb-6">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {recipe.recipe_name}
-          </h1>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {recipe.recipe_name}
+            </h1>
 
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-            <span>{primaryLabel}</span>
+            {/* Visibility pill */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs text-gray-700">
+              <span
+                className={clsx(
+                  "inline-flex h-2 w-2 rounded-full",
+                  isPublic ? "bg-emerald-500" : "bg-gray-400"
+                )}
+                aria-hidden="true"
+              />
+              <span className="font-medium">
+                {isPublic ? "Public" : "Private"}
+              </span>
+              <span className="text-gray-500">
+                {isPublic ? "Visible in Discover" : "Only in your library"}
+              </span>
+              {isPublic && (savedByCount ?? 0) > 0 && (
+                <span className="text-gray-400">
+                  • Saved by {savedByCount} cook
+                  {savedByCount === 1 ? "" : "s"}
+                </span>
+              )}
+            </div>
+          </div>
 
+          {/* Ownership / import chips */}
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-600">
             {isOwned && (
-              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 font-medium text-emerald-700">
                 Created by you
               </span>
             )}
 
             {isImported && (
-              <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+              <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 font-medium text-blue-700">
                 Imported into your library
               </span>
             )}
@@ -75,7 +107,7 @@ export default function ViewerRecipe({
         </header>
 
         {/* Stats mobile */}
-        <section className="mb-6 grid gap-4 sm:grid-cols-4 md:hidden grid-cols-2">
+        <section className="mb-6 grid grid-cols-2 gap-4 md:hidden">
           <MetricCardMobile
             title="Creation date"
             value={formatDateToLocal(recipe.recipe_created_at!)}
@@ -169,7 +201,7 @@ export default function ViewerRecipe({
         </section>
 
         {/* Stats desktop */}
-        <section className="hidden md:grid md:grid-cols-4 gap-4 mb-6">
+        <section className="mb-6 hidden gap-4 md:grid md:grid-cols-4">
           <MetricCard
             title="Creation date"
             value={formatDateToLocal(recipe.recipe_created_at!)}
@@ -262,7 +294,7 @@ export default function ViewerRecipe({
         </section>
 
         {/* Ingredients & Steps */}
-        <section className="mb-6 grid gap-3 items-stretch sm:grid-cols-2">
+        <section className="mb-6 grid items-stretch gap-3 sm:grid-cols-2">
           <MetricCard
             title="Ingredients"
             items={ingredientLines}

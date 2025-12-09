@@ -209,6 +209,54 @@ export async function fetchRecipeById(id: string) {
   }
 }
 
+export type RecipeForEdit = RecipeForm & {
+  saved_by_count: number;
+};
+
+export async function fetchRecipeForEdit(
+  id: string
+): Promise<RecipeForEdit | null> {
+  const userId = await requireUserId();
+
+  const rows = await sql<RecipeForEdit[]>`
+    SELECT
+      r.id,
+      r.recipe_name,
+      r.recipe_type,
+      r.recipe_ingredients,
+      r.recipe_ingredients_structured,
+      r.recipe_steps,
+      r.equipment,
+      r.allergens,
+      r.dietary_flags,
+      r.servings,
+      r.prep_time_min,
+      r.difficulty,
+      r.status,
+      r.calories_total,
+      r.estimated_cost_total,
+      (r.recipe_created_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_created_at,
+      (r.recipe_updated_at AT TIME ZONE 'UTC')::timestamptz::text AS recipe_updated_at,
+      COALESCE(cardinality(r.saved_by_user_ids), 0)::int AS saved_by_count
+    FROM public.recipes r
+    WHERE r.id = ${id}::uuid AND r.user_id = ${userId}::uuid
+    LIMIT 1;
+  `;
+
+  const r = rows[0];
+  if (!r) return null;
+
+  // keep arrays non-null, same as fetchRecipeById
+  return {
+    ...r,
+    recipe_ingredients: r.recipe_ingredients ?? [],
+    recipe_steps: r.recipe_steps ?? [],
+    equipment: r.equipment ?? [],
+    allergens: r.allergens ?? [],
+    dietary_flags: r.dietary_flags ?? [],
+  };
+}
+
 /**
  * Fetch a recipe by id where the caller is either the **owner** OR
  * has the recipe in `saved_by_user_ids`.
@@ -219,9 +267,11 @@ export async function fetchRecipeById(id: string) {
 /** Recipe row plus `saved_by_user_ids` for “owner OR saved” views. */
 export type RecipeWithOwner = RecipeForm & {
   user_id: string;
+  saved_by_count?: number | null;
 };
 
-type RecipeRowWithSavedBy = RecipeWithOwner & {
+type RecipeRowWithSavedBy = RecipeForm & {
+  user_id: string;
   saved_by_user_ids: string[] | null;
 };
 
@@ -253,19 +303,18 @@ export async function fetchRecipeByIdForOwner(
     FROM public.recipes r
     WHERE
       r.id = ${recipeId}::uuid
-      AND (
-        r.user_id = ${userId}::uuid
-        OR ${userId}::uuid = ANY(r.saved_by_user_ids)
-      )
+      AND r.user_id = ${userId}::uuid  -- edit page: only owner can edit
     LIMIT 1
   `;
 
   if (rows.length === 0) return null;
 
   const { saved_by_user_ids, ...r } = rows[0];
+  const saved_by_count = saved_by_user_ids ? saved_by_user_ids.length : 0;
 
   return {
     ...r,
+    saved_by_count,
     recipe_ingredients: r.recipe_ingredients ?? [],
     recipe_steps: r.recipe_steps ?? [],
     equipment: r.equipment ?? [],
@@ -831,9 +880,10 @@ function andAll(parts: any[]) {
   return rest.reduce((acc, cur) => sql`${acc} AND ${cur}`, first);
 }
 
-/** Row used by the viewer: same as RecipeForm + user_id to detect ownership */
+/** Row used by the viewer: same as RecipeForm + user_id + import count */
 export type RecipeViewerItem = RecipeForm & {
   user_id: string;
+  saved_by_count: number;
 };
 
 export async function fetchRecipeByIdForOwnerOrSaved(
@@ -859,7 +909,8 @@ export async function fetchRecipeByIdForOwnerOrSaved(
       r.estimated_cost_total,
       r.status,
       r.recipe_created_at,
-      r.recipe_updated_at
+      r.recipe_updated_at,
+      COALESCE(cardinality(r.saved_by_user_ids), 0)::int AS saved_by_count
     FROM public.recipes r
     WHERE
       r.id = ${id}::uuid
