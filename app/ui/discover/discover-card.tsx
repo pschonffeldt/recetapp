@@ -13,6 +13,7 @@ type Props = {
 
 export default function DiscoverCard({ recipe }: Props) {
   const creator = recipe.created_by_display_name ?? "RecetApp cook";
+  const savedCount = recipe.saved_by_count ?? 0;
 
   return (
     <div className="relative rounded-md bg-white shadow-md border p-4 border-gray-100">
@@ -36,7 +37,6 @@ export default function DiscoverCard({ recipe }: Props) {
             {recipe.recipe_ingredients?.length
               ? (() => {
                   const fullText = recipe.recipe_ingredients.join(", ") + ".";
-
                   const MAX_CHARS = 100;
                   if (fullText.length <= MAX_CHARS) return fullText;
                   return fullText.slice(0, MAX_CHARS).trimEnd() + "…";
@@ -44,7 +44,8 @@ export default function DiscoverCard({ recipe }: Props) {
               : "—"}
           </span>
         </div>
-        {/* Date and creator */}
+
+        {/* Date, creator, saved count */}
         <div className="flex flex-col gap-1 text-gray-500">
           <div className="flex flex-row">
             <p className="pr-1">Created at -</p>
@@ -57,7 +58,20 @@ export default function DiscoverCard({ recipe }: Props) {
               Created by: <span className="font-medium">{creator}</span>
             </p>
           </div>
+          {/* When there are saves */}
+          {savedCount > 0 && (
+            <p className="text-xs text-gray-400">
+              Saved by {savedCount} cook{savedCount === 1 ? "" : "s"}
+            </p>
+          )}
+          {/* When there is saves */}
+          {savedCount === 0 && (
+            <p className="text-xs text-gray-400">
+              No saves yet — be the first to add it!
+            </p>
+          )}
         </div>
+
         {/* Actions: Import + View */}
         <div className="mt-4 flex justify-end gap-2 border-t pt-3">
           <ImportRecipeFromDiscoverCard id={recipe.id} />

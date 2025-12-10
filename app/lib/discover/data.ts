@@ -36,10 +36,11 @@ export type DiscoverRecipeCard = {
   prep_time_min: number | null;
   created_by_display_name: string | null;
   recipe_created_at: string;
+  saved_by_count: number;
 };
 
 // 2) Internal row shape for the SQL query
-type DiscoverRecipeRow = {
+export type DiscoverRecipeRow = {
   id: string;
   recipe_name: string;
   recipe_type: RecipeForm["recipe_type"];
@@ -48,7 +49,8 @@ type DiscoverRecipeRow = {
   servings: number | null;
   prep_time_min: number | null;
   recipe_created_at: string | Date;
-  created_by_display_name: string | null; // users.user_name
+  created_by_display_name: string | null;
+  saved_by_count: number;
 };
 
 // 3) Filters for Discover grid / count
@@ -128,6 +130,7 @@ export async function fetchDiscoverRecipes({
   const safePage = Math.max(1, page);
   const offset = (safePage - 1) * DISCOVER_PAGE_SIZE;
 
+  // Build shared WHERE fragment (status/public + filters)
   const whereSql = buildDiscoverWhere({
     currentUserId,
     search,
@@ -146,7 +149,8 @@ export async function fetchDiscoverRecipes({
       r.servings,
       r.prep_time_min,
       r.recipe_created_at,
-      u.user_name AS created_by_display_name
+      u.user_name AS created_by_display_name,
+      cardinality(r.saved_by_user_ids) AS saved_by_count
     FROM public.recipes r
     LEFT JOIN public.users u ON u.id = r.user_id
     WHERE ${whereSql}
@@ -175,6 +179,7 @@ export async function fetchDiscoverRecipes({
       typeof r.recipe_created_at === "string"
         ? r.recipe_created_at
         : r.recipe_created_at.toISOString(),
+    saved_by_count: r.saved_by_count ?? 0,
   }));
 }
 

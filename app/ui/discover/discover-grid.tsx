@@ -1,6 +1,7 @@
 import Link from "next/link";
 import DiscoverCard from "./discover-card";
 import type { DiscoverRecipeCard } from "@/app/lib/discover/data";
+import { VisibilityBadge } from "@/app/ui/recipes/recipes-visibility-badge";
 
 type Props = {
   recipes: DiscoverRecipeCard[];
