@@ -1,22 +1,26 @@
-import { requireUserId } from "@/app/lib/auth/helpers";
-import { fetchRecipeByIdForOwnerOrSaved } from "@/app/lib/recipes/data";
+import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import ViewerRecipe from "@/app/ui/recipes/recipes-viewer";
-import { notFound } from "next/navigation";
+import { requireUserId } from "@/app/lib/auth/helpers";
+import { fetchRecipeByIdForOwnerOrSaved } from "@/app/lib/recipes/data";
 
-type PageProps = {
+export const metadata: Metadata = { title: "View Recipe" };
+
+export default async function Page({
+  params,
+}: {
   params: Promise<{ id: string }>;
-};
-
-export default async function Page({ params }: PageProps) {
+}) {
   const { id } = await params;
-  const userId = await requireUserId();
 
+  const userId = await requireUserId();
   const recipe = await fetchRecipeByIdForOwnerOrSaved(id, userId);
+
   if (!recipe) notFound();
 
-  const isOwner = recipe.user_id === userId;
-  const mode: "dashboard" | "imported" = isOwner ? "dashboard" : "imported";
+  const mode: "dashboard" | "imported" =
+    recipe.user_id === userId ? "dashboard" : "imported";
 
   return (
     <main>

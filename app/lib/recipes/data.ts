@@ -880,7 +880,7 @@ function andAll(parts: any[]) {
   return rest.reduce((acc, cur) => sql`${acc} AND ${cur}`, first);
 }
 
-/** Row used by the viewer: same as RecipeForm + user_id + import count */
+/** Row used by the viewer: RecipeForm + user_id + saved_by_count for visibility UI */
 export type RecipeViewerItem = RecipeForm & {
   user_id: string;
   saved_by_count: number;
@@ -910,7 +910,7 @@ export async function fetchRecipeByIdForOwnerOrSaved(
       r.status,
       r.recipe_created_at,
       r.recipe_updated_at,
-      COALESCE(cardinality(r.saved_by_user_ids), 0)::int AS saved_by_count
+      COALESCE(CARDINALITY(r.saved_by_user_ids), 0) AS saved_by_count
     FROM public.recipes r
     WHERE
       r.id = ${id}::uuid

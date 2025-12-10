@@ -1,7 +1,8 @@
 "use client";
 
-import { Button } from "@/app/ui/general/button";
+import clsx from "clsx";
 import Link from "next/link";
+import { Button } from "@/app/ui/general/button";
 import {
   DeleteRecipeOnViewer,
   ImportRecipeFromDiscover,
@@ -11,19 +12,17 @@ import {
 import { RecipeForm } from "@/app/lib/types/definitions";
 import { inter } from "../branding/branding-fonts";
 import { MetricCard, MetricCardMobile } from "./recipes-indicators";
-import { RecipeFormState } from "@/app/lib/forms/state";
 import { buildIngredientLines } from "@/app/lib/ingredients";
 import { formatDateToLocal, capitalizeFirst } from "@/app/lib/utils/format";
-import clsx from "clsx";
 
 type ViewerMode = "dashboard" | "discover" | "imported";
 
 /**
  * Viewer recipe type:
- * - works with existing RecipeForm
- * - optionally supports saved_by_count (for “saved by X cooks” text)
+ * - base is RecipeForm
+ * - optionally has saved_by_count for “saved by X cooks”
  */
-type ViewerRecipeData = RecipeForm & {
+export type ViewerRecipeData = RecipeForm & {
   saved_by_count?: number | null;
 };
 
@@ -39,14 +38,6 @@ export default function ViewerRecipe({
 
   const canEdit = mode === "dashboard"; // imported + discover = read-only
 
-  const initial: RecipeFormState = { message: null, errors: {} };
-
-  async function handleOnClick() {
-    const html2pdf = await require("html2pdf.js");
-    const element = document.querySelector("#print");
-    html2pdf(element, { margin: 20 });
-  }
-
   // Use shared helper
   const ingredientLines = buildIngredientLines(recipe);
 
@@ -55,6 +46,14 @@ export default function ViewerRecipe({
   const isOwned = mode === "dashboard"; // we only pass "dashboard" for recipes you own
   const savedByCount =
     typeof recipe.saved_by_count === "number" ? recipe.saved_by_count : null;
+
+  async function handleOnClick() {
+    const html2pdf = await require("html2pdf.js");
+    const element = document.querySelector("#print");
+    if (element) {
+      html2pdf(element, { margin: 20 });
+    }
+  }
 
   return (
     <div>
@@ -337,15 +336,12 @@ export default function ViewerRecipe({
 
           <Button onClick={handleOnClick}>Share</Button>
 
-          {/* When viewing an imported recipe, allow removing from library */}
           {mode === "imported" && (
             <RemoveImportedRecipeOnViewer id={recipe.id} />
           )}
 
-          {/* In discover mode, allow importing */}
           {mode === "discover" && <ImportRecipeFromDiscover id={recipe.id} />}
 
-          {/* Only allow edit/delete in dashboard mode (owned recipes) */}
           {canEdit && (
             <>
               <UpdateRecipeOnViewer id={recipe.id} />
