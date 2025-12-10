@@ -1,8 +1,7 @@
 "use client";
 
-import clsx from "clsx";
-import Link from "next/link";
 import { Button } from "@/app/ui/general/button";
+import Link from "next/link";
 import {
   DeleteRecipeOnViewer,
   ImportRecipeFromDiscover,
@@ -14,16 +13,20 @@ import { inter } from "../branding/branding-fonts";
 import { MetricCard, MetricCardMobile } from "./recipes-indicators";
 import { buildIngredientLines } from "@/app/lib/ingredients";
 import { formatDateToLocal, capitalizeFirst } from "@/app/lib/utils/format";
+import clsx from "clsx";
 
 type ViewerMode = "dashboard" | "discover" | "imported";
 
 /**
  * Viewer recipe type:
  * - base is RecipeForm
- * - optionally has saved_by_count for “saved by X cooks”
+ * - optionally has:
+ *   - saved_by_count for “saved by X cooks”
+ *   - created_by_display_name for discover viewer
  */
-export type ViewerRecipeData = RecipeForm & {
+type ViewerRecipeData = RecipeForm & {
   saved_by_count?: number | null;
+  created_by_display_name?: string | null;
 };
 
 export default function ViewerRecipe({
@@ -38,14 +41,21 @@ export default function ViewerRecipe({
 
   const canEdit = mode === "dashboard"; // imported + discover = read-only
 
-  // Use shared helper
+  // Ingredients list for the card
   const ingredientLines = buildIngredientLines(recipe);
 
   const isPublic = recipe.status === "public";
   const isImported = mode === "imported";
   const isOwned = mode === "dashboard"; // we only pass "dashboard" for recipes you own
+
   const savedByCount =
     typeof recipe.saved_by_count === "number" ? recipe.saved_by_count : null;
+
+  const creatorName =
+    recipe.created_by_display_name &&
+    recipe.created_by_display_name.trim().length > 0
+      ? recipe.created_by_display_name
+      : "RecetApp cook";
 
   async function handleOnClick() {
     const html2pdf = await require("html2pdf.js");
@@ -58,12 +68,20 @@ export default function ViewerRecipe({
   return (
     <div>
       <div id="print" className="rounded-md border-gray-200 bg-gray-50 p-6">
-        {/* Recipe name and visibility */}
+        {/* Recipe name, visibility + creator */}
         <header className="mb-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              {recipe.recipe_name}
-            </h1>
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl font-semibold tracking-tight">
+                {recipe.recipe_name}
+              </h1>
+
+              {mode === "discover" && (
+                <p className="text-xs text-gray-500">
+                  Created by <span className="font-medium">{creatorName}</span>
+                </p>
+              )}
+            </div>
 
             {/* Visibility pill */}
             <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs text-gray-700">
