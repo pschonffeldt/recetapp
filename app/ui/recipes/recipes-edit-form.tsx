@@ -123,9 +123,11 @@ export default function EditRecipeForm({
           {/* Visibility (status) */}
           <div className="mb-4">
             <span className="mb-2 block text-sm font-medium">Visibility</span>
+
             <p className="text-xs text-gray-500">
-              Private recipes are only visible to you. Public recipes can appear
-              in Discover for other RecetApp cooks.
+              Public recipes can appear in Discover and be saved by other cooks.
+              Switching back to private hides this recipe from Discover, but it
+              doesn&apos;t remove it from anyone who already saved it.
             </p>
 
             <div className="mt-3 space-y-1 text-sm">
@@ -161,19 +163,6 @@ export default function EditRecipeForm({
                 </span>
               </label>
             </div>
-
-            {/* Guard-rail microcopy when switching from public */}
-            {isPublic && savedByCount > 0 && (
-              <p className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                This recipe is currently public and has been saved by{" "}
-                <span className="font-semibold">
-                  {savedByCount} other cook{savedByCount === 1 ? "" : "s"}
-                </span>
-                . If you make it private, it will stop appearing in Discover for
-                new users. People who already saved it will still see it in
-                their library.
-              </p>
-            )}
 
             <div id="status-error" aria-live="polite" aria-atomic="true">
               {state.errors.status?.map((e) => (
