@@ -89,7 +89,7 @@ export default async function Page({
   const sp = searchParams ? await searchParams : {};
   const raw = sp.recipes ?? "";
 
-  // NEW: empty or missing `recipes` => "no selection"
+  // empty or missing `recipes` => "no selection"
   const recipeIds =
     raw.trim().length > 0
       ? raw
