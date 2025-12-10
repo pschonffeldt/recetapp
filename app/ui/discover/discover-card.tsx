@@ -17,14 +17,29 @@ export default function DiscoverCard({ recipe }: Props) {
 
   return (
     <div className="relative rounded-md bg-white shadow-md border p-4 border-gray-100">
-      {/* Header row: name + type and difficulty chip */}
+      {/* Header row: name + type / difficulty / time */}
       <div className="flex flex-col place-items-start justify-between border-b pb-2 gap-1">
         <p className="font-medium">{recipe.recipe_name}</p>
-        <div className="flex items-center justify-between text-gray-500 text-sm gap-2">
-          <p>Type:</p>
-          <RecipesType type={recipe.recipe_type} />
-          <p className="pl-4">Difficulty:</p>
-          <RecipesDifficulty type={recipe.difficulty} />
+        <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 sm:text-sm">
+          {/* Type */}
+          <span className="flex items-center gap-1">
+            <span>Type:</span>
+            <RecipesType type={recipe.recipe_type} />
+          </span>
+          {/* Difficulty */}
+          <span className="flex items-center gap-1">
+            <span>Difficulty:</span>
+            <RecipesDifficulty type={recipe.difficulty} />
+          </span>
+          {/* Prep time */}
+          <span className="flex items-center gap-1">
+            <span>Time:</span>
+            <span>
+              {recipe.prep_time_min != null
+                ? `${recipe.prep_time_min} min`
+                : "—"}
+            </span>
+          </span>
         </div>
       </div>
 
