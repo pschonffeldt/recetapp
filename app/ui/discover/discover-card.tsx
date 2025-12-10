@@ -6,6 +6,7 @@ import {
 } from "../recipes/recipes-buttons";
 import { formatDateToLocal } from "@/app/lib/utils/format";
 import { DiscoverRecipeCard } from "@/app/lib/discover/data";
+import PrepTimePill from "./discover-time-pill";
 
 type Props = {
   recipe: DiscoverRecipeCard;
@@ -31,14 +32,10 @@ export default function DiscoverCard({ recipe }: Props) {
             <span>Difficulty:</span>
             <RecipesDifficulty type={recipe.difficulty} />
           </span>
-          {/* Prep time */}
+          {/* Prep time pill */}
           <span className="flex items-center gap-1">
             <span>Time:</span>
-            <span>
-              {recipe.prep_time_min != null
-                ? `${recipe.prep_time_min} min`
-                : "—"}
-            </span>
+            <PrepTimePill minutes={recipe.prep_time_min} />
           </span>
         </div>
       </div>
