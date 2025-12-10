@@ -115,7 +115,6 @@ export default async function Page({
           showType={true}
           showDifficulty={true}
           showMaxPrep={true}
-          showSort={true}
         />
       </section>
 

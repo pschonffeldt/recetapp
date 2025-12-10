@@ -84,7 +84,6 @@ export default async function Page(props: {
           showType={true}
           showDifficulty={true}
           showMaxPrep={true}
-          showSort={true}
         />
       </section>
 

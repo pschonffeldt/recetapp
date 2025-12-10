@@ -26,7 +26,6 @@ type Props = {
   showType?: boolean;
   showDifficulty?: boolean;
   showMaxPrep?: boolean;
-  showSort?: boolean;
 };
 
 function FilterChip({ label }: { label: string }) {
@@ -59,7 +58,7 @@ export default function RecipesFiltersToolbar(props: Props) {
     showType = true,
     showDifficulty = true,
     showMaxPrep = true,
-    showSort = true,
+    // showSort = true,
   } = props;
 
   const countText = (() => {
@@ -167,28 +166,6 @@ export default function RecipesFiltersToolbar(props: Props) {
               placeholder="e.g. 30"
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-          </div>
-        )}
-
-        {/* Sort */}
-        {showSort && (
-          <div className="w-full min-w-[140px] md:w-auto">
-            <label
-              htmlFor="discover-sort"
-              className="block text-xs font-medium text-gray-700"
-            >
-              Sort by
-            </label>
-            <select
-              id="discover-sort"
-              name="sort"
-              defaultValue={sort}
-              className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-              <option value="shortest">Shortest prep time</option>
-            </select>
           </div>
         )}
 
