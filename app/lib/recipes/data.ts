@@ -477,7 +477,16 @@ export async function fetchRecipeCardData() {
  * =============================================================================
  */
 
-type SortKey = "name" | "date" | "type";
+// All sort keys supported by the UI
+export type SortKey =
+  | "name"
+  | "date"
+  | "type"
+  | "difficulty"
+  | "owner"
+  | "time"
+  | "visibility";
+
 type SortOrder = "asc" | "desc";
 
 /**
@@ -495,8 +504,8 @@ export async function fetchFilteredRecipes(
     type,
     userId,
   }: {
-    sort: "name" | "date" | "type";
-    order: "asc" | "desc";
+    sort: SortKey;
+    order: SortOrder;
     type: string | null;
     userId: string;
   }
@@ -510,6 +519,27 @@ export async function fetchFilteredRecipes(
 
   const hasSearch = searchQuery.length > 0;
   const searchTerm = `%${searchQuery}%`;
+
+  // Expression used for "owner" sort (owned vs imported)
+  const ownerExpr = sql`CASE WHEN r.user_id = ${userId}::uuid THEN 0 ELSE 1 END`;
+
+  // Decide which column/expression to sort by
+  const sortExpr =
+    sort === "name"
+      ? sql`r.recipe_name`
+      : sort === "type"
+      ? sql`r.recipe_type`
+      : sort === "difficulty"
+      ? sql`r.difficulty`
+      : sort === "time"
+      ? sql`r.prep_time_min`
+      : sort === "visibility"
+      ? sql`r.status`
+      : sort === "owner"
+      ? ownerExpr
+      : sql`r.recipe_created_at`; // default = date
+
+  const directionSql = order === "asc" ? sql`ASC` : sql`DESC`;
 
   const rows = await sql<Row[]>`
     SELECT
@@ -557,13 +587,8 @@ export async function fetchFilteredRecipes(
         OR r.recipe_type = ${type}::recipe_type_enum
       )
     ORDER BY
-      ${
-        sort === "name"
-          ? sql`r.recipe_name`
-          : sort === "type"
-          ? sql`r.recipe_type`
-          : sql`r.recipe_created_at`
-      } ${order === "asc" ? sql`ASC` : sql`DESC`}
+      ${sortExpr} ${directionSql},
+      r.recipe_created_at DESC  -- stable tiebreaker
     LIMIT ${RECIPES_PAGE_SIZE}
     OFFSET ${offset}
   `;

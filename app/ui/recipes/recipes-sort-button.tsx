@@ -5,7 +5,14 @@ import { setParams } from "./recipes-url";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
 
 // Server-side sort keys supported by your list query
-type SortCol = "name" | "date" | "type";
+type SortCol =
+  | "name"
+  | "date"
+  | "type"
+  | "difficulty"
+  | "owner"
+  | "time"
+  | "visibility";
 
 export default function SortButton({
   column,

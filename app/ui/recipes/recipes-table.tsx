@@ -10,6 +10,7 @@ import RecipesDifficulty from "./recipes-difficulty";
 import { formatDateToLocal } from "@/app/lib/utils/format";
 import {
   fetchFilteredRecipes,
+  SortKey,
   type RecipeListItem,
 } from "@/app/lib/recipes/data";
 import clsx from "clsx";
@@ -18,7 +19,7 @@ type RecipesTableProps = {
   userId: string;
   query: string;
   currentPage: number;
-  sort: "name" | "date" | "type";
+  sort: SortKey;
   order: "asc" | "desc";
   type: string | null;
 };
@@ -29,6 +30,25 @@ function OwnershipBadge({ owner }: { owner: "owned" | "imported" }) {
     owner === "owned"
       ? "border-emerald-200 bg-emerald-50 text-emerald-700"
       : "border-blue-200 bg-blue-50 text-blue-700";
+
+  return (
+    <span
+      className={clsx(
+        "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
+        style
+      )}
+    >
+      {label}
+    </span>
+  );
+}
+
+function VisibilityBadge({ status }: { status: "public" | "private" }) {
+  const isPublic = status === "public";
+  const label = isPublic ? "Public" : "Private";
+  const style = isPublic
+    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+    : "border-gray-200 bg-gray-100 text-gray-600";
 
   return (
     <span
@@ -172,15 +192,24 @@ export default async function RecipesTable({
                 <th className="px-4 py-5 sm:pl-6">
                   <SortButton column="name" label="Recipe" />
                 </th>
-                <th className="px-3 py-5 font-medium">Ingredients</th>
-                <th className="px-3 py-5 font-medium">Steps</th>
-                <th className="whitespace-nowrap px-3 py-5 font-medium">
-                  <SortButton column="date" label="Creation date" />
-                </th>
                 <th className="px-3 py-5 font-medium">
                   <SortButton column="type" label="Type" />
                 </th>
-                <th className="px-3 py-5 font-medium">Owner</th>
+                <th className="px-3 py-5 font-medium">
+                  <SortButton column="difficulty" label="Difficulty" />
+                </th>
+                <th className="whitespace-nowrap px-3 py-5 font-medium">
+                  <SortButton column="time" label="Time" />
+                </th>
+                <th className="whitespace-nowrap px-3 py-5 font-medium">
+                  <SortButton column="date" label="Creation date" />
+                </th>
+                <th className="whitespace-nowrap px-3 py-5 font-medium">
+                  <SortButton column="visibility" label="Visibility" />
+                </th>
+                <th className="px-3 py-5 font-medium">
+                  <SortButton column="owner" label="Owner" />
+                </th>
                 <th className="px-3 py-5 text-right text-sm font-medium">
                   Actions
                 </th>
@@ -191,7 +220,7 @@ export default async function RecipesTable({
               {isEmpty ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     className="px-6 py-10 text-center text-sm text-gray-500"
                   >
                     No recipes found.
@@ -203,36 +232,30 @@ export default async function RecipesTable({
                     key={recipe.id}
                     className="w-full border-b py-3 text-sm last-of-type:border-none"
                   >
-                    {/* Name */}
+                    {/* Recipe name */}
                     <td className="whitespace-normal py-3 pl-6 pr-3 align-middle">
                       <p className="font-medium">{recipe.recipe_name}</p>
                     </td>
 
-                    {/* Ingredients */}
-                    <td className="whitespace-normal break-words px-3 py-3 align-middle">
-                      {recipe.recipe_ingredients?.length
-                        ? recipe.recipe_ingredients.join(", ")
-                        : "—"}
+                    {/* Type */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle">
+                      <RecipesType type={recipe.recipe_type} />
                     </td>
 
-                    {/* Steps */}
-                    <td className="whitespace-normal break-words px-3 py-3 align-middle">
-                      {recipe.recipe_steps?.length
-                        ? (() => {
-                            const fullText =
-                              recipe.recipe_steps
-                                .map((step: string) =>
-                                  step
-                                    .replace(/[^\p{L}\p{N}\s]/gu, "")
-                                    .replace(/\s+/g, " ")
-                                    .trim()
-                                )
-                                .join(". ") + ".";
-                            const MAX_CHARS = 200;
-                            if (fullText.length <= MAX_CHARS) return fullText;
-                            return fullText.slice(0, MAX_CHARS).trimEnd() + "…";
-                          })()
-                        : "—"}
+                    {/* Difficulty */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle">
+                      <RecipesDifficulty type={recipe.difficulty} />
+                    </td>
+
+                    {/* Time (prep_time_min) */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle">
+                      {recipe.prep_time_min != null ? (
+                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-700">
+                          {recipe.prep_time_min} min
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-400">—</span>
+                      )}
                     </td>
 
                     {/* Created at */}
@@ -246,9 +269,9 @@ export default async function RecipesTable({
                       </time>
                     </td>
 
-                    {/* Type */}
+                    {/* Visibility */}
                     <td className="whitespace-nowrap px-3 py-3 align-middle">
-                      <RecipesType type={recipe.recipe_type} />
+                      <VisibilityBadge status={recipe.status} />
                     </td>
 
                     {/* Owner */}
@@ -260,7 +283,6 @@ export default async function RecipesTable({
                     <td className="whitespace-nowrap py-3 pl-3 pr-6 align-middle">
                       <div className="flex justify-end gap-2">
                         <ViewRecipe id={recipe.id} />
-
                         {recipe.owner_relationship === "owned" ? (
                           <>
                             <UpdateRecipe id={recipe.id} />
