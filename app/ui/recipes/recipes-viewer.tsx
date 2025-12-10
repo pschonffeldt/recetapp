@@ -71,15 +71,20 @@ export default function ViewerRecipe({
         {/* Recipe name, visibility + creator */}
         <header className="mb-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col gap-1">
+            <div>
               <h1 className="text-2xl font-semibold tracking-tight">
                 {recipe.recipe_name}
               </h1>
 
               {mode === "discover" && (
-                <p className="text-xs text-gray-500">
-                  Created by <span className="font-medium">{creatorName}</span>
-                </p>
+                <div className="mt-1 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs text-gray-700">
+                  <span>
+                    Created by{" "}
+                    <span className="font-medium">
+                      {recipe.created_by_display_name ?? "RecetApp cook"}
+                    </span>
+                  </span>
+                </div>
               )}
             </div>
 
