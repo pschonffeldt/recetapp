@@ -6,7 +6,7 @@ import {
 } from "../recipes/recipes-buttons";
 import { formatDateToLocal } from "@/app/lib/utils/format";
 import { DiscoverRecipeCard } from "@/app/lib/discover/data";
-import PrepTimePill from "./discover-time-pill";
+import PrepTimePill from "../general/time-pill";
 
 type Props = {
   recipe: DiscoverRecipeCard;

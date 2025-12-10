@@ -14,6 +14,7 @@ import {
   type RecipeListItem,
 } from "@/app/lib/recipes/data";
 import clsx from "clsx";
+import PrepTimePill from "../general/time-pill";
 
 type RecipesTableProps = {
   userId: string;
@@ -249,13 +250,7 @@ export default async function RecipesTable({
 
                     {/* Time (prep_time_min) */}
                     <td className="whitespace-nowrap px-3 py-3 align-middle">
-                      {recipe.prep_time_min != null ? (
-                        <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-700">
-                          {recipe.prep_time_min} min
-                        </span>
-                      ) : (
-                        <span className="text-xs text-gray-400">—</span>
-                      )}
+                      <PrepTimePill minutes={recipe.prep_time_min} />
                     </td>
 
                     {/* Created at */}
