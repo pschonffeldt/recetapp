@@ -894,6 +894,7 @@ export async function fetchUserById(id: string) {
 
 /** Row shape for the admin users list */
 export type AdminUserListItem = {
+  // User info
   id: string;
   name: string;
   last_name: string | null;
@@ -901,9 +902,18 @@ export type AdminUserListItem = {
   email: string;
   country: string | null;
   language: string | null;
+  // User type
   user_role: "user" | "admin";
   membership_tier: MembershipTier | null;
   created_at: string;
+  // Activity timestamps
+  updated_at: string | null;
+  password_changed_at: string | null;
+  profile_updated_at: string | null;
+  // Recipe counts
+  owned_recipes_count: number;
+  imported_recipes_count: number;
+  total_recipes_count: number;
 };
 
 /**
@@ -913,19 +923,38 @@ export type AdminUserListItem = {
 export async function fetchAdminUsers(): Promise<AdminUserListItem[]> {
   const rows = await sql<AdminUserListItem[]>/* sql */ `
     SELECT
-      id,
-      name,
-      last_name,
-      user_name,
-      email,
-      country,
-      language,
-      user_role,
-      membership_tier,
-      (created_at AT TIME ZONE 'UTC')::timestamptz::text AS created_at
-    FROM public.users
-    ORDER BY created_at DESC
+      u.id,
+      u.name,
+      u.last_name,
+      u.user_name,
+      u.email,
+      u.country,
+      u.language,
+      u.user_role,
+      u.membership_tier,
+      (u.created_at AT TIME ZONE 'UTC')::timestamptz::text  AS created_at,
+      (u.updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS updated_at,
+      (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
+      (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
+      COALESCE(owned.count, 0)::int    AS owned_recipes_count,
+      COALESCE(imported.count, 0)::int AS imported_recipes_count,
+      (COALESCE(owned.count, 0) + COALESCE(imported.count, 0))::int AS total_recipes_count
+    FROM public.users u
+    -- Owned recipes per user
+    LEFT JOIN LATERAL (
+      SELECT COUNT(*)::int AS count
+      FROM public.recipes r
+      WHERE r.user_id = u.id
+    ) AS owned ON TRUE
+    -- Imported/saved recipes per user
+    LEFT JOIN LATERAL (
+      SELECT COUNT(*)::int AS count
+      FROM public.recipes r
+      WHERE u.id = ANY(r.saved_by_user_ids)
+    ) AS imported ON TRUE
+    ORDER BY u.created_at DESC
   `;
+
   return rows;
 }
 

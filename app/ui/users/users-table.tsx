@@ -49,6 +49,49 @@ function MembershipBadge({ tier }: { tier: MembershipTier | null }) {
   );
 }
 
+function RecipesSummaryCell({
+  owned,
+  imported,
+  total,
+}: {
+  owned: number;
+  imported: number;
+  total: number;
+}) {
+  return (
+    <div className="flex flex-col">
+      <span className="text-sm font-medium text-gray-900">{total}</span>
+      <span className="text-xs text-gray-500">
+        own {owned} · imported {imported}
+      </span>
+    </div>
+  );
+}
+
+function ActivityCell({
+  updated_at,
+  password_changed_at,
+  profile_updated_at,
+}: {
+  updated_at: string | null;
+  password_changed_at: string | null;
+  profile_updated_at: string | null;
+}) {
+  return (
+    <div className="flex flex-col text-xs text-gray-500">
+      <span>Updated: {updated_at ? formatDateToLocal(updated_at) : "—"}</span>
+      <span>
+        Password:{" "}
+        {password_changed_at ? formatDateToLocal(password_changed_at) : "—"}
+      </span>
+      <span>
+        Profile:{" "}
+        {profile_updated_at ? formatDateToLocal(profile_updated_at) : "—"}
+      </span>
+    </div>
+  );
+}
+
 export default async function AdminUsersTable() {
   const users = await fetchAdminUsers();
   const isEmpty = users.length === 0;
@@ -67,16 +110,16 @@ export default async function AdminUsersTable() {
                 <th className="px-3 py-5 font-medium">Language</th>
                 <th className="px-3 py-5 font-medium">Membership</th>
                 <th className="px-3 py-5 font-medium">Role</th>
-                <th className="whitespace-nowrap px-3 py-5 font-medium">
-                  Created
-                </th>
-                <th className="px-3 py-5 text-right text-sm font-medium">
-                  Actions
-                </th>
+                <th className="px-3 py-5 font-medium">Recipes</th>
+                <th className="px-3 py-5 font-medium">Created</th>
+                <th className="px-3 py-5 font-medium">Activity</th>
+                <th className="px-3 py-5 font-medium">Actions</th>
               </tr>
             </thead>
+
             <tbody className="bg-white">
               {isEmpty ? (
+                // If no users :(
                 <tr>
                   <td
                     colSpan={8}
@@ -87,6 +130,7 @@ export default async function AdminUsersTable() {
                 </tr>
               ) : (
                 users.map((u) => (
+                  // If there are users :)
                   <tr
                     key={u.id}
                     className="w-full border-b py-3 text-sm last-of-type:border-none"
@@ -126,11 +170,29 @@ export default async function AdminUsersTable() {
                       <RoleBadge role={u.user_role} />
                     </td>
 
+                    {/* Recipes */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle">
+                      <RecipesSummaryCell
+                        owned={u.owned_recipes_count}
+                        imported={u.imported_recipes_count}
+                        total={u.total_recipes_count}
+                      />
+                    </td>
+
                     {/* Created at */}
                     <td className="whitespace-nowrap px-3 py-3 text-gray-600 align-middle">
                       <time dateTime={u.created_at}>
                         {formatDateToLocal(u.created_at)}
                       </time>
+                    </td>
+
+                    {/* Activity */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle">
+                      <ActivityCell
+                        updated_at={u.updated_at}
+                        password_changed_at={u.password_changed_at}
+                        profile_updated_at={u.profile_updated_at}
+                      />
                     </td>
 
                     {/* Actions */}
@@ -150,18 +212,21 @@ export default async function AdminUsersTable() {
             </tbody>
           </table>
 
-          {/* Simple mobile cards */}
+          {/* Mobile cards */}
           <div className="md:hidden">
             {isEmpty ? (
+              // If no users :(
               <div className="w-full rounded-md bg-white p-4 text-gray-500">
                 No users found.
               </div>
             ) : (
               users.map((u) => (
+                // If there are users :)
                 <div
                   key={u.id}
                   className="mb-2 w-full rounded-md bg-white p-4 text-sm"
                 >
+                  {/* Name + username + email */}
                   <p className="font-medium">
                     {u.name} {u.last_name}
                   </p>
@@ -170,11 +235,45 @@ export default async function AdminUsersTable() {
                   )}
                   <p className="mt-1 text-xs text-gray-500">{u.email}</p>
 
+                  {/* Badges: membership + role */}
                   <div className="mt-2 flex flex-wrap gap-2">
                     <MembershipBadge tier={u.membership_tier} />
                     <RoleBadge role={u.user_role} />
                   </div>
 
+                  {/* Recipes summary */}
+                  <p className="mt-2 text-xs text-gray-500">
+                    Recipes:{" "}
+                    <span className="font-semibold">
+                      {u.total_recipes_count}
+                    </span>{" "}
+                    <span className="text-[11px] text-gray-500">
+                      (own {u.owned_recipes_count} · imported{" "}
+                      {u.imported_recipes_count})
+                    </span>
+                  </p>
+
+                  {/* Activity snapshot */}
+                  <div className="mt-1 space-y-0.5 text-[11px] text-gray-500">
+                    <p>
+                      Updated:{" "}
+                      {u.updated_at ? formatDateToLocal(u.updated_at) : "—"}
+                    </p>
+                    <p>
+                      Password:{" "}
+                      {u.password_changed_at
+                        ? formatDateToLocal(u.password_changed_at)
+                        : "—"}
+                    </p>
+                    <p>
+                      Profile:{" "}
+                      {u.profile_updated_at
+                        ? formatDateToLocal(u.profile_updated_at)
+                        : "—"}
+                    </p>
+                  </div>
+
+                  {/* Joined date */}
                   <p className="mt-2 text-xs text-gray-500">
                     Joined{" "}
                     <time dateTime={u.created_at}>
@@ -182,6 +281,7 @@ export default async function AdminUsersTable() {
                     </time>
                   </p>
 
+                  {/* Actions */}
                   <div className="mt-2 flex justify-end">
                     <Link
                       href={`/dashboard/admin/users/${u.id}`}
