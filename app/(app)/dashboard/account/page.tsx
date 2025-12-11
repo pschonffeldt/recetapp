@@ -30,8 +30,9 @@ export default async function Page() {
           },
         ]}
       />
-
+      {/* Membership form */}
       <EditAccountMembershipForm user={user} libraryCount={libraryCount} />
+      {/* User information form */}
       <EditAccountSettingsForm user={user} />
     </main>
   );

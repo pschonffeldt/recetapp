@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { UserForm, MembershipTier } from "@/app/lib/types/definitions";
 import { inter } from "../branding/branding-fonts";
 import { Button } from "../general/button";
+import { useToast } from "@/app/ui/toast/toast-provider";
+import { PLAN_PRICING } from "@/app/lib/membership/plans";
 
 type Props = {
   user: UserForm;
@@ -23,22 +26,28 @@ const PLAN_LABEL: Record<MembershipTier, string> = {
 };
 
 const PLAN_HELP: Record<MembershipTier, string> = {
-  free: `Great for getting started and trying RecetApp with up to ${PLAN_LIMITS.free} recipes.`,
-  tier1: `For more serious cooking: more space for your recipes and imports (up to ${PLAN_LIMITS.tier1} recipes).`,
-  tier2: `For power users and meal planners: even more room for your recipes and imports (up to ${PLAN_LIMITS.tier2} recipes).`,
+  free: `Great for getting started and trying RecetApp with up to ${PLAN_LIMITS.free} recipes (${PLAN_PRICING.free}).`,
+  tier1: `For more serious cooking: more space for your recipes and imports (up to ${PLAN_LIMITS.tier1} recipes) for ${PLAN_PRICING.tier1}.`,
+  tier2: `For power users and meal planners: even more room for your recipes and imports (up to ${PLAN_LIMITS.tier2} recipes) for ${PLAN_PRICING.tier2}.`,
 };
+
+// Used to compare which tier is “higher”
+const PLAN_ORDER: MembershipTier[] = ["free", "tier1", "tier2"];
 
 export default function EditAccountMembershipForm({
   user,
   libraryCount,
 }: Props) {
+  const router = useRouter();
+  const { push } = useToast();
+
   const currentTier: MembershipTier =
     (user.membership_tier as MembershipTier) ?? "free";
 
-  // What the user is previewing / targeting
+  // Tier currently being previewed / targeted
   const [selectedTier, setSelectedTier] = useState<MembershipTier>(currentTier);
 
-  // Current plan (pill)
+  // Current plan pill
   const currentLabel = PLAN_LABEL[currentTier];
   const currentMax = PLAN_LIMITS[currentTier];
 
@@ -47,24 +56,55 @@ export default function EditAccountMembershipForm({
       ? "bg-emerald-50 text-emerald-700 border-emerald-200"
       : "bg-indigo-50 text-indigo-700 border-indigo-200";
 
-  // Selected/previewed plan (context box)
+  // Selected / preview plan
   const selectedLabel = PLAN_LABEL[selectedTier];
   const selectedMax = PLAN_LIMITS[selectedTier];
   const selectedHelp = PLAN_HELP[selectedTier];
 
   const viewingCurrent = selectedTier === currentTier;
 
-  // Allowed targets
-  const upgradeOptions: MembershipTier[] =
-    currentTier === "free" ? ["free", "tier1", "tier2"] : ["tier1", "tier2"];
-
-  const canUpgrade =
-    selectedTier !== currentTier && upgradeOptions.includes(selectedTier);
+  // All selectable plans (we’ll decide what to do on click)
+  const upgradeOptions: MembershipTier[] = ["free", "tier1", "tier2"];
 
   const handleUpgradeClick = () => {
-    if (!canUpgrade) return;
-    // TODO: hook into Stripe / checkout / billing flow
-    console.log("Upgrade flow would start for plan:", selectedTier);
+    const currentIndex = PLAN_ORDER.indexOf(currentTier);
+    const selectedIndex = PLAN_ORDER.indexOf(selectedTier);
+
+    // Same plan → just show a gentle warning
+    if (selectedIndex === currentIndex) {
+      push({
+        variant: "warning",
+        title: "Already on this plan",
+        message: "Select a higher tier to upgrade your membership.",
+      });
+      return;
+    }
+
+    // Lower plan → future downgrade flow
+    if (selectedIndex < currentIndex) {
+      push({
+        variant: "info",
+        title: "Downgrade not available yet",
+        message:
+          "Downgrades will be handled in a dedicated flow in a future update.",
+      });
+      return;
+    }
+
+    // Safety check: don’t let them pick a plan that can't fit their current library
+    if (libraryCount > selectedMax) {
+      push({
+        variant: "error",
+        title: "Plan limit exceeded",
+        message: `You currently have ${libraryCount} recipes, but ${PLAN_LABEL[selectedTier]} allows up to ${selectedMax}.`,
+      });
+      return;
+    }
+
+    // Upgrade → go to payment page, passing from/to tiers
+    router.push(
+      `/payments/membership-payment?from=${currentTier}&to=${selectedTier}`
+    );
   };
 
   return (
@@ -131,7 +171,7 @@ export default function EditAccountMembershipForm({
         {viewingCurrent && currentTier === "free" && (
           <p className="mt-2 text-gray-600">
             When you&apos;re ready, select a higher tier to see how your limits
-            will change and start the upgrade.
+            will change and start the upgrade flow.
           </p>
         )}
       </div>
@@ -158,17 +198,13 @@ export default function EditAccountMembershipForm({
             ))}
           </select>
           <p className="mt-1 text-xs text-gray-500">
-            Changing this will update the plan details above. The upgrade only
-            starts after you click{" "}
+            Changing this will update the plan details above. The actual upgrade
+            (or future downgrade) only starts after you click{" "}
             <span className="font-semibold">Upgrade plan</span>.
           </p>
         </div>
 
-        <Button
-          type="button"
-          onClick={handleUpgradeClick}
-          disabled={!canUpgrade}
-        >
+        <Button type="button" onClick={handleUpgradeClick}>
           Upgrade plan
         </Button>
       </div>
