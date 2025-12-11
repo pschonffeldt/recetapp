@@ -874,7 +874,17 @@ export async function fetchIngredientsForUser(
 export async function fetchUserById(id: string) {
   if (!id) throw new Error("fetchUserById: id is required");
   const rows = await sql<UserForm[]>`
-    SELECT id, name, user_name, last_name, email, password, country, language
+    SELECT
+      id,
+      name,
+      user_name,
+      last_name,
+      email,
+      password,
+      country,
+      language,
+      user_role,
+      membership_tier
     FROM public.users
     WHERE id = ${id}::uuid
   `;
@@ -947,4 +957,20 @@ export async function fetchRecipeByIdForOwnerOrSaved(
   `;
 
   return rows[0] ?? null;
+}
+
+/**
+ * Total recipes in a user's library (owned + imported).
+ * Used for membership limits.
+ */
+export async function fetchRecipeLibraryCount(userId: string): Promise<number> {
+  const rows = await sql<{ count: number }[]>`
+    SELECT COUNT(*)::int AS count
+    FROM public.recipes r
+    WHERE
+      r.user_id = ${userId}::uuid
+      OR ${userId}::uuid = ANY(r.saved_by_user_ids)
+  `;
+
+  return rows[0]?.count ?? 0;
 }

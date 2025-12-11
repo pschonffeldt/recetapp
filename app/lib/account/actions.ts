@@ -16,9 +16,10 @@
 import { auth } from "@/auth";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
-
 import { sql } from "../db";
 import { UpdateUserProfileSchema } from "./validation";
+import { requireUserId } from "../auth/helpers";
+import { MembershipTier } from "../types/definitions";
 
 /* =============================================================================
  * Types
@@ -173,6 +174,88 @@ export async function updateUserProfile(
   revalidatePath("/dashboard/account");
 
   return { message: null, errors: {}, ok: true, shouldRefresh: true };
+}
+
+type ActionResult = {
+  ok: boolean;
+  message: string | null;
+  errors: Record<string, string[]>;
+};
+
+const MEMBERSHIP_LIMITS: Record<MembershipTier, number> = {
+  free: 10,
+  tier1: 50,
+  tier2: 100,
+};
+
+export async function updateUserMembership(
+  _prev: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    const userId = await requireUserId();
+    const targetId = formData.get("id")?.toString();
+    const membership = formData.get("membership_tier")?.toString();
+
+    if (!targetId || targetId !== userId) {
+      return {
+        ok: false,
+        message: "You can only update your own membership.",
+        errors: {},
+      };
+    }
+
+    if (membership !== "free" && membership !== "tier1") {
+      return {
+        ok: false,
+        message: "Invalid membership tier.",
+        errors: { membership_tier: ["Please choose a valid plan."] },
+      };
+    }
+
+    const tier = membership as MembershipTier;
+
+    // Enforce limits on downgrade
+    const [{ count }] = await sql<{ count: number }[]>`
+      SELECT COUNT(*)::int AS count
+      FROM public.recipes r
+      WHERE
+        r.user_id = ${userId}::uuid
+        OR ${userId}::uuid = ANY(r.saved_by_user_ids)
+    `;
+    const libraryCount = count ?? 0;
+    const maxAllowed = MEMBERSHIP_LIMITS[tier];
+
+    if (libraryCount > maxAllowed) {
+      return {
+        ok: false,
+        message: `You currently have ${libraryCount} recipes in your library. The ${
+          tier === "free" ? "Free" : "Tier 1"
+        } plan allows up to ${maxAllowed}.`,
+        errors: {
+          membership_tier: [
+            "Reduce your recipes or choose a higher tier to downgrade.",
+          ],
+        },
+      };
+    }
+
+    await sql`
+      UPDATE public.users
+      SET membership_tier = ${tier}::membership_tier,
+          updated_at = NOW()
+      WHERE id = ${userId}::uuid
+    `;
+
+    return { ok: true, message: null, errors: {} };
+  } catch (err) {
+    console.error("updateUserMembership error:", err);
+    return {
+      ok: false,
+      message: "Something went wrong updating your membership.",
+      errors: {},
+    };
+  }
 }
 
 /**

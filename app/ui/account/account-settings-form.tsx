@@ -101,7 +101,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     Boolean(state.errors?.[k]?.length);
 
   return (
-    <div className="pb-12">
+    <div className="mt-8">
       {/* PROFILE FORM */}
       <form action={profileAction}>
         <input type="hidden" name="id" value={user.id} />
@@ -225,20 +225,21 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                 ) : null}
               </div>
             </div>
+            <div className="mt-6 flex justify-center gap-4 px-6 lg:justify-end lg:px-0">
+              {profileState.message && (
+                <p className="mt-3 text-sm text-red-600">
+                  {profileState.message}
+                </p>
+              )}
+              <Link
+                href="/dashboard"
+                className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
+              >
+                Discard Changes
+              </Link>
+              <Button type="submit">Save Changes</Button>
+            </div>
           </section>
-        </div>
-
-        <div className="mt-6 flex justify-center gap-4 px-6 lg:justify-end lg:px-0">
-          {profileState.message && (
-            <p className="mt-3 text-sm text-red-600">{profileState.message}</p>
-          )}
-          <Link
-            href="/dashboard"
-            className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
-          >
-            Discard Changes
-          </Link>
-          <Button type="submit">Save Changes</Button>
         </div>
       </form>
 
@@ -309,14 +310,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                 ) : null}
               </div>
             </div>
+            <div className="mt-6 flex justify-center gap-4 px-6 lg:justify-end lg:px-0">
+              {pwdState.message && (
+                <p className="mt-3 text-sm text-red-600">{pwdState.message}</p>
+              )}
+              <Button type="submit">Update Password</Button>
+            </div>
           </section>
-        </div>
-
-        <div className="mt-6 flex justify-center gap-4 px-6 lg:justify-end lg:px-0">
-          {pwdState.message && (
-            <p className="mt-3 text-sm text-red-600">{pwdState.message}</p>
-          )}
-          <Button type="submit">Update Password</Button>
         </div>
       </form>
     </div>

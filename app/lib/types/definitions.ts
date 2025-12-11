@@ -156,6 +156,9 @@ export type RecipeForm = {
  * Shape used by the account settings / user form.
  * Note: password here is the plain value used for forms, not necessarily DB.
  */
+
+export type MembershipTier = "free" | "tier1" | "tier2";
+
 export type UserForm = {
   id: string;
   name: string;
@@ -165,6 +168,7 @@ export type UserForm = {
   password: string;
   country: Country;
   language: Language;
+  membership_tier?: MembershipTier;
 };
 
 /* =============================================================================
