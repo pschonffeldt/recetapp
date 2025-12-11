@@ -27,6 +27,7 @@ import type {
   CardData,
   UserForm,
   LatestRecipeRaw,
+  MembershipTier,
 } from "../types/definitions";
 import type { IncomingIngredientPayload } from "../types/definitions";
 import { parseStructuredIngredients } from "../ingredients";
@@ -889,6 +890,43 @@ export async function fetchUserById(id: string) {
     WHERE id = ${id}::uuid
   `;
   return rows[0] ?? null;
+}
+
+/** Row shape for the admin users list */
+export type AdminUserListItem = {
+  id: string;
+  name: string;
+  last_name: string | null;
+  user_name: string | null;
+  email: string;
+  country: string | null;
+  language: string | null;
+  user_role: "user" | "admin";
+  membership_tier: MembershipTier | null;
+  created_at: string;
+};
+
+/**
+ * Fetch all users for the admin users table.
+ * (Authorization is enforced at the route level.)
+ */
+export async function fetchAdminUsers(): Promise<AdminUserListItem[]> {
+  const rows = await sql<AdminUserListItem[]>/* sql */ `
+    SELECT
+      id,
+      name,
+      last_name,
+      user_name,
+      email,
+      country,
+      language,
+      user_role,
+      membership_tier,
+      (created_at AT TIME ZONE 'UTC')::timestamptz::text AS created_at
+    FROM public.users
+    ORDER BY created_at DESC
+  `;
+  return rows;
 }
 
 /* =============================================================================

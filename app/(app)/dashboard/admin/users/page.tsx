@@ -1,12 +1,34 @@
-import { inter } from "@/app/ui/branding/branding-fonts";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { auth } from "@/auth";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
+import { fetchUserById } from "@/app/lib/recipes/data";
+import AdminUsersTable from "@/app/ui/users/users-table";
 
-export default async function Page() {
+export const metadata: Metadata = {
+  title: "Admin · Users",
+};
+
+export default async function AdminUsersPage() {
+  const session = await auth();
+  const id = (session?.user as any)?.id as string | undefined;
+  if (!id) notFound();
+
+  const me = await fetchUserById(id);
+  // Only allow admins to see this page
+  if (!me || (me as any).user_role !== "admin") {
+    notFound();
+  }
+
   return (
     <main>
-      {/* Page title */}
-      <h1 className={`${inter.className} mb-4 pl-6 text-xl md:text-2xl`}>
-        Users
-      </h1>
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: "Admin", href: "/dashboard/admin" },
+          { label: "Users", href: "/dashboard/admin/users", active: true },
+        ]}
+      />
+      <AdminUsersTable />
     </main>
   );
 }
