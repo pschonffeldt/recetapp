@@ -168,7 +168,16 @@ export type UserForm = {
   password: string;
   country: Country;
   language: Language;
+
+  // Membership & role
   membership_tier?: MembershipTier;
+  user_role?: string | null;
+
+  // Activity metadata (all optional)
+  created_at?: string;
+  profile_updated_at?: string | null;
+  password_changed_at?: string | null;
+  last_login_at?: string | null;
 };
 
 /* =============================================================================

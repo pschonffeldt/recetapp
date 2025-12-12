@@ -10,7 +10,7 @@ import {
   updateUserProfile,
   updateUserPassword,
 } from "@/app/lib/account/actions";
-import { formatDateToLocal } from "@/app/lib/utils/format";
+import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils/format";
 
 type ActionResult = {
   ok: boolean;
@@ -311,7 +311,7 @@ export default function AdminUserEditForm({
                     id="language"
                     name="language"
                     type="text"
-                    defaultValue={user.language}
+                    defaultValue={capitalizeFirst(user.language)}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                     aria-invalid={hasErr(profileState, "language")}
                     aria-describedby={
@@ -337,28 +337,30 @@ export default function AdminUserEditForm({
               <h2 className={`${inter.className} mb-2 text-xl md:text-2xl`}>
                 Membership & role
               </h2>
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="text-gray-600">Membership:</span>
-                <span
-                  className={`inline-flex items-center rounded-full border px-3 py-1 font-medium ${membershipPillClass}`}
-                >
-                  {membershipLabel[membershipTier]}
-                </span>
+              <div className="rounded-md border border-gray-200 bg-white p-3">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="text-gray-600">Membership:</span>
+                  <span
+                    className={`inline-flex items-center rounded-full border px-3 py-1 font-medium ${membershipPillClass}`}
+                  >
+                    {membershipLabel[membershipTier]}
+                  </span>
 
-                <span className="ml-3 text-gray-600">Role:</span>
-                <span
-                  className={`inline-flex items-center rounded-full border px-3 py-1 font-medium ${rolePillClass}`}
-                >
-                  {role === "admin" ? "Admin" : "User"}
-                </span>
+                  <span className="ml-3 text-gray-600">Role:</span>
+                  <span
+                    className={`inline-flex items-center rounded-full border px-3 py-1 font-medium ${rolePillClass}`}
+                  >
+                    {role === "admin" ? "Admin" : "User"}
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Activity / usage info */}
             <div>
-              <h3 className="mb-2 text-sm font-semibold text-gray-800">
+              <h2 className={`${inter.className} mb-2 text-xl md:text-2xl`}>
                 Activity & usage
-              </h3>
+              </h2>
 
               <div className="grid gap-4 text-xs sm:grid-cols-2">
                 {/* Recipe counts */}
@@ -389,7 +391,13 @@ export default function AdminUserEditForm({
                       </dd>
                     </div>
                     <div className="flex justify-between gap-2">
-                      <dt className="text-gray-600">Profile updated</dt>
+                      <dt className="text-gray-600">Last login</dt>
+                      <dd className="text-gray-800">
+                        {safeDate(user.last_login_at)}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      <dt className="text-gray-600">Personal info changed</dt>
                       <dd className="text-gray-800">
                         {safeDate(user.profile_updated_at)}
                       </dd>
@@ -398,12 +406,6 @@ export default function AdminUserEditForm({
                       <dt className="text-gray-600">Password changed</dt>
                       <dd className="text-gray-800">
                         {safeDate(user.password_changed_at)}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between gap-2">
-                      <dt className="text-gray-600">Last login</dt>
-                      <dd className="text-gray-800">
-                        {safeDate(user.last_login_at)}
                       </dd>
                     </div>
                   </dl>

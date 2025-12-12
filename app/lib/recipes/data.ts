@@ -874,21 +874,28 @@ export async function fetchIngredientsForUser(
  */
 export async function fetchUserById(id: string) {
   if (!id) throw new Error("fetchUserById: id is required");
+
   const rows = await sql<UserForm[]>`
     SELECT
-      id,
-      name,
-      user_name,
-      last_name,
-      email,
-      password,
-      country,
-      language,
-      user_role,
-      membership_tier
-    FROM public.users
-    WHERE id = ${id}::uuid
+      u.id,
+      u.name,
+      u.user_name,
+      u.last_name,
+      u.email,
+      u.password,
+      u.country,
+      u.language AS language,
+      u.membership_tier,
+      u.user_role,
+      (u.created_at AT TIME ZONE 'UTC')::timestamptz::text          AS created_at,
+      (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
+      (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
+      NULL::text                                                   AS last_login_at
+    FROM public.users AS u
+    WHERE u.id = ${id}::uuid
+    LIMIT 1
   `;
+
   return rows[0] ?? null;
 }
 
@@ -1040,4 +1047,32 @@ export async function fetchRecipeLibraryCount(userId: string): Promise<number> {
   `;
 
   return rows[0]?.count ?? 0;
+}
+
+/** Simple aggregate counts for a user’s recipe library (owned vs imported). */
+export async function fetchRecipeCountsForUser(userId: string): Promise<{
+  owned: number;
+  imported: number;
+}> {
+  const rows = await sql<{ owned: number; imported: number }[]>`
+    SELECT
+      COALESCE(
+        COUNT(*) FILTER (WHERE r.user_id = ${userId}::uuid),
+        0
+      )::int AS owned,
+      COALESCE(
+        COUNT(*) FILTER (
+          WHERE ${userId}::uuid = ANY(r.saved_by_user_ids)
+            AND (r.user_id IS NULL OR r.user_id <> ${userId}::uuid)
+        ),
+        0
+      )::int AS imported
+    FROM public.recipes r
+  `;
+
+  const row = rows[0];
+  return {
+    owned: row?.owned ?? 0,
+    imported: row?.imported ?? 0,
+  };
 }
