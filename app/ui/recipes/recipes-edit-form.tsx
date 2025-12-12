@@ -308,7 +308,7 @@ export default function EditRecipeForm({
               inputMode="numeric"
               min={1}
               step={1}
-              defaultValue={recipe.servings ?? ""}
+              defaultValue={recipe.servings ?? "e.g. 6 servings"}
               className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="servings-error"
             />
@@ -336,7 +336,7 @@ export default function EditRecipeForm({
               inputMode="numeric"
               min={0}
               step={1}
-              defaultValue={recipe.prep_time_min ?? ""}
+              defaultValue={recipe.prep_time_min ?? "e.g. 25 minutes"}
               className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="prep_time_min-error"
             />
@@ -364,7 +364,7 @@ export default function EditRecipeForm({
               inputMode="numeric"
               min={0}
               step={1}
-              defaultValue={recipe.calories_total ?? ""}
+              defaultValue={recipe.calories_total ?? "e.g. 5000 Kcal"}
               className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="calories_total-error"
             />
@@ -396,7 +396,7 @@ export default function EditRecipeForm({
               inputMode="decimal"
               min={0}
               step="0.01"
-              defaultValue={recipe.estimated_cost_total ?? ""}
+              defaultValue={recipe.estimated_cost_total ?? "e.g. $20"}
               className="block w-full rounded-md border border-gray-200 p-2 text-base"
               aria-describedby="estimated_cost_total-error"
             />

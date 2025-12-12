@@ -318,22 +318,21 @@ export default function ViewerRecipe({
         {/* Ingredients & Steps */}
         <section className="mb-6 grid items-stretch gap-3 sm:grid-cols-2">
           <MetricCard
-            title="Ingredients"
-            items={ingredientLines}
-            emptyLabel="No ingredients."
-            listStyle="disc"
+            title="Steps"
+            items={recipe.recipe_steps}
+            emptyLabel="No steps."
+            listStyle="decimal"
             fontClassName={inter.className}
-            className="h-full"
+            className="flex-1"
           />
-
           <div className="flex h-full flex-col gap-3">
             <MetricCard
-              title="Steps"
-              items={recipe.recipe_steps}
-              emptyLabel="No steps."
-              listStyle="decimal"
+              title="Ingredients"
+              items={ingredientLines}
+              emptyLabel="No ingredients."
+              listStyle="disc"
               fontClassName={inter.className}
-              className="flex-1"
+              className="h-full"
             />
             <MetricCard
               title="Equipment"

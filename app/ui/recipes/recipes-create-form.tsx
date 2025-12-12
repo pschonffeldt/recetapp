@@ -275,7 +275,7 @@ export default function RecipeForm() {
               inputMode="numeric"
               min={1}
               step={1}
-              placeholder=""
+              placeholder="e.g. 6 servings"
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base placeholder:text-gray-500"
               aria-describedby="servings-error"
             />
@@ -303,7 +303,7 @@ export default function RecipeForm() {
               inputMode="numeric"
               min={0}
               step={1}
-              placeholder=""
+              placeholder="e.g. 25 minutes"
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base placeholder:text-gray-500"
               aria-describedby="prep_time_min-error"
             />
@@ -331,7 +331,7 @@ export default function RecipeForm() {
               inputMode="numeric"
               min={0}
               step={1}
-              placeholder=""
+              placeholder="e.g. 5000 Kcal"
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base placeholder:text-gray-500"
               aria-describedby="calories_total-error"
             />
@@ -363,7 +363,7 @@ export default function RecipeForm() {
               inputMode="decimal"
               min={0}
               step="0.01"
-              placeholder=""
+              placeholder="e.g. $20"
               className="block w-full rounded-md border border-gray-200 py-2 px-3 text-base placeholder:text-gray-500"
               aria-describedby="estimated_cost_total-error"
             />

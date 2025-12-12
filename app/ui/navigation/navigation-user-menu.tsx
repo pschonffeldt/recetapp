@@ -9,6 +9,7 @@ import {
   ShoppingCartIcon,
   ArrowDownIcon,
   GlobeAltIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChartBarIcon,
@@ -24,6 +25,7 @@ type Props = {
   notificationsHref?: string;
   shoppinglistHref?: string;
   discoverHref?: string;
+  helpHref?: string;
 
   /** Admin-only routes */
   isAdmin?: boolean;
@@ -42,6 +44,7 @@ export default function UserSettingsFab({
   notificationsHref = "/dashboard/notifications",
   shoppinglistHref = "/dashboard/shopping-list",
   discoverHref = "/dashboard/discover",
+  helpHref = "/dashboard/help",
 
   isAdmin = false,
   adminNotificationHref = "/dashboard/admin/notification-center",
@@ -170,11 +173,16 @@ export default function UserSettingsFab({
               label="Account"
               onClick={() => go(profileHref)}
             />
-            {/* Divider before admin tools */}
-            <div className="my-2 h-px bg-gray-200/60" />
+            <MenuItem
+              icon={<InformationCircleIcon className="h-5 w-5" />}
+              label="Help"
+              onClick={() => go(helpHref)}
+            />
             {/* Admin-only section */}
             {isAdmin && (
               <div>
+                {/* Divider before admin tools */}
+                <div className="my-2 h-px bg-gray-200/60" />
                 <div className="flex flex-row items-center gap-2 mt-4 mb-1 rounded-md bg-blue-400 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
                   <ArrowDownIcon className="ml-1 w-3"></ArrowDownIcon>
                   <span>Admin tools</span>

@@ -8,6 +8,7 @@ import {
   ArrowDownIcon,
   GlobeAltIcon,
   HomeIcon,
+  InformationCircleIcon,
   MegaphoneIcon,
   ShoppingCartIcon,
   UserIcon,
@@ -48,6 +49,7 @@ export default function NavLinksClient({ isAdmin }: Props) {
       icon: MegaphoneIcon,
     },
     { name: "Account", href: "/dashboard/account", icon: UserIcon },
+    { name: "Help", href: "/dashboard/help", icon: InformationCircleIcon },
   ];
 
   const adminLinks: NavItem[] = [
