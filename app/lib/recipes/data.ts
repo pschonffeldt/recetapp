@@ -917,6 +917,7 @@ export type AdminUserListItem = {
   updated_at: string | null;
   password_changed_at: string | null;
   profile_updated_at: string | null;
+  last_login_at: string | null;
   // Recipe counts
   owned_recipes_count: number;
   imported_recipes_count: number;
@@ -1004,10 +1005,11 @@ export async function fetchAdminUsers(): Promise<AdminUserListItem[]> {
       u.language,
       u.user_role,
       u.membership_tier,
-      (u.created_at AT TIME ZONE 'UTC')::timestamptz::text  AS created_at,
-      (u.updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS updated_at,
+      (u.created_at AT TIME ZONE 'UTC')::timestamptz::text          AS created_at,
+      (u.updated_at AT TIME ZONE 'UTC')::timestamptz::text          AS updated_at,
       (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
       (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
+      (u.last_login_at AT TIME ZONE 'UTC')::timestamptz::text       AS last_login_at,
       COALESCE(owned.count, 0)::int    AS owned_recipes_count,
       COALESCE(imported.count, 0)::int AS imported_recipes_count,
       (COALESCE(owned.count, 0) + COALESCE(imported.count, 0))::int AS total_recipes_count

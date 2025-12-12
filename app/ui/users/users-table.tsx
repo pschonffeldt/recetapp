@@ -1,96 +1,10 @@
 import Link from "next/link";
-import clsx from "clsx";
 import { formatDateToLocal } from "@/app/lib/utils/format";
-import {
-  fetchAdminUsers,
-  type AdminUserListItem,
-} from "@/app/lib/recipes/data";
-import type { MembershipTier } from "@/app/lib/types/definitions";
-
-function RoleBadge({ role }: { role: "user" | "admin" }) {
-  const base =
-    "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium";
-  const admin = "border-purple-300 bg-purple-50 text-purple-700";
-  const user = "border-gray-200 bg-gray-50 text-gray-700";
-
-  return (
-    <span className={clsx(base, role === "admin" ? admin : user)}>
-      {role === "admin" ? "Admin" : "User"}
-    </span>
-  );
-}
-
-function MembershipBadge({ tier }: { tier: MembershipTier | null }) {
-  if (!tier) {
-    return (
-      <span className="inline-flex items-center rounded-full border border-gray-200 px-2 py-0.5 text-[11px] text-gray-500">
-        Not set
-      </span>
-    );
-  }
-
-  const label =
-    tier === "free" ? "Free" : tier === "tier1" ? "Tier 1" : "Tier 2";
-
-  const cls =
-    tier === "free"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-      : "border-indigo-200 bg-indigo-50 text-indigo-700";
-
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
-        cls
-      )}
-    >
-      {label}
-    </span>
-  );
-}
-
-function RecipesSummaryCell({
-  owned,
-  imported,
-  total,
-}: {
-  owned: number;
-  imported: number;
-  total: number;
-}) {
-  return (
-    <div className="flex flex-col">
-      <span className="text-sm font-medium text-gray-900">{total}</span>
-      <span className="text-xs text-gray-500">
-        own {owned} · imported {imported}
-      </span>
-    </div>
-  );
-}
-
-function ActivityCell({
-  updated_at,
-  password_changed_at,
-  profile_updated_at,
-}: {
-  updated_at: string | null;
-  password_changed_at: string | null;
-  profile_updated_at: string | null;
-}) {
-  return (
-    <div className="flex flex-col text-xs text-gray-500">
-      <span>Updated: {updated_at ? formatDateToLocal(updated_at) : "—"}</span>
-      <span>
-        Password:{" "}
-        {password_changed_at ? formatDateToLocal(password_changed_at) : "—"}
-      </span>
-      <span>
-        Profile:{" "}
-        {profile_updated_at ? formatDateToLocal(profile_updated_at) : "—"}
-      </span>
-    </div>
-  );
-}
+import { fetchAdminUsers } from "@/app/lib/recipes/data";
+import ActivityCell from "./users-activity-cell";
+import RecipesSummaryCell from "./user-recipes-summary-cell";
+import MembershipBadge from "./users-membership-badge";
+import RoleBadge from "./users-role-badge";
 
 export default async function AdminUsersTable() {
   const users = await fetchAdminUsers();
@@ -111,7 +25,7 @@ export default async function AdminUsersTable() {
                 <th className="px-3 py-5 font-medium">Membership</th>
                 <th className="px-3 py-5 font-medium">Role</th>
                 <th className="px-3 py-5 font-medium">Recipes</th>
-                <th className="px-3 py-5 font-medium">Created</th>
+                <th className="px-3 py-5 font-medium">Joined</th>
                 <th className="px-3 py-5 font-medium">Activity</th>
                 <th className="px-3 py-5 font-medium">Actions</th>
               </tr>
@@ -179,7 +93,7 @@ export default async function AdminUsersTable() {
                       />
                     </td>
 
-                    {/* Created at */}
+                    {/* Joined */}
                     <td className="whitespace-nowrap px-3 py-3 text-gray-600 align-middle">
                       <time dateTime={u.created_at}>
                         {formatDateToLocal(u.created_at)}
@@ -191,7 +105,7 @@ export default async function AdminUsersTable() {
                       <ActivityCell
                         updated_at={u.updated_at}
                         password_changed_at={u.password_changed_at}
-                        profile_updated_at={u.profile_updated_at}
+                        last_login_at={u.last_login_at}
                       />
                     </td>
 
@@ -253,26 +167,6 @@ export default async function AdminUsersTable() {
                     </span>
                   </p>
 
-                  {/* Activity snapshot */}
-                  <div className="mt-1 space-y-0.5 text-[11px] text-gray-500">
-                    <p>
-                      Updated:{" "}
-                      {u.updated_at ? formatDateToLocal(u.updated_at) : "—"}
-                    </p>
-                    <p>
-                      Password:{" "}
-                      {u.password_changed_at
-                        ? formatDateToLocal(u.password_changed_at)
-                        : "—"}
-                    </p>
-                    <p>
-                      Profile:{" "}
-                      {u.profile_updated_at
-                        ? formatDateToLocal(u.profile_updated_at)
-                        : "—"}
-                    </p>
-                  </div>
-
                   {/* Joined date */}
                   <p className="mt-2 text-xs text-gray-500">
                     Joined{" "}
@@ -280,6 +174,26 @@ export default async function AdminUsersTable() {
                       {formatDateToLocal(u.created_at)}
                     </time>
                   </p>
+
+                  {/* Activity snapshot */}
+                  <div className="mt-1 space-y-0.5 text-[11px] text-gray-500">
+                    <p>
+                      Profile updated:{" "}
+                      {u.updated_at ? formatDateToLocal(u.updated_at) : "—"}
+                    </p>
+                    <p>
+                      Password updated:{" "}
+                      {u.password_changed_at
+                        ? formatDateToLocal(u.password_changed_at)
+                        : "—"}
+                    </p>
+                    <p>
+                      Last login:{" "}
+                      {u.last_login_at
+                        ? formatDateToLocal(u.last_login_at)
+                        : "—"}
+                    </p>
+                  </div>
 
                   {/* Actions */}
                   <div className="mt-2 flex justify-end">
