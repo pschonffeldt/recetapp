@@ -11,9 +11,11 @@ export default function ActivityCell({
 }) {
   return (
     <div className="flex flex-col text-xs text-gray-500">
-      <span>Updated: {updated_at ? formatDateToLocal(updated_at) : "—"}</span>
       <span>
-        Password:{" "}
+        Last update: {updated_at ? formatDateToLocal(updated_at) : "—"}
+      </span>
+      <span>
+        Password updated:{" "}
         {password_changed_at ? formatDateToLocal(password_changed_at) : "—"}
       </span>
       <span>
