@@ -923,6 +923,73 @@ export type AdminUserListItem = {
   total_recipes_count: number;
 };
 
+// ===== Admin: single user with extra metadata =====
+
+type AdminUserRow = UserForm & {
+  // already in UserForm, but we make sure it’s present in the row
+  membership_tier?: UserForm["membership_tier"];
+  user_role: string | null;
+  created_at: string;
+  profile_updated_at: string | null;
+  password_changed_at: string | null;
+  last_login_at: string | null;
+  recipes_owned_count: number;
+  recipes_imported_count: number;
+};
+
+export async function fetchUserByIdForAdmin(
+  id: string
+): Promise<AdminUserRow | null> {
+  if (!id) throw new Error("fetchUserByIdForAdmin: id is required");
+
+  const rows = await sql<AdminUserRow[]>`
+    WITH owned AS (
+      SELECT
+        r.user_id,
+        COUNT(*)::int AS cnt
+      FROM public.recipes r
+      WHERE r.user_id IS NOT NULL
+      GROUP BY r.user_id
+    ),
+    imported AS (
+      SELECT
+        saver_id,
+        COUNT(*)::int AS cnt
+      FROM (
+        SELECT UNNEST(r.saved_by_user_ids) AS saver_id
+        FROM public.recipes r
+        WHERE r.saved_by_user_ids IS NOT NULL
+      ) s
+      GROUP BY saver_id
+    )
+    SELECT
+      u.id,
+      u.name,
+      u.user_name,
+      u.last_name,
+      u.email,
+      ''::text AS password,
+      u.country,
+      u.language,
+      u.membership_tier,
+      u.user_role,
+      (u.created_at AT TIME ZONE 'UTC')::timestamptz::text         AS created_at,
+      (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text AS profile_updated_at,
+      (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
+      -- no column yet → return NULL as placeholder
+      NULL::timestamptz::text                                      AS last_login_at,
+      COALESCE(owned.cnt, 0)::int    AS recipes_owned_count,
+      COALESCE(imported.cnt, 0)::int AS recipes_imported_count
+    FROM public.users u
+    LEFT JOIN owned    ON owned.user_id     = u.id
+    LEFT JOIN imported ON imported.saver_id = u.id
+    WHERE u.id = ${id}::uuid
+    LIMIT 1
+  `;
+
+  return rows[0] ?? null;
+}
+
 /**
  * Fetch all users for the admin users table.
  * (Authorization is enforced at the route level.)

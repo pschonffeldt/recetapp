@@ -1,35 +1,22 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { auth } from "@/auth";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
-import {
-  fetchUserById,
-  fetchRecipeCountsForUser,
-} from "@/app/lib/recipes/data";
+import { fetchUserByIdForAdmin } from "@/app/lib/recipes/data";
 import AdminUserEditForm from "@/app/ui/users/users-edit-form";
 
 export const metadata: Metadata = {
-  title: "Admin · User",
+  title: "Admin – Edit user",
 };
 
 type PageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export default async function Page({ params }: PageProps) {
-  const session = await auth();
+  const { id } = await params;
 
-  // Optional: guard so only admins can hit this page
-  const sessionRole =
-    (session?.user as any)?.user_role || (session?.user as any)?.role;
-  if (!session || sessionRole !== "admin") {
-    notFound();
-  }
-
-  const user = await fetchUserById(params.id);
+  const user = await fetchUserByIdForAdmin(id);
   if (!user) notFound();
-
-  const { owned, imported } = await fetchRecipeCountsForUser(params.id);
 
   return (
     <main>
@@ -38,20 +25,13 @@ export default async function Page({ params }: PageProps) {
           { label: "Admin", href: "/dashboard/admin" },
           { label: "Users", href: "/dashboard/admin/users" },
           {
-            label: user.user_name || user.email,
-            href: `/dashboard/admin/users/${user.id}`,
+            label: "Edit user",
+            href: `/dashboard/admin/users/${id}`,
             active: true,
           },
         ]}
       />
-
-      <AdminUserEditForm
-        user={{
-          ...user,
-          recipes_owned_count: owned,
-          recipes_imported_count: imported,
-        }}
-      />
+      <AdminUserEditForm user={user} />
     </main>
   );
 }
