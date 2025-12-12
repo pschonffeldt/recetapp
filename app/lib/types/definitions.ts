@@ -32,6 +32,7 @@ export type DbUserRow = {
   country: string | null;
   language: string | null;
   user_role: Role; // enum/text in DB
+  last_login_at?: string | null;
 };
 
 /**

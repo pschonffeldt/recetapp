@@ -84,7 +84,7 @@ export const { auth, signIn, signOut } = NextAuth({
     }),
   ],
 
-  // NEW: track successful logins
+  // Track successful logins
   events: {
     async signIn({ user }) {
       try {
@@ -92,12 +92,11 @@ export const { auth, signIn, signOut } = NextAuth({
         if (!id) return;
 
         await sql/* sql */ `
-          UPDATE public.users
-          SET last_login_at = NOW()
-          WHERE id = ${id}::uuid
-        `;
+        UPDATE public.users
+        SET last_login_at = NOW()
+        WHERE id = ${id}::uuid
+      `;
       } catch (err) {
-        // Don’t block login if this fails, just log it
         console.error("Failed to update last_login_at:", err);
       }
     },

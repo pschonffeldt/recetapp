@@ -876,7 +876,7 @@ export async function fetchUserById(id: string) {
   if (!id) throw new Error("fetchUserById: id is required");
 
   const rows = await sql<UserForm[]>`
-    SELECT
+        SELECT
       u.id,
       u.name,
       u.user_name,
@@ -890,7 +890,7 @@ export async function fetchUserById(id: string) {
       (u.created_at AT TIME ZONE 'UTC')::timestamptz::text          AS created_at,
       (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
       (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
-      NULL::text                                                   AS last_login_at
+      (u.last_login_at AT TIME ZONE 'UTC')::timestamptz::text       AS last_login_at
     FROM public.users AS u
     WHERE u.id = ${id}::uuid
     LIMIT 1
@@ -926,13 +926,12 @@ export type AdminUserListItem = {
 // ===== Admin: single user with extra metadata =====
 
 type AdminUserRow = UserForm & {
-  // already in UserForm, but we make sure it’s present in the row
   membership_tier?: UserForm["membership_tier"];
   user_role: string | null;
   created_at: string;
   profile_updated_at: string | null;
   password_changed_at: string | null;
-  last_login_at: string | null;
+  last_login_at?: string | null;
   recipes_owned_count: number;
   recipes_imported_count: number;
 };
@@ -962,7 +961,7 @@ export async function fetchUserByIdForAdmin(
       ) s
       GROUP BY saver_id
     )
-    SELECT
+            SELECT
       u.id,
       u.name,
       u.user_name,
@@ -973,11 +972,10 @@ export async function fetchUserByIdForAdmin(
       u.language,
       u.membership_tier,
       u.user_role,
-      (u.created_at AT TIME ZONE 'UTC')::timestamptz::text         AS created_at,
-      (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text AS profile_updated_at,
+      (u.created_at AT TIME ZONE 'UTC')::timestamptz::text          AS created_at,
+      (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
       (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
-      -- no column yet → return NULL as placeholder
-      NULL::timestamptz::text                                      AS last_login_at,
+      (u.last_login_at AT TIME ZONE 'UTC')::timestamptz::text       AS last_login_at,
       COALESCE(owned.cnt, 0)::int    AS recipes_owned_count,
       COALESCE(imported.cnt, 0)::int AS recipes_imported_count
     FROM public.users u

@@ -9,19 +9,22 @@ export const formatCurrency = (amount: number) => {
 };
 
 // Date formatter, should be updated as there is a 1 day offset
-export const formatDateToLocal = (
-  dateStr: string,
+export function formatDateToLocal(
+  dateStr: string | null | undefined,
   locale: string = "en-US"
-) => {
+): string {
+  if (!dateStr) return "—";
+
   const date = new Date(dateStr);
-  const options: Intl.DateTimeFormatOptions = {
-    day: "numeric",
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return new Intl.DateTimeFormat(locale, {
+    day: "2-digit",
     month: "short",
     year: "numeric",
-  };
-  const formatter = new Intl.DateTimeFormat(locale, options);
-  return formatter.format(date);
-};
+    timeZone: "UTC", // <<< important so server & client match
+  }).format(date);
+}
 
 // This I think is for the chart, but still need to research
 export const generateYAxis = (revenue: Revenue[]) => {
