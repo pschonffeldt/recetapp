@@ -283,7 +283,7 @@ export default function AdminUserEditForm({
                     id="country"
                     name="country"
                     type="text"
-                    defaultValue={user.country}
+                    defaultValue={user.country ?? ""}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                     aria-invalid={hasErr(profileState, "country")}
                     aria-describedby={
@@ -292,6 +292,7 @@ export default function AdminUserEditForm({
                         : undefined
                     }
                   />
+
                   {profileState.errors?.country?.length ? (
                     <p id="country-error" className="mt-2 text-sm text-red-500">
                       {profileState.errors.country[0]}
@@ -311,7 +312,7 @@ export default function AdminUserEditForm({
                     id="language"
                     name="language"
                     type="text"
-                    defaultValue={capitalizeFirst(user.language)}
+                    defaultValue={capitalizeFirst(user.language) ?? ""}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                     aria-invalid={hasErr(profileState, "language")}
                     aria-describedby={

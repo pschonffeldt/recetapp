@@ -167,14 +167,15 @@ export type UserForm = {
   last_name: string;
   email: string;
   password: string;
-  country: Country;
-  language: Language;
-
-  // Membership & role
+  country: Country | string | null;
+  language: Language | string;
   membership_tier?: MembershipTier;
-  user_role?: string | null;
-
-  // Activity metadata (all optional)
+  gender?: string | null;
+  date_of_birth?: string | null; // we'll return "YYYY-MM-DD"
+  allergies: string[]; // always array (can be empty)
+  dietary_flags: string[]; // always array (can be empty)
+  weight_kg?: number | null;
+  height_cm?: number | null;
   created_at?: string;
   profile_updated_at?: string | null;
   password_changed_at?: string | null;

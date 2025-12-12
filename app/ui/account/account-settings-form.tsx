@@ -225,6 +225,134 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                 ) : null}
               </div>
             </div>
+            {/* Health & dietary info */}
+            <div>
+              <h2 className={`${inter.className} mb-2 text-xl md:text-2xl`}>
+                Health & dietary information
+              </h2>
+
+              <div className="grid gap-6 rounded-md p-2 sm:grid-cols-2">
+                {/* Gender */}
+                <div>
+                  <label
+                    htmlFor="gender"
+                    className="mb-2 block text-sm font-medium"
+                  >
+                    Gender (optional)
+                  </label>
+                  <select
+                    id="gender"
+                    name="gender"
+                    defaultValue={user.gender ?? ""}
+                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
+                  >
+                    <option value="">Not specified</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="non-binary">Non-binary</option>
+                    <option value="other">Other</option>
+                    <option value="prefer-not-to-say">Prefer not to say</option>
+                  </select>
+                </div>
+
+                {/* Date of birth (read / edit) */}
+                <div>
+                  <label
+                    htmlFor="date_of_birth"
+                    className="mb-2 block text-sm font-medium"
+                  >
+                    Date of birth
+                  </label>
+                  <input
+                    id="date_of_birth"
+                    name="date_of_birth"
+                    type="date"
+                    defaultValue={user.date_of_birth ?? ""}
+                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
+                  />
+                </div>
+
+                {/* Weight */}
+                <div>
+                  <label
+                    htmlFor="weight_kg"
+                    className="mb-2 block text-sm font-medium"
+                  >
+                    Weight (kg)
+                  </label>
+                  <input
+                    id="weight_kg"
+                    name="weight_kg"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    defaultValue={user.weight_kg ?? ""}
+                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
+                  />
+                </div>
+
+                {/* Height */}
+                <div>
+                  <label
+                    htmlFor="height_cm"
+                    className="mb-2 block text-sm font-medium"
+                  >
+                    Height (cm)
+                  </label>
+                  <input
+                    id="height_cm"
+                    name="height_cm"
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    defaultValue={user.height_cm ?? ""}
+                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
+                  />
+                </div>
+              </div>
+
+              {/* Allergies + dietary flags as free-text lists for now */}
+              <div className="mt-4 grid gap-6 rounded-md p-2 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="allergies"
+                    className="mb-2 block text-sm font-medium"
+                  >
+                    Allergies (comma-separated)
+                  </label>
+                  <textarea
+                    id="allergies"
+                    name="allergies"
+                    rows={2}
+                    defaultValue={user.allergies?.join(", ") ?? ""}
+                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Example: peanuts, dairy, shellfish
+                  </p>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="dietary_flags"
+                    className="mb-2 block text-sm font-medium"
+                  >
+                    Dietary preferences / restrictions
+                  </label>
+                  <textarea
+                    id="dietary_flags"
+                    name="dietary_flags"
+                    rows={2}
+                    defaultValue={user.dietary_flags?.join(", ") ?? ""}
+                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Example: vegetarian, gluten-free, low-sugar
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-6 flex justify-center gap-4 px-6 lg:justify-end lg:px-0">
               {profileState.message && (
                 <p className="mt-3 text-sm text-red-600">

@@ -13,24 +13,24 @@
 "use server";
 import "server-only";
 
-import { sql } from "../db";
 import { requireUserId } from "../auth/helpers";
+import { sql } from "../db";
 
 export type RecipeListItem = RecipeForm & {
   owner_relationship: "owned" | "imported";
 };
 
+import { parseStructuredIngredients } from "../ingredients";
 import type {
-  Revenue,
-  RecipeField,
-  RecipeForm,
   CardData,
-  UserForm,
+  IncomingIngredientPayload,
   LatestRecipeRaw,
   MembershipTier,
+  RecipeField,
+  RecipeForm,
+  Revenue,
+  UserForm,
 } from "../types/definitions";
-import type { IncomingIngredientPayload } from "../types/definitions";
-import { parseStructuredIngredients } from "../ingredients";
 
 /* =============================================================================
  * Shared constants + row types
@@ -876,7 +876,7 @@ export async function fetchUserById(id: string) {
   if (!id) throw new Error("fetchUserById: id is required");
 
   const rows = await sql<UserForm[]>`
-        SELECT
+    SELECT
       u.id,
       u.name,
       u.user_name,
@@ -887,6 +887,12 @@ export async function fetchUserById(id: string) {
       u.language AS language,
       u.membership_tier,
       u.user_role,
+      u.gender,
+      (u.date_of_birth)::date::text AS date_of_birth,
+      COALESCE(u.allergies,      '{}'::text[]) AS allergies,
+      COALESCE(u.dietary_flags,  '{}'::text[]) AS dietary_flags,
+      u.weight_kg,
+      u.height_cm,
       (u.created_at AT TIME ZONE 'UTC')::timestamptz::text          AS created_at,
       (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
       (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,

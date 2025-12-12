@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useActionState } from "react";
-import Link from "next/link";
+import { createAccount } from "@/app/lib/auth/actions";
+import { inter } from "@/app/ui/branding/branding-fonts";
+import { Button } from "@/app/ui/general/button";
 import {
+  ArrowRightIcon,
   AtSymbolIcon,
   KeyIcon,
   UserIcon,
-  ArrowRightIcon,
 } from "@heroicons/react/24/outline";
-import { inter } from "@/app/ui/branding/branding-fonts";
-import { Button } from "@/app/ui/general/button";
-import { createAccount } from "@/app/lib/auth/actions";
+import Link from "next/link";
+import React, { useActionState } from "react";
 
 type SignupState = {
   ok: boolean;
@@ -111,6 +111,40 @@ export default function SignupForm() {
               <p className="mt-2 text-sm text-red-500">{err("last_name")}</p>
             )}
           </div>
+        </div>
+
+        <div className="mt-4">
+          {/* Country */}
+          <label
+            htmlFor="country"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
+            Country
+          </label>
+          <input
+            id="country"
+            name="country"
+            type="text"
+            required
+            className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+            autoComplete="country-name"
+          />
+        </div>
+        <div className="mt-4">
+          {/* Date of birth */}
+          <label
+            htmlFor="date_of_birth"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
+            Date of birth
+          </label>
+          <input
+            id="date_of_birth"
+            name="date_of_birth"
+            type="date"
+            required
+            className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+          />
         </div>
 
         {/* Email */}

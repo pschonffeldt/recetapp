@@ -1,10 +1,10 @@
-import { Metadata } from "next";
-import Breadcrumbs from "@/app/ui/general/breadcrumbs";
-import EditAccountSettingsForm from "@/app/ui/account/account-settings-form";
+import { fetchRecipeLibraryCount, fetchUserById } from "@/app/lib/recipes/data";
 import EditAccountMembershipForm from "@/app/ui/account/account-membership-settings";
-import { notFound } from "next/navigation";
+import EditAccountSettingsForm from "@/app/ui/account/account-settings-form";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { auth } from "@/auth";
-import { fetchUserById, fetchRecipeLibraryCount } from "@/app/lib/recipes/data";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = { title: "Account Settings" };
 

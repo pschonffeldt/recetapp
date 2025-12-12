@@ -33,7 +33,6 @@ export type SignupResult = {
   ok: boolean;
   message: string | null;
   errors: Record<string, string[]>;
-  userId?: string;
 };
 
 /* =============================================================================
@@ -46,6 +45,8 @@ const SignupSchema = z
     name: z.string().trim().min(1, "First name is required"),
     user_name: z.string().trim().min(1, "User name is required"),
     last_name: z.string().trim().optional().default(""),
+    country: z.string().trim().min(1, "Country is required"),
+    date_of_birth: z.string().trim().min(1, "Date of birth is required"),
     email: z
       .string()
       .email()
@@ -106,6 +107,8 @@ export async function createAccount(
     name: formData.get("name"),
     user_name: formData.get("user_name"),
     last_name: formData.get("last_name"),
+    country: formData.get("country"),
+    date_of_birth: formData.get("date_of_birth"),
     email: formData.get("email"),
     password: formData.get("password"),
     confirm: formData.get("confirm"),
@@ -120,7 +123,15 @@ export async function createAccount(
     return { ok: false, message: "Fix errors and try again.", errors };
   }
 
-  const { name, user_name, last_name, email, password } = parsed.data;
+  const {
+    name,
+    user_name,
+    last_name,
+    email,
+    password,
+    country,
+    date_of_birth,
+  } = parsed.data;
 
   // UX check (unique index still guarantees at DB level)
   const existing = await sql/* sql */ `
@@ -140,12 +151,31 @@ export async function createAccount(
   let userId: string | null = null;
   try {
     const rows = await sql<{ id: string }[]>/* sql */ `
-      INSERT INTO public.users
-        (name, user_name, last_name, email, password, password_changed_at)
-      VALUES
-        (${name}, ${user_name}, ${last_name}, ${email}, ${hash}, NOW())
-      RETURNING id
-    `;
+  INSERT INTO public.users
+    (
+      name,
+      user_name,
+      last_name,
+      email,
+      password,
+      country,
+      date_of_birth,
+      password_changed_at
+    )
+  VALUES
+    (
+      ${name},
+      ${user_name},
+      ${last_name},
+      ${email},
+      ${hash},
+      ${country},
+      ${date_of_birth}::date,
+      NOW()
+    )
+  RETURNING id
+`;
+
     userId = rows[0]?.id ?? null;
   } catch (e: any) {
     const msg = String(e?.message || e);
@@ -166,13 +196,8 @@ export async function createAccount(
       redirectTo: "/dashboard",
     });
 
-    // Fallback: if for any reason no redirect occurred, force it.
     redirect("/dashboard");
   } catch {
-    // If sign-in fails, send them to login with a success hint.
     redirect("/login?signup=success");
   }
-
-  // Unreachable after redirect; kept for completeness / typing.
-  return { ok: true, message: null, errors: {}, userId } as SignupResult;
 }
