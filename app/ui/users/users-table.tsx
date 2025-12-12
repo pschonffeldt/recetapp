@@ -178,13 +178,19 @@ export default async function AdminUsersTable() {
                   {/* Activity snapshot */}
                   <div className="mt-1 space-y-0.5 text-[11px] text-gray-500">
                     <p>
-                      Profile updated:{" "}
+                      Updated:{" "}
                       {u.updated_at ? formatDateToLocal(u.updated_at) : "—"}
                     </p>
                     <p>
-                      Password updated:{" "}
+                      Password:{" "}
                       {u.password_changed_at
                         ? formatDateToLocal(u.password_changed_at)
+                        : "—"}
+                    </p>
+                    <p>
+                      Profile:{" "}
+                      {u.profile_updated_at
+                        ? formatDateToLocal(u.profile_updated_at)
                         : "—"}
                     </p>
                     <p>
