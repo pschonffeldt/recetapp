@@ -397,7 +397,7 @@ export default function AdminUserEditForm({
                       </dd>
                     </div>
                     <div className="flex justify-between gap-2">
-                      <dt className="text-gray-600">Personal info changed</dt>
+                      <dt className="text-gray-600">Profile info changed</dt>
                       <dd className="text-gray-800">
                         {safeDate(user.profile_updated_at)}
                       </dd>
