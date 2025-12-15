@@ -11,8 +11,8 @@ type PageProps = {
   params: Promise<{ id: string }>;
 };
 
-function coerceTier(v: unknown): MembershipTier | null {
-  return v === "free" || v === "tier1" || v === "tier2" ? v : null;
+function coerceTier(v: unknown): MembershipTier | undefined {
+  return v === "free" || v === "tier1" || v === "tier2" ? v : undefined;
 }
 
 export default async function Page({ params }: PageProps) {
@@ -23,7 +23,8 @@ export default async function Page({ params }: PageProps) {
 
   const userForForm = {
     ...user,
-    membership_tier: coerceTier((user as any).membership_tier),
+    // never null / undefined
+    membership_tier: coerceTier((user as any).membership_tier) ?? "free",
   };
 
   return (
