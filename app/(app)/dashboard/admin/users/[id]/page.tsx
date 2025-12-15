@@ -7,14 +7,16 @@ import type { MembershipTier } from "@/app/lib/types/definitions";
 
 export const metadata: Metadata = { title: "Admin – Edit user" };
 
-type PageProps = { params: { id: string } };
+type PageProps = {
+  params: Promise<{ id: string }>;
+};
 
 function coerceTier(v: unknown): MembershipTier | null {
   return v === "free" || v === "tier1" || v === "tier2" ? v : null;
 }
 
 export default async function Page({ params }: PageProps) {
-  const { id } = params;
+  const { id } = await params;
 
   const user = await fetchUserByIdForAdmin(id);
   if (!user) notFound();
@@ -37,7 +39,7 @@ export default async function Page({ params }: PageProps) {
           },
         ]}
       />
-      <AdminUserEditForm user={user} />;
+      <AdminUserEditForm user={userForForm} />
     </main>
   );
 }
