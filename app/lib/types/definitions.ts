@@ -182,7 +182,7 @@ export type UserForm = {
   height_cm: number | null;
   weight_kg: number | null;
 
-  membership_tier: MembershipTier | null;
+  membership_tier: MembershipTier;
   user_role: "user" | "admin";
 
   created_at: string;

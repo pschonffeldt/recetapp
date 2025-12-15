@@ -117,24 +117,46 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     () => ((user as any).gender ?? "") as string
   );
 
-  // Sync gender after router.refresh() delivers new server props
-  useEffect(() => {
-    setGender(((user as any).gender ?? "") as string);
-  }, [user]);
-
-  // ✅ Pending flags that only clear once we have a real result
+  // Pending flags that only clear once we have a real result
   const [profilePending, setProfilePending] = useState(false);
   const [pwdPending, setPwdPending] = useState(false);
 
-  // ✅ Ref guards (prevents double toast in dev/StrictMode)
+  // Ref guards (prevents double toast in dev/StrictMode)
   const profileHandledRef = useRef(false);
   const pwdHandledRef = useRef(false);
+
+  // Used to prevent the brief snap-back during router.refresh()
+  const submittedGenderRef = useRef<string | null>(null);
+
+  // Guarded gender sync (prevents flash)
+  const serverGender = ((user as any).gender ?? "") as string;
+  useEffect(() => {
+    // If we just submitted a gender, ignore stale server props during refresh.
+    if (
+      submittedGenderRef.current !== null &&
+      serverGender !== submittedGenderRef.current
+    ) {
+      return;
+    }
+
+    setGender(serverGender);
+
+    // Once server catches up to our submitted value, clear the guard.
+    if (
+      submittedGenderRef.current !== null &&
+      serverGender === submittedGenderRef.current
+    ) {
+      submittedGenderRef.current = null;
+    }
+  }, [serverGender]);
 
   // Reset the "handled" guard each time user submits
   const onSubmitProfile = () => {
     profileHandledRef.current = false;
+    submittedGenderRef.current = gender;
     setProfilePending(true);
   };
+
   const onSubmitPwd = () => {
     pwdHandledRef.current = false;
     setPwdPending(true);
@@ -240,7 +262,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   htmlFor="user_name"
                   className="mb-2 block text-sm font-medium"
                 >
-                  User name
+                  User name (no spaces allowed)
                 </label>
                 <input
                   id="user_name"

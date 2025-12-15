@@ -988,7 +988,7 @@ export async function fetchUserByIdForAdmin(
       u.dietary_flags,
       u.height_cm,
       u.weight_kg,
-      u.membership_tier,
+      COALESCE(u.membership_tier, 'free')::membership_tier AS membership_tier,
       u.user_role,
       (u.created_at AT TIME ZONE 'UTC')::timestamptz::text          AS created_at,
       (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,

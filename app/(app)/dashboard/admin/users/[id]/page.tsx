@@ -3,20 +3,26 @@ import { notFound } from "next/navigation";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { fetchUserByIdForAdmin } from "@/app/lib/recipes/data";
 import AdminUserEditForm from "@/app/ui/users/users-edit-form";
+import type { MembershipTier } from "@/app/lib/types/definitions";
 
-export const metadata: Metadata = {
-  title: "Admin – Edit user",
-};
+export const metadata: Metadata = { title: "Admin – Edit user" };
 
-type PageProps = {
-  params: Promise<{ id: string }>;
-};
+type PageProps = { params: { id: string } };
+
+function coerceTier(v: unknown): MembershipTier | null {
+  return v === "free" || v === "tier1" || v === "tier2" ? v : null;
+}
 
 export default async function Page({ params }: PageProps) {
-  const { id } = await params;
+  const { id } = params;
 
   const user = await fetchUserByIdForAdmin(id);
   if (!user) notFound();
+
+  const userForForm = {
+    ...user,
+    membership_tier: coerceTier((user as any).membership_tier),
+  };
 
   return (
     <main>
@@ -31,7 +37,7 @@ export default async function Page({ params }: PageProps) {
           },
         ]}
       />
-      <AdminUserEditForm user={user} />
+      <AdminUserEditForm user={user} />;
     </main>
   );
 }

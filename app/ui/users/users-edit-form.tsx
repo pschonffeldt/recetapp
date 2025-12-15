@@ -22,7 +22,7 @@ const emptyState: ActionResult = { ok: false, message: null, errors: {} };
 
 // Extra admin-only metadata that may come from your admin users query
 type AdminUserExtra = {
-  membership_tier?: MembershipTier;
+  membership_tier: MembershipTier | null;
   user_role?: string | null;
   created_at?: string;
   profile_updated_at?: string | null;
@@ -45,10 +45,14 @@ function resultToToastError(state: ActionResult): string | null {
   return fieldMsg ?? state.message ?? null;
 }
 
+// helper: defaultValue can’t be null
+function dv(v: string | null | undefined): string {
+  return v ?? "";
+}
+
 export default function AdminUserEditForm({
   user,
 }: {
-  // UserForm from definitions + optional admin metadata fields
   user: UserForm & Partial<AdminUserExtra>;
 }) {
   const { push } = useToast();
@@ -148,7 +152,7 @@ export default function AdminUserEditForm({
         <input type="hidden" name="id" value={user.id} />
 
         <div className="rounded-md bg-gray-50 p-4 md:p-6">
-          <section className="p-3 text-sm space-y-12">
+          <section className="space-y-12 p-3 text-sm">
             {/* Personal info */}
             <div>
               <h2 className={`${inter.className} mb-2 text-xl md:text-2xl`}>
@@ -167,7 +171,7 @@ export default function AdminUserEditForm({
                   id="user_name"
                   name="user_name"
                   type="text"
-                  defaultValue={user.user_name}
+                  defaultValue={dv(user.user_name)}
                   autoComplete="user-name"
                   className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   aria-invalid={hasErr(profileState, "user_name")}
@@ -197,7 +201,7 @@ export default function AdminUserEditForm({
                     id="name"
                     name="name"
                     type="text"
-                    defaultValue={user.name}
+                    defaultValue={dv(user.name)}
                     autoComplete="given-name"
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                     aria-invalid={hasErr(profileState, "name")}
@@ -224,7 +228,7 @@ export default function AdminUserEditForm({
                     id="last_name"
                     name="last_name"
                     type="text"
-                    defaultValue={user.last_name}
+                    defaultValue={dv(user.last_name)}
                     autoComplete="family-name"
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                     aria-invalid={hasErr(profileState, "last_name")}
@@ -256,7 +260,7 @@ export default function AdminUserEditForm({
                     id="email"
                     name="email"
                     type="email"
-                    defaultValue={user.email}
+                    defaultValue={dv(user.email)}
                     autoComplete="email"
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                     aria-invalid={hasErr(profileState, "email")}
@@ -283,7 +287,7 @@ export default function AdminUserEditForm({
                     id="country"
                     name="country"
                     type="text"
-                    defaultValue={user.country ?? ""}
+                    defaultValue={dv((user as any).country)}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                     aria-invalid={hasErr(profileState, "country")}
                     aria-describedby={
@@ -312,7 +316,8 @@ export default function AdminUserEditForm({
                     id="language"
                     name="language"
                     type="text"
-                    defaultValue={capitalizeFirst(user.language) ?? ""}
+                    // capitalizeFirst should get a string, not null/undefined
+                    defaultValue={capitalizeFirst(dv((user as any).language))}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                     aria-invalid={hasErr(profileState, "language")}
                     aria-describedby={
@@ -364,7 +369,6 @@ export default function AdminUserEditForm({
               </h2>
 
               <div className="grid gap-4 text-xs sm:grid-cols-2">
-                {/* Recipe counts */}
                 <div className="rounded-md border border-gray-200 bg-white p-3">
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                     Recipe library
@@ -379,7 +383,6 @@ export default function AdminUserEditForm({
                   </p>
                 </div>
 
-                {/* Dates */}
                 <div className="rounded-md border border-gray-200 bg-white p-3">
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
                     Account activity
