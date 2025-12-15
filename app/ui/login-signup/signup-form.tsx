@@ -1,6 +1,7 @@
 "use client";
 
 import { createAccount } from "@/app/lib/auth/actions";
+import { COUNTRIES } from "@/app/lib/types/definitions";
 import { inter } from "@/app/ui/branding/branding-fonts";
 import { Button } from "@/app/ui/general/button";
 import {
@@ -121,15 +122,31 @@ export default function SignupForm() {
           >
             Country
           </label>
-          <input
+
+          <select
             id="country"
             name="country"
-            type="text"
             required
+            defaultValue=""
             className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
             autoComplete="country-name"
-          />
+          >
+            <option value="" disabled>
+              Select a country…
+            </option>
+
+            {COUNTRIES.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+
+          {err("country") && (
+            <p className="mt-2 text-sm text-red-500">{err("country")}</p>
+          )}
         </div>
+
         <div className="mt-4">
           {/* Date of birth */}
           <label
