@@ -59,6 +59,14 @@ function toOptional(v: FormDataEntryValue | null): string | undefined {
   return s === "" ? undefined : s;
 }
 
+function normalizeCsv(s: string): string {
+  return s
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .join(", ");
+}
+
 /* =============================================================================
  * Actions
  * =============================================================================
@@ -115,8 +123,10 @@ export async function updateUserProfile(
     country: toOptionalKeepEmpty(rawCountry),
     gender: toOptionalKeepEmpty(rawGender),
     date_of_birth: toOptionalKeepEmpty(rawDob),
-    allergies: toOptionalKeepEmpty(rawAllergies),
-    dietary_flags: toOptionalKeepEmpty(rawDietaryFlags),
+    allergies: rawAllergies === null ? undefined : String(rawAllergies).trim(), // may be ""
+    dietary_flags:
+      rawDietaryFlags === null ? undefined : String(rawDietaryFlags).trim(), // may be ""
+
     height_cm: toOptionalKeepEmpty(rawHeight),
     weight_kg: toOptionalKeepEmpty(rawWeight),
   };
@@ -173,22 +183,25 @@ export async function updateUserProfile(
     );
   }
 
-  // allergies / dietary_flags (store as text[]). "" clears -> NULL
+  // allergies / dietary_flags (text[] in DB). "" clears -> empty array
   if (d.allergies !== undefined) {
     if (d.allergies === "") {
-      sets.push(sql`allergies = NULL`);
+      sets.push(sql`allergies = ARRAY[]::text[]`);
     } else {
-      const arr = csvToTextArray(d.allergies);
-      sets.push(sql`allergies = ${arr}::text[]`);
+      // "Fruit, Dairy" -> {"Fruit","Dairy"}
+      sets.push(
+        sql`allergies = array_remove(regexp_split_to_array(${d.allergies}, '\\s*,\\s*'), '')`
+      );
     }
   }
 
   if (d.dietary_flags !== undefined) {
     if (d.dietary_flags === "") {
-      sets.push(sql`dietary_flags = NULL`);
+      sets.push(sql`dietary_flags = ARRAY[]::text[]`);
     } else {
-      const arr = csvToTextArray(d.dietary_flags);
-      sets.push(sql`dietary_flags = ${arr}::text[]`);
+      sets.push(
+        sql`dietary_flags = array_remove(regexp_split_to_array(${d.dietary_flags}, '\\s*,\\s*'), '')`
+      );
     }
   }
 
