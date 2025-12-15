@@ -1,24 +1,54 @@
 import { z } from "zod";
 
-/** Profile fields (any subset allowed) */
+const optTrimmed = z.string().trim().optional();
+
 export const UpdateUserProfileSchema = z
   .object({
-    name: z.string().min(1, "First name is required").optional(),
-    user_name: z.string().min(1, "USer name is required").optional(),
-    last_name: z.string().min(1, "Last name is required").optional(),
-    email: z.string().email("Invalid email").optional(),
-  })
-  // avoid empty payloads (optional)
-  .refine(
-    (v) =>
-      v.name !== undefined ||
-      v.user_name !== undefined ||
-      v.last_name !== undefined ||
-      v.email !== undefined,
-    { message: "Nothing to update", path: ["_form"] }
-  );
+    // required-ish fields (only validated if provided)
+    name: z.string().trim().min(1, "First name is required").optional(),
+    user_name: z.string().trim().min(1, "User name is required").optional(),
+    last_name: optTrimmed, // allow empty -> action decides
+    email: z.string().trim().email("Invalid email").optional(),
 
-/** Password change (both are required and must match) */
+    // nullable/optional profile fields ("" allowed to clear)
+    country: optTrimmed,
+    gender: optTrimmed,
+
+    date_of_birth: z
+      .string()
+      .trim()
+      .optional()
+      .refine(
+        (v) => v === undefined || v === "" || /^\d{4}-\d{2}-\d{2}$/.test(v),
+        {
+          message: "Use format YYYY-MM-DD",
+        }
+      ),
+
+    allergies: optTrimmed,
+    dietary_flags: optTrimmed,
+
+    height_cm: z
+      .string()
+      .trim()
+      .optional()
+      .refine((v) => v === undefined || v === "" || !Number.isNaN(Number(v)), {
+        message: "Height must be a number",
+      }),
+
+    weight_kg: z
+      .string()
+      .trim()
+      .optional()
+      .refine((v) => v === undefined || v === "" || !Number.isNaN(Number(v)), {
+        message: "Weight must be a number",
+      }),
+  })
+  .refine((v) => Object.values(v).some((val) => val !== undefined), {
+    message: "Nothing to update",
+    path: ["_form"],
+  });
+
 export const UpdateUserPasswordSchema = z
   .object({
     password: z.string().min(6, "Password must be at least 6 characters"),

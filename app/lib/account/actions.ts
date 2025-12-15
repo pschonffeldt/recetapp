@@ -71,30 +71,57 @@ function toOptional(v: FormDataEntryValue | null): string | undefined {
  * - Validates with zod + manual checks for empties
  * - Handles duplicate-email DB errors gracefully
  */
+// lib/account/actions.ts (only updateUserProfile)
+
 export async function updateUserProfile(
   _prev: AccountFormState,
   formData: FormData
 ): Promise<AccountFormState> {
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;
-  if (!userId) {
-    return { message: "Unauthorized.", errors: {}, ok: false };
-  }
+  if (!userId) return { message: "Unauthorized.", errors: {}, ok: false };
 
-  // Read raw values to detect “user explicitly cleared the field”
+  // keep empty string ("") so optional fields can be cleared
+  const toOptionalKeepEmpty = (
+    v: FormDataEntryValue | null
+  ): string | undefined => {
+    if (v === null) return undefined;
+    return v.toString().trim(); // may be ""
+  };
+
+  const csvToTextArray = (s: string): string[] =>
+    s
+      .split(",")
+      .map((x) => x.trim())
+      .filter(Boolean);
+
   const rawName = formData.get("name");
   const rawUserName = formData.get("user_name");
   const rawLast = formData.get("last_name");
   const rawEmail = formData.get("email");
+  const rawCountry = formData.get("country");
+  const rawGender = formData.get("gender");
+  const rawDob = formData.get("date_of_birth");
+  const rawAllergies = formData.get("allergies");
+  const rawDietaryFlags = formData.get("dietary_flags");
+  const rawHeight = formData.get("height_cm");
+  const rawWeight = formData.get("weight_kg");
 
   const candidate = {
-    name: toOptional(rawName),
-    user_name: toOptional(rawUserName),
-    last_name: toOptional(rawLast),
-    email: toOptional(rawEmail),
+    name: toOptionalKeepEmpty(rawName),
+    user_name: toOptionalKeepEmpty(rawUserName),
+    last_name: toOptionalKeepEmpty(rawLast),
+    email: toOptionalKeepEmpty(rawEmail),
+    country: toOptionalKeepEmpty(rawCountry),
+    gender: toOptionalKeepEmpty(rawGender),
+    date_of_birth: toOptionalKeepEmpty(rawDob),
+    allergies: toOptionalKeepEmpty(rawAllergies),
+    dietary_flags: toOptionalKeepEmpty(rawDietaryFlags),
+    height_cm: toOptionalKeepEmpty(rawHeight),
+    weight_kg: toOptionalKeepEmpty(rawWeight),
   };
 
-  // Manual validation to catch explicit blanks
+  // Manual validation for required-ish fields (only if present in form submit)
   const errors: Record<string, string[]> = {};
   if (rawName !== null && String(rawName).trim() === "") {
     errors.name = ["First name cannot be empty."];
@@ -102,14 +129,10 @@ export async function updateUserProfile(
   if (rawUserName !== null && String(rawUserName).trim() === "") {
     errors.user_name = ["User name cannot be empty."];
   }
-  if (rawLast !== null && String(rawLast).trim() === "") {
-    errors.last_name = ["Last name cannot be empty."];
-  }
   if (rawEmail !== null && String(rawEmail).trim() === "") {
     errors.email = ["Email cannot be empty."];
   }
 
-  // Zod validation (format checks for email, etc.)
   const parsed = UpdateUserProfileSchema.safeParse(candidate);
   if (!parsed.success) {
     for (const issue of parsed.error.issues) {
@@ -123,20 +146,73 @@ export async function updateUserProfile(
   }
 
   const d = parsed.data!;
-
-  // Build dynamic SETs from provided fields
   const sets: any[] = [];
+
+  // Required / primary fields
   if (d.name !== undefined) sets.push(sql`name = ${d.name}`);
   if (d.user_name !== undefined) sets.push(sql`user_name = ${d.user_name}`);
   if (d.last_name !== undefined) sets.push(sql`last_name = ${d.last_name}`);
   if (d.email !== undefined) sets.push(sql`email = ${d.email}`);
 
+  // Nullable text fields ("" clears -> NULL)
+  if (d.country !== undefined) {
+    sets.push(
+      d.country === "" ? sql`country = NULL` : sql`country = ${d.country}`
+    );
+  }
+  if (d.gender !== undefined) {
+    sets.push(d.gender === "" ? sql`gender = NULL` : sql`gender = ${d.gender}`);
+  }
+
+  // date_of_birth: "" clears -> NULL, else cast to date
+  if (d.date_of_birth !== undefined) {
+    sets.push(
+      d.date_of_birth === ""
+        ? sql`date_of_birth = NULL`
+        : sql`date_of_birth = ${d.date_of_birth}::date`
+    );
+  }
+
+  // allergies / dietary_flags (store as text[]). "" clears -> NULL
+  if (d.allergies !== undefined) {
+    if (d.allergies === "") {
+      sets.push(sql`allergies = NULL`);
+    } else {
+      const arr = csvToTextArray(d.allergies);
+      sets.push(sql`allergies = ${arr}::text[]`);
+    }
+  }
+
+  if (d.dietary_flags !== undefined) {
+    if (d.dietary_flags === "") {
+      sets.push(sql`dietary_flags = NULL`);
+    } else {
+      const arr = csvToTextArray(d.dietary_flags);
+      sets.push(sql`dietary_flags = ${arr}::text[]`);
+    }
+  }
+
+  const toIntOrNull = (s: string) => {
+    const cleaned = s.replace(",", ".").trim();
+    if (cleaned === "") return null;
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? Math.round(n) : null;
+  };
+
+  if (d.height_cm !== undefined) {
+    if (d.height_cm === "") sets.push(sql`height_cm = NULL`);
+    else sets.push(sql`height_cm = ${toIntOrNull(d.height_cm)}`);
+  }
+
+  if (d.weight_kg !== undefined) {
+    if (d.weight_kg === "") sets.push(sql`weight_kg = NULL`);
+    else sets.push(sql`weight_kg = ${toIntOrNull(d.weight_kg)}`);
+  }
+
   if (sets.length === 0) {
-    // User submitted, but nothing changed → show a gentle message
     return { message: "No changes to save.", errors: {}, ok: false };
   }
 
-  // Stamp lifecycle column
   sets.push(sql`profile_updated_at = now()`);
 
   const setSql =
@@ -147,8 +223,7 @@ export async function updateUserProfile(
   try {
     await sql`UPDATE public.users SET ${setSql} WHERE id = ${userId}::uuid`;
   } catch (e: any) {
-    // Postgres duplicate-key on email → clear, field-level error + toast message
-    const code = e?.code as string | undefined; // e.g. '23505'
+    const code = e?.code as string | undefined;
     const constraint = (e?.constraint as string | undefined) || "";
     const msg = String(e?.message || "");
 
@@ -170,9 +245,7 @@ export async function updateUserProfile(
     return { ok: false, message: "Failed to update profile.", errors: {} };
   }
 
-  // Let RSC bits refresh
   revalidatePath("/dashboard/account");
-
   return { message: null, errors: {}, ok: true, shouldRefresh: true };
 }
 

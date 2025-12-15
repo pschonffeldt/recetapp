@@ -1,6 +1,13 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import {
+  useActionState,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { type UserForm } from "@/app/lib/types/definitions";
 import { inter } from "../branding/branding-fonts";
 import Link from "next/link";
@@ -10,6 +17,7 @@ import {
   updateUserProfile,
   updateUserPassword,
 } from "@/app/lib/account/actions";
+import { useRouter } from "next/navigation";
 
 type ActionResult = {
   ok: boolean;
@@ -19,6 +27,12 @@ type ActionResult = {
 
 const emptyState: ActionResult = { ok: false, message: null, errors: {} };
 
+const asIntDefault = (v: unknown) => {
+  if (v === null || v === undefined || v === "") return "";
+  const n = Number(v);
+  return Number.isFinite(n) ? String(Math.round(n)) : "";
+};
+
 function pickFirstError(errors: Record<string, string[]>): string | null {
   for (const key of Object.keys(errors)) {
     const msgs = errors[key];
@@ -27,18 +41,68 @@ function pickFirstError(errors: Record<string, string[]>): string | null {
   return null;
 }
 
-// Toast handling
 function resultToToastError(state: ActionResult): string | null {
-  // prefer first field error; otherwise use top-level message
   const fieldMsg = pickFirstError(state.errors);
   return fieldMsg ?? state.message ?? null;
 }
 
-// Edit user account info
+function pgArrayToCsv(v: unknown): string {
+  if (v === null || v === undefined) return "";
+
+  if (Array.isArray(v)) {
+    return v
+      .map((x) => String(x ?? "").trim())
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  if (typeof v === "string") {
+    const s = v.trim();
+    if (!s) return "";
+
+    if (s.startsWith("{") && s.endsWith("}")) {
+      const inner = s.slice(1, -1).trim();
+      if (!inner) return "";
+
+      const parts: string[] = [];
+      let cur = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < inner.length; i++) {
+        const ch = inner[i];
+
+        if (ch === '"' && inner[i - 1] !== "\\") {
+          inQuotes = !inQuotes;
+          continue;
+        }
+
+        if (ch === "," && !inQuotes) {
+          parts.push(cur);
+          cur = "";
+          continue;
+        }
+
+        cur += ch;
+      }
+      parts.push(cur);
+
+      return parts
+        .map((p) => p.trim().replace(/\\"/g, '"').trim())
+        .filter(Boolean)
+        .join(", ");
+    }
+
+    return s;
+  }
+
+  return String(v).trim();
+}
+
 export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
   const { push } = useToast();
+  const router = useRouter();
+  const [isRefreshing, startRefresh] = useTransition();
 
-  // Separate actions
   const [profileState, profileAction] = useActionState<ActionResult, FormData>(
     updateUserProfile,
     emptyState
@@ -48,70 +112,128 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     emptyState
   );
 
-  // General success toasts
+  // Controlled gender so it doesn't snap back
+  const [gender, setGender] = useState<string>(
+    () => ((user as any).gender ?? "") as string
+  );
+
+  // Sync gender after router.refresh() delivers new server props
   useEffect(() => {
+    setGender(((user as any).gender ?? "") as string);
+  }, [user]);
+
+  // ✅ Pending flags that only clear once we have a real result
+  const [profilePending, setProfilePending] = useState(false);
+  const [pwdPending, setPwdPending] = useState(false);
+
+  // ✅ Ref guards (prevents double toast in dev/StrictMode)
+  const profileHandledRef = useRef(false);
+  const pwdHandledRef = useRef(false);
+
+  // Reset the "handled" guard each time user submits
+  const onSubmitProfile = () => {
+    profileHandledRef.current = false;
+    setProfilePending(true);
+  };
+  const onSubmitPwd = () => {
+    pwdHandledRef.current = false;
+    setPwdPending(true);
+  };
+
+  useEffect(() => {
+    if (!profilePending) return;
+
+    // success
     if (profileState.ok) {
-      push({
-        variant: "success",
-        title: "Profile updated",
-        message: "Your changes were saved.",
-      });
+      if (!profileHandledRef.current) {
+        profileHandledRef.current = true;
+        push({
+          variant: "success",
+          title: "Profile updated",
+          message: "Your changes were saved.",
+        });
+        startRefresh(() => router.refresh());
+        setProfilePending(false);
+      }
+      return;
     }
-  }, [profileState.ok, push]);
 
-  // Passwprd success toasts
-  useEffect(() => {
-    if (pwdState.ok) {
-      push({
-        variant: "success",
-        title: "Password updated",
-        message: "Your password was changed successfully.",
-      });
-    }
-  }, [pwdState.ok, push]);
-
-  // General error toasts
-  useEffect(() => {
-    if (!profileState.ok) {
-      const msg = resultToToastError(profileState);
-      if (msg) {
+    // error (only close pending when we actually have a message)
+    const msg = resultToToastError(profileState);
+    if (msg) {
+      if (!profileHandledRef.current) {
+        profileHandledRef.current = true;
         push({
           variant: "error",
           title: "Couldn’t update profile",
           message: msg,
         });
+        setProfilePending(false);
       }
     }
-  }, [profileState, push]);
-  // Password error toasts
+  }, [profilePending, profileState, push, router, startRefresh]);
+
   useEffect(() => {
-    if (!pwdState.ok) {
-      const msg = resultToToastError(pwdState);
-      if (msg) {
+    if (!pwdPending) return;
+
+    if (pwdState.ok) {
+      if (!pwdHandledRef.current) {
+        pwdHandledRef.current = true;
+        push({
+          variant: "success",
+          title: "Password updated",
+          message: "Your password was changed successfully.",
+        });
+        startRefresh(() => router.refresh());
+        setPwdPending(false);
+      }
+      return;
+    }
+
+    const msg = resultToToastError(pwdState);
+    if (msg) {
+      if (!pwdHandledRef.current) {
+        pwdHandledRef.current = true;
         push({
           variant: "error",
           title: "Couldn’t update password",
           message: msg,
         });
+        setPwdPending(false);
       }
     }
-  }, [pwdState, push]);
+  }, [pwdPending, pwdState, push, router, startRefresh]);
 
   const hasErr = (state: ActionResult, k: string) =>
     Boolean(state.errors?.[k]?.length);
 
+  const allergiesText = useMemo(
+    () => pgArrayToCsv((user as any).allergies),
+    [(user as any).allergies]
+  );
+
+  const dietaryFlagsText = useMemo(
+    () => pgArrayToCsv((user as any).dietary_flags),
+    [(user as any).dietary_flags]
+  );
+
+  const dobValue = user.date_of_birth
+    ? String(user.date_of_birth).slice(0, 10)
+    : "";
+
   return (
     <div className="mt-8">
       {/* PROFILE FORM */}
-      <form action={profileAction}>
+      <form action={profileAction} onSubmit={onSubmitProfile}>
         <input type="hidden" name="id" value={user.id} />
+
         <div className="rounded-md bg-gray-50 p-4 md:p-6">
-          <section className="p-3 text-sm ">
+          <section className="p-3 text-sm">
             <h2 className={`${inter.className} mb-4 text-xl md:text-2xl`}>
               Personal information
             </h2>
 
-            {/* Public name - user name */}
+            {/* User name */}
             <div className="gap-6 rounded-md p-2">
               <div>
                 <label
@@ -124,8 +246,8 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   id="user_name"
                   name="user_name"
                   type="text"
-                  defaultValue={user.user_name}
-                  autoComplete="user-name"
+                  defaultValue={user.user_name ?? ""}
+                  autoComplete="username"
                   className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   aria-invalid={hasErr(profileState, "user_name")}
                   aria-describedby={
@@ -141,6 +263,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                 ) : null}
               </div>
             </div>
+
             <div className="mb-6 grid gap-6 rounded-md p-2 sm:grid-cols-2">
               {/* First name */}
               <div>
@@ -154,7 +277,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   id="name"
                   name="name"
                   type="text"
-                  defaultValue={user.name}
+                  defaultValue={user.name ?? ""}
                   autoComplete="given-name"
                   className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   aria-invalid={hasErr(profileState, "name")}
@@ -162,11 +285,6 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     hasErr(profileState, "name") ? "name-error" : undefined
                   }
                 />
-                {profileState.errors?.name?.length ? (
-                  <p id="name-error" className="mt-2 text-sm text-red-500">
-                    {profileState.errors.name[0]}
-                  </p>
-                ) : null}
               </div>
 
               {/* Last name */}
@@ -181,7 +299,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   id="last_name"
                   name="last_name"
                   type="text"
-                  defaultValue={user.last_name}
+                  defaultValue={user.last_name ?? ""}
                   autoComplete="family-name"
                   className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   aria-invalid={hasErr(profileState, "last_name")}
@@ -191,11 +309,6 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                       : undefined
                   }
                 />
-                {profileState.errors?.last_name?.length ? (
-                  <p id="last_name-error" className="mt-2 text-sm text-red-500">
-                    {profileState.errors.last_name[0]}
-                  </p>
-                ) : null}
               </div>
 
               {/* Email */}
@@ -210,7 +323,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   id="email"
                   name="email"
                   type="email"
-                  defaultValue={user.email}
+                  defaultValue={user.email ?? ""}
                   autoComplete="email"
                   className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   aria-invalid={hasErr(profileState, "email")}
@@ -218,13 +331,26 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     hasErr(profileState, "email") ? "email-error" : undefined
                   }
                 />
-                {profileState.errors?.email?.length ? (
-                  <p id="email-error" className="mt-2 text-sm text-red-500">
-                    {profileState.errors.email[0]}
-                  </p>
-                ) : null}
+              </div>
+
+              {/* Country */}
+              <div>
+                <label
+                  htmlFor="country"
+                  className="mb-2 block text-sm font-medium"
+                >
+                  Country (optional)
+                </label>
+                <input
+                  id="country"
+                  name="country"
+                  type="text"
+                  defaultValue={(user as any).country ?? ""}
+                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
+                />
               </div>
             </div>
+
             {/* Health & dietary info */}
             <div>
               <h2 className={`${inter.className} mb-2 text-xl md:text-2xl`}>
@@ -232,7 +358,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
               </h2>
 
               <div className="grid gap-6 rounded-md p-2 sm:grid-cols-2">
-                {/* Gender */}
+                {/* Gender (controlled) */}
                 <div>
                   <label
                     htmlFor="gender"
@@ -243,7 +369,8 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   <select
                     id="gender"
                     name="gender"
-                    defaultValue={user.gender ?? ""}
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   >
                     <option value="">Not specified</option>
@@ -255,7 +382,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   </select>
                 </div>
 
-                {/* Date of birth (read / edit) */}
+                {/* Date of birth */}
                 <div>
                   <label
                     htmlFor="date_of_birth"
@@ -267,7 +394,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     id="date_of_birth"
                     name="date_of_birth"
                     type="date"
-                    defaultValue={user.date_of_birth ?? ""}
+                    defaultValue={dobValue}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   />
                 </div>
@@ -284,9 +411,10 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     id="weight_kg"
                     name="weight_kg"
                     type="number"
-                    step="0.1"
-                    min="0"
-                    defaultValue={user.weight_kg ?? ""}
+                    step={1}
+                    min={0}
+                    inputMode="numeric"
+                    defaultValue={asIntDefault((user as any).weight_kg)}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   />
                 </div>
@@ -303,15 +431,16 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     id="height_cm"
                     name="height_cm"
                     type="number"
-                    step="0.1"
-                    min="0"
-                    defaultValue={user.height_cm ?? ""}
+                    step={1}
+                    min={0}
+                    inputMode="numeric"
+                    defaultValue={asIntDefault((user as any).height_cm)}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   />
                 </div>
               </div>
 
-              {/* Allergies + dietary flags as free-text lists for now */}
+              {/* Allergies + dietary flags */}
               <div className="mt-4 grid gap-6 rounded-md p-2 sm:grid-cols-2">
                 <div>
                   <label
@@ -323,13 +452,9 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   <textarea
                     id="allergies"
                     name="allergies"
-                    rows={2}
-                    defaultValue={user.allergies?.join(", ") ?? ""}
+                    defaultValue={allergiesText}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Example: peanuts, dairy, shellfish
-                  </p>
                 </div>
 
                 <div>
@@ -337,51 +462,45 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     htmlFor="dietary_flags"
                     className="mb-2 block text-sm font-medium"
                   >
-                    Dietary preferences / restrictions
+                    Dietary preferences / restrictions (comma-separated)
                   </label>
                   <textarea
                     id="dietary_flags"
                     name="dietary_flags"
-                    rows={2}
-                    defaultValue={user.dietary_flags?.join(", ") ?? ""}
+                    defaultValue={dietaryFlagsText}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Example: vegetarian, gluten-free, low-sugar
-                  </p>
                 </div>
               </div>
             </div>
 
             <div className="mt-6 flex justify-center gap-4 px-6 lg:justify-end lg:px-0">
-              {profileState.message && (
-                <p className="mt-3 text-sm text-red-600">
-                  {profileState.message}
-                </p>
-              )}
               <Link
                 href="/dashboard"
                 className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
               >
                 Discard Changes
               </Link>
-              <Button type="submit">Save Changes</Button>
+
+              <Button type="submit" disabled={isRefreshing}>
+                {isRefreshing ? "Saving..." : "Save Changes"}
+              </Button>
             </div>
           </section>
         </div>
       </form>
 
       {/* PASSWORD FORM */}
-      <form action={pwdAction} className="mt-8">
+      <form action={pwdAction} className="mt-8" onSubmit={onSubmitPwd}>
         <input type="hidden" name="id" value={user.id} />
+
         <div className="rounded-md bg-gray-50 p-4 md:p-6">
-          <section className="p-3 text-sm ">
+          <section className="p-3 text-sm">
             <h2 className={`${inter.className} mb-4 text-xl md:text-2xl`}>
               Login information
             </h2>
 
             <div className="mb-6 grid gap-6 rounded-md p-2 sm:grid-cols-2">
-              {/* Password */}
               <div>
                 <label
                   htmlFor="password"
@@ -396,18 +515,9 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   defaultValue=""
                   className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   aria-invalid={hasErr(pwdState, "password")}
-                  aria-describedby={
-                    hasErr(pwdState, "password") ? "password-error" : undefined
-                  }
                 />
-                {pwdState.errors?.password?.length ? (
-                  <p id="password-error" className="mt-2 text-sm text-red-500">
-                    {pwdState.errors.password[0]}
-                  </p>
-                ) : null}
               </div>
 
-              {/* Confirm password */}
               <div>
                 <label
                   htmlFor="confirm_password"
@@ -422,27 +532,14 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   defaultValue=""
                   className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   aria-invalid={hasErr(pwdState, "confirm_password")}
-                  aria-describedby={
-                    hasErr(pwdState, "confirm_password")
-                      ? "confirm_password-error"
-                      : undefined
-                  }
                 />
-                {pwdState.errors?.confirm_password?.length ? (
-                  <p
-                    id="confirm_password-error"
-                    className="mt-2 text-sm text-red-500"
-                  >
-                    {pwdState.errors.confirm_password[0]}
-                  </p>
-                ) : null}
               </div>
             </div>
+
             <div className="mt-6 flex justify-center gap-4 px-6 lg:justify-end lg:px-0">
-              {pwdState.message && (
-                <p className="mt-3 text-sm text-red-600">{pwdState.message}</p>
-              )}
-              <Button type="submit">Update Password</Button>
+              <Button type="submit" disabled={isRefreshing}>
+                {isRefreshing ? "Updating..." : "Update Password"}
+              </Button>
             </div>
           </section>
         </div>

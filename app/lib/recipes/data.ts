@@ -885,14 +885,19 @@ export async function fetchUserById(id: string) {
       u.password,
       u.country,
       u.language AS language,
+      u.gender,
+      -- date_of_birth as text (nullable)
+      CASE
+        WHEN u.date_of_birth IS NOT NULL
+        THEN (u.date_of_birth AT TIME ZONE 'UTC')::timestamptz::text
+        ELSE NULL
+      END AS date_of_birth,
+      u.allergies,
+      u.dietary_flags,
+      u.height_cm::int AS height_cm,
+      u.weight_kg::int  AS weight_kg,
       u.membership_tier,
       u.user_role,
-      u.gender,
-      (u.date_of_birth)::date::text AS date_of_birth,
-      COALESCE(u.allergies,      '{}'::text[]) AS allergies,
-      COALESCE(u.dietary_flags,  '{}'::text[]) AS dietary_flags,
-      u.weight_kg,
-      u.height_cm,
       (u.created_at AT TIME ZONE 'UTC')::timestamptz::text          AS created_at,
       (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
       (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
@@ -950,17 +955,13 @@ export async function fetchUserByIdForAdmin(
 
   const rows = await sql<AdminUserRow[]>`
     WITH owned AS (
-      SELECT
-        r.user_id,
-        COUNT(*)::int AS cnt
+      SELECT r.user_id, COUNT(*)::int AS cnt
       FROM public.recipes r
       WHERE r.user_id IS NOT NULL
       GROUP BY r.user_id
     ),
     imported AS (
-      SELECT
-        saver_id,
-        COUNT(*)::int AS cnt
+      SELECT saver_id, COUNT(*)::int AS cnt
       FROM (
         SELECT UNNEST(r.saved_by_user_ids) AS saver_id
         FROM public.recipes r
@@ -968,7 +969,7 @@ export async function fetchUserByIdForAdmin(
       ) s
       GROUP BY saver_id
     )
-            SELECT
+    SELECT
       u.id,
       u.name,
       u.user_name,
@@ -977,6 +978,16 @@ export async function fetchUserByIdForAdmin(
       ''::text AS password,
       u.country,
       u.language,
+      u.gender,
+      CASE
+        WHEN u.date_of_birth IS NOT NULL
+        THEN (u.date_of_birth AT TIME ZONE 'UTC')::timestamptz::text
+        ELSE NULL
+      END AS date_of_birth,
+      u.allergies,
+      u.dietary_flags,
+      u.height_cm,
+      u.weight_kg,
       u.membership_tier,
       u.user_role,
       (u.created_at AT TIME ZONE 'UTC')::timestamptz::text          AS created_at,
@@ -1015,7 +1026,7 @@ export async function fetchAdminUsers(): Promise<AdminUserListItem[]> {
       (u.updated_at AT TIME ZONE 'UTC')::timestamptz::text          AS updated_at,
       (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
       (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
-      (u.last_login_at AT TIME ZONE 'UTC')::timestamptz::text       AS last_login_at,
+      (u.last_login_at AT TIME ZONE 'UTC')::timestamptz::text AS last_login_at,
       COALESCE(owned.count, 0)::int    AS owned_recipes_count,
       COALESCE(imported.count, 0)::int AS imported_recipes_count,
       (COALESCE(owned.count, 0) + COALESCE(imported.count, 0))::int AS total_recipes_count

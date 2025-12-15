@@ -163,23 +163,33 @@ export type MembershipTier = "free" | "tier1" | "tier2";
 export type UserForm = {
   id: string;
   name: string;
-  user_name: string;
-  last_name: string;
+  user_name: string | null;
+  last_name: string | null;
   email: string;
-  password: string;
-  country: Country | string | null;
-  language: Language | string;
-  membership_tier?: MembershipTier;
-  gender?: string | null;
-  date_of_birth?: string | null; // we'll return "YYYY-MM-DD"
-  allergies: string[]; // always array (can be empty)
-  dietary_flags: string[]; // always array (can be empty)
-  weight_kg?: number | null;
-  height_cm?: number | null;
-  created_at?: string;
-  profile_updated_at?: string | null;
-  password_changed_at?: string | null;
-  last_login_at?: string | null;
+  password: string | null;
+
+  country: string | null;
+  language: string | null;
+  gender: string | null;
+
+  // This is returned as a timestamptz::text (or NULL)
+  date_of_birth: string | null;
+
+  // Store as free-text strings (comma-separated, nullable)
+  allergies: string | null;
+  dietary_flags: string | null;
+
+  height_cm: number | null;
+  weight_kg: number | null;
+
+  membership_tier: MembershipTier | null;
+  user_role: "user" | "admin";
+
+  created_at: string;
+  updated_at: string | null;
+  profile_updated_at: string | null;
+  password_changed_at: string | null;
+  last_login_at: string | null;
 };
 
 /* =============================================================================
