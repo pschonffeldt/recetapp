@@ -8,7 +8,7 @@ import {
   useState,
   useTransition,
 } from "react";
-import { type UserForm } from "@/app/lib/types/definitions";
+import { COUNTRIES, type UserForm } from "@/app/lib/types/definitions";
 import { inter } from "../branding/branding-fonts";
 import Link from "next/link";
 import { Button } from "../general/button";
@@ -363,13 +363,20 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                 >
                   Country (optional)
                 </label>
-                <input
+
+                <select
                   id="country"
                   name="country"
-                  type="text"
                   defaultValue={(user as any).country ?? ""}
                   className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
-                />
+                >
+                  <option value="">Not specified</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
