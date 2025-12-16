@@ -1,4 +1,10 @@
+import { Metadata } from "next";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
+
+// Set title for metadata
+export const metadata: Metadata = {
+  title: "Support",
+};
 
 export default async function Page() {
   return (
@@ -6,16 +12,11 @@ export default async function Page() {
       {/* Page title */}
       <Breadcrumbs
         breadcrumbs={[
-          {
-            label: "Help",
-            href: "/dashboard/help",
-            active: true,
-          },
+          { label: "Support", href: "/dashboard/support", active: true },
         ]}
       />
-      <div className="rounded-md border-gray-200 bg-gray-50 p-6 shadow-sm">
-        Tula
-      </div>
+
+      <div>Tula</div>
     </main>
   );
 }
