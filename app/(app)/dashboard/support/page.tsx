@@ -1,4 +1,3 @@
-// app/(app)/dashboard/support/page.tsx
 import SupportForm from "@/app/ui/support/support-form";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";

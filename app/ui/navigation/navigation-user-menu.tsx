@@ -11,6 +11,7 @@ import {
   GlobeAltIcon,
   InformationCircleIcon,
   ChartPieIcon,
+  InboxIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChartBarIcon,
@@ -33,6 +34,7 @@ type Props = {
   adminNotificationHref?: string;
   adminUsersHref?: string;
   metricsHref?: string;
+  supportHref?: string;
 
   logoutAction?: (formData: FormData) => Promise<void>;
   title?: string;
@@ -52,6 +54,7 @@ export default function UserSettingsFab({
   adminNotificationHref = "/dashboard/admin/notification-center",
   adminUsersHref = "/dashboard/admin/users",
   metricsHref = "/dashboard/admin/metrics",
+  supportHref = "/dashboard/admin/support",
 
   logoutAction,
   title = "User menu",
@@ -204,6 +207,11 @@ export default function UserSettingsFab({
                   icon={<ChartPieIcon className="h-5 w-5" />}
                   label="Usage metrics"
                   onClick={() => go(metricsHref)}
+                />
+                <MenuItem
+                  icon={<InboxIcon className="h-5 w-5" />}
+                  label="Support inbox"
+                  onClick={() => go(supportHref)}
                 />
               </div>
             )}

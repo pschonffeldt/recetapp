@@ -9,6 +9,7 @@ import {
   ChartPieIcon,
   GlobeAltIcon,
   HomeIcon,
+  InboxIcon,
   InformationCircleIcon,
   MegaphoneIcon,
   ShoppingCartIcon,
@@ -67,6 +68,11 @@ export default function NavLinksClient({ isAdmin }: Props) {
     },
     { name: "Users", href: "/dashboard/admin/users", icon: UsersIcon },
     { name: "Metrics", href: "/dashboard/admin/metrics", icon: ChartPieIcon },
+    {
+      name: "Support inbox",
+      href: "/dashboard/admin/support",
+      icon: InboxIcon,
+    },
   ];
 
   const renderLink = (link: NavItem) => {

@@ -1,4 +1,3 @@
-// app/lib/support/actions.ts
 "use server";
 
 import { sql } from "@/app/lib/db";
