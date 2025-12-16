@@ -1,10 +1,16 @@
 import { auth } from "@/auth";
 import { notFound, redirect } from "next/navigation";
 import { fetchSupportMessageById } from "@/app/lib/support/admin-data";
-import { setSupportSolved } from "@/app/lib/support/admin-actions";
 import Link from "next/link";
 import { capitalizeFirst } from "@/app/lib/utils/format";
 import { timeAgoFromIso } from "@/app/lib/utils/time";
+import {
+  supportCategoryLabel,
+  supportCategoryPillClass,
+  supportStatusLabel,
+  supportStatusPillClass,
+} from "@/app/lib/support/pills";
+import MarkSolvedButton from "@/app/ui/support/admin/mark-solved-button";
 
 export const metadata = { title: "Admin – Support message" };
 
@@ -33,8 +39,12 @@ export default async function Page({ params }: PageProps) {
             </h1>
 
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-              <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700">
-                {capitalizeFirst(msg.category)}
+              <span className={supportCategoryPillClass(msg.category)}>
+                {supportCategoryLabel(msg.category)}
+              </span>
+
+              <span className={supportStatusPillClass(isSolved)}>
+                {supportStatusLabel(isSolved)}
               </span>
 
               <span className="text-gray-300">•</span>
@@ -46,6 +56,12 @@ export default async function Page({ params }: PageProps) {
               <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
                 {timeAgoFromIso(msg.created_at)}
               </span>
+
+              {isSolved && msg.solved_at && (
+                <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                  Solved {timeAgoFromIso(msg.solved_at)}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -58,21 +74,7 @@ export default async function Page({ params }: PageProps) {
             Back to inbox
           </Link>
 
-          <form action={setSupportSolved}>
-            <input type="hidden" name="id" value={msg.id} />
-            <input type="hidden" name="solved" value={String(!isSolved)} />
-            <button
-              type="submit"
-              className={[
-                "rounded-md px-4 py-2 text-sm font-medium",
-                isSolved
-                  ? "border bg-white text-gray-700 hover:bg-gray-50"
-                  : "bg-blue-600 text-white hover:bg-blue-700",
-              ].join(" ")}
-            >
-              {isSolved ? "Mark unsolved" : "Mark solved"}
-            </button>
-          </form>
+          <MarkSolvedButton id={msg.id} isSolved={isSolved} size="md" />
         </div>
       </div>
 
@@ -89,8 +91,8 @@ export default async function Page({ params }: PageProps) {
 
             {/* Category pill  */}
             {msg.category ? (
-              <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700">
-                {capitalizeFirst(msg.category)}
+              <span className={supportCategoryPillClass(msg.category)}>
+                {supportCategoryLabel(msg.category)}
               </span>
             ) : null}
           </div>
@@ -170,17 +172,17 @@ export default async function Page({ params }: PageProps) {
               <div className="rounded-lg border border-gray-100 p-3">
                 <p className="text-xs text-gray-500">Language</p>
                 <p className="mt-1 text-sm font-medium text-gray-900">
-                  {msg.language ?? "—"}
+                  {capitalizeFirst(msg.language ?? "—")}
                 </p>
               </div>
               <div className="rounded-lg border border-gray-100 p-3">
                 <p className="text-xs text-gray-500">Gender</p>
                 <p className="mt-1 text-sm font-medium text-gray-900">
-                  {msg.gender ?? "—"}
+                  {capitalizeFirst(msg.gender ?? "—")}
                 </p>
               </div>
               <div className="rounded-lg border border-gray-100 p-3">
-                <p className="text-xs text-gray-500">DOB</p>
+                <p className="text-xs text-gray-500">Date of birth</p>
                 <p className="mt-1 text-sm font-medium text-gray-900">
                   {msg.date_of_birth ? msg.date_of_birth.slice(0, 10) : "—"}
                 </p>

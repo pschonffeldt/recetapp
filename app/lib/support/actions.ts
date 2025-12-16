@@ -51,7 +51,7 @@ export async function createSupportRequest(
       INSERT INTO public.support_requests (user_id, category, subject, message)
       VALUES (${userId}::uuid, ${category}, ${subject}, ${message})
     `;
-    return { ok: true, message: null, errors: {} };
+    return { ok: true, message: "Support request sent.", errors: {} };
   } catch (e) {
     console.error("createSupportRequest failed:", e);
     return {

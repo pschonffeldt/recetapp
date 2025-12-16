@@ -1,40 +1,57 @@
 "use server";
 
-import { sql } from "@/app/lib/db";
 import { auth } from "@/auth";
+import { sql } from "@/app/lib/db";
 import { revalidatePath } from "next/cache";
 
-function isAdmin(session: any) {
-  return (session?.user as any)?.user_role === "admin";
-}
+export type ActionResult = {
+  ok: boolean;
+  message: string | null;
+  errors: Record<string, string[]>;
+};
 
-export async function setSupportSolved(formData: FormData) {
+export async function setSupportSolved(
+  formData: FormData
+): Promise<ActionResult> {
   const session = await auth();
-  const adminId = (session?.user as any)?.id as string | undefined;
-  if (!adminId || !isAdmin(session)) throw new Error("Unauthorized");
+  const userId = (session?.user as any)?.id as string | undefined;
+  const role = (session?.user as any)?.user_role as string | undefined;
 
-  const id = formData.get("id")?.toString();
-  const solved = formData.get("solved")?.toString() === "true";
-  if (!id) throw new Error("Missing id");
-
-  if (solved) {
-    await sql`
-      UPDATE public.support_requests
-      SET solved_at = NOW(),
-          solved_by = ${adminId}::uuid,
-          updated_at = NOW()
-      WHERE id = ${id}::uuid
-    `;
-  } else {
-    await sql`
-      UPDATE public.support_requests
-      SET solved_at = NULL,
-          solved_by = NULL,
-          updated_at = NOW()
-      WHERE id = ${id}::uuid
-    `;
+  if (!userId || role !== "admin") {
+    return { ok: false, message: "Unauthorized.", errors: {} };
   }
 
-  revalidatePath("/dashboard/admin/support");
-  revalidatePath(`/dashboard/admin/support/${id}`);
+  const id = formData.get("id")?.toString();
+  const solvedRaw = formData.get("solved")?.toString();
+  const solved = solvedRaw === "true";
+
+  if (!id) return { ok: false, message: "Missing message id.", errors: {} };
+
+  try {
+    await sql`
+      UPDATE public.support_requests
+      SET
+        status = ${solved ? "solved" : "open"}::support_status,
+        solved_at = ${solved ? sql`NOW()` : sql`NULL`},
+        solved_by = ${solved ? sql`${userId}::uuid` : sql`NULL`},
+        updated_at = NOW()
+      WHERE id = ${id}::uuid
+    `;
+
+    revalidatePath("/dashboard/admin/support");
+    revalidatePath(`/dashboard/admin/support/${id}`);
+
+    return {
+      ok: true,
+      message: solved ? "Marked as solved." : "Marked as unsolved.",
+      errors: {},
+    };
+  } catch (e) {
+    console.error("setSupportSolved failed:", e);
+    return {
+      ok: false,
+      message: "Failed to update support message.",
+      errors: {},
+    };
+  }
 }

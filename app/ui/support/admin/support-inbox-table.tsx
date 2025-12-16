@@ -1,26 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { setSupportSolved } from "@/app/lib/support/admin-actions";
 import type { SupportInboxRow } from "@/app/lib/support/admin-data";
-import { minutesToAgo } from "@/app/lib/utils/time";
-
-function categoryPill(category: string) {
-  const base =
-    "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium";
-  switch (category) {
-    case "billing":
-      return `${base} bg-amber-50 text-amber-800 border-amber-200`;
-    case "bug":
-      return `${base} bg-red-50 text-red-800 border-red-200`;
-    case "feature":
-      return `${base} bg-indigo-50 text-indigo-800 border-indigo-200`;
-    case "account":
-      return `${base} bg-emerald-50 text-emerald-800 border-emerald-200`;
-    default:
-      return `${base} bg-gray-50 text-gray-800 border-gray-200`;
-  }
-}
+import { minutesToAgo, timeAgoFromIso } from "@/app/lib/utils/time";
+import {
+  supportCategoryLabel,
+  supportCategoryPillClass,
+  supportStatusLabel,
+  supportStatusPillClass,
+} from "@/app/lib/support/pills";
+import MarkSolvedButton from "@/app/ui/support/admin/mark-solved-button";
 
 export default function SupportInboxTable({
   rows,
@@ -43,35 +32,45 @@ export default function SupportInboxTable({
 
         <tbody className="divide-y divide-gray-100">
           {rows.map((r) => {
-            const isSolved = !!r.solved_at;
+            // ✅ status is the source of truth now
+            const isSolved = r.status === "solved";
+
+            // ✅ prefer minutes-from-query, fallback to solved_at
+            const solvedAgo =
+              typeof r.solved_minutes_ago === "number"
+                ? minutesToAgo(r.solved_minutes_ago)
+                : r.solved_at
+                ? timeAgoFromIso(r.solved_at)
+                : null;
+
             return (
               <tr key={r.id} className="hover:bg-gray-50/70">
+                {/* STATUS */}
                 <td className="px-4 py-3">
-                  <span
-                    className={[
-                      "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium",
-                      isSolved
-                        ? "bg-gray-50 text-gray-700 border-gray-200"
-                        : "bg-blue-50 text-blue-700 border-blue-200",
-                    ].join(" ")}
-                  >
-                    {isSolved ? "Solved" : "Unsolved"}
+                  <span className={supportStatusPillClass(isSolved)}>
+                    {supportStatusLabel(isSolved)}
                   </span>
                 </td>
 
+                {/* CATEGORY */}
                 <td className="px-4 py-3">
-                  <span className={categoryPill(r.category)}>{r.category}</span>
+                  <span className={supportCategoryPillClass(r.category)}>
+                    {supportCategoryLabel(r.category)}
+                  </span>
                 </td>
 
+                {/* SUBJECT */}
                 <td className="px-4 py-3 font-medium text-gray-900">
                   {r.subject}
                 </td>
 
+                {/* USER */}
                 <td className="px-4 py-3 text-gray-700">
                   <div className="font-medium">{r.user_name ?? "—"}</div>
                   <div className="text-xs text-gray-500">{r.email}</div>
                 </td>
 
+                {/* SENT + SOLVED */}
                 <td className="px-4 py-3 text-gray-700">
                   <div className="text-xs text-gray-500">
                     {minutesToAgo(r.minutes_ago)}
@@ -79,8 +78,31 @@ export default function SupportInboxTable({
                   <div className="text-xs text-gray-500">
                     {new Date(r.created_at).toLocaleString()}
                   </div>
+
+                  {isSolved &&
+                    (r.solved_at || r.solved_minutes_ago !== null) && (
+                      <div className="mt-2 rounded-md border border-emerald-100 bg-emerald-50 px-2.5 py-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-emerald-800">
+                            Solved
+                          </span>
+                          {solvedAgo ? (
+                            <span className="text-xs font-medium text-emerald-700">
+                              {solvedAgo}
+                            </span>
+                          ) : null}
+                        </div>
+
+                        {r.solved_at ? (
+                          <div className="mt-1 text-[11px] text-emerald-800/80">
+                            {new Date(r.solved_at).toLocaleString()}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
                 </td>
 
+                {/* ACTIONS */}
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
                     <Link
@@ -90,25 +112,7 @@ export default function SupportInboxTable({
                       View
                     </Link>
 
-                    <form action={setSupportSolved}>
-                      <input type="hidden" name="id" value={r.id} />
-                      <input
-                        type="hidden"
-                        name="solved"
-                        value={String(!isSolved)}
-                      />
-                      <button
-                        type="submit"
-                        className={[
-                          "rounded-md px-3 py-1.5 text-xs font-medium",
-                          isSolved
-                            ? "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-                            : "bg-blue-600 text-white hover:bg-blue-700",
-                        ].join(" ")}
-                      >
-                        {isSolved ? "Mark unsolved" : "Mark solved"}
-                      </button>
-                    </form>
+                    <MarkSolvedButton id={r.id} isSolved={isSolved} size="sm" />
                   </div>
                 </td>
               </tr>

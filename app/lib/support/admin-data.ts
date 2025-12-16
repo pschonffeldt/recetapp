@@ -17,6 +17,8 @@ export type SupportInboxRow = {
   subject: string;
   created_at: string; // ISO string
   solved_at: string | null;
+  status: "open" | "solved";
+  solved_minutes_ago: number | null;
 
   // helpful for list UI
   user_name: string | null;
@@ -31,7 +33,15 @@ export async function fetchSupportInbox(): Promise<SupportInboxRow[]> {
       sr.user_id::text,
       sr.category,
       sr.subject,
+
+      -- enum -> text for TS
+      COALESCE(
+        sr.status::text,
+        CASE WHEN sr.solved_at IS NOT NULL THEN 'solved' ELSE 'open' END
+      ) AS status,
+
       (sr.created_at AT TIME ZONE 'UTC')::timestamptz::text AS created_at,
+
       CASE
         WHEN sr.solved_at IS NULL THEN NULL
         ELSE (sr.solved_at AT TIME ZONE 'UTC')::timestamptz::text
@@ -40,15 +50,29 @@ export async function fetchSupportInbox(): Promise<SupportInboxRow[]> {
       u.user_name,
       u.email,
 
+      -- minutes since created
       GREATEST(
         0,
         FLOOR(EXTRACT(EPOCH FROM (NOW() - sr.created_at)) / 60)::int
-      ) AS minutes_ago
+      ) AS minutes_ago,
+
+      -- minutes since solved (nullable)
+      CASE
+        WHEN sr.solved_at IS NULL THEN NULL
+        ELSE GREATEST(
+          0,
+          FLOOR(EXTRACT(EPOCH FROM (NOW() - sr.solved_at)) / 60)::int
+        )
+      END AS solved_minutes_ago
+
     FROM public.support_requests sr
     JOIN public.users u ON u.id = sr.user_id
+
     ORDER BY
-      (sr.solved_at IS NOT NULL) ASC,  -- unsolved first
+      -- open first
+      (COALESCE(sr.status, 'open'::support_status) = 'solved'::support_status) ASC,
       sr.created_at DESC
+
     LIMIT 200
   `;
 
