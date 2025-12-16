@@ -6,6 +6,7 @@ import clsx from "clsx";
 
 import {
   ArrowDownIcon,
+  ChartPieIcon,
   GlobeAltIcon,
   HomeIcon,
   InformationCircleIcon,
@@ -30,6 +31,7 @@ type NavItem = {
 export default function NavLinksClient({ isAdmin }: Props) {
   const pathname = usePathname();
 
+  // Links for everyone
   const baseLinks: NavItem[] = [
     { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
     { name: "Recipes", href: "/dashboard/recipes", icon: DocumentPlusIcon },
@@ -52,6 +54,7 @@ export default function NavLinksClient({ isAdmin }: Props) {
     { name: "Help", href: "/dashboard/help", icon: InformationCircleIcon },
   ];
 
+  // Admin only links
   const adminLinks: NavItem[] = [
     {
       name: "New notification",
@@ -59,6 +62,7 @@ export default function NavLinksClient({ isAdmin }: Props) {
       icon: ShieldCheckIcon,
     },
     { name: "Users", href: "/dashboard/admin/users", icon: UsersIcon },
+    { name: "Metrics", href: "/dashboard/admin/metrics", icon: ChartPieIcon },
   ];
 
   const renderLink = (link: NavItem) => {

@@ -7,17 +7,5 @@ export default async function UserMenuServer() {
 
   const isAdmin = ((session?.user as any)?.user_role ?? "user") === "admin";
 
-  return (
-    <UserSettingsFab
-      isAdmin={isAdmin}
-      logoutAction={logout}
-      // you can override defaults here if needed:
-      // dashboardleHref="/dashboard"
-      // profileHref="/dashboard/account"
-      // recipesHref="/dashboard/recipes"
-      // notificationsHref="/dashboard/notifications"
-      // adminNotificationHref="/dashboard/admin/notification-center"
-      // adminUsersHref="/dashboard/admin/users"
-    />
-  );
+  return <UserSettingsFab isAdmin={isAdmin} logoutAction={logout} />;
 }
