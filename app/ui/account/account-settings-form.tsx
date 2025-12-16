@@ -150,10 +150,43 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     }
   }, [serverGender]);
 
+  // Controlled country so it doesn't snap back
+  const [country, setCountry] = useState<string>(
+    () => ((user as any).country ?? "") as string
+  );
+
+  // Used to prevent snap-back during router.refresh()
+  const submittedCountryRef = useRef<string | null>(null);
+
+  // Guarded country sync (prevents snap-back)
+  const serverCountry = ((user as any).country ?? "") as string;
+
+  useEffect(() => {
+    // If we just submitted a country, ignore stale server props during refresh.
+    if (
+      submittedCountryRef.current !== null &&
+      serverCountry !== submittedCountryRef.current
+    ) {
+      return;
+    }
+
+    // Normal case: keep local state aligned with server value
+    setCountry(serverCountry);
+
+    // Once server catches up to our submitted value, clear the guard.
+    if (
+      submittedCountryRef.current !== null &&
+      serverCountry === submittedCountryRef.current
+    ) {
+      submittedCountryRef.current = null;
+    }
+  }, [serverCountry]);
+
   // Reset the "handled" guard each time user submits
   const onSubmitProfile = () => {
     profileHandledRef.current = false;
     submittedGenderRef.current = gender;
+    submittedCountryRef.current = country;
     setProfilePending(true);
   };
 
@@ -355,7 +388,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                 />
               </div>
 
-              {/* Country */}
+              {/* Country (optional) */}
               <div>
                 <label
                   htmlFor="country"
@@ -367,8 +400,10 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                 <select
                   id="country"
                   name="country"
-                  defaultValue={(user as any).country ?? ""}
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
                   className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
+                  autoComplete="country-name"
                 >
                   <option value="">Not specified</option>
                   {COUNTRIES.map((c) => (
