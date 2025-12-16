@@ -51,7 +51,11 @@ export default function NavLinksClient({ isAdmin }: Props) {
       icon: MegaphoneIcon,
     },
     { name: "Account", href: "/dashboard/account", icon: UserIcon },
-    { name: "Help", href: "/dashboard/help", icon: InformationCircleIcon },
+    {
+      name: "Support",
+      href: "/dashboard/support",
+      icon: InformationCircleIcon,
+    },
   ];
 
   // Admin only links
@@ -71,7 +75,7 @@ export default function NavLinksClient({ isAdmin }: Props) {
 
     return (
       <Link
-        key={link.name}
+        key={link.href}
         href={link.href}
         className={clsx(
           "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 lg:flex-none lg:justify-start lg:p-2 lg:px-3",

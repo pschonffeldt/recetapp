@@ -46,7 +46,7 @@ export default function UserSettingsFab({
   notificationsHref = "/dashboard/notifications",
   shoppinglistHref = "/dashboard/shopping-list",
   discoverHref = "/dashboard/discover",
-  helpHref = "/dashboard/help",
+  helpHref = "/dashboard/support",
 
   isAdmin = false,
   adminNotificationHref = "/dashboard/admin/notification-center",
@@ -178,7 +178,7 @@ export default function UserSettingsFab({
             />
             <MenuItem
               icon={<InformationCircleIcon className="h-5 w-5" />}
-              label="Help"
+              label="Support"
               onClick={() => go(helpHref)}
             />
             {/* Admin-only section */}
