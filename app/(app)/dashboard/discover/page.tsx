@@ -93,7 +93,7 @@ export default async function Page({
       />
 
       {/* Page intro */}
-      <p className="mt-2 text-sm text-gray-600">
+      <p className="mx-4 mt-2 text-sm text-gray-600">
         Browse public recipes shared by the community. Only recipes marked as{" "}
         <span className="font-medium">Public</span> will appear here.
       </p>

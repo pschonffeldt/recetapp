@@ -51,7 +51,7 @@ export default function DiscoverGrid({ recipes, hasFilters = false }: Props) {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="mx-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3 md:mx-0">
       {recipes.map((recipe) => (
         <DiscoverCard key={recipe.id} recipe={recipe} />
       ))}
