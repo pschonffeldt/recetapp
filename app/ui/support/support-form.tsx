@@ -47,7 +47,7 @@ export default function SupportForm() {
         <select
           id="category"
           name="category"
-          className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+          className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
           defaultValue="bug"
         >
           <option value="bug">Bug</option>
@@ -68,7 +68,7 @@ export default function SupportForm() {
         <input
           id="subject"
           name="subject"
-          className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+          className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
           placeholder="Short summary"
         />
         {err("subject") && (
@@ -83,7 +83,7 @@ export default function SupportForm() {
         <textarea
           id="message"
           name="message"
-          className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+          className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
           rows={6}
           placeholder="What happened? What did you expect? What did you try?"
         />

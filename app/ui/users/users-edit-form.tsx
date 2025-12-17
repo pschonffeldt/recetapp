@@ -146,13 +146,91 @@ export default function AdminUserEditForm({
       : "bg-gray-50 text-gray-700 border-gray-200";
 
   return (
-    <div className="mt-6">
+    <div className="mt-6 mb-6">
       {/* ================= PROFILE FORM (personal / language, etc.) ================= */}
       <form action={profileAction}>
         <input type="hidden" name="id" value={user.id} />
 
         <div className="rounded-md bg-gray-50 p-4 md:p-6">
           <section className="space-y-12 p-3 text-sm">
+            {/* Membership + role (info only for now) */}
+            <div>
+              <h2 className={`${inter.className} mb-2 text-xl md:text-2xl`}>
+                Membership & role
+              </h2>
+              <div className="rounded-md border border-gray-200 bg-white p-3">
+                <div className="flex flex-wrap items-center gap-2 text-xs">
+                  <span className="text-gray-600">Membership:</span>
+                  <span
+                    className={`inline-flex items-center rounded-full border px-3 py-1 font-medium ${membershipPillClass}`}
+                  >
+                    {membershipLabel[membershipTier]}
+                  </span>
+
+                  <span className="ml-3 text-gray-600">Role:</span>
+                  <span
+                    className={`inline-flex items-center rounded-full border px-3 py-1 font-medium ${rolePillClass}`}
+                  >
+                    {role === "admin" ? "Admin" : "User"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Activity / usage info */}
+            <div>
+              <h2 className={`${inter.className} mb-2 text-xl md:text-2xl`}>
+                Activity & usage
+              </h2>
+
+              <div className="grid gap-4 text-xs sm:grid-cols-2">
+                <div className="rounded-md border border-gray-200 bg-white p-3">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                    Recipe library
+                  </p>
+                  <p className="text-sm">
+                    Total recipes:{" "}
+                    <span className="font-semibold">{totalRecipes}</span>
+                  </p>
+                  <p className="mt-1">
+                    Own: <span className="font-semibold">{owned}</span> ·
+                    Imported: <span className="font-semibold">{imported}</span>
+                  </p>
+                </div>
+
+                <div className="rounded-md border border-gray-200 bg-white p-3">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                    Account activity
+                  </p>
+                  <dl className="space-y-1">
+                    <div className="flex justify-between gap-2">
+                      <dt className="text-gray-600">Joined</dt>
+                      <dd className="text-gray-800">
+                        {safeDate(user.created_at)}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      <dt className="text-gray-600">Last login</dt>
+                      <dd className="text-gray-800">
+                        {safeDate(user.last_login_at)}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      <dt className="text-gray-600">Profile info changed</dt>
+                      <dd className="text-gray-800">
+                        {safeDate(user.profile_updated_at)}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between gap-2">
+                      <dt className="text-gray-600">Password changed</dt>
+                      <dd className="text-gray-800">
+                        {safeDate(user.password_changed_at)}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+            </div>
             {/* Personal info */}
             <div>
               <h2 className={`${inter.className} mb-2 text-xl md:text-2xl`}>
@@ -334,85 +412,6 @@ export default function AdminUserEditForm({
                       {profileState.errors.language[0]}
                     </p>
                   ) : null}
-                </div>
-              </div>
-            </div>
-
-            {/* Membership + role (info only for now) */}
-            <div>
-              <h2 className={`${inter.className} mb-2 text-xl md:text-2xl`}>
-                Membership & role
-              </h2>
-              <div className="rounded-md border border-gray-200 bg-white p-3">
-                <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="text-gray-600">Membership:</span>
-                  <span
-                    className={`inline-flex items-center rounded-full border px-3 py-1 font-medium ${membershipPillClass}`}
-                  >
-                    {membershipLabel[membershipTier]}
-                  </span>
-
-                  <span className="ml-3 text-gray-600">Role:</span>
-                  <span
-                    className={`inline-flex items-center rounded-full border px-3 py-1 font-medium ${rolePillClass}`}
-                  >
-                    {role === "admin" ? "Admin" : "User"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Activity / usage info */}
-            <div>
-              <h2 className={`${inter.className} mb-2 text-xl md:text-2xl`}>
-                Activity & usage
-              </h2>
-
-              <div className="grid gap-4 text-xs sm:grid-cols-2">
-                <div className="rounded-md border border-gray-200 bg-white p-3">
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                    Recipe library
-                  </p>
-                  <p className="text-sm">
-                    Total recipes:{" "}
-                    <span className="font-semibold">{totalRecipes}</span>
-                  </p>
-                  <p className="mt-1">
-                    Own: <span className="font-semibold">{owned}</span> ·
-                    Imported: <span className="font-semibold">{imported}</span>
-                  </p>
-                </div>
-
-                <div className="rounded-md border border-gray-200 bg-white p-3">
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">
-                    Account activity
-                  </p>
-                  <dl className="space-y-1">
-                    <div className="flex justify-between gap-2">
-                      <dt className="text-gray-600">Joined</dt>
-                      <dd className="text-gray-800">
-                        {safeDate(user.created_at)}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between gap-2">
-                      <dt className="text-gray-600">Last login</dt>
-                      <dd className="text-gray-800">
-                        {safeDate(user.last_login_at)}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between gap-2">
-                      <dt className="text-gray-600">Profile info changed</dt>
-                      <dd className="text-gray-800">
-                        {safeDate(user.profile_updated_at)}
-                      </dd>
-                    </div>
-                    <div className="flex justify-between gap-2">
-                      <dt className="text-gray-600">Password changed</dt>
-                      <dd className="text-gray-800">
-                        {safeDate(user.password_changed_at)}
-                      </dd>
-                    </div>
-                  </dl>
                 </div>
               </div>
             </div>
