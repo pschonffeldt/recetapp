@@ -33,6 +33,19 @@ const asIntDefault = (v: unknown) => {
   return Number.isFinite(n) ? String(Math.round(n)) : "";
 };
 
+function pickFirstError(errors: Record<string, string[]>): string | null {
+  for (const key of Object.keys(errors)) {
+    const msgs = errors[key];
+    if (msgs && msgs.length) return msgs[0];
+  }
+  return null;
+}
+
+function resultToToastError(state: ActionResult): string | null {
+  const fieldMsg = pickFirstError(state.errors);
+  return fieldMsg ?? state.message ?? null;
+}
+
 function pgArrayToCsv(v: unknown): string {
   if (v === null || v === undefined) return "";
 
@@ -85,50 +98,6 @@ function pgArrayToCsv(v: unknown): string {
   return String(v).trim();
 }
 
-const FIELD_LABELS: Record<string, string> = {
-  user_name: "User name",
-  name: "First name",
-  last_name: "Last name",
-  email: "Email",
-  country: "Country",
-  gender: "Gender",
-  date_of_birth: "Date of birth",
-  height_cm: "Height",
-  weight_kg: "Weight",
-  allergies: "Allergies",
-  dietary_flags: "Dietary preferences",
-  password: "Password",
-  confirm_password: "Confirm password",
-};
-
-function buildToastMessage(state: ActionResult): string | null {
-  const entries = Object.entries(state.errors ?? {});
-  const pieces: string[] = [];
-
-  for (const [field, msgs] of entries) {
-    if (!msgs?.length) continue;
-    const label = FIELD_LABELS[field] ?? field;
-    for (const m of msgs) pieces.push(`${label}: ${m}`);
-  }
-
-  // De-dupe + cap length so toasts don’t get ridiculous
-  const uniq = Array.from(new Set(pieces));
-
-  if (uniq.length > 0) {
-    const shown = uniq.slice(0, 3);
-    const extra = uniq.length - shown.length;
-    return extra > 0
-      ? `${shown.join(" • ")} • +${extra} more`
-      : shown.join(" • ");
-  }
-
-  return state.message ?? null;
-}
-
-function hasFieldErr(state: ActionResult, k: string) {
-  return Boolean(state.errors?.[k]?.length);
-}
-
 export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
   const { push } = useToast();
   const router = useRouter();
@@ -147,8 +116,25 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
   const [gender, setGender] = useState<string>(
     () => ((user as any).gender ?? "") as string
   );
-  const submittedGenderRef = useRef<string | null>(null);
 
+  // Controlled country so it doesn't snap back
+  const [country, setCountry] = useState<string>(
+    () => ((user as any).country ?? "") as string
+  );
+
+  // Pending flags that only clear once we have a real result
+  const [profilePending, setProfilePending] = useState(false);
+  const [pwdPending, setPwdPending] = useState(false);
+
+  // Ref guards (prevents double toast in dev/StrictMode)
+  const profileHandledRef = useRef(false);
+  const pwdHandledRef = useRef(false);
+
+  // Used to prevent the brief snap-back during router.refresh()
+  const submittedGenderRef = useRef<string | null>(null);
+  const submittedCountryRef = useRef<string | null>(null);
+
+  // Guarded gender sync (prevents flash)
   const serverGender = ((user as any).gender ?? "") as string;
   useEffect(() => {
     if (
@@ -168,12 +154,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     }
   }, [serverGender]);
 
-  // Controlled country so it doesn't snap back
-  const [country, setCountry] = useState<string>(
-    () => ((user as any).country ?? "") as string
-  );
-  const submittedCountryRef = useRef<string | null>(null);
-
+  // Guarded country sync (prevents flash)
   const serverCountry = ((user as any).country ?? "") as string;
   useEffect(() => {
     if (
@@ -193,14 +174,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     }
   }, [serverCountry]);
 
-  // Pending flags
-  const [profilePending, setProfilePending] = useState(false);
-  const [pwdPending, setPwdPending] = useState(false);
-
-  // Ref guards (prevents double toast in dev/StrictMode)
-  const profileHandledRef = useRef(false);
-  const pwdHandledRef = useRef(false);
-
+  // Reset the "handled" guard each time user submits
   const onSubmitProfile = () => {
     profileHandledRef.current = false;
     submittedGenderRef.current = gender;
@@ -213,7 +187,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     setPwdPending(true);
   };
 
-  // Profile result handling (toast-only)
+  // Profile result handling (toast-only, no inline errors)
   useEffect(() => {
     if (!profilePending) return;
 
@@ -231,8 +205,11 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
       return;
     }
 
-    const msg = buildToastMessage(profileState);
-    if (msg && !profileHandledRef.current) {
+    // Only show an error toast once we actually have a message/error from the action
+    const msg = resultToToastError(profileState);
+    if (!msg) return;
+
+    if (!profileHandledRef.current) {
       profileHandledRef.current = true;
       push({
         variant: "error",
@@ -243,7 +220,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     }
   }, [profilePending, profileState, push, router, startRefresh]);
 
-  // Password result handling (toast-only)
+  // Password result handling
   useEffect(() => {
     if (!pwdPending) return;
 
@@ -261,8 +238,11 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
       return;
     }
 
-    const msg = buildToastMessage(pwdState);
-    if (msg && !pwdHandledRef.current) {
+    // Only toast when we have a real error payload
+    const msg = resultToToastError(pwdState);
+    if (!msg) return;
+
+    if (!pwdHandledRef.current) {
       pwdHandledRef.current = true;
       push({
         variant: "error",
@@ -286,6 +266,9 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
   const dobValue = user.date_of_birth
     ? String(user.date_of_birth).slice(0, 10)
     : "";
+
+  const disableProfile = isRefreshing || profilePending;
+  const disablePwd = isRefreshing || pwdPending;
 
   return (
     <div className="mt-8">
@@ -314,13 +297,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   type="text"
                   defaultValue={user.user_name ?? ""}
                   autoComplete="username"
-                  className={[
-                    "block w-full rounded-md border px-3 py-2 text-base",
-                    hasFieldErr(profileState, "user_name")
-                      ? "border-red-300"
-                      : "border-gray-200",
-                  ].join(" ")}
-                  aria-invalid={hasFieldErr(profileState, "user_name")}
+                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                 />
               </div>
             </div>
@@ -340,13 +317,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   type="text"
                   defaultValue={user.name ?? ""}
                   autoComplete="given-name"
-                  className={[
-                    "block w-full rounded-md border px-3 py-2 text-base",
-                    hasFieldErr(profileState, "name")
-                      ? "border-red-300"
-                      : "border-gray-200",
-                  ].join(" ")}
-                  aria-invalid={hasFieldErr(profileState, "name")}
+                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                 />
               </div>
 
@@ -364,13 +335,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   type="text"
                   defaultValue={user.last_name ?? ""}
                   autoComplete="family-name"
-                  className={[
-                    "block w-full rounded-md border px-3 py-2 text-base",
-                    hasFieldErr(profileState, "last_name")
-                      ? "border-red-300"
-                      : "border-gray-200",
-                  ].join(" ")}
-                  aria-invalid={hasFieldErr(profileState, "last_name")}
+                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                 />
               </div>
 
@@ -388,13 +353,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   type="email"
                   defaultValue={user.email ?? ""}
                   autoComplete="email"
-                  className={[
-                    "block w-full rounded-md border px-3 py-2 text-base",
-                    hasFieldErr(profileState, "email")
-                      ? "border-red-300"
-                      : "border-gray-200",
-                  ].join(" ")}
-                  aria-invalid={hasFieldErr(profileState, "email")}
+                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                 />
               </div>
 
@@ -412,14 +371,8 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   name="country"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  className={[
-                    "block w-full rounded-md border px-3 py-2 text-base",
-                    hasFieldErr(profileState, "country")
-                      ? "border-red-300"
-                      : "border-gray-200",
-                  ].join(" ")}
+                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   autoComplete="country-name"
-                  aria-invalid={hasFieldErr(profileState, "country")}
                 >
                   <option value="">Not specified</option>
                   {COUNTRIES.map((c) => (
@@ -438,7 +391,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
               </h2>
 
               <div className="grid gap-6 rounded-md p-2 sm:grid-cols-2">
-                {/* Gender (controlled) */}
+                {/* Gender */}
                 <div>
                   <label
                     htmlFor="gender"
@@ -451,13 +404,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     name="gender"
                     value={gender}
                     onChange={(e) => setGender(e.target.value)}
-                    className={[
-                      "block w-full rounded-md border px-3 py-2 text-base",
-                      hasFieldErr(profileState, "gender")
-                        ? "border-red-300"
-                        : "border-gray-200",
-                    ].join(" ")}
-                    aria-invalid={hasFieldErr(profileState, "gender")}
+                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   >
                     <option value="">Not specified</option>
                     <option value="female">Female</option>
@@ -481,13 +428,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     name="date_of_birth"
                     type="date"
                     defaultValue={dobValue}
-                    className={[
-                      "block w-full rounded-md border px-3 py-2 text-base",
-                      hasFieldErr(profileState, "date_of_birth")
-                        ? "border-red-300"
-                        : "border-gray-200",
-                    ].join(" ")}
-                    aria-invalid={hasFieldErr(profileState, "date_of_birth")}
+                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   />
                 </div>
 
@@ -507,13 +448,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     min={0}
                     inputMode="numeric"
                     defaultValue={asIntDefault((user as any).weight_kg)}
-                    className={[
-                      "block w-full rounded-md border px-3 py-2 text-base",
-                      hasFieldErr(profileState, "weight_kg")
-                        ? "border-red-300"
-                        : "border-gray-200",
-                    ].join(" ")}
-                    aria-invalid={hasFieldErr(profileState, "weight_kg")}
+                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   />
                 </div>
 
@@ -533,13 +468,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     min={0}
                     inputMode="numeric"
                     defaultValue={asIntDefault((user as any).height_cm)}
-                    className={[
-                      "block w-full rounded-md border px-3 py-2 text-base",
-                      hasFieldErr(profileState, "height_cm")
-                        ? "border-red-300"
-                        : "border-gray-200",
-                    ].join(" ")}
-                    aria-invalid={hasFieldErr(profileState, "height_cm")}
+                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                   />
                 </div>
               </div>
@@ -557,13 +486,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     id="allergies"
                     name="allergies"
                     defaultValue={allergiesText}
-                    className={[
-                      "block w-full rounded-md border px-3 py-2 text-sm",
-                      hasFieldErr(profileState, "allergies")
-                        ? "border-red-300"
-                        : "border-gray-200",
-                    ].join(" ")}
-                    aria-invalid={hasFieldErr(profileState, "allergies")}
+                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
                   />
                 </div>
 
@@ -578,13 +501,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     id="dietary_flags"
                     name="dietary_flags"
                     defaultValue={dietaryFlagsText}
-                    className={[
-                      "block w-full rounded-md border px-3 py-2 text-sm",
-                      hasFieldErr(profileState, "dietary_flags")
-                        ? "border-red-300"
-                        : "border-gray-200",
-                    ].join(" ")}
-                    aria-invalid={hasFieldErr(profileState, "dietary_flags")}
+                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
                   />
                 </div>
               </div>
@@ -598,8 +515,8 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                 Discard Changes
               </Link>
 
-              <Button type="submit" disabled={isRefreshing}>
-                {isRefreshing ? "Saving..." : "Save Changes"}
+              <Button type="submit" disabled={disableProfile}>
+                {disableProfile ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </section>
@@ -629,13 +546,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   name="password"
                   type="password"
                   defaultValue=""
-                  className={[
-                    "block w-full rounded-md border px-3 py-2 text-base",
-                    hasFieldErr(pwdState, "password")
-                      ? "border-red-300"
-                      : "border-gray-200",
-                  ].join(" ")}
-                  aria-invalid={hasFieldErr(pwdState, "password")}
+                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                 />
               </div>
 
@@ -651,20 +562,14 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   name="confirm_password"
                   type="password"
                   defaultValue=""
-                  className={[
-                    "block w-full rounded-md border px-3 py-2 text-base",
-                    hasFieldErr(pwdState, "confirm_password")
-                      ? "border-red-300"
-                      : "border-gray-200",
-                  ].join(" ")}
-                  aria-invalid={hasFieldErr(pwdState, "confirm_password")}
+                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                 />
               </div>
             </div>
 
             <div className="mt-6 flex justify-center gap-4 px-6 lg:justify-end lg:px-0">
-              <Button type="submit" disabled={isRefreshing}>
-                {isRefreshing ? "Updating..." : "Update Password"}
+              <Button type="submit" disabled={disablePwd}>
+                {disablePwd ? "Updating..." : "Update Password"}
               </Button>
             </div>
           </section>
