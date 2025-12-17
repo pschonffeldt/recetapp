@@ -62,19 +62,23 @@ export default function RecipesFiltersToolbar(props: Props) {
   } = props;
 
   const countText = (() => {
-    const label = contextLabel;
     if (totalCount == null) {
       return hasFilters
         ? `Found results matching your filters`
-        : `Showing ${label}`;
+        : `Showing ${contextLabel}`;
     }
 
-    const plural = totalCount === 1 ? "" : "s";
+    // If your label already includes "recipes", swap it for "recipe" when needed.
+    const label =
+      totalCount === 1
+        ? contextLabel.replace(/\brecipes\b/i, "recipe")
+        : contextLabel.replace(/\brecipe\b/i, "recipes");
 
     return hasFilters
-      ? `Found ${totalCount} ${label}${plural}`
-      : `Showing ${totalCount} ${label}${plural}`;
+      ? `Found ${totalCount} ${label}`
+      : `Showing ${totalCount} ${label}`;
   })();
+
   const router = useRouter();
 
   return (
