@@ -86,8 +86,21 @@ export async function updateUserProfile(
   formData: FormData
 ): Promise<AccountFormState> {
   const session = await auth();
-  const userId = (session?.user as any)?.id as string | undefined;
-  if (!userId) return { message: "Unauthorized.", errors: {}, ok: false };
+
+  const actorId = (session?.user as any)?.id as string | undefined;
+  const actorRole =
+    ((session?.user as any)?.user_role as string | undefined) ?? "user";
+  if (!actorId) return { message: "Unauthorized.", errors: {}, ok: false };
+
+  // ✅ IMPORTANT:
+  // - On /dashboard/account, you may not send "id" (or it equals actorId)
+  // - On admin edit user, you DO send "id" and it’s the target user
+  const targetUserId = (formData.get("id")?.toString() || actorId).trim();
+
+  // Only admins can edit other users
+  if (targetUserId !== actorId && actorRole !== "admin") {
+    return { ok: false, message: "Forbidden.", errors: {} };
+  }
 
   // keep empty string ("") so optional fields can be cleared
   const toOptionalKeepEmpty = (
@@ -96,12 +109,6 @@ export async function updateUserProfile(
     if (v === null) return undefined;
     return v.toString().trim(); // may be ""
   };
-
-  const csvToTextArray = (s: string): string[] =>
-    s
-      .split(",")
-      .map((x) => x.trim())
-      .filter(Boolean);
 
   const rawName = formData.get("name");
   const rawUserName = formData.get("user_name");
@@ -126,7 +133,6 @@ export async function updateUserProfile(
     allergies: rawAllergies === null ? undefined : String(rawAllergies).trim(), // may be ""
     dietary_flags:
       rawDietaryFlags === null ? undefined : String(rawDietaryFlags).trim(), // may be ""
-
     height_cm: toOptionalKeepEmpty(rawHeight),
     weight_kg: toOptionalKeepEmpty(rawWeight),
   };
@@ -156,6 +162,43 @@ export async function updateUserProfile(
   }
 
   const d = parsed.data!;
+
+  // ✅ Pre-check duplicates (exclude the SAME target user)
+  // This avoids relying on DB errors and fixes admin-edit false positives.
+  if (d.email !== undefined && d.email !== "") {
+    const dup = await sql`
+      SELECT 1
+      FROM public.users
+      WHERE lower(email) = lower(${d.email})
+        AND id <> ${targetUserId}::uuid
+      LIMIT 1
+    `;
+    if (dup.length > 0) {
+      return {
+        ok: false,
+        message: "That email is already in use.",
+        errors: { email: ["That email is already in use."] },
+      };
+    }
+  }
+
+  if (d.user_name !== undefined && d.user_name !== "") {
+    const dup = await sql`
+      SELECT 1
+      FROM public.users
+      WHERE lower(user_name) = lower(${d.user_name})
+        AND id <> ${targetUserId}::uuid
+      LIMIT 1
+    `;
+    if (dup.length > 0) {
+      return {
+        ok: false,
+        message: "That user name is already taken.",
+        errors: { user_name: ["That user name is already taken."] },
+      };
+    }
+  }
+
   const sets: any[] = [];
 
   // Required / primary fields
@@ -188,7 +231,6 @@ export async function updateUserProfile(
     if (d.allergies === "") {
       sets.push(sql`allergies = ARRAY[]::text[]`);
     } else {
-      // "Fruit, Dairy" -> {"Fruit","Dairy"}
       sets.push(
         sql`allergies = array_remove(regexp_split_to_array(${d.allergies}, '\\s*,\\s*'), '')`
       );
@@ -234,31 +276,23 @@ export async function updateUserProfile(
       : sets.slice(1).reduce((acc, cur) => sql`${acc}, ${cur}`, sets[0]);
 
   try {
-    await sql`UPDATE public.users SET ${setSql} WHERE id = ${userId}::uuid`;
+    await sql`
+      UPDATE public.users
+      SET ${setSql}
+      WHERE id = ${targetUserId}::uuid
+    `;
   } catch (e: any) {
-    const code = e?.code as string | undefined;
-    const constraint = (e?.constraint as string | undefined) || "";
-    const msg = String(e?.message || "");
-
-    const emailTaken =
-      code === "23505" &&
-      (/(users_email_unique|users_email_key)/i.test(constraint) ||
-        /duplicate key.*?(users_email_unique|users_email_key)/i.test(msg) ||
-        /duplicate key.*email/i.test(msg));
-
-    if (emailTaken) {
-      return {
-        ok: false,
-        message: "That email is already in use.",
-        errors: { email: ["That email is already in use."] },
-      };
-    }
-
     console.error("updateUserProfile failed:", e);
     return { ok: false, message: "Failed to update profile.", errors: {} };
   }
 
-  revalidatePath("/dashboard/account");
+  // Revalidate the right UI
+  if (targetUserId === actorId) {
+    revalidatePath("/dashboard/account");
+  } else {
+    revalidatePath("/dashboard/admin/users");
+  }
+
   return { message: null, errors: {}, ok: true, shouldRefresh: true };
 }
 

@@ -1,7 +1,11 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
-import type { UserForm, MembershipTier } from "@/app/lib/types/definitions";
+import {
+  type UserForm,
+  type MembershipTier,
+  COUNTRIES,
+} from "@/app/lib/types/definitions";
 import { inter } from "@/app/ui/branding/branding-fonts";
 import Link from "next/link";
 import { Button } from "@/app/ui/general/button";
@@ -11,6 +15,7 @@ import {
   updateUserPassword,
 } from "@/app/lib/account/actions";
 import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils/format";
+import { useRouter } from "next/navigation";
 
 type ActionResult = {
   ok: boolean;
@@ -20,7 +25,6 @@ type ActionResult = {
 
 const emptyState: ActionResult = { ok: false, message: null, errors: {} };
 
-// Extra admin-only metadata that may come from your admin users query
 type AdminUserExtra = {
   membership_tier: MembershipTier | null;
   user_role?: string | null;
@@ -45,7 +49,6 @@ function resultToToastError(state: ActionResult): string | null {
   return fieldMsg ?? state.message ?? null;
 }
 
-// helper: defaultValue can’t be null
 function dv(v: string | null | undefined): string {
   return v ?? "";
 }
@@ -56,17 +59,26 @@ export default function AdminUserEditForm({
   user: UserForm & Partial<AdminUserExtra>;
 }) {
   const { push } = useToast();
+  const router = useRouter();
 
   const [profileState, profileAction] = useActionState<ActionResult, FormData>(
     updateUserProfile,
     emptyState
   );
+
   const [pwdState, pwdAction] = useActionState<ActionResult, FormData>(
     updateUserPassword,
     emptyState
   );
 
-  // Success toasts
+  // ✅ Remount the form when server props update (so defaultValue updates too)
+  const formKey = `${user.id}:${user.profile_updated_at ?? ""}`;
+
+  // ======================
+  // Toasts
+  // ======================
+
+  // Profile success (ONE place only) + refresh
   useEffect(() => {
     if (profileState.ok) {
       push({
@@ -74,20 +86,11 @@ export default function AdminUserEditForm({
         title: "User profile updated",
         message: "The user information was saved.",
       });
+      router.refresh();
     }
-  }, [profileState.ok, push]);
+  }, [profileState.ok, push, router]);
 
-  useEffect(() => {
-    if (pwdState.ok) {
-      push({
-        variant: "success",
-        title: "Password updated",
-        message: "The user’s password was changed.",
-      });
-    }
-  }, [pwdState.ok, push]);
-
-  // Error toasts
+  // Profile errors
   useEffect(() => {
     if (!profileState.ok) {
       const msg = resultToToastError(profileState);
@@ -101,6 +104,19 @@ export default function AdminUserEditForm({
     }
   }, [profileState, push]);
 
+  // Password success
+  useEffect(() => {
+    if (pwdState.ok) {
+      push({
+        variant: "success",
+        title: "Password updated",
+        message: "The user’s password was changed.",
+      });
+      router.refresh();
+    }
+  }, [pwdState.ok, push, router]);
+
+  // Password errors
   useEffect(() => {
     if (!pwdState.ok) {
       const msg = resultToToastError(pwdState);
@@ -147,13 +163,13 @@ export default function AdminUserEditForm({
 
   return (
     <div className="mt-6 mb-6">
-      {/* ================= PROFILE FORM (personal / language, etc.) ================= */}
-      <form action={profileAction}>
+      {/* ================= PROFILE FORM ================= */}
+      <form key={formKey} action={profileAction}>
         <input type="hidden" name="id" value={user.id} />
 
         <div className="rounded-md bg-gray-50 p-4 md:p-6">
           <section className="space-y-12 p-3 text-sm">
-            {/* Membership + role (info only for now) */}
+            {/* Membership + role */}
             <div>
               <h2 className={`${inter.className} mb-2 text-xl md:text-2xl`}>
                 Membership & role
@@ -231,13 +247,14 @@ export default function AdminUserEditForm({
                 </div>
               </div>
             </div>
+
             {/* Personal info */}
             <div>
               <h2 className={`${inter.className} mb-2 text-xl md:text-2xl`}>
                 Personal information
               </h2>
 
-              {/* Username / handle */}
+              {/* Username */}
               <div className="rounded-md p-2">
                 <label
                   htmlFor="user_name"
@@ -361,19 +378,20 @@ export default function AdminUserEditForm({
                   >
                     Country
                   </label>
-                  <input
+
+                  <select
                     id="country"
                     name="country"
-                    type="text"
                     defaultValue={dv((user as any).country)}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
-                    aria-invalid={hasErr(profileState, "country")}
-                    aria-describedby={
-                      hasErr(profileState, "country")
-                        ? "country-error"
-                        : undefined
-                    }
-                  />
+                  >
+                    <option value="">Select a country</option>
+                    {COUNTRIES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
 
                   {profileState.errors?.country?.length ? (
                     <p id="country-error" className="mt-2 text-sm text-red-500">
@@ -394,7 +412,6 @@ export default function AdminUserEditForm({
                     id="language"
                     name="language"
                     type="text"
-                    // capitalizeFirst should get a string, not null/undefined
                     defaultValue={capitalizeFirst(dv((user as any).language))}
                     className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
                     aria-invalid={hasErr(profileState, "language")}
