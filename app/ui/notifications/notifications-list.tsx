@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import type { AppNotification } from "@/app/lib/types/definitions";
@@ -12,17 +12,52 @@ import {
 } from "@/app/lib/notifications/actions";
 import { capitalizeFirst } from "@/app/lib/utils/format";
 
-function formatDateTime(value?: string | null) {
-  if (!value) return "";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+/* =============================================================================
+ * Client-only date formatter (prevents hydration mismatch)
+ * =============================================================================
+ */
+
+function useClientDateTime(value?: string | null) {
+  const [text, setText] = useState("");
+
+  useEffect(() => {
+    if (!value) {
+      setText("");
+      return;
+    }
+
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) {
+      setText("");
+      return;
+    }
+
+    // Locale-aware formatting ONLY on the client
+    setText(
+      d.toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    );
+  }, [value]);
+
+  return text;
+}
+
+function ReceivedAt({ iso }: { iso?: string | null }) {
+  const txt = useClientDateTime(iso);
+
+  // Server renders "", client fills in after mount. No mismatch.
+  if (!iso) return null;
+
+  return (
+    <p className="mt-2 text-xs text-gray-500" suppressHydrationWarning>
+      Received {txt || "—"}
+    </p>
+  );
 }
 
 type Props = {
@@ -55,7 +90,10 @@ export default function NotificationsList({
   );
 
   // true if there is at least one unread notification
-  const hasUnread = items.some((n) => n.status === "unread");
+  const hasUnread = useMemo(
+    () => items.some((n) => n.status === "unread"),
+    [items]
+  );
 
   // --- Pagination helpers (URLSearchParams) ---
   const pathname = usePathname();
@@ -66,7 +104,6 @@ export default function NotificationsList({
   const hrefForPage = (p: number) => {
     const sp = new URLSearchParams(searchParams?.toString() ?? "");
     sp.set("page", String(p));
-    // keep any existing filters like ?only=…&status=…
     return `${pathname}?${sp.toString()}`;
   };
 
@@ -75,7 +112,7 @@ export default function NotificationsList({
 
   return (
     <div className="rounded-md bg-gray-50 p-4 md:p-6">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="text-xl font-semibold">Your notifications</h2>
 
         <form action={markAll}>
@@ -96,9 +133,7 @@ export default function NotificationsList({
           const isBroadcast = n.userId == null;
           const isUnread = n.status === "unread" && !isBroadcast;
 
-          const receivedAt = formatDateTime(
-            (n as any).publishedAt ?? (n as any).createdAt
-          );
+          const receivedIso = (n as any).publishedAt ?? (n as any).createdAt;
 
           return (
             <li key={n.id} className="rounded-md border bg-white p-4">
@@ -123,21 +158,20 @@ export default function NotificationsList({
                       )}
                     </div>
                   </div>
-                  <div className="flex flex-row mt-1 text-lg font-semibold gap-1">
+
+                  <div className="mt-1 flex flex-row gap-1 text-lg font-semibold">
                     <span>Subject:</span>
                     <h3>{n.title}</h3>
                   </div>
 
-                  <div className="border-b mt-2 p-4">
+                  <div className="mt-2 border-b p-4">
                     <p className="mt-1 whitespace-pre-line text-sm text-gray-700">
                       {n.body}
                     </p>
                   </div>
-                  {receivedAt && (
-                    <p className="mt-2 text-xs text-gray-500">
-                      Received {receivedAt}
-                    </p>
-                  )}
+
+                  <ReceivedAt iso={receivedIso} />
+
                   {/* If there is a URL, display button */}
                   {n.linkUrl && (
                     <a
@@ -153,7 +187,7 @@ export default function NotificationsList({
               </div>
 
               {/* Mark read button */}
-              <div className="pt-4 flex justify-end">
+              <div className="flex justify-end pt-4">
                 {isUnread && (
                   <form action={markOne} className="shrink-0">
                     <input type="hidden" name="id" value={n.id} />
@@ -174,49 +208,41 @@ export default function NotificationsList({
       </ul>
 
       {/* Pagination controls */}
-      <div className="mt-6 flex items-center justify-between">
+      <div className="mt-6 flex items-center justify-between gap-3">
         <p className="text-sm text-gray-600">
           Page {page} of {totalPages} • {total} total
         </p>
+
         <div className="flex gap-2">
-          {/* Previous button */}
-          <Button
-            className={`rounded-md bg-blue-600 px-3 py-2 text-sm text-white disabled:opacity-50 
-              ${
-                prevDisabled
-                  ? "pointer-events-none opacity-50"
-                  : "hover:bg-blue-400"
-              }
-            `}
+          <Link
+            prefetch={false}
+            aria-disabled={prevDisabled}
+            tabIndex={prevDisabled ? -1 : 0}
+            href={prevDisabled ? "#" : hrefForPage(page - 1)}
+            className={[
+              "rounded-md bg-blue-600 px-3 py-2 text-sm text-white",
+              prevDisabled
+                ? "pointer-events-none opacity-50"
+                : "hover:bg-blue-400",
+            ].join(" ")}
           >
-            <Link
-              prefetch={false}
-              aria-disabled={prevDisabled}
-              tabIndex={prevDisabled ? -1 : 0}
-              href={prevDisabled ? "#" : hrefForPage(page - 1)}
-            >
-              ← Previous
-            </Link>
-          </Button>
-          {/* Previous button */}
-          <Button
-            className={`rounded-md bg-blue-600 px-3 py-2 text-sm text-white disabled:opacity-50 
-              ${
-                nextDisabled
-                  ? "pointer-events-none opacity-50"
-                  : "hover:bg-blue-400"
-              }
-            `}
+            ← Previous
+          </Link>
+
+          <Link
+            prefetch={false}
+            aria-disabled={nextDisabled}
+            tabIndex={nextDisabled ? -1 : 0}
+            href={nextDisabled ? "#" : hrefForPage(page + 1)}
+            className={[
+              "rounded-md bg-blue-600 px-3 py-2 text-sm text-white",
+              nextDisabled
+                ? "pointer-events-none opacity-50"
+                : "hover:bg-blue-400",
+            ].join(" ")}
           >
-            <Link
-              prefetch={false}
-              aria-disabled={nextDisabled}
-              tabIndex={nextDisabled ? -1 : 0}
-              href={nextDisabled ? "#" : hrefForPage(page + 1)}
-            >
-              Next →
-            </Link>
-          </Button>
+            Next →
+          </Link>
         </div>
       </div>
     </div>

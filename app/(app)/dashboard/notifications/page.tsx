@@ -89,6 +89,16 @@ export default async function Page({
     kind,
   });
 
+  function buildTabHref(tab: TabKey, only: NonNullable<Search["only"]>) {
+    const params = new URLSearchParams();
+    params.set("tab", tab);
+    if (only !== "all") params.set("only", only);
+
+    // UX: when switching tabs, reset pagination
+    // (don’t include `page` here)
+    return `/dashboard/notifications?${params.toString()}`;
+  }
+
   return (
     <main>
       {/* Upper helpers like breadcrumbs and buttons */}
@@ -105,34 +115,75 @@ export default async function Page({
       </div>
 
       {/* Tabs */}
-      <div className="ml-4 flex items-center flex-wrap gap-0.5">
-        {TABS.map((t) => {
-          const isActive = t.key === activeTab;
+      <div className="mt-3">
+        {/* Mobile: dropdown */}
+        <div className="sm:hidden px-4 pb-4">
+          <details className="group rounded-md border border-gray-200 bg-white">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 text-sm font-medium text-gray-900">
+              <span>
+                Filter:{" "}
+                <span className="font-semibold">
+                  {TABS.find((t) => t.key === activeTab)?.label ?? "All"}
+                </span>
+              </span>
+              <span className="text-gray-400 group-open:rotate-180 transition">
+                ▾
+              </span>
+            </summary>
 
-          // Preserve `only` in the URL if it’s not the default
-          const params = new URLSearchParams();
-          params.set("tab", t.key);
-          if (only !== "all") params.set("only", only);
-          if (page !== 1) params.set("page", String(page));
+            <div className="border-t border-gray-100 p-2 mb-6">
+              <div className="grid gap-1">
+                {TABS.map((t) => {
+                  const isActive = t.key === activeTab;
+                  return (
+                    <Link
+                      key={t.key}
+                      href={buildTabHref(t.key, only)}
+                      aria-current={isActive ? "page" : undefined}
+                      className={[
+                        "rounded-md px-3 py-2 text-sm",
+                        isActive
+                          ? "bg-blue-600 text-white"
+                          : "text-gray-700 hover:bg-gray-50",
+                      ].join(" ")}
+                    >
+                      {t.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </details>
+        </div>
 
-          const href = `/dashboard/notifications?${params.toString()}`;
-          // Returning the and highlighting the active filter tab
-          return (
-            <Link
-              key={t.key}
-              href={href}
-              className={
-                "rounded-t-md px-2 py-2 text-xs font-medium " +
-                (isActive
-                  ? "bg-blue-600 text-white"
-                  : "bg-blue-500 text-white hover:bg-blue-400 opacity-50")
-              }
-            >
-              {t.label}
-            </Link>
-          );
-        })}
+        {/* Desktop: nicer pill tabs (and still scrolls if it ever overflows) */}
+        <nav
+          className="pb-4 hidden sm:block"
+          aria-label="Notification categories"
+        >
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+            {TABS.map((t) => {
+              const isActive = t.key === activeTab;
+              return (
+                <Link
+                  key={t.key}
+                  href={buildTabHref(t.key, only)}
+                  aria-current={isActive ? "page" : undefined}
+                  className={[
+                    "whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition",
+                    isActive
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50",
+                  ].join(" ")}
+                >
+                  {t.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       </div>
+
       {/* Notification list */}
       <NotificationsList
         items={items}
