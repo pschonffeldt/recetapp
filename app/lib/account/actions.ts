@@ -90,11 +90,10 @@ export async function updateUserProfile(
   const actorId = (session?.user as any)?.id as string | undefined;
   const actorRole =
     ((session?.user as any)?.user_role as string | undefined) ?? "user";
-  if (!actorId) return { message: "Unauthorized.", errors: {}, ok: false };
+  if (!actorId) return { ok: false, message: "Unauthorized.", errors: {} };
 
-  // ✅ IMPORTANT:
-  // - On /dashboard/account, you may not send "id" (or it equals actorId)
-  // - On admin edit user, you DO send "id" and it’s the target user
+  // - On /dashboard/account you might not send "id"
+  // - On admin edit user you DO send "id" (target user id)
   const targetUserId = (formData.get("id")?.toString() || actorId).trim();
 
   // Only admins can edit other users
@@ -158,13 +157,15 @@ export async function updateUserProfile(
   }
 
   if (Object.keys(errors).length) {
-    return { message: "Please correct the errors above.", errors, ok: false };
+    return { ok: false, message: "Please correct the errors above.", errors };
   }
 
   const d = parsed.data!;
 
-  // ✅ Pre-check duplicates (exclude the SAME target user)
-  // This avoids relying on DB errors and fixes admin-edit false positives.
+  // ---------------------------------------------------------------------------
+  // Uniqueness pre-checks (case-insensitive) — exclude the SAME target user.
+  // NOTE: use dup.length (not rowCount) because neon/sql returns an array.
+  // ---------------------------------------------------------------------------
   if (d.email !== undefined && d.email !== "") {
     const dup = await sql`
       SELECT 1
@@ -265,7 +266,7 @@ export async function updateUserProfile(
   }
 
   if (sets.length === 0) {
-    return { message: "No changes to save.", errors: {}, ok: false };
+    return { ok: false, message: "No changes to save.", errors: {} };
   }
 
   sets.push(sql`profile_updated_at = now()`);
@@ -282,6 +283,41 @@ export async function updateUserProfile(
       WHERE id = ${targetUserId}::uuid
     `;
   } catch (e: any) {
+    const code = e?.code as string | undefined;
+    const constraint = (e?.constraint as string | undefined) || "";
+    const msg = String(e?.message || "");
+
+    // If you named your constraints/indexes differently, update these patterns:
+    const emailTaken =
+      code === "23505" &&
+      (/(users_email_unique|users_email_key|users_email_lower_unique)/i.test(
+        constraint
+      ) ||
+        /duplicate key.*email/i.test(msg));
+
+    const userNameTaken =
+      code === "23505" &&
+      (/(users_user_name_unique|users_user_name_key|users_user_name_lower_unique)/i.test(
+        constraint
+      ) ||
+        /duplicate key.*user_name/i.test(msg));
+
+    if (emailTaken) {
+      return {
+        ok: false,
+        message: "That email is already in use.",
+        errors: { email: ["That email is already in use."] },
+      };
+    }
+
+    if (userNameTaken) {
+      return {
+        ok: false,
+        message: "That user name is already taken.",
+        errors: { user_name: ["That user name is already taken."] },
+      };
+    }
+
     console.error("updateUserProfile failed:", e);
     return { ok: false, message: "Failed to update profile.", errors: {} };
   }
@@ -291,9 +327,10 @@ export async function updateUserProfile(
     revalidatePath("/dashboard/account");
   } else {
     revalidatePath("/dashboard/admin/users");
+    revalidatePath(`/dashboard/admin/users/${targetUserId}`);
   }
 
-  return { message: null, errors: {}, ok: true, shouldRefresh: true };
+  return { ok: true, message: null, errors: {}, shouldRefresh: true };
 }
 
 type ActionResult = {
