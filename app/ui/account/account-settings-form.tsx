@@ -33,19 +33,6 @@ const asIntDefault = (v: unknown) => {
   return Number.isFinite(n) ? String(Math.round(n)) : "";
 };
 
-function pickFirstError(errors: Record<string, string[]>): string | null {
-  for (const key of Object.keys(errors)) {
-    const msgs = errors[key];
-    if (msgs && msgs.length) return msgs[0];
-  }
-  return null;
-}
-
-function resultToToastError(state: ActionResult): string | null {
-  const fieldMsg = pickFirstError(state.errors);
-  return fieldMsg ?? state.message ?? null;
-}
-
 function pgArrayToCsv(v: unknown): string {
   if (v === null || v === undefined) return "";
 
@@ -98,6 +85,50 @@ function pgArrayToCsv(v: unknown): string {
   return String(v).trim();
 }
 
+const FIELD_LABELS: Record<string, string> = {
+  user_name: "User name",
+  name: "First name",
+  last_name: "Last name",
+  email: "Email",
+  country: "Country",
+  gender: "Gender",
+  date_of_birth: "Date of birth",
+  height_cm: "Height",
+  weight_kg: "Weight",
+  allergies: "Allergies",
+  dietary_flags: "Dietary preferences",
+  password: "Password",
+  confirm_password: "Confirm password",
+};
+
+function buildToastMessage(state: ActionResult): string | null {
+  const entries = Object.entries(state.errors ?? {});
+  const pieces: string[] = [];
+
+  for (const [field, msgs] of entries) {
+    if (!msgs?.length) continue;
+    const label = FIELD_LABELS[field] ?? field;
+    for (const m of msgs) pieces.push(`${label}: ${m}`);
+  }
+
+  // De-dupe + cap length so toasts don’t get ridiculous
+  const uniq = Array.from(new Set(pieces));
+
+  if (uniq.length > 0) {
+    const shown = uniq.slice(0, 3);
+    const extra = uniq.length - shown.length;
+    return extra > 0
+      ? `${shown.join(" • ")} • +${extra} more`
+      : shown.join(" • ");
+  }
+
+  return state.message ?? null;
+}
+
+function hasFieldErr(state: ActionResult, k: string) {
+  return Boolean(state.errors?.[k]?.length);
+}
+
 export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
   const { push } = useToast();
   const router = useRouter();
@@ -116,22 +147,10 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
   const [gender, setGender] = useState<string>(
     () => ((user as any).gender ?? "") as string
   );
-
-  // Pending flags that only clear once we have a real result
-  const [profilePending, setProfilePending] = useState(false);
-  const [pwdPending, setPwdPending] = useState(false);
-
-  // Ref guards (prevents double toast in dev/StrictMode)
-  const profileHandledRef = useRef(false);
-  const pwdHandledRef = useRef(false);
-
-  // Used to prevent the brief snap-back during router.refresh()
   const submittedGenderRef = useRef<string | null>(null);
 
-  // Guarded gender sync (prevents flash)
   const serverGender = ((user as any).gender ?? "") as string;
   useEffect(() => {
-    // If we just submitted a gender, ignore stale server props during refresh.
     if (
       submittedGenderRef.current !== null &&
       serverGender !== submittedGenderRef.current
@@ -141,7 +160,6 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
 
     setGender(serverGender);
 
-    // Once server catches up to our submitted value, clear the guard.
     if (
       submittedGenderRef.current !== null &&
       serverGender === submittedGenderRef.current
@@ -154,15 +172,10 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
   const [country, setCountry] = useState<string>(
     () => ((user as any).country ?? "") as string
   );
-
-  // Used to prevent snap-back during router.refresh()
   const submittedCountryRef = useRef<string | null>(null);
 
-  // Guarded country sync (prevents snap-back)
   const serverCountry = ((user as any).country ?? "") as string;
-
   useEffect(() => {
-    // If we just submitted a country, ignore stale server props during refresh.
     if (
       submittedCountryRef.current !== null &&
       serverCountry !== submittedCountryRef.current
@@ -170,10 +183,8 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
       return;
     }
 
-    // Normal case: keep local state aligned with server value
     setCountry(serverCountry);
 
-    // Once server catches up to our submitted value, clear the guard.
     if (
       submittedCountryRef.current !== null &&
       serverCountry === submittedCountryRef.current
@@ -182,7 +193,14 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     }
   }, [serverCountry]);
 
-  // Reset the "handled" guard each time user submits
+  // Pending flags
+  const [profilePending, setProfilePending] = useState(false);
+  const [pwdPending, setPwdPending] = useState(false);
+
+  // Ref guards (prevents double toast in dev/StrictMode)
+  const profileHandledRef = useRef(false);
+  const pwdHandledRef = useRef(false);
+
   const onSubmitProfile = () => {
     profileHandledRef.current = false;
     submittedGenderRef.current = gender;
@@ -195,10 +213,10 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     setPwdPending(true);
   };
 
+  // Profile result handling (toast-only)
   useEffect(() => {
     if (!profilePending) return;
 
-    // success
     if (profileState.ok) {
       if (!profileHandledRef.current) {
         profileHandledRef.current = true;
@@ -213,21 +231,19 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
       return;
     }
 
-    // error (only close pending when we actually have a message)
-    const msg = resultToToastError(profileState);
-    if (msg) {
-      if (!profileHandledRef.current) {
-        profileHandledRef.current = true;
-        push({
-          variant: "error",
-          title: "Couldn’t update profile",
-          message: msg,
-        });
-        setProfilePending(false);
-      }
+    const msg = buildToastMessage(profileState);
+    if (msg && !profileHandledRef.current) {
+      profileHandledRef.current = true;
+      push({
+        variant: "error",
+        title: "Couldn’t update profile",
+        message: msg,
+      });
+      setProfilePending(false);
     }
   }, [profilePending, profileState, push, router, startRefresh]);
 
+  // Password result handling (toast-only)
   useEffect(() => {
     if (!pwdPending) return;
 
@@ -245,22 +261,17 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
       return;
     }
 
-    const msg = resultToToastError(pwdState);
-    if (msg) {
-      if (!pwdHandledRef.current) {
-        pwdHandledRef.current = true;
-        push({
-          variant: "error",
-          title: "Couldn’t update password",
-          message: msg,
-        });
-        setPwdPending(false);
-      }
+    const msg = buildToastMessage(pwdState);
+    if (msg && !pwdHandledRef.current) {
+      pwdHandledRef.current = true;
+      push({
+        variant: "error",
+        title: "Couldn’t update password",
+        message: msg,
+      });
+      setPwdPending(false);
     }
   }, [pwdPending, pwdState, push, router, startRefresh]);
-
-  const hasErr = (state: ActionResult, k: string) =>
-    Boolean(state.errors?.[k]?.length);
 
   const allergiesText = useMemo(
     () => pgArrayToCsv((user as any).allergies),
@@ -303,19 +314,14 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   type="text"
                   defaultValue={user.user_name ?? ""}
                   autoComplete="username"
-                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
-                  aria-invalid={hasErr(profileState, "user_name")}
-                  aria-describedby={
-                    hasErr(profileState, "user_name")
-                      ? "user_name-error"
-                      : undefined
-                  }
+                  className={[
+                    "block w-full rounded-md border px-3 py-2 text-base",
+                    hasFieldErr(profileState, "user_name")
+                      ? "border-red-300"
+                      : "border-gray-200",
+                  ].join(" ")}
+                  aria-invalid={hasFieldErr(profileState, "user_name")}
                 />
-                {profileState.errors?.user_name?.length ? (
-                  <p id="user_name-error" className="mt-2 text-sm text-red-500">
-                    {profileState.errors.user_name[0]}
-                  </p>
-                ) : null}
               </div>
             </div>
 
@@ -334,11 +340,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   type="text"
                   defaultValue={user.name ?? ""}
                   autoComplete="given-name"
-                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
-                  aria-invalid={hasErr(profileState, "name")}
-                  aria-describedby={
-                    hasErr(profileState, "name") ? "name-error" : undefined
-                  }
+                  className={[
+                    "block w-full rounded-md border px-3 py-2 text-base",
+                    hasFieldErr(profileState, "name")
+                      ? "border-red-300"
+                      : "border-gray-200",
+                  ].join(" ")}
+                  aria-invalid={hasFieldErr(profileState, "name")}
                 />
               </div>
 
@@ -356,13 +364,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   type="text"
                   defaultValue={user.last_name ?? ""}
                   autoComplete="family-name"
-                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
-                  aria-invalid={hasErr(profileState, "last_name")}
-                  aria-describedby={
-                    hasErr(profileState, "last_name")
-                      ? "last_name-error"
-                      : undefined
-                  }
+                  className={[
+                    "block w-full rounded-md border px-3 py-2 text-base",
+                    hasFieldErr(profileState, "last_name")
+                      ? "border-red-300"
+                      : "border-gray-200",
+                  ].join(" ")}
+                  aria-invalid={hasFieldErr(profileState, "last_name")}
                 />
               </div>
 
@@ -380,11 +388,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   type="email"
                   defaultValue={user.email ?? ""}
                   autoComplete="email"
-                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
-                  aria-invalid={hasErr(profileState, "email")}
-                  aria-describedby={
-                    hasErr(profileState, "email") ? "email-error" : undefined
-                  }
+                  className={[
+                    "block w-full rounded-md border px-3 py-2 text-base",
+                    hasFieldErr(profileState, "email")
+                      ? "border-red-300"
+                      : "border-gray-200",
+                  ].join(" ")}
+                  aria-invalid={hasFieldErr(profileState, "email")}
                 />
               </div>
 
@@ -402,8 +412,14 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   name="country"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
+                  className={[
+                    "block w-full rounded-md border px-3 py-2 text-base",
+                    hasFieldErr(profileState, "country")
+                      ? "border-red-300"
+                      : "border-gray-200",
+                  ].join(" ")}
                   autoComplete="country-name"
+                  aria-invalid={hasFieldErr(profileState, "country")}
                 >
                   <option value="">Not specified</option>
                   {COUNTRIES.map((c) => (
@@ -435,7 +451,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     name="gender"
                     value={gender}
                     onChange={(e) => setGender(e.target.value)}
-                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
+                    className={[
+                      "block w-full rounded-md border px-3 py-2 text-base",
+                      hasFieldErr(profileState, "gender")
+                        ? "border-red-300"
+                        : "border-gray-200",
+                    ].join(" ")}
+                    aria-invalid={hasFieldErr(profileState, "gender")}
                   >
                     <option value="">Not specified</option>
                     <option value="female">Female</option>
@@ -459,7 +481,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     name="date_of_birth"
                     type="date"
                     defaultValue={dobValue}
-                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
+                    className={[
+                      "block w-full rounded-md border px-3 py-2 text-base",
+                      hasFieldErr(profileState, "date_of_birth")
+                        ? "border-red-300"
+                        : "border-gray-200",
+                    ].join(" ")}
+                    aria-invalid={hasFieldErr(profileState, "date_of_birth")}
                   />
                 </div>
 
@@ -479,7 +507,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     min={0}
                     inputMode="numeric"
                     defaultValue={asIntDefault((user as any).weight_kg)}
-                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
+                    className={[
+                      "block w-full rounded-md border px-3 py-2 text-base",
+                      hasFieldErr(profileState, "weight_kg")
+                        ? "border-red-300"
+                        : "border-gray-200",
+                    ].join(" ")}
+                    aria-invalid={hasFieldErr(profileState, "weight_kg")}
                   />
                 </div>
 
@@ -499,7 +533,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     min={0}
                     inputMode="numeric"
                     defaultValue={asIntDefault((user as any).height_cm)}
-                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
+                    className={[
+                      "block w-full rounded-md border px-3 py-2 text-base",
+                      hasFieldErr(profileState, "height_cm")
+                        ? "border-red-300"
+                        : "border-gray-200",
+                    ].join(" ")}
+                    aria-invalid={hasFieldErr(profileState, "height_cm")}
                   />
                 </div>
               </div>
@@ -517,7 +557,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     id="allergies"
                     name="allergies"
                     defaultValue={allergiesText}
-                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                    className={[
+                      "block w-full rounded-md border px-3 py-2 text-sm",
+                      hasFieldErr(profileState, "allergies")
+                        ? "border-red-300"
+                        : "border-gray-200",
+                    ].join(" ")}
+                    aria-invalid={hasFieldErr(profileState, "allergies")}
                   />
                 </div>
 
@@ -532,7 +578,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                     id="dietary_flags"
                     name="dietary_flags"
                     defaultValue={dietaryFlagsText}
-                    className="block w-full rounded-md border border-gray-200 px-3 py-2 text-sm"
+                    className={[
+                      "block w-full rounded-md border px-3 py-2 text-sm",
+                      hasFieldErr(profileState, "dietary_flags")
+                        ? "border-red-300"
+                        : "border-gray-200",
+                    ].join(" ")}
+                    aria-invalid={hasFieldErr(profileState, "dietary_flags")}
                   />
                 </div>
               </div>
@@ -577,8 +629,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   name="password"
                   type="password"
                   defaultValue=""
-                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
-                  aria-invalid={hasErr(pwdState, "password")}
+                  className={[
+                    "block w-full rounded-md border px-3 py-2 text-base",
+                    hasFieldErr(pwdState, "password")
+                      ? "border-red-300"
+                      : "border-gray-200",
+                  ].join(" ")}
+                  aria-invalid={hasFieldErr(pwdState, "password")}
                 />
               </div>
 
@@ -594,8 +651,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
                   name="confirm_password"
                   type="password"
                   defaultValue=""
-                  className="block w-full rounded-md border border-gray-200 px-3 py-2 text-base"
-                  aria-invalid={hasErr(pwdState, "confirm_password")}
+                  className={[
+                    "block w-full rounded-md border px-3 py-2 text-base",
+                    hasFieldErr(pwdState, "confirm_password")
+                      ? "border-red-300"
+                      : "border-gray-200",
+                  ].join(" ")}
+                  aria-invalid={hasFieldErr(pwdState, "confirm_password")}
                 />
               </div>
             </div>
