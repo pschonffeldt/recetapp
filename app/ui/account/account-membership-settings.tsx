@@ -63,6 +63,14 @@ export default function EditAccountMembershipForm({
 
   const viewingCurrent = selectedTier === currentTier;
 
+  const currentIndex = PLAN_ORDER.indexOf(currentTier);
+  const selectedIndex = PLAN_ORDER.indexOf(selectedTier);
+
+  const isDowngrade = currentTier !== "free" && selectedIndex < currentIndex; // paid → lower
+  const isUpgrade = selectedIndex > currentIndex;
+
+  const ctaLabel = isDowngrade ? "Downgrade plan" : "Upgrade plan";
+
   // All selectable plans (we’ll decide what to do on click)
   const upgradeOptions: MembershipTier[] = ["free", "tier1", "tier2"];
 
@@ -198,14 +206,14 @@ export default function EditAccountMembershipForm({
             ))}
           </select>
           <p className="mt-1 text-xs text-gray-500">
-            Changing this will update the plan details above. The actual upgrade
-            (or future downgrade) only starts after you click{" "}
-            <span className="font-semibold">Upgrade plan</span>.
+            Changing this will update the plan details above. The actual switch
+            only starts after you click{" "}
+            <span className="font-semibold">{ctaLabel}</span>.
           </p>
         </div>
 
         <Button type="button" onClick={handleUpgradeClick}>
-          Upgrade plan
+          {ctaLabel}
         </Button>
       </div>
     </section>
