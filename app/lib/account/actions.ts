@@ -59,14 +59,6 @@ function toOptional(v: FormDataEntryValue | null): string | undefined {
   return s === "" ? undefined : s;
 }
 
-function normalizeCsv(s: string): string {
-  return s
-    .split(",")
-    .map((x) => x.trim())
-    .filter(Boolean)
-    .join(", ");
-}
-
 /* =============================================================================
  * Actions
  * =============================================================================
