@@ -1,27 +1,25 @@
-import Link from "next/link";
 import Logo from "@/app/ui/branding/branding-recetapp-logo";
-import { brand } from "../branding/branding";
 import { signOut } from "@/auth";
 import { PowerIcon } from "@heroicons/react/24/outline";
+import { brand } from "../branding/branding";
 import NavLinks from "./navigation-links";
 
 export default function SideNav() {
   return (
     <div className="flex h-full flex-col lg:px-2">
       {/* Box containing the logo + link to home when click */}
-      <Link
+      <div
         className={`${brand(
           "brand",
           "bg"
         )} mb-2 flex h-20 items-end justify-start p-4 rounded-b-lg lg:h-40`}
-        href="/"
       >
         {/* Brand logo */}
         {/* <div className="w-32 text-white md:w-40"> */}
         <div className="w-32 text-white lg:w-40">
           <Logo />
         </div>
-      </Link>
+      </div>
       {/* Box containing everything lower than the logo */}
       <div className="flex grow flex-row justify-between space-x-2 px-2 lg:px-0 lg:flex-col lg:space-x-0 lg:space-y-2">
         {/* Navigation buttons */}
