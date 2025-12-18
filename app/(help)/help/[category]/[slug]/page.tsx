@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import HelpHero from "@/app/ui/help/help-hero";
+import HelpMarkdown from "@/app/ui/help/help-markdown";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { Button } from "@/app/ui/general/button";
 import { fetchHelpArticleBySlugs } from "@/app/lib/help/data";
@@ -52,12 +53,13 @@ export default async function HelpArticlePage({
           </div>
 
           <h1 className="mt-2 text-2xl font-semibold">{article.title}</h1>
+
           {article.summary ? (
             <p className="mt-2 text-sm text-gray-600">{article.summary}</p>
           ) : null}
 
-          <div className="mt-6 whitespace-pre-wrap text-sm leading-6 text-gray-800">
-            {article.body_md}
+          <div className="mt-6">
+            <HelpMarkdown content={article.body_md} />
           </div>
         </article>
       </main>
