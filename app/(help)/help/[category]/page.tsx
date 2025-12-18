@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import HelpSearch from "@/app/ui/help/help-search";
+import HelpHero from "@/app/ui/help/help-hero";
 import {
   fetchHelpCategoryBySlug,
   fetchHelpArticlesByCategory,
@@ -23,43 +23,43 @@ export default async function HelpCategoryPage({
   const articles = await fetchHelpArticlesByCategory(cat.id, q);
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
-      <div className="mb-6">
+    <>
+      <HelpHero
+        title={cat.title}
+        subtitle={cat.description ?? "Browse articles in this topic."}
+        action={`/help/${cat.slug}`}
+        defaultValue={q}
+      />
+
+      <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
         <Link className="text-sm text-blue-600 hover:underline" href="/help">
           ← Help home
         </Link>
 
-        <h1 className="mt-2 text-2xl font-semibold">{cat.title}</h1>
-        {cat.description ? (
-          <p className="mt-1 text-sm text-gray-600">{cat.description}</p>
-        ) : null}
-
-        <div className="mt-5 max-w-2xl">
-          <HelpSearch action={`/help/${cat.slug}`} defaultValue={q} />
+        <div className="mt-6">
+          {articles.length === 0 ? (
+            <p className="text-sm text-gray-600">
+              No articles found{q ? " for that search." : " yet."}
+            </p>
+          ) : (
+            <ul className="space-y-3">
+              {articles.map((a) => (
+                <li key={a.id} className="rounded-md border bg-white p-4">
+                  <Link
+                    href={`/help/${a.category_slug}/${a.slug}`}
+                    className="text-base font-semibold text-blue-600 hover:underline"
+                  >
+                    {a.title}
+                  </Link>
+                  {a.summary ? (
+                    <p className="mt-1 text-sm text-gray-700">{a.summary}</p>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-      </div>
-
-      {articles.length === 0 ? (
-        <p className="text-sm text-gray-600">
-          No articles found{q ? " for that search." : " yet."}
-        </p>
-      ) : (
-        <ul className="space-y-2">
-          {articles.map((a) => (
-            <li key={a.id} className="rounded-md border bg-white p-4">
-              <Link
-                href={`/help/${a.category_slug}/${a.slug}`}
-                className="font-semibold text-blue-600 hover:underline"
-              >
-                {a.title}
-              </Link>
-              {a.summary ? (
-                <p className="mt-1 text-sm text-gray-700">{a.summary}</p>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      )}
-    </main>
+      </main>
+    </>
   );
 }

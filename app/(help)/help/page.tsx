@@ -18,20 +18,48 @@ export default async function HelpHome({
   ]);
 
   return (
-    <main>
-      {/* Header */}
-      <div className="rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-10 text-white">
-        <h1 className="text-2xl font-semibold">RecetApp Help Center</h1>
-        <p className="mt-1 text-sm text-white/90">
-          Find answers, guides, and troubleshooting steps.
-        </p>
+    <>
+      {/* Full-width hero (same colors as before) */}
+      <section className="w-full bg-gradient-to-r from-blue-600 to-cyan-500">
+        {/* Top row inside hero */}
+        <div className="mx-auto w-full max-w-5xl px-4 pt-6 md:px-6">
+          <div className="flex items-center justify-between gap-3 text-white">
+            <Link href="/help" className="text-sm font-semibold text-white">
+              RecetApp Help
+            </Link>
 
-        <div className="mt-6 max-w-2xl">
-          <HelpSearch action="/help" defaultValue={q} />
+            <div className="flex items-center gap-2 text-sm text-white/90">
+              <span aria-hidden className="text-base">
+                🌐
+              </span>
+              <span>English</span>
+              <span aria-hidden className="ml-1">
+                ▾
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="mx-auto max-w-5xl px-4 py-10">
+        {/* Centered title + search */}
+        <div className="mx-auto w-full max-w-5xl px-4 py-14 md:px-6">
+          <div className="flex flex-col items-center text-center text-white">
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              How can we help? <span aria-hidden>👋</span>
+            </h1>
+
+            <p className="mt-2 max-w-2xl text-sm text-white/90">
+              Find answers, guides, and troubleshooting steps.
+            </p>
+
+            <div className="mt-8 w-full max-w-2xl">
+              <HelpSearch action="/help" defaultValue={q} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Body (constrained) */}
+      <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
         {q ? (
           <>
             <h2 className="mb-4 text-lg font-semibold">
@@ -81,7 +109,7 @@ export default async function HelpHome({
             </div>
           </>
         )}
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
