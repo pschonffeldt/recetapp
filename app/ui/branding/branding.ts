@@ -98,6 +98,3 @@ const CLASSES: Record<Token, Record<Kind, string>> = {
     border: "border-gray-700",
   },
 };
-
-/** Returns "bg-blue-600" / "text-blue-600" / "border-blue-600". */
-export const brand = (token: Token, kind: Kind = "bg") => CLASSES[token][kind];

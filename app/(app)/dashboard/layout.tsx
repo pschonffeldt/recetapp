@@ -1,4 +1,3 @@
-import { brand } from "@/app/ui/branding/branding";
 import Logo from "@/app/ui/branding/branding-recetapp-logo";
 import SideNav from "@/app/ui/navigation/navigation-sidenav";
 import UserMenuServer from "@/app/ui/navigation/navigation-user-menu-server";
@@ -18,13 +17,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Main content area (scrolls on lg+) */}
         <div className="flex-grow min-h-0 pt-0 lg:overflow-y-auto lg:p-12 lg:overscroll-y-contain">
           {/* Mobile header with RecetApp logo/brand */}
-          <div
-            className={`${brand(
-              "brand",
-              "bg"
-            )} mb-4 flex items-center justify-between px-4 py-6 lg:hidden`}
-          >
-            <div className="flex items-center gap-2">
+          <div className="mb-4 flex items-center justify-between bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-6 lg:hidden">
+            <div className="flex items-center gap-2 text-white">
               <Logo />
             </div>
           </div>
