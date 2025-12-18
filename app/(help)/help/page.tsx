@@ -1,35 +1,85 @@
 import Link from "next/link";
-import { auth } from "@/auth";
+import HelpSearch from "@/app/ui/help/help-search";
+import { fetchHelpCategories, searchHelpArticles } from "@/app/lib/help/data";
 
-export default async function HelpPage() {
-  const session = await auth();
-  const isLoggedIn = !!session?.user;
+export const metadata = { title: "Help" };
 
-  const supportHref = isLoggedIn
-    ? "/dashboard/support"
-    : "/login?callbackUrl=/dashboard/support";
+export default async function HelpHome({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const sp = await searchParams;
+  const q = (sp.q ?? "").trim();
+
+  const [categories, results] = await Promise.all([
+    fetchHelpCategories(),
+    q ? searchHelpArticles(q) : Promise.resolve([]),
+  ]);
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="text-3xl font-semibold">Help</h1>
-
-      <div className="mt-6 rounded-lg border bg-white p-4">
-        <h2 className="text-lg font-medium">Need more help?</h2>
-        <p className="mt-1 text-sm text-gray-600">
-          Contact support if you can’t find the answer in the guides or FAQ.
+    <main>
+      {/* Header */}
+      <div className="rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-10 text-white">
+        <h1 className="text-2xl font-semibold">RecetApp Help Center</h1>
+        <p className="mt-1 text-sm text-white/90">
+          Find answers, guides, and troubleshooting steps.
         </p>
 
-        <Link
-          href={supportHref}
-          className="mt-3 inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white"
-        >
-          Contact support
-        </Link>
+        <div className="mt-6 max-w-2xl">
+          <HelpSearch action="/help" defaultValue={q} />
+        </div>
+      </div>
 
-        {!isLoggedIn && (
-          <p className="mt-2 text-xs text-gray-500">
-            You’ll need to sign in first.
-          </p>
+      <div className="mx-auto max-w-5xl px-4 py-10">
+        {q ? (
+          <>
+            <h2 className="mb-4 text-lg font-semibold">
+              Search results for “{q}”
+            </h2>
+
+            {results.length === 0 ? (
+              <p className="text-sm text-gray-600">
+                No results found. Try a different search.
+              </p>
+            ) : (
+              <ul className="space-y-3">
+                {results.map((a) => (
+                  <li key={a.id} className="rounded-md border bg-white p-4">
+                    <p className="text-xs text-gray-500">{a.category_title}</p>
+                    <Link
+                      className="text-base font-semibold text-blue-600 hover:underline"
+                      href={`/help/${a.category_slug}/${a.slug}`}
+                    >
+                      {a.title}
+                    </Link>
+                    {a.summary ? (
+                      <p className="mt-1 text-sm text-gray-700">{a.summary}</p>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
+        ) : (
+          <>
+            <h2 className="mb-4 text-lg font-semibold">Topics</h2>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {categories.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/help/${c.slug}`}
+                  className="rounded-md border bg-white p-6 shadow-sm transition hover:shadow"
+                >
+                  <div className="text-base font-semibold">{c.title}</div>
+                  <p className="mt-2 text-sm text-gray-600">
+                    {c.description ?? "Explore articles and guides."}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </main>
