@@ -21,7 +21,7 @@ export default function HelpHero({
             RecetApp Help
           </Link>
 
-          <div className="flex items-center gap-2 text-sm text-white/90">
+          {/* <div className="flex items-center gap-2 text-sm text-white/90">
             <span aria-hidden className="text-base">
               🌐
             </span>
@@ -29,7 +29,7 @@ export default function HelpHero({
             <span aria-hidden className="ml-1">
               ▾
             </span>
-          </div>
+          </div> */}
         </div>
       </div>
 
