@@ -154,7 +154,7 @@ export default function NewNotificationForm({ users }: Props) {
           </div>
           <div>
             <label className="mb-2 block text-sm font-medium">
-              Level (users can't see this)
+              Level (users can&apos;t see this)
             </label>
             <select
               name="level"

@@ -1,14 +1,6 @@
 "use client";
 
 import { generatePagination } from "@/app/lib/utils/format";
-// ============================================
-// Pagination (Client Component, a11y-enhanced)
-// - Same logic as your current component
-// - Adds a11y: <nav>, aria-current on active page,
-//   aria-label + rel on arrows
-// - Adds tooltips via `title` on arrows and numbers
-// ============================================
-
 import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Link from "next/link";
@@ -21,11 +13,11 @@ export default function Pagination({
   totalPages: number;
   currentPage?: number;
 }) {
-  // Hide pager when it's pointless
-  if (totalPages <= 1) return null;
-
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  // Hide pager when it's pointless (must be AFTER hooks)
+  if (totalPages <= 1) return null;
 
   const clamp = (n: number) =>
     Math.min(Math.max(1, n), Math.max(1, totalPages));
@@ -105,7 +97,6 @@ function PaginationNumber({
     }
   );
 
-  // Tooltip text
   const title =
     position === "middle"
       ? ""
@@ -113,7 +104,6 @@ function PaginationNumber({
       ? `Page ${page} (current)`
       : `Go to page ${page}`;
 
-  // Active page and ellipsis are not links
   if (isActive) {
     return (
       <div className={className} aria-current="page" title={title}>

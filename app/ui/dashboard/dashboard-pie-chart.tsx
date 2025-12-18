@@ -9,6 +9,13 @@ type Slice = {
   color?: string;
 };
 
+type Segment = Slice & {
+  pct: number;
+  start: number;
+  end: number;
+  color: string;
+};
+
 export default function PieChart({
   data,
   size = 160, // pixel size of the chart
@@ -39,19 +46,19 @@ export default function PieChart({
     "#ea580c",
   ];
 
-  // build the conic-gradient segments
-  let currentAngle = 0;
-  const segments = data.map((d, i) => {
+  // build the conic-gradient segments (NO mutation during render)
+  const segments = data.reduce<Segment[]>((acc, d, i) => {
     const pct = total === 0 ? 0 : d.value / total;
     const angle = pct * 360;
-    const start = currentAngle;
-    const end = currentAngle + angle;
-    currentAngle = end;
 
-    const color = palette[i % palette.length];
+    const start = acc.length ? acc[acc.length - 1].end : 0;
+    const end = start + angle;
 
-    return { ...d, pct, start, end, color };
-  });
+    const color = d.color ?? palette[i % palette.length];
+
+    acc.push({ ...d, pct, start, end, color });
+    return acc;
+  }, []);
 
   const gradient = segments
     .map((s) => `${s.color} ${s.start}deg ${s.end}deg`)
@@ -60,10 +67,9 @@ export default function PieChart({
   return (
     <div className="w-full">
       <h2 className="mb-4 pl-6 text-xl md:text-2xl">{title}</h2>
-      {/* <div className="rounded-xl bg-gray-50 p-4"> */}
+
       <div className="rounded-xl bg-gray-50 p-4">
-        {/* <div className="grid grid-cols-1 items-center gap-6 rounded-md bg-white p-4 "> */}
-        <div className="grid grid-cols-1 md:grid-cols-1 items-center gap-6 rounded-md bg-white p-4">
+        <div className="grid grid-cols-1 items-center gap-6 rounded-md bg-white p-4">
           {/* Chart */}
           <div className="flex items-center justify-center">
             <div
@@ -85,6 +91,7 @@ export default function PieChart({
                   height: size - thickness * 2,
                 }}
               />
+
               {/* Center total */}
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
@@ -97,7 +104,7 @@ export default function PieChart({
 
           {/* Legend */}
           <div>
-            <ul className="grid grid-cols-1 md:grid-cols-1 items-center gap-2 rounded-md bg-white">
+            <ul className="grid grid-cols-1 items-center gap-2 rounded-md bg-white">
               {segments.map((s) => (
                 <li
                   key={s.label}
@@ -111,6 +118,7 @@ export default function PieChart({
                     />
                     <span className="text-sm text-gray-700">{s.label}</span>
                   </div>
+
                   <div className="text-sm tabular-nums text-gray-600">
                     {s.value}
                     {showPercent && total > 0 && (

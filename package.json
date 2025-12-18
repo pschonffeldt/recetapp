@@ -4,7 +4,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "db:psql": "dotenv -e .env -- bash -lc 'psql \"$POSTGRES_URL\"'",
     "db:migrate:users": "dotenv -e .env -- bash -lc 'psql \"$POSTGRES_URL\" -f migrations/20251110_users_lifecycle.sql'",

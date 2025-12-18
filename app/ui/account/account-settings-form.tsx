@@ -253,14 +253,13 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
     }
   }, [pwdPending, pwdState, push, router, startRefresh]);
 
-  const allergiesText = useMemo(
-    () => pgArrayToCsv((user as any).allergies),
-    [(user as any).allergies]
-  );
+  const allergies = (user as any)?.allergies;
+  const dietaryFlags = (user as any)?.dietary_flags;
 
+  const allergiesText = useMemo(() => pgArrayToCsv(allergies), [allergies]);
   const dietaryFlagsText = useMemo(
-    () => pgArrayToCsv((user as any).dietary_flags),
-    [(user as any).dietary_flags]
+    () => pgArrayToCsv(dietaryFlags),
+    [dietaryFlags]
   );
 
   const dobValue = user.date_of_birth

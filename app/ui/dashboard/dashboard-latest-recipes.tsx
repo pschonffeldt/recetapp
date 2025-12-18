@@ -25,7 +25,7 @@ export default async function LatestRecipes() {
         <div className="bg-white px-6">
           {isEmpty ? (
             <div className="w-full rounded-md bg-white p-4 text-sm text-gray-500">
-              You don't have any recipes yet 😔!
+              You don&apos;t have any recipes yet 😔!
             </div>
           ) : (
             (latestRecipes ?? []).map((recipe, i) => (

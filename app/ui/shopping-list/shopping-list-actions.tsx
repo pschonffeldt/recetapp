@@ -92,7 +92,7 @@ export default function ShoppingListActions({
 
     setIsExporting(true);
     try {
-      const html2pdf = await require("html2pdf.js");
+      const { default: html2pdf } = await import("html2pdf.js");
 
       const recipeListHtml =
         appliedRecipes.length > 0

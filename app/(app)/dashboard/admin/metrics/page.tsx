@@ -1,7 +1,6 @@
 import LatestRecipes from "@/app/ui/dashboard/dashboard-latest-recipes";
 import CardWrapper from "@/app/ui/general/cards";
 import PieChart from "@/app/ui/dashboard/dashboard-pie-chart";
-import { inter } from "@/app/ui/branding/branding-fonts";
 import { Suspense } from "react";
 import { Metadata } from "next";
 import {

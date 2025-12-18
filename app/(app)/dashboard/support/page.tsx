@@ -1,5 +1,6 @@
 import SupportForm from "@/app/ui/support/support-form";
 import { auth } from "@/auth";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata = { title: "Support" };
@@ -20,7 +21,7 @@ export default async function Page() {
 
       {/* Quick links to public help */}
       <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <a
+        <Link
           className="rounded-md border bg-white p-4 hover:bg-gray-50"
           href="/help"
         >
@@ -28,17 +29,17 @@ export default async function Page() {
           <div className="mt-1 text-xs text-gray-600">
             Guides + FAQs (public)
           </div>
-        </a>
+        </Link>
 
-        <a
+        <Link
           className="rounded-md border bg-white p-4 hover:bg-gray-50"
           href="/help/faq"
         >
           <div className="text-sm font-medium">FAQ</div>
           <div className="mt-1 text-xs text-gray-600">Common questions</div>
-        </a>
+        </Link>
 
-        <a
+        <Link
           className="rounded-md border bg-white p-4 hover:bg-gray-50"
           href="/help/guides"
         >
@@ -46,7 +47,7 @@ export default async function Page() {
           <div className="mt-1 text-xs text-gray-600">
             Step-by-step articles
           </div>
-        </a>
+        </Link>
       </section>
 
       {/* Support form */}

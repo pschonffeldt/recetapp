@@ -51,18 +51,13 @@ export default function ViewerRecipe({
   const savedByCount =
     typeof recipe.saved_by_count === "number" ? recipe.saved_by_count : null;
 
-  const creatorName =
-    recipe.created_by_display_name &&
-    recipe.created_by_display_name.trim().length > 0
-      ? recipe.created_by_display_name
-      : "RecetApp cook";
-
   async function handleOnClick() {
-    const html2pdf = await require("html2pdf.js");
+    const { default: html2pdf } = await import("html2pdf.js");
+
     const element = document.querySelector("#print");
-    if (element) {
-      html2pdf(element, { margin: 20 });
-    }
+    if (!(element instanceof HTMLElement)) return;
+
+    html2pdf(element, { margin: 20 });
   }
 
   return (
