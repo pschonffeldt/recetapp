@@ -1,29 +1,24 @@
 import Logo from "@/app/ui/branding/branding-recetapp-logo";
 import { signOut } from "@/auth";
 import { PowerIcon } from "@heroicons/react/24/outline";
-import { brand } from "../branding/branding";
 import NavLinks from "./navigation-links";
 
 export default function SideNav() {
   return (
     <div className="flex h-full flex-col lg:px-2">
       {/* Box containing the logo + link to home when click */}
-      <div
-        className={`${brand(
-          "brand",
-          "bg"
-        )} mb-2 flex h-20 items-end justify-start p-4 rounded-b-lg lg:h-40`}
-      >
+      <div className="mb-2 flex h-20 items-end justify-start rounded-b-lg bg-gradient-to-r from-blue-600 to-cyan-500 p-4 lg:h-40">
         {/* Brand logo */}
-        {/* <div className="w-32 text-white md:w-40"> */}
         <div className="w-32 text-white lg:w-40">
           <Logo />
         </div>
       </div>
+
       {/* Box containing everything lower than the logo */}
-      <div className="flex grow flex-row justify-between space-x-2 px-2 lg:px-0 lg:flex-col lg:space-x-0 lg:space-y-2">
+      <div className="flex grow flex-row justify-between space-x-2 px-2 lg:flex-col lg:space-x-0 lg:space-y-2 lg:px-0">
         {/* Navigation buttons */}
         <NavLinks />
+
         {/* Space between buttons and sign out button */}
         <div className="hidden h-auto w-full grow rounded-md bg-gray-50 lg:block">
           {/* Here we will eventually add the Mini-viewer component  */}
