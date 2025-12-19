@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+/* =============================================================================
+ * Helpers
+ * ============================================================================= */
+
 function Wave({
   flip = false,
   className = "",
@@ -12,11 +16,46 @@ function Wave({
       <svg
         viewBox="0 0 1440 140"
         preserveAspectRatio="none"
-        className={`block h-[90px] w-full md:h-[120px] ${
+        className={`block h-[95px] w-full md:h-[130px] ${
           flip ? "rotate-180" : ""
         }`}
       >
-        {/* smooth wave */}
+        <path
+          d="M0,64 C240,140 520,0 760,48 C1010,98 1220,140 1440,72 L1440,140 L0,140 Z"
+          fill="currentColor"
+        />
+      </svg>
+    </div>
+  );
+}
+
+function WaveEdge({
+  position,
+  className = "",
+}: {
+  position: "top" | "bottom";
+  className?: string;
+}) {
+  return (
+    <div
+      aria-hidden
+      className={[
+        "pointer-events-none absolute left-0 w-full overflow-hidden",
+        position === "top"
+          ? "top-0 -translate-y-[1px]"
+          : "bottom-0 translate-y-[1px]",
+        className,
+      ].join(" ")}
+    >
+      <svg
+        viewBox="0 0 1440 140"
+        preserveAspectRatio="none"
+        className={[
+          "block w-full",
+          "h-[95px] md:h-[130px]",
+          position === "top" ? "rotate-180" : "",
+        ].join(" ")}
+      >
         <path
           d="M0,64 C240,140 520,0 760,48 C1010,98 1220,140 1440,72 L1440,140 L0,140 Z"
           fill="currentColor"
@@ -27,8 +66,7 @@ function Wave({
 }
 
 function SparklesOverlay() {
-  // lightweight “star dots”
-  const dots = Array.from({ length: 28 }).map((_, i) => i);
+  const dots = Array.from({ length: 32 }).map((_, i) => i);
   return (
     <div
       className="pointer-events-none absolute inset-0 opacity-40"
@@ -39,23 +77,29 @@ function SparklesOverlay() {
           key={i}
           className="absolute h-1 w-1 rounded-full bg-white/70"
           style={{
-            left: `${(i * 37) % 100}%`,
-            top: `${(i * 23) % 100}%`,
-            transform: `scale(${0.6 + ((i * 13) % 10) / 10})`,
+            left: `${(i * 31) % 100}%`,
+            top: `${(i * 19) % 100}%`,
+            transform: `scale(${0.5 + ((i * 11) % 12) / 10})`,
           }}
         />
       ))}
-      {/* a few bigger glows */}
-      <span className="absolute left-[12%] top-[18%] h-2 w-2 rounded-full bg-white/80 blur-[0.5px]" />
-      <span className="absolute left-[68%] top-[35%] h-2 w-2 rounded-full bg-white/80 blur-[0.5px]" />
-      <span className="absolute left-[40%] top-[72%] h-2 w-2 rounded-full bg-white/80 blur-[0.5px]" />
+      <span className="absolute left-[10%] top-[20%] h-2 w-2 rounded-full bg-white/80 blur-[0.5px]" />
+      <span className="absolute left-[72%] top-[32%] h-2 w-2 rounded-full bg-white/80 blur-[0.5px]" />
+      <span className="absolute left-[42%] top-[74%] h-2 w-2 rounded-full bg-white/80 blur-[0.5px]" />
     </div>
   );
 }
 
-function AppMock({ label }: { label: string }) {
+function AppMock({ label, wide = true }: { label: string; wide?: boolean }) {
+  // Key fix: always enforce consistent width + prevent narrow shrink in grid layouts
   return (
-    <div className="rounded-2xl border bg-white shadow-sm">
+    <div
+      className={[
+        "w-full",
+        wide ? "max-w-[560px]" : "max-w-[460px]",
+        "rounded-2xl border bg-white shadow-sm",
+      ].join(" ")}
+    >
       <div className="flex items-center gap-2 border-b px-4 py-3">
         <span className="h-3 w-3 rounded-full bg-red-400" />
         <span className="h-3 w-3 rounded-full bg-yellow-400" />
@@ -63,7 +107,7 @@ function AppMock({ label }: { label: string }) {
         <div className="ml-2 text-xs text-gray-500">{label}</div>
       </div>
       <div className="p-4 md:p-6">
-        <div className="h-56 w-full rounded-xl bg-gray-100 md:h-64" />
+        <div className="h-60 w-full rounded-xl bg-gray-100 md:h-72" />
       </div>
     </div>
   );
@@ -71,14 +115,46 @@ function AppMock({ label }: { label: string }) {
 
 function StatCard({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-xl bg-gray-50 p-5">
-      <div className="text-4xl font-semibold tracking-tight text-gray-900">
+    <div className="rounded-xl bg-gray-50 p-6">
+      <div className="text-[2.25rem] font-semibold leading-none tracking-tight text-gray-900">
         {value}
       </div>
-      <p className="mt-2 text-sm leading-6 text-gray-700">{label}</p>
+      <p className="mt-3 text-sm leading-6 text-gray-700">{label}</p>
     </div>
   );
 }
+
+function SectionHeader({
+  kicker,
+  title,
+  subtitle,
+}: {
+  kicker?: string;
+  title: string;
+  subtitle?: string;
+}) {
+  return (
+    <div className="mx-auto max-w-3xl text-center">
+      {kicker ? (
+        <p className="text-xs font-semibold uppercase tracking-wide text-blue-200/90">
+          {kicker}
+        </p>
+      ) : null}
+      <h2 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">
+        {title}
+      </h2>
+      {subtitle ? (
+        <p className="mx-auto mt-4 max-w-2xl text-sm text-white/90 md:text-base">
+          {subtitle}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+/* =============================================================================
+ * Page
+ * ============================================================================= */
 
 export const metadata = { title: "RecetApp" };
 
@@ -126,21 +202,46 @@ export default function Page() {
       {/* =========================
           2) HERO
          ========================= */}
-      <section className="relative">
-        <div className="mx-auto max-w-6xl px-4 pt-10 md:px-6 md:pt-14">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+      <section className="relative overflow-hidden bg-white">
+        {/* Background: blobs + subtle noise */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          {/* Big soft blobs */}
+          <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-blue-500/20 blur-3xl" />
+          <div className="absolute -left-40 top-24 h-[520px] w-[520px] rounded-full bg-sky-400/20 blur-3xl" />
+          <div className="absolute -right-52 bottom-[-220px] h-[640px] w-[640px] rounded-full bg-indigo-500/15 blur-3xl" />
+
+          {/* Soft arc wash */}
+          <div className="absolute inset-x-0 bottom-[-260px] h-[520px] rounded-[999px] bg-gradient-to-t from-blue-500/10 via-sky-400/5 to-transparent blur-2xl" />
+
+          {/* Subtle noise overlay */}
+          <div
+            className="absolute inset-0 opacity-[0.07] mix-blend-overlay"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E")`,
+            }}
+          />
+
+          {/* Bottom fade (smooth transition) */}
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white" />
+          {/* If your next section is gray-50, use this instead:
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-gray-50" />
+    */}
+        </div>
+
+        <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20 lg:min-h-[70vh] lg:flex lg:items-center">
+          <div className="grid w-full gap-12 lg:grid-cols-2 lg:items-center">
             <div>
-              <h1 className="text-4xl font-semibold tracking-tight md:text-5xl">
+              <h1 className="text-5xl font-semibold tracking-tight md:text-6xl">
                 The easiest way to keep your recipes organized.
               </h1>
 
-              <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
+              <p className="mt-5 text-sm leading-6 text-gray-700 md:text-base">
                 RecetApp helps you save structured recipes, reuse ingredients,
                 and generate shopping lists fast — so meal planning feels
                 effortless.
               </p>
 
-              <div className="mt-7 flex flex-wrap gap-3">
+              <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/signup"
                   className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-500"
@@ -155,8 +256,7 @@ export default function Page() {
                 </Link>
               </div>
 
-              {/* Small icon link row (below CTAs) */}
-              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-gray-600">
+              <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-gray-600">
                 <Link href="/help/getting-started" className="hover:underline">
                   Getting started
                 </Link>
@@ -172,43 +272,39 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="lg:justify-self-end">
+            <div className="flex justify-start lg:justify-end">
               <AppMock label="RecetApp — dashboard preview" />
             </div>
           </div>
         </div>
-
-        {/* curved “white to band” transition */}
-        <Wave flip className="text-white" />
       </section>
 
       {/* =========================
-          3) Big gradient band
-         ========================= */}
+    3) Big gradient band (wave top + bottom)
+   ========================= */}
       <section className="relative">
-        <Wave flip className="text-white" />
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
+          {/* Top wave */}
+          {/* <Wave flip className="relative z-10 text-white" /> */}
+
           <SparklesOverlay />
 
-          <div className="mx-auto max-w-6xl px-4 py-14 md:px-6 md:py-18">
-            <div className="mx-auto max-w-3xl text-center">
-              <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
-                Reimagine the limits of what’s possible in your kitchen.
-              </h2>
-              <p className="mt-3 text-sm text-white/90 md:text-base">
-                From “where did I save that recipe?” to a clean system you can
-                trust — RecetApp keeps everything organized.
-              </p>
+          <div className="relative z-10 mx-auto max-w-6xl px-4 py-18 md:px-6 md:py-24">
+            <SectionHeader
+              title="Reimagine the limits of what’s possible in your kitchen."
+              subtitle="From “where did I save that recipe?” to a clean system you can trust — RecetApp keeps everything organized."
+            />
+
+            <div className="mt-12 grid gap-6 lg:grid-cols-2 lg:items-center">
+              <div className="flex justify-center lg:justify-start">
+                <AppMock label="Structured recipe view" />
+              </div>
+              <div className="flex justify-center lg:justify-end">
+                <AppMock label="Shopping list builder" />
+              </div>
             </div>
 
-            {/* Screenshot strip inside band */}
-            <div className="mt-10 grid gap-6 lg:grid-cols-2 lg:items-center">
-              <AppMock label="Structured recipe view" />
-              <AppMock label="Shopping list builder" />
-            </div>
-
-            {/* Small pill links under band */}
-            <div className="mt-10 flex flex-wrap justify-center gap-2">
+            <div className="mt-12 flex flex-wrap justify-center gap-2">
               {["Convenient", "Private", "Organized"].map((t) => (
                 <span
                   key={t}
@@ -220,30 +316,30 @@ export default function Page() {
             </div>
           </div>
 
-          {/* band → white wave */}
-          <Wave className="text-white" />
+          {/* Bottom wave */}
+          <Wave className="relative z-10 text-white" />
         </div>
       </section>
 
       {/* =========================
-          4) Alternating feature rows
+          4) Alternating feature rows (taller + bigger + consistent mock width)
          ========================= */}
-      <section className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20">
+      <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
         {/* Feature 1 */}
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
               Provide clarity instantly
             </p>
-            <h3 className="mt-2 text-3xl font-semibold tracking-tight">
+            <h3 className="mt-3 text-4xl font-semibold tracking-tight md:text-[2.75rem]">
               Find recipes fast — and trust what you saved.
             </h3>
-            <p className="mt-3 text-sm leading-6 text-gray-700 md:text-base">
+            <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
               Save recipes with clean structure (ingredients, steps, notes) so
               they’re easy to read, edit, and cook from later.
             </p>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
               <StatCard
                 value="Less scrolling"
                 label="Stop hunting through screenshots and messy notes."
@@ -254,7 +350,7 @@ export default function Page() {
               />
             </div>
 
-            <div className="mt-6 space-y-2 text-sm text-gray-700">
+            <div className="mt-7 space-y-2 text-sm text-gray-700">
               <div className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
                 <span>Search by title and summary</span>
@@ -270,26 +366,27 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="lg:justify-self-end">
+          <div className="flex justify-start lg:justify-end">
+            {/* FIX: force same width as other sections */}
             <AppMock label="Recipe page preview" />
           </div>
         </div>
 
         {/* Feature 2 */}
-        <div className="mt-16 grid gap-10 lg:grid-cols-2 lg:items-center">
+        <div className="mt-20 grid gap-12 lg:grid-cols-2 lg:items-center">
           <div className="lg:order-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
               Shop smarter
             </p>
-            <h3 className="mt-2 text-3xl font-semibold tracking-tight">
+            <h3 className="mt-3 text-4xl font-semibold tracking-tight md:text-[2.75rem]">
               Build a shopping list from multiple recipes.
             </h3>
-            <p className="mt-3 text-sm leading-6 text-gray-700 md:text-base">
+            <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
               Pick the recipes you’re making and generate a list that’s actually
               usable at the store.
             </p>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
               <StatCard
                 value="Fewer repeats"
                 label="Combine ingredients across recipes into one list."
@@ -300,7 +397,7 @@ export default function Page() {
               />
             </div>
 
-            <div className="mt-6 space-y-2 text-sm text-gray-700">
+            <div className="mt-7 space-y-2 text-sm text-gray-700">
               <div className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
                 <span>Recipe picker → list in seconds</span>
@@ -316,26 +413,26 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="lg:order-1">
+          <div className="flex justify-start lg:order-1">
             <AppMock label="Shopping list preview" />
           </div>
         </div>
 
         {/* Feature 3 */}
-        <div className="mt-16 grid gap-10 lg:grid-cols-2 lg:items-center">
+        <div className="mt-20 grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
               Keep things consistent
             </p>
-            <h3 className="mt-2 text-3xl font-semibold tracking-tight">
+            <h3 className="mt-3 text-4xl font-semibold tracking-tight md:text-[2.75rem]">
               Reuse ingredients instead of rewriting them.
             </h3>
-            <p className="mt-3 text-sm leading-6 text-gray-700 md:text-base">
+            <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
               Consistent ingredient naming keeps your recipes cleaner and your
               lists easier to manage over time.
             </p>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
               <StatCard
                 value="Cleaner data"
                 label="Ingredient names stay consistent across recipes."
@@ -346,7 +443,7 @@ export default function Page() {
               />
             </div>
 
-            <div className="mt-6 space-y-2 text-sm text-gray-700">
+            <div className="mt-7 space-y-2 text-sm text-gray-700">
               <div className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
                 <span>Structured ingredients</span>
@@ -362,27 +459,27 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="lg:justify-self-end">
+          <div className="flex justify-start lg:justify-end">
             <AppMock label="Ingredient structure preview" />
           </div>
         </div>
       </section>
 
       {/* =========================
-          5) “Secure. Adaptable. No barriers.” band
+          5) Privacy section (taller + bigger)
          ========================= */}
       <section className="bg-gray-50">
-        <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
+        <div className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
+          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
-              <h2 className="text-3xl font-semibold tracking-tight">
+              <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
                 Private by default. Simple by design.
               </h2>
-              <p className="mt-3 text-sm leading-6 text-gray-700 md:text-base">
+              <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
                 Your recipes stay yours. Share only when you want to.
               </p>
 
-              <div className="mt-6 space-y-4">
+              <div className="mt-10 space-y-5">
                 <div>
                   <div className="text-sm font-semibold text-gray-900">
                     Private-first
@@ -410,7 +507,7 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="lg:justify-self-end">
+            <div className="flex justify-start lg:justify-end">
               <AppMock label="Account / privacy controls preview" />
             </div>
           </div>
@@ -418,82 +515,148 @@ export default function Page() {
       </section>
 
       {/* =========================
-          6) People using it
+          6) Slack-like “companies use Slack” block (redone)
          ========================= */}
-      <section className="mx-auto max-w-6xl px-4 py-10 md:px-6">
+      <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-24">
         <h2 className="text-center text-sm font-semibold text-gray-700">
-          Built for people who cook at home (and want less chaos)
+          People who cook at home love RecetApp.
         </h2>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-4">
-          {[
-            "Meal prep",
-            "Family recipes",
-            "New favorites",
-            "Weeknight cooking",
-          ].map((t) => (
-            <div
-              key={t}
-              className="rounded-xl border bg-white p-4 text-sm text-gray-700 shadow-sm"
-            >
-              {t}
+        {/* Featured panel + thumbnail strip (Slack vibe) */}
+        <div className="mt-8 grid gap-6 lg:grid-cols-12 lg:items-stretch">
+          {/* Featured */}
+          <div className="lg:col-span-8">
+            <div className="relative overflow-hidden rounded-2xl border bg-white shadow-sm">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-cyan-50" />
+              <div className="relative grid gap-6 p-6 md:grid-cols-2 md:p-8">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                    Featured story
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
+                    “Meal planning finally feels calm.”
+                  </h3>
+                  <p className="mt-3 text-sm leading-6 text-gray-700">
+                    I stopped saving recipes in 5 different places. Now I can
+                    actually find what I need — and my shopping list is done in
+                    minutes.
+                  </p>
+
+                  <div className="mt-5 flex items-center gap-3 text-sm text-gray-700">
+                    <span className="h-9 w-9 rounded-full bg-gray-200" />
+                    <div>
+                      <div className="font-semibold text-gray-900">
+                        Home cook
+                      </div>
+                      <div className="text-xs text-gray-600">
+                        Weekly meal prep
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6">
+                    <Link
+                      href="/signup"
+                      className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-500"
+                    >
+                      Try it free
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Big media placeholder (Slack uses video/photo) */}
+                <div className="rounded-xl border bg-white p-3 shadow-sm">
+                  <div className="h-52 w-full rounded-lg bg-gray-100 md:h-56" />
+                  <div className="mt-3 text-xs text-gray-500">
+                    Featured preview (swap for video/image later)
+                  </div>
+                </div>
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* Thumbnails column */}
+          <div className="lg:col-span-4">
+            <div className="grid gap-4">
+              {[
+                {
+                  title: "Weeknight cooking",
+                  body: "Save favorites and repeat them fast.",
+                },
+                { title: "Family recipes", body: "Keep traditions organized." },
+                {
+                  title: "New favorites",
+                  body: "Test, tweak, and keep notes.",
+                },
+              ].map((t) => (
+                <div
+                  key={t.title}
+                  className="rounded-2xl border bg-white p-5 shadow-sm"
+                >
+                  <div className="text-sm font-semibold text-gray-900">
+                    {t.title}
+                  </div>
+                  <p className="mt-2 text-sm text-gray-700">{t.body}</p>
+                  <div className="mt-4 h-20 w-full rounded-lg bg-gray-100" />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* =========================
-          7) Big stats band
+          7) Big stats band (wave top + bottom + taller)
          ========================= */}
       <section className="relative">
         <Wave flip className="text-white" />
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
           <SparklesOverlay />
-          <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20">
-            <h2 className="text-center text-3xl font-semibold tracking-tight md:text-4xl">
+
+          <div className="mx-auto max-w-6xl px-4 py-18 md:px-6 md:py-24">
+            <h2 className="text-center text-4xl font-semibold tracking-tight md:text-5xl">
               A calmer way to plan meals.
             </h2>
 
-            <div className="mt-10 grid gap-8 md:grid-cols-3">
+            <div className="mt-12 grid gap-10 md:grid-cols-3">
               <div className="text-center">
-                <div className="text-4xl font-semibold">1</div>
-                <p className="mt-2 text-sm text-white/90">
+                <div className="text-5xl font-semibold">1</div>
+                <p className="mt-3 text-sm text-white/90 md:text-base">
                   place for recipes, ingredients, and shopping lists
                 </p>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-semibold">Less</div>
-                <p className="mt-2 text-sm text-white/90">
+                <div className="text-5xl font-semibold">Less</div>
+                <p className="mt-3 text-sm text-white/90 md:text-base">
                   retyping and fewer forgotten items
                 </p>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-semibold">More</div>
-                <p className="mt-2 text-sm text-white/90">
+                <div className="text-5xl font-semibold">More</div>
+                <p className="mt-3 text-sm text-white/90 md:text-base">
                   time cooking (and less time searching)
                 </p>
               </div>
             </div>
           </div>
-
-          <Wave className="text-white" />
         </div>
+        <Wave className="text-white" />
       </section>
 
       {/* =========================
-          8) Cards grid 
+          8) Cards grid (taller + slightly bigger header)
          ========================= */}
-      <section className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20">
+      <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
         <div className="text-center">
-          <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+          <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
             Get started in minutes.
           </h2>
-          <p className="mt-3 text-sm text-gray-700 md:text-base">
+          <p className="mt-4 text-sm text-gray-700 md:text-base">
             Quick guides to unlock value fast.
           </p>
         </div>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
+        <div className="mt-12 grid gap-4 md:grid-cols-3">
           {[
             {
               title: "Add your first recipe",
@@ -514,11 +677,11 @@ export default function Page() {
             <Link
               key={c.title}
               href={c.href}
-              className="rounded-2xl border bg-white p-6 shadow-sm transition hover:shadow"
+              className="rounded-2xl border bg-white p-7 shadow-sm transition hover:shadow"
             >
-              <div className="text-base font-semibold">{c.title}</div>
+              <div className="text-lg font-semibold">{c.title}</div>
               <p className="mt-2 text-sm text-gray-700">{c.body}</p>
-              <div className="mt-4 text-sm font-medium text-blue-600">
+              <div className="mt-5 text-sm font-medium text-blue-600">
                 Read more →
               </div>
             </Link>
@@ -527,17 +690,17 @@ export default function Page() {
       </section>
 
       {/* =========================
-          9) Final CTA
+          9) Final CTA + Footer (more personality)
          ========================= */}
       <section className="bg-gray-50">
-        <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20">
-          <div className="rounded-2xl bg-gradient-to-r from-blue-700 to-cyan-600 p-10 text-white">
+        <div className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-24">
+          <div className="rounded-2xl bg-gradient-to-r from-blue-700 to-cyan-600 p-10 text-white md:p-12">
             <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
               <div>
-                <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
+                <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
                   Ready to organize your recipes?
                 </h2>
-                <p className="mt-3 text-sm text-white/90 md:text-base">
+                <p className="mt-4 text-sm text-white/90 md:text-base">
                   Start free. Upgrade only if you need more.
                 </p>
               </div>
@@ -559,9 +722,102 @@ export default function Page() {
             </div>
           </div>
 
-          {/* dense footer area  */}
-          <footer className="mt-12 border-t pt-8 text-xs text-gray-500">
-            <div className="flex flex-wrap items-center justify-between gap-4">
+          {/* Footer (Slack-like density + personality) */}
+          <footer className="mt-14 border-t pt-10">
+            <div className="grid gap-10 md:grid-cols-12">
+              <div className="md:col-span-4">
+                <div className="text-sm font-semibold text-gray-900">
+                  RecetApp
+                </div>
+                <p className="mt-3 max-w-sm text-sm leading-6 text-gray-600">
+                  A calmer way to save recipes, reuse ingredients, and plan
+                  meals without chaos.
+                </p>
+              </div>
+
+              <div className="grid gap-8 md:col-span-8 md:grid-cols-4">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">
+                    Product
+                  </div>
+                  <div className="mt-3 space-y-2 text-sm text-gray-600">
+                    <Link href="/signup" className="block hover:underline">
+                      Get started
+                    </Link>
+                    <Link href="/login" className="block hover:underline">
+                      Log in
+                    </Link>
+                    <Link href="/releases" className="block hover:underline">
+                      Releases
+                    </Link>
+                    <Link href="/roadmap" className="block hover:underline">
+                      Roadmap
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">
+                    Help
+                  </div>
+                  <div className="mt-3 space-y-2 text-sm text-gray-600">
+                    <Link href="/help" className="block hover:underline">
+                      Help Center
+                    </Link>
+                    <Link
+                      href="/help/getting-started"
+                      className="block hover:underline"
+                    >
+                      Getting started
+                    </Link>
+                    <Link
+                      href="/help/recipes"
+                      className="block hover:underline"
+                    >
+                      Recipes
+                    </Link>
+                    <Link
+                      href="/help/troubleshooting"
+                      className="block hover:underline"
+                    >
+                      Troubleshooting
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">
+                    Company
+                  </div>
+                  <div className="mt-3 space-y-2 text-sm text-gray-600">
+                    <Link href="/about" className="block hover:underline">
+                      About
+                    </Link>
+                    <Link href="/privacy" className="block hover:underline">
+                      Privacy
+                    </Link>
+                    <Link href="/terms" className="block hover:underline">
+                      Terms
+                    </Link>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">
+                    Follow
+                  </div>
+                  <div className="mt-3 space-y-2 text-sm text-gray-600">
+                    <span className="block text-gray-500">
+                      (Add socials later)
+                    </span>
+                    <span className="block text-gray-500">X / Instagram</span>
+                    <span className="block text-gray-500">YouTube</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-10 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
               <div>© {new Date().getFullYear()} RecetApp</div>
               <div className="flex flex-wrap gap-4">
                 <Link href="/help" className="hover:underline">
