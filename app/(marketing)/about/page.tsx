@@ -1,13 +1,7 @@
 import { SparklesOverlay, Wave } from "@/app/lib/marketing/helpers";
-import MarketingCTA from "@/app/ui/marketing/home/home-cta";
-import MarketingFooter from "@/app/ui/marketing/home/home-footer";
 import InfoCard from "@/app/ui/marketing/home/home-infocards";
 import SoftDot from "@/app/ui/marketing/home/home-soft-dot";
 import Link from "next/link";
-
-/* =============================================================================
- * Page
- * ============================================================================= */
 
 export const metadata = { title: "About • RecetApp" };
 

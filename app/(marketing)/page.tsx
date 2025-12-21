@@ -6,9 +6,6 @@ import {
   StatCard,
   Wave,
 } from "../lib/marketing/helpers";
-import MarketingCTA from "../ui/marketing/home/home-cta";
-import MarketingFooter from "../ui/marketing/home/home-footer";
-import MarketingTopNavBar from "../ui/marketing/home/home-topnav";
 
 export const metadata = { title: "RecetApp" };
 
