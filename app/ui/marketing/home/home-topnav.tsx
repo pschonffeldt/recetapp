@@ -1,14 +1,55 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 export default function MarketingTopNavBar() {
+  const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  // Close on Escape
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  // Close on click outside
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (!open) return;
+      const target = e.target as Node;
+      if (panelRef.current && !panelRef.current.contains(target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [open]);
+
+  // Prevent body scroll when open (mobile)
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
+  const close = () => setOpen(false);
+
   return (
     <header className="sticky top-0 z-40 border-b bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl items-center justify-between text-base px-4 py-4 md:px-6">
-        <Link href="/" className="font-semibold tracking-tight">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
+        <Link href="/" className="text-base font-semibold tracking-tight">
           RecetApp
         </Link>
 
-        <nav className="hidden items-start justify-start gap-6 text-gray-700 md:flex">
+        {/* Desktop nav */}
+        <nav className="hidden items-start justify-start gap-6 text-base text-gray-700 md:flex">
           <Link href="/about" className="hover:text-gray-900 hover:underline">
             About
           </Link>
@@ -27,20 +68,122 @@ export default function MarketingTopNavBar() {
         </nav>
 
         <div className="flex items-center gap-3">
+          {/* Desktop login */}
           <Link
             href="/login"
-            className="hidden text-gray-700 hover:text-gray-900 hover:underline md:inline-block"
+            className="hidden text-base text-gray-700 hover:text-gray-900 hover:underline md:inline-block"
           >
             Log in
           </Link>
+
+          {/* CTA always visible */}
           <Link
             href="/signup"
             className="flex h-10 items-center rounded-lg bg-blue-500 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
           >
             Get started
           </Link>
+
+          {/* Mobile burger */}
+          <button
+            type="button"
+            className="ml-1 inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 md:hidden"
+            aria-label="Open menu"
+            aria-expanded={open}
+            aria-controls="marketing-mobile-menu"
+            onClick={() => setOpen((v) => !v)}
+          >
+            {/* simple hamburger / close icon */}
+            <span className="sr-only">Toggle menu</span>
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
+              {open ? (
+                <>
+                  <path d="M6 6l12 12" />
+                  <path d="M18 6l-12 12" />
+                </>
+              ) : (
+                <>
+                  <path d="M4 7h16" />
+                  <path d="M4 12h16" />
+                  <path d="M4 17h16" />
+                </>
+              )}
+            </svg>
+          </button>
         </div>
       </div>
+
+      {/* Mobile menu overlay + panel */}
+      {open && (
+        <div className="md:hidden">
+          {/* overlay */}
+          <div className="fixed inset-0 z-40 bg-black/20" onClick={close} />
+
+          {/* panel */}
+          <div
+            id="marketing-mobile-menu"
+            ref={panelRef}
+            className="fixed inset-x-0 top-[65px] z-50 border-b bg-white backdrop-blur"
+          >
+            <div className="mx-auto max-w-6xl px-4 py-4 md:px-6">
+              <nav className="grid gap-3 text-base text-gray-800">
+                <Link
+                  href="/"
+                  onClick={close}
+                  className="rounded-lg px-2 py-2 hover:bg-blue-50"
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/about"
+                  onClick={close}
+                  className="rounded-lg px-2 py-2 hover:bg-blue-50"
+                >
+                  About
+                </Link>
+                <Link
+                  href="/features"
+                  onClick={close}
+                  className="rounded-lg px-2 py-2 hover:bg-blue-50"
+                >
+                  Features
+                </Link>
+                <Link
+                  href="/pricing"
+                  onClick={close}
+                  className="rounded-lg px-2 py-2 hover:bg-blue-50"
+                >
+                  Pricing
+                </Link>
+                <Link
+                  href="/help"
+                  onClick={close}
+                  className="rounded-lg px-2 py-2 hover:bg-blue-50"
+                >
+                  Help
+                </Link>
+
+                <div className="mt-1 border-t pt-3">
+                  <Link
+                    href="/login"
+                    onClick={close}
+                    className="block rounded-lg px-2 py-2 text-gray-700 hover:bg-blue-50"
+                  >
+                    Log in
+                  </Link>
+                </div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
