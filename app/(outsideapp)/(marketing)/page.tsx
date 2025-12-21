@@ -13,7 +13,7 @@ export default function Page() {
   return (
     <div className="min-h-screen bg-white">
       {/* =========================
-          2) HERO
+          1) HERO
         ========================= */}
       <section className="relative overflow-hidden bg-white">
         {/* Background: blobs + subtle noise */}
@@ -89,7 +89,7 @@ export default function Page() {
         </div>
       </section>
       {/* =========================
-          3) Big gradient band (wave top + bottom)
+          2) Big gradient band (wave top + bottom)
         ========================= */}
       <section className="relative">
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
@@ -97,7 +97,7 @@ export default function Page() {
 
           <SparklesOverlay />
 
-          <div className="relative z-10 mx-auto max-w-6xl px-4 py-18 md:px-6 md:py-24">
+          <div className="relative mt-12 z-10 mx-auto max-w-6xl px-4 py-18 md:px-6 md:py-24">
             <SectionHeader
               title="Reimagine the limits of what’s possible in your kitchen."
               subtitle="From “where did I save that recipe?” to a clean system you can trust — RecetApp keeps everything organized."
@@ -130,7 +130,7 @@ export default function Page() {
       </section>
 
       {/* =========================
-          4) Alternating feature rows
+          3) Alternating feature rows
         ========================= */}
       <section className="mx-auto flex max-w-6xl flex-col gap-36 px-4 py-20 md:px-6 md:py-28">
         {/* Feature 1 */}
@@ -310,7 +310,7 @@ export default function Page() {
         </div>
       </section>
       {/* =========================
-          5) Privacy section
+          4) Privacy section
         ========================= */}
       <section className="relative">
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
@@ -370,7 +370,7 @@ export default function Page() {
         </div>
       </section>
       {/* =========================
-          6) People using it
+          5) People using it
          ========================= */}
       <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-24">
         <h2 className="text-center text-sm font-semibold text-gray-700">
@@ -460,7 +460,7 @@ export default function Page() {
         </div>
       </section>
       {/* =========================
-          7) Big stats band (wave top + bottom + taller)
+          6) Big stats band (wave top + bottom + taller)
         ========================= */}
       <section className="relative">
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
@@ -502,7 +502,7 @@ export default function Page() {
         </div>
       </section>
       {/* =========================
-          8) Cards grid
+          7) Cards grid
         ========================= */}
       <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
         <div className="text-center">
