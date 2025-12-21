@@ -12,7 +12,7 @@ export default function MarketingFooter() {
           </p>
         </div>
         {/* Footer columns */}
-        <div className="grid gap-8 md:col-span-8 md:grid-cols-5">
+        <div className="grid gap-8 md:col-span-8 md:grid-cols-4">
           {/* Product */}
           <div>
             <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">
@@ -121,7 +121,7 @@ export default function MarketingFooter() {
             </div>
           </div>
           {/* Socials */}
-          <div>
+          {/* <div>
             <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">
               Follow us
             </div>
@@ -136,13 +136,13 @@ export default function MarketingFooter() {
                 Terms
               </Link>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
-      <div className="mt-10 flex flex-col flex-wrap items-start justify-between gap-3 text-xs text-gray-500">
+      <div className="mt-10 pt-4 flex flex-col flex-wrap items-start justify-between gap-3 text-xs text-gray-500 border-t">
         <div>© {new Date().getFullYear()} RecetApp, app version 1.0.0.</div>
-        <div>Developed in Chile</div>
+        <div>Developed in Chile 🇨🇱</div>
       </div>
     </footer>
   );
