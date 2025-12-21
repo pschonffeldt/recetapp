@@ -260,6 +260,55 @@ export default function Page() {
             <AppMock label="Ingredient structure preview" />
           </div>
         </div>
+        {/* Feature 4 (Discover) */}
+        {/* Feature 4 (Discover) — flipped like Feature 2 */}
+        <div className="mt-20 grid gap-12 lg:grid-cols-2 lg:items-center">
+          <div className="lg:order-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+              Discover & share (optional)
+            </p>
+
+            <h3 className="mt-3 text-4xl font-semibold tracking-tight md:text-[2.75rem]">
+              Discover recipes — and share yours when you’re ready.
+            </h3>
+
+            <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
+              Explore a growing library of community recipes and save them into
+              your cookbook. Publish your own favorites only if you choose —
+              with privacy controls that keep it simple.
+            </p>
+
+            <div className="mt-8 grid gap-4 md:grid-cols-2">
+              <StatCard
+                value="More inspiration"
+                label="Find new ideas without losing your own system."
+              />
+              <StatCard
+                value="Your rules"
+                label="Share publicly, share privately, or don’t share at all."
+              />
+            </div>
+
+            <div className="mt-7 space-y-2 text-sm text-gray-700">
+              <div className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
+                <span>Browse categories and trending recipes</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
+                <span>Save to your cookbook with one click</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
+                <span>Publish selectively with simple privacy controls</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-start lg:order-1">
+            <AppMock label="Discover feed preview" />
+          </div>
+        </div>
       </section>
       {/* =========================
           5) Privacy section
