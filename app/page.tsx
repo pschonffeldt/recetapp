@@ -805,8 +805,11 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="mt-10 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
-              <div>© {new Date().getFullYear()} RecetApp</div>
+            <div className="mt-10 flex flex-col flex-wrap items-start justify-between gap-3 text-xs text-gray-500">
+              <div>
+                © {new Date().getFullYear()} RecetApp, app version 1.0.0.
+              </div>
+              <div>Developed in Chile with Love</div>
               {/* <div className="flex flex-wrap gap-4">
                 <Link href="/help" className="hover:underline">
                   Help
