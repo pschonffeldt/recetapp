@@ -5,20 +5,16 @@ import {
   SparklesOverlay,
   StatCard,
   Wave,
-} from "./lib/marketing/helpers";
-import MarketingCTA from "./ui/marketing/home/home-cta";
-import MarketingFooter from "./ui/marketing/home/home-footer";
-import MarketingTopNavBar from "./ui/marketing/home/home-topnav";
+} from "../lib/marketing/helpers";
+import MarketingCTA from "../ui/marketing/home/home-cta";
+import MarketingFooter from "../ui/marketing/home/home-footer";
+import MarketingTopNavBar from "../ui/marketing/home/home-topnav";
 
 export const metadata = { title: "RecetApp" };
 
 export default function Page() {
   return (
     <div className="min-h-screen bg-white">
-      {/* =========================
-          1) Top nav
-         ========================= */}
-      <MarketingTopNavBar />
       {/* =========================
           2) HERO
         ========================= */}
@@ -532,17 +528,6 @@ export default function Page() {
               </div>
             </Link>
           ))}
-        </div>
-      </section>
-      {/* =========================
-          9) Final CTA
-        ========================= */}
-      <section className="bg-gray-50">
-        <div className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-24">
-          {/* CTA */}
-          <MarketingCTA />
-          {/* Footer */}
-          <MarketingFooter />
         </div>
       </section>
     </div>

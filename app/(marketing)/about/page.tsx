@@ -15,44 +15,6 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* =========================
-          1) Top nav (match homepage)
-         ========================= */}
-      <header className="sticky top-0 z-40 border-b bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
-          <Link href="/" className="text-sm font-semibold tracking-tight">
-            RecetApp
-          </Link>
-
-          <nav className="hidden items-center gap-6 text-sm text-gray-700 md:flex">
-            <Link href="/roadmap" className="hover:text-gray-900">
-              Roadmap
-            </Link>
-            <Link href="/releases" className="hover:text-gray-900">
-              Releases
-            </Link>
-            <Link href="/help" className="hover:text-gray-900">
-              Help
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="hidden text-sm text-gray-700 hover:text-gray-900 md:inline-block"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/signup"
-              className="inline-flex h-9 items-center rounded-lg bg-blue-600 px-3 text-sm font-medium text-white hover:bg-blue-500"
-            >
-              Get started
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* =========================
           2) About hero (same blob background vibe)
          ========================= */}
       <section className="relative overflow-hidden bg-white">
@@ -298,19 +260,6 @@ export default function AboutPage() {
               />
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* =========================
-          5) CTA and Footer
-         ========================= */}
-
-      <section className="bg-gray-50">
-        <div className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-24">
-          {/* CTA */}
-          <MarketingCTA />
-          {/* Footer */}
-          <MarketingFooter />
         </div>
       </section>
     </div>
