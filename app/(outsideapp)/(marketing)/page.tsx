@@ -132,7 +132,7 @@ export default function Page() {
       {/* =========================
           4) Alternating feature rows
         ========================= */}
-      <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
+      <section className="mx-auto flex max-w-6xl flex-col gap-36 px-4 py-20 md:px-6 md:py-28">
         {/* Feature 1 */}
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
@@ -177,7 +177,7 @@ export default function Page() {
           </div>
         </div>
         {/* Feature 2 */}
-        <div className="mt-20 grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div className="lg:order-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
               Shop smarter
@@ -219,7 +219,7 @@ export default function Page() {
           </div>
         </div>
         {/* Feature 3 */}
-        <div className="mt-20 grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
               Keep things consistent
@@ -261,11 +261,10 @@ export default function Page() {
           </div>
         </div>
         {/* Feature 4 (Discover) */}
-        {/* Feature 4 (Discover) — flipped like Feature 2 */}
-        <div className="mt-20 grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
           <div className="lg:order-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-              Discover & share (optional)
+              Discover & share
             </p>
 
             <h3 className="mt-3 text-4xl font-semibold tracking-tight md:text-[2.75rem]">
