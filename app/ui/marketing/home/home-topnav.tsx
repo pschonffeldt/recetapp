@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function MarketingHeader() {
+export default function MarketingTopNavBar() {
   return (
     <header className="sticky top-0 z-40 border-b bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">

@@ -1,14 +1,14 @@
 import Link from "next/link";
 import {
   AppMock,
-  SparklesOverlay,
   SectionHeader,
-  Wave,
+  SparklesOverlay,
   StatCard,
+  Wave,
 } from "./lib/marketing/helpers";
-import MarketingHeader from "./ui/marketing/home/home-topnav";
-import MarketingFooter from "./ui/marketing/home/home-footer";
 import MarketingCTA from "./ui/marketing/home/home-cta";
+import MarketingFooter from "./ui/marketing/home/home-footer";
+import MarketingTopNavBar from "./ui/marketing/home/home-topnav";
 
 export const metadata = { title: "RecetApp" };
 
@@ -18,7 +18,7 @@ export default function Page() {
       {/* =========================
           1) Top nav
          ========================= */}
-      <MarketingHeader />
+      <MarketingTopNavBar />
       {/* =========================
           2) HERO
         ========================= */}
