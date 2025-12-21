@@ -1,4 +1,3 @@
-import Link from "next/link";
 import HelpSearch from "@/app/ui/help/help-search";
 
 export default function HelpHero({
@@ -17,10 +16,6 @@ export default function HelpHero({
       {/* top row */}
       <div className="mx-auto w-full max-w-5xl px-4 pt-6 md:px-6">
         <div className="flex items-center justify-between gap-3 text-white">
-          <Link href="/help" className="text-sm font-semibold text-white">
-            RecetApp Help
-          </Link>
-
           {/* <div className="flex items-center gap-2 text-sm text-white/90">
             <span aria-hidden className="text-base">
               🌐
