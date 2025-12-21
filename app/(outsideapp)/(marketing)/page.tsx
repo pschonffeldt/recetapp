@@ -73,7 +73,10 @@ export default function Page() {
                 <Link href="/help/recipes" className="hover:underline">
                   Recipes
                 </Link>
-                <Link href="/help/shopping-list" className="hover:underline">
+                <Link
+                  href="/help/shopping-planning"
+                  className="hover:underline"
+                >
                   Shopping list
                 </Link>
                 <Link href="/help/troubleshooting" className="hover:underline">
