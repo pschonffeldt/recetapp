@@ -22,8 +22,8 @@ export default function EditRecipeForm({
   const [state, formAction] = useActionState(updateRecipe, initialState);
 
   const initialIngredients = buildInitialIngredientsForEditor(recipe);
-  const savedByCount = recipe.saved_by_count ?? 0;
-  const isPublic = recipe.status === "public";
+  // const savedByCount = recipe.saved_by_count ?? 0;
+  // const isPublic = recipe.status === "public";
 
   return (
     <form action={formAction} className="pb-12">

@@ -219,12 +219,3 @@ export default async function Page({ params }: PageProps) {
     </main>
   );
 }
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between gap-3">
-      <dt className="text-gray-500">{label}</dt>
-      <dd className="font-medium text-gray-800 text-right">{value}</dd>
-    </div>
-  );
-}

@@ -60,41 +60,41 @@ type Token =
   | "darkbtn";
 type Kind = "bg" | "text" | "border";
 
-const CLASSES: Record<Token, Record<Kind, string>> = {
-  background: {
-    bg: "bg-slate-900",
-    text: "text-slate-900",
-    border: "border-slate-900",
-  },
-  brand: {
-    bg: "bg-blue-600",
-    text: "text-blue-600",
-    border: "border-blue-600",
-  },
-  alt: { bg: "bg-sky-500", text: "text-sky-500", border: "border-sky-500" },
-  positive: {
-    bg: "bg-green-600",
-    text: "text-green-600",
-    border: "border-green-600",
-  },
-  destructive: {
-    bg: "bg-red-600",
-    text: "text-red-600",
-    border: "border-red-600",
-  },
-  dark: {
-    bg: "bg-gray-800",
-    text: "text-gray-800",
-    border: "border-gray-800",
-  },
-  darker: {
-    bg: "bg-gray-900",
-    text: "text-gray-900",
-    border: "border-gray-900",
-  },
-  darkbtn: {
-    bg: "bg-gray-700",
-    text: "text-gray-700",
-    border: "border-gray-700",
-  },
-};
+// const CLASSES: Record<Token, Record<Kind, string>> = {
+//   background: {
+//     bg: "bg-slate-900",
+//     text: "text-slate-900",
+//     border: "border-slate-900",
+//   },
+//   brand: {
+//     bg: "bg-blue-600",
+//     text: "text-blue-600",
+//     border: "border-blue-600",
+//   },
+//   alt: { bg: "bg-sky-500", text: "text-sky-500", border: "border-sky-500" },
+//   positive: {
+//     bg: "bg-green-600",
+//     text: "text-green-600",
+//     border: "border-green-600",
+//   },
+//   destructive: {
+//     bg: "bg-red-600",
+//     text: "text-red-600",
+//     border: "border-red-600",
+//   },
+//   dark: {
+//     bg: "bg-gray-800",
+//     text: "text-gray-800",
+//     border: "border-gray-800",
+//   },
+//   darker: {
+//     bg: "bg-gray-900",
+//     text: "text-gray-900",
+//     border: "border-gray-900",
+//   },
+//   darkbtn: {
+//     bg: "bg-gray-700",
+//     text: "text-gray-700",
+//     border: "border-gray-700",
+//   },
+// };

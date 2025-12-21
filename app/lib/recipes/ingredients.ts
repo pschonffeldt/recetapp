@@ -21,7 +21,6 @@ import type {
   IncomingIngredientPayload,
   IngredientUnit,
 } from "../types/definitions";
-import { sql } from "../db";
 
 /* =============================================================================
  * Parsing & Normalization
@@ -153,14 +152,14 @@ export const IngredientsPayloadSchema = z.array(IngredientPayloadSchema);
  * Simple slug helper to normalize ingredient names into URL-safe slugs.
  * Replace with a shared helper if you centralize slugging later.
  */
-function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // remove accents
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+// function slugify(name: string): string {
+//   return name
+//     .toLowerCase()
+//     .normalize("NFD")
+//     .replace(/[\u0300-\u036f]/g, "")
+//     .replace(/[^a-z0-9]+/g, "-")
+//     .replace(/^-+|-+$/g, "");
+// }
 
 /**
  * Sync structured ingredients with the `recipe_ingredients` join table.

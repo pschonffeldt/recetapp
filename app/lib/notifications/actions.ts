@@ -136,10 +136,9 @@ export async function markNotificationRead(
 /**
  * Mark all notifications as read for the current user.
  */
-export async function markAllNotificationsRead(
-  _prev: ActionResult | undefined,
-  _formData: FormData
-): Promise<ActionResult> {
+export async function markAllNotificationsRead(): Promise<ActionResult> {
+// _prev: ActionResult | undefined,
+// _formData: FormData
   const userId = await requireUserId();
 
   try {
