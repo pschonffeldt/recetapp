@@ -1,124 +1,14 @@
 import Link from "next/link";
-
-/* =============================================================================
- * Helpers
- * ============================================================================= */
-
-function Wave({
-  flip = false,
-  className = "",
-}: {
-  flip?: boolean;
-  className?: string;
-}) {
-  return (
-    <div className={className} aria-hidden>
-      <svg
-        viewBox="0 0 500 140"
-        preserveAspectRatio="none"
-        className={`block h-[95px] w-full md:h-[130px] ${
-          flip ? "rotate-180" : ""
-        }`}
-      >
-        <path
-          d="M0,64 C240,140 520,0 760,48 C1010,98 1220,140 1440,72 L1440,140 L0,140 Z"
-          fill="currentColor"
-        />
-      </svg>
-    </div>
-  );
-}
-
-function SparklesOverlay() {
-  const dots = Array.from({ length: 32 }).map((_, i) => i);
-  return (
-    <div
-      className="pointer-events-none absolute inset-0 opacity-40"
-      aria-hidden
-    >
-      {dots.map((i) => (
-        <span
-          key={i}
-          className="absolute h-1 w-1 rounded-full bg-white/70"
-          style={{
-            left: `${(i * 31) % 100}%`,
-            top: `${(i * 19) % 100}%`,
-            transform: `scale(${0.5 + ((i * 11) % 12) / 10})`,
-          }}
-        />
-      ))}
-      <span className="absolute left-[10%] top-[20%] h-2 w-2 rounded-full bg-white/80 blur-[0.5px]" />
-      <span className="absolute left-[72%] top-[32%] h-2 w-2 rounded-full bg-white/80 blur-[0.5px]" />
-      <span className="absolute left-[42%] top-[74%] h-2 w-2 rounded-full bg-white/80 blur-[0.5px]" />
-    </div>
-  );
-}
-
-function AppMock({ label, wide = true }: { label: string; wide?: boolean }) {
-  // Always enforce consistent width + prevent narrow shrink in grid layouts
-  return (
-    <div
-      className={[
-        "w-full",
-        wide ? "max-w-[560px]" : "max-w-[460px]",
-        "rounded-2xl border bg-white shadow-sm",
-      ].join(" ")}
-    >
-      <div className="flex items-center gap-2 border-b px-4 py-3">
-        <span className="h-3 w-3 rounded-full bg-red-400" />
-        <span className="h-3 w-3 rounded-full bg-yellow-400" />
-        <span className="h-3 w-3 rounded-full bg-green-400" />
-        <div className="ml-2 text-xs text-gray-500">{label}</div>
-      </div>
-      <div className="p-4 md:p-6">
-        <div className="h-60 w-full rounded-xl bg-gray-100 md:h-72" />
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="rounded-xl bg-gray-50 p-6">
-      <div className="text-[2.25rem] font-semibold leading-none tracking-tight text-gray-900">
-        {value}
-      </div>
-      <p className="mt-3 text-sm leading-6 text-gray-700">{label}</p>
-    </div>
-  );
-}
-
-function SectionHeader({
-  kicker,
-  title,
-  subtitle,
-}: {
-  kicker?: string;
-  title: string;
-  subtitle?: string;
-}) {
-  return (
-    <div className="mx-auto max-w-3xl text-center">
-      {kicker ? (
-        <p className="text-xs font-semibold uppercase tracking-wide text-blue-200/90">
-          {kicker}
-        </p>
-      ) : null}
-      <h2 className="mt-2 text-4xl font-semibold tracking-tight md:text-5xl">
-        {title}
-      </h2>
-      {subtitle ? (
-        <p className="mx-auto mt-4 max-w-2xl text-sm text-white/90 md:text-base">
-          {subtitle}
-        </p>
-      ) : null}
-    </div>
-  );
-}
-
-/* =============================================================================
- * Page
- * ============================================================================= */
+import {
+  AppMock,
+  SparklesOverlay,
+  SectionHeader,
+  Wave,
+  StatCard,
+} from "./lib/marketing/helpers";
+import MarketingHeader from "./ui/marketing/home/home-topnav";
+import MarketingFooter from "./ui/marketing/home/home-footer";
+import MarketingCTA from "./ui/marketing/home/home-cta";
 
 export const metadata = { title: "RecetApp" };
 
@@ -128,40 +18,7 @@ export default function Page() {
       {/* =========================
           1) Top nav
          ========================= */}
-      <header className="sticky top-0 z-40 border-b bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
-          <Link href="/" className="text-sm font-semibold tracking-tight">
-            RecetApp
-          </Link>
-
-          <nav className="hidden items-center gap-6 text-sm text-gray-700 md:flex">
-            <Link href="/roadmap" className="hover:text-gray-900">
-              Roadmap
-            </Link>
-            <Link href="/releases" className="hover:text-gray-900">
-              Releases
-            </Link>
-            <Link href="/help" className="hover:text-gray-900">
-              Help
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="hidden text-sm text-gray-700 hover:text-gray-900 md:inline-block"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/signup"
-              className="inline-flex h-9 items-center rounded-lg bg-blue-600 px-3 text-sm font-medium text-white hover:bg-blue-500"
-            >
-              Get started
-            </Link>
-          </div>
-        </div>
-      </header>
+      <MarketingHeader />
       {/* =========================
           2) HERO
         ========================= */}
@@ -678,151 +535,14 @@ export default function Page() {
         </div>
       </section>
       {/* =========================
-          9) Final CTA + Footer
+          9) Final CTA
         ========================= */}
       <section className="bg-gray-50">
         <div className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-24">
-          <div className="rounded-2xl bg-gradient-to-r from-blue-700 to-cyan-600 p-10 text-white md:p-12">
-            <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-              <div>
-                <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
-                  Ready to organize your recipes?
-                </h2>
-                <p className="mt-4 text-sm text-white/90 md:text-base">
-                  Start free. Upgrade only if you need more.
-                </p>
-              </div>
-
-              <div className="flex flex-wrap gap-3 lg:justify-end">
-                <Link
-                  href="/signup"
-                  className="inline-flex h-10 items-center justify-center rounded-lg bg-white px-4 text-sm font-medium text-blue-700 hover:bg-white/90"
-                >
-                  Get started free
-                </Link>
-                <Link
-                  href="/login"
-                  className="inline-flex h-10 items-center justify-center rounded-lg border border-white/25 bg-white/10 px-4 text-sm font-medium text-white hover:bg-white/15"
-                >
-                  Log in
-                </Link>
-              </div>
-            </div>
-          </div>
-
+          {/* CTA */}
+          <MarketingCTA />
           {/* Footer */}
-          <footer className="mt-14 border-t pt-10">
-            <div className="grid gap-10 md:grid-cols-12">
-              <div className="md:col-span-4">
-                <div className="text-sm font-semibold text-gray-900">
-                  RecetApp
-                </div>
-                <p className="mt-3 max-w-sm text-sm leading-6 text-gray-600">
-                  A calmer way to save recipes, reuse ingredients, and plan
-                  meals without chaos.
-                </p>
-              </div>
-
-              <div className="grid gap-8 md:col-span-8 md:grid-cols-3">
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">
-                    Product
-                  </div>
-                  <div className="mt-3 space-y-2 text-sm text-gray-600">
-                    <Link href="/signup" className="block hover:underline">
-                      Get started
-                    </Link>
-                    <Link href="/login" className="block hover:underline">
-                      Log in
-                    </Link>
-                    <Link href="/releases" className="block hover:underline">
-                      Releases
-                    </Link>
-                    <Link href="/roadmap" className="block hover:underline">
-                      Roadmap
-                    </Link>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">
-                    Help
-                  </div>
-                  <div className="mt-3 space-y-2 text-sm text-gray-600">
-                    <Link href="/help" className="block hover:underline">
-                      Help Center
-                    </Link>
-                    <Link
-                      href="/help/getting-started"
-                      className="block hover:underline"
-                    >
-                      Getting started
-                    </Link>
-                    <Link
-                      href="/help/recipes"
-                      className="block hover:underline"
-                    >
-                      Recipes
-                    </Link>
-                    <Link
-                      href="/help/troubleshooting"
-                      className="block hover:underline"
-                    >
-                      Troubleshooting
-                    </Link>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">
-                    Company
-                  </div>
-                  <div className="mt-3 space-y-2 text-sm text-gray-600">
-                    <Link href="/about" className="block hover:underline">
-                      About
-                    </Link>
-                    <Link href="/privacy" className="block hover:underline">
-                      Privacy
-                    </Link>
-                    <Link href="/terms" className="block hover:underline">
-                      Terms
-                    </Link>
-                  </div>
-                </div>
-
-                {/* <div>
-                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">
-                    Follow
-                  </div>
-                  <div className="mt-3 space-y-2 text-sm text-gray-600">
-                    <span className="block text-gray-500">
-                      (Add socials later)
-                    </span>
-                    <span className="block text-gray-500">X / Instagram</span>
-                    <span className="block text-gray-500">YouTube</span>
-                  </div>
-                </div> */}
-              </div>
-            </div>
-
-            <div className="mt-10 flex flex-col flex-wrap items-start justify-between gap-3 text-xs text-gray-500">
-              <div>
-                © {new Date().getFullYear()} RecetApp, app version 1.0.0.
-              </div>
-              <div>Developed in Chile with Love</div>
-              {/* <div className="flex flex-wrap gap-4">
-                <Link href="/help" className="hover:underline">
-                  Help
-                </Link>
-                <Link href="/roadmap" className="hover:underline">
-                  Roadmap
-                </Link>
-                <Link href="/releases" className="hover:underline">
-                  Releases
-                </Link>
-              </div> */}
-            </div>
-          </footer>
+          <MarketingFooter />
         </div>
       </section>
     </div>
