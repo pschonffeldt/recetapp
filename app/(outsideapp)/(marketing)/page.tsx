@@ -1,11 +1,11 @@
-import Link from "next/link";
 import {
   AppMock,
-  SectionHeader,
   SparklesOverlay,
-  StatCard,
+  SectionHeader,
   Wave,
-} from "../lib/marketing/helpers";
+  StatCard,
+} from "@/app/lib/marketing/helpers";
+import Link from "next/link";
 
 export const metadata = { title: "RecetApp" };
 
