@@ -14,47 +14,11 @@ function Wave({
   return (
     <div className={className} aria-hidden>
       <svg
-        viewBox="0 0 1440 140"
+        viewBox="0 0 500 140"
         preserveAspectRatio="none"
         className={`block h-[95px] w-full md:h-[130px] ${
           flip ? "rotate-180" : ""
         }`}
-      >
-        <path
-          d="M0,64 C240,140 520,0 760,48 C1010,98 1220,140 1440,72 L1440,140 L0,140 Z"
-          fill="currentColor"
-        />
-      </svg>
-    </div>
-  );
-}
-
-function WaveEdge({
-  position,
-  className = "",
-}: {
-  position: "top" | "bottom";
-  className?: string;
-}) {
-  return (
-    <div
-      aria-hidden
-      className={[
-        "pointer-events-none absolute left-0 w-full overflow-hidden",
-        position === "top"
-          ? "top-0 -translate-y-[1px]"
-          : "bottom-0 translate-y-[1px]",
-        className,
-      ].join(" ")}
-    >
-      <svg
-        viewBox="0 0 1440 140"
-        preserveAspectRatio="none"
-        className={[
-          "block w-full",
-          "h-[95px] md:h-[130px]",
-          position === "top" ? "rotate-180" : "",
-        ].join(" ")}
       >
         <path
           d="M0,64 C240,140 520,0 760,48 C1010,98 1220,140 1440,72 L1440,140 L0,140 Z"
@@ -91,7 +55,7 @@ function SparklesOverlay() {
 }
 
 function AppMock({ label, wide = true }: { label: string; wide?: boolean }) {
-  // Key fix: always enforce consistent width + prevent narrow shrink in grid layouts
+  // Always enforce consistent width + prevent narrow shrink in grid layouts
   return (
     <div
       className={[
@@ -198,10 +162,9 @@ export default function Page() {
           </div>
         </div>
       </header>
-
       {/* =========================
           2) HERO
-         ========================= */}
+        ========================= */}
       <section className="relative overflow-hidden bg-white">
         {/* Background: blobs + subtle noise */}
         <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -223,9 +186,6 @@ export default function Page() {
 
           {/* Bottom fade (smooth transition) */}
           <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white" />
-          {/* If your next section is gray-50, use this instead:
-        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-gray-50" />
-    */}
         </div>
 
         <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20 lg:min-h-[70vh] lg:flex lg:items-center">
@@ -278,14 +238,12 @@ export default function Page() {
           </div>
         </div>
       </section>
-
       {/* =========================
-    3) Big gradient band (wave top + bottom)
-   ========================= */}
+          3) Big gradient band (wave top + bottom)
+        ========================= */}
       <section className="relative">
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
           {/* Top wave */}
-          {/* <Wave flip className="relative z-10 text-white" /> */}
 
           <SparklesOverlay />
 
@@ -322,8 +280,8 @@ export default function Page() {
       </section>
 
       {/* =========================
-          4) Alternating feature rows (taller + bigger + consistent mock width)
-         ========================= */}
+          4) Alternating feature rows
+        ========================= */}
       <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
         {/* Feature 1 */}
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
@@ -338,7 +296,6 @@ export default function Page() {
               Save recipes with clean structure (ingredients, steps, notes) so
               they’re easy to read, edit, and cook from later.
             </p>
-
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               <StatCard
                 value="Less scrolling"
@@ -349,7 +306,6 @@ export default function Page() {
                 label="Get to the steps quickly with clear formatting."
               />
             </div>
-
             <div className="mt-7 space-y-2 text-sm text-gray-700">
               <div className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
@@ -365,13 +321,11 @@ export default function Page() {
               </div>
             </div>
           </div>
-
           <div className="flex justify-start lg:justify-end">
-            {/* FIX: force same width as other sections */}
+            {/* Force same width as other sections */}
             <AppMock label="Recipe page preview" />
           </div>
         </div>
-
         {/* Feature 2 */}
         <div className="mt-20 grid gap-12 lg:grid-cols-2 lg:items-center">
           <div className="lg:order-2">
@@ -385,7 +339,6 @@ export default function Page() {
               Pick the recipes you’re making and generate a list that’s actually
               usable at the store.
             </p>
-
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               <StatCard
                 value="Fewer repeats"
@@ -396,7 +349,6 @@ export default function Page() {
                 label="Keep items organized so you don’t miss essentials."
               />
             </div>
-
             <div className="mt-7 space-y-2 text-sm text-gray-700">
               <div className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
@@ -412,12 +364,10 @@ export default function Page() {
               </div>
             </div>
           </div>
-
           <div className="flex justify-start lg:order-1">
             <AppMock label="Shopping list preview" />
           </div>
         </div>
-
         {/* Feature 3 */}
         <div className="mt-20 grid gap-12 lg:grid-cols-2 lg:items-center">
           <div>
@@ -431,7 +381,6 @@ export default function Page() {
               Consistent ingredient naming keeps your recipes cleaner and your
               lists easier to manage over time.
             </p>
-
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               <StatCard
                 value="Cleaner data"
@@ -442,7 +391,6 @@ export default function Page() {
                 label="Stop rewriting the same items again and again."
               />
             </div>
-
             <div className="mt-7 space-y-2 text-sm text-gray-700">
               <div className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
@@ -458,71 +406,80 @@ export default function Page() {
               </div>
             </div>
           </div>
-
           <div className="flex justify-start lg:justify-end">
             <AppMock label="Ingredient structure preview" />
           </div>
         </div>
       </section>
-
       {/* =========================
-          5) Privacy section (taller + bigger)
-         ========================= */}
-      <section className="bg-gray-50">
-        <div className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
-            <div>
-              <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
-                Private by default. Simple by design.
-              </h2>
-              <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                Your recipes stay yours. Share only when you want to.
-              </p>
+          5) Privacy section
+        ========================= */}
+      <section className="relative">
+        <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
+          {/* Top wave */}
+          <Wave flip className="relative z-10 text-white" />
 
-              <div className="mt-10 space-y-5">
-                <div>
-                  <div className="text-sm font-semibold text-gray-900">
-                    Private-first
+          <SparklesOverlay />
+
+          <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
+            <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+              <div>
+                <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
+                  Private by default. Simple by design.
+                </h2>
+                <p className="mt-4 text-sm leading-6 text-white/85 md:text-base">
+                  Your recipes stay yours. Share only when you want to.
+                </p>
+
+                <div className="mt-10 space-y-5">
+                  <div>
+                    <div className="text-sm font-semibold text-white">
+                      Private-first
+                    </div>
+                    <p className="mt-1 text-sm text-white/85">
+                      Keep recipes private by default; publish selectively.
+                    </p>
                   </div>
-                  <p className="mt-1 text-sm text-gray-700">
-                    Keep recipes private by default; publish selectively.
-                  </p>
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-gray-900">
-                    Clean UX
+
+                  <div>
+                    <div className="text-sm font-semibold text-white">
+                      Clean UX
+                    </div>
+                    <p className="mt-1 text-sm text-white/85">
+                      Calm UI so you can focus on cooking, not settings.
+                    </p>
                   </div>
-                  <p className="mt-1 text-sm text-gray-700">
-                    Calm UI so you can focus on cooking, not settings.
-                  </p>
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-gray-900">
-                    Help Center built-in
+
+                  <div>
+                    <div className="text-sm font-semibold text-white">
+                      Help Center built-in
+                    </div>
+                    <p className="mt-1 text-sm text-white/85">
+                      Guides + troubleshooting available anytime.
+                    </p>
                   </div>
-                  <p className="mt-1 text-sm text-gray-700">
-                    Guides + troubleshooting available anytime.
-                  </p>
                 </div>
               </div>
-            </div>
 
-            <div className="flex justify-start lg:justify-end">
-              <AppMock label="Account / privacy controls preview" />
+              <div className="flex justify-start lg:justify-end">
+                <AppMock label="Account / privacy controls preview" />
+              </div>
             </div>
           </div>
+
+          {/* Bottom wave */}
+          <Wave className="relative z-10 text-white" />
         </div>
       </section>
-
       {/* =========================
-          6) Slack-like “companies use Slack” block (redone)
+          6) People using it
          ========================= */}
       <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-24">
         <h2 className="text-center text-sm font-semibold text-gray-700">
           People who cook at home love RecetApp.
         </h2>
 
-        {/* Featured panel + thumbnail strip (Slack vibe) */}
+        {/* Featured panel + thumbnail strip */}
         <div className="mt-8 grid gap-6 lg:grid-cols-12 lg:items-stretch">
           {/* Featured */}
           <div className="lg:col-span-8">
@@ -564,7 +521,7 @@ export default function Page() {
                   </div>
                 </div>
 
-                {/* Big media placeholder (Slack uses video/photo) */}
+                {/* Big media placeholder */}
                 <div className="rounded-xl border bg-white p-3 shadow-sm">
                   <div className="h-52 w-full rounded-lg bg-gray-100 md:h-56" />
                   <div className="mt-3 text-xs text-gray-500">
@@ -604,16 +561,16 @@ export default function Page() {
           </div>
         </div>
       </section>
-
       {/* =========================
           7) Big stats band (wave top + bottom + taller)
-         ========================= */}
+        ========================= */}
       <section className="relative">
-        <Wave flip className="text-white" />
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
+          <Wave flip className="relative z-10 text-white" />
+
           <SparklesOverlay />
 
-          <div className="mx-auto max-w-6xl px-4 py-18 md:px-6 md:py-24">
+          <div className="relative z-10 mx-auto max-w-6xl px-4 py-18 md:px-6 md:py-24">
             <h2 className="text-center text-4xl font-semibold tracking-tight md:text-5xl">
               A calmer way to plan meals.
             </h2>
@@ -625,12 +582,14 @@ export default function Page() {
                   place for recipes, ingredients, and shopping lists
                 </p>
               </div>
+
               <div className="text-center">
                 <div className="text-5xl font-semibold">Less</div>
                 <p className="mt-3 text-sm text-white/90 md:text-base">
                   retyping and fewer forgotten items
                 </p>
               </div>
+
               <div className="text-center">
                 <div className="text-5xl font-semibold">More</div>
                 <p className="mt-3 text-sm text-white/90 md:text-base">
@@ -639,13 +598,14 @@ export default function Page() {
               </div>
             </div>
           </div>
-        </div>
-        <Wave className="text-white" />
-      </section>
 
+          {/* Bottom wave */}
+          <Wave className="relative z-10 text-white" />
+        </div>
+      </section>
       {/* =========================
-          8) Cards grid (taller + slightly bigger header)
-         ========================= */}
+          8) Cards grid
+        ========================= */}
       <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
         <div className="text-center">
           <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
@@ -656,42 +616,70 @@ export default function Page() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-4 md:grid-cols-3">
+        <div className="mt-12 grid gap-6 md:grid-cols-3">
           {[
             {
+              type: "Guide",
               title: "Add your first recipe",
               body: "The fastest way to start building your personal cookbook.",
               href: "/help/getting-started",
+              image: "/images/help/getting-started.png", // replace with new path
             },
             {
+              type: "Feature",
               title: "Make a shopping list",
               body: "Pick recipes and generate a clean list for the store.",
               href: "/help/shopping-list",
+              image: "/images/help/shopping-list.png", // replace with new path
             },
             {
+              type: "Help",
               title: "Troubleshooting",
               body: "Quick fixes for the most common issues.",
               href: "/help/troubleshooting",
+              image: "/images/help/troubleshooting.png", // replace with new path
             },
           ].map((c) => (
             <Link
               key={c.title}
               href={c.href}
-              className="rounded-2xl border bg-white p-7 shadow-sm transition hover:shadow"
+              className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
-              <div className="text-lg font-semibold">{c.title}</div>
-              <p className="mt-2 text-sm text-gray-700">{c.body}</p>
-              <div className="mt-5 text-sm font-medium text-blue-600">
-                Read more →
+              {/* Image header */}
+              <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100">
+                {/* <img
+                  src={c.image}
+                  alt=""
+                  className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                /> */}
+              </div>
+
+              {/* Body */}
+              <div className="p-7">
+                <div className="text-sm text-gray-600">{c.type}</div>
+
+                <div className="mt-2 text-2xl font-semibold leading-tight tracking-tight text-gray-900">
+                  {c.title}
+                </div>
+
+                <p className="mt-3 text-sm leading-6 text-gray-700">{c.body}</p>
+
+                <div className="mt-10 flex items-center justify-between">
+                  <span className="text-sm font-semibold uppercase tracking-wide text-blue-600">
+                    Read more
+                  </span>
+                  <span className="text-blue-600 transition-transform group-hover:translate-x-0.5">
+                    →
+                  </span>
+                </div>
               </div>
             </Link>
           ))}
         </div>
       </section>
-
       {/* =========================
-          9) Final CTA + Footer (more personality)
-         ========================= */}
+          9) Final CTA + Footer
+        ========================= */}
       <section className="bg-gray-50">
         <div className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-24">
           <div className="rounded-2xl bg-gradient-to-r from-blue-700 to-cyan-600 p-10 text-white md:p-12">
@@ -722,7 +710,7 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Footer (Slack-like density + personality) */}
+          {/* Footer */}
           <footer className="mt-14 border-t pt-10">
             <div className="grid gap-10 md:grid-cols-12">
               <div className="md:col-span-4">
@@ -735,7 +723,7 @@ export default function Page() {
                 </p>
               </div>
 
-              <div className="grid gap-8 md:col-span-8 md:grid-cols-4">
+              <div className="grid gap-8 md:col-span-8 md:grid-cols-3">
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">
                     Product
@@ -802,7 +790,7 @@ export default function Page() {
                   </div>
                 </div>
 
-                <div>
+                {/* <div>
                   <div className="text-xs font-semibold uppercase tracking-wide text-gray-700">
                     Follow
                   </div>
@@ -813,13 +801,13 @@ export default function Page() {
                     <span className="block text-gray-500">X / Instagram</span>
                     <span className="block text-gray-500">YouTube</span>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 
             <div className="mt-10 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-500">
               <div>© {new Date().getFullYear()} RecetApp</div>
-              <div className="flex flex-wrap gap-4">
+              {/* <div className="flex flex-wrap gap-4">
                 <Link href="/help" className="hover:underline">
                   Help
                 </Link>
@@ -829,7 +817,7 @@ export default function Page() {
                 <Link href="/releases" className="hover:underline">
                   Releases
                 </Link>
-              </div>
+              </div> */}
             </div>
           </footer>
         </div>
