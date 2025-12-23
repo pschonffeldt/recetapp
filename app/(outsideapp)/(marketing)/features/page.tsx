@@ -83,7 +83,7 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="flex justify-start lg:justify-end">
+            <div className="flex justify-start z-10 lg:justify-end">
               <AppMock label="RecetApp — features preview" />
             </div>
           </div>
@@ -294,7 +294,7 @@ export default function Page() {
               Discover & share
             </p>
             <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-[2.75rem]">
-              Discover recipes — and share yours when you’re ready.
+              Discover recipes and share yours when you&apos;re ready.
             </h2>
             <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
               Explore a growing library of community recipes and save them into
@@ -332,6 +332,67 @@ export default function Page() {
           <div className="flex justify-start lg:order-1">
             <AppMock label="Discover feed preview" />
           </div>
+        </div>
+      </section>
+
+      {/* =========================
+          3) Privacy section
+        ========================= */}
+      <section className="relative">
+        <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
+          {/* Top wave */}
+          <Wave flip className="relative z-10 text-white" />
+
+          <SparklesOverlay />
+
+          <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
+            <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+              <div>
+                <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
+                  Private by default. Simple by design.
+                </h2>
+                <p className="mt-4 text-sm leading-6 text-white/85 md:text-base">
+                  Your recipes stay yours. Share only when you want to.
+                </p>
+
+                <div className="mt-10 space-y-5">
+                  <div>
+                    <div className="text-sm font-semibold text-white">
+                      Private-first
+                    </div>
+                    <p className="mt-1 text-sm text-white/85">
+                      Keep recipes private by default; publish selectively.
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="text-sm font-semibold text-white">
+                      Clean UX
+                    </div>
+                    <p className="mt-1 text-sm text-white/85">
+                      Calm UI so you can focus on cooking, not settings.
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="text-sm font-semibold text-white">
+                      Help Center built-in
+                    </div>
+                    <p className="mt-1 text-sm text-white/85">
+                      Guides + troubleshooting available anytime.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-start lg:justify-end">
+                <AppMock label="Account / privacy controls preview" />
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom wave */}
+          <Wave className="relative z-10 text-white" />
         </div>
       </section>
     </>

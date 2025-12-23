@@ -131,7 +131,7 @@ export default async function Page({
 
           <p className="mt-1 text-sm text-gray-600">
             {!hasRecipes
-              ? "You don't have any recipes yet. Create a recipe to start building a shopping list."
+              ? "You don&apos;t have any recipes yet. Create a recipe to start building a shopping list."
               : selectedCount === 0
               ? "Select one or more recipes below to generate your shopping list."
               : `Based on ${selectedCount} selected recipe${
