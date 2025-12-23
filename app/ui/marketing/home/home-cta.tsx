@@ -1,8 +1,11 @@
+import { SparklesOverlay } from "@/app/lib/marketing/helpers";
 import Link from "next/link";
 
 export default function MarketingCTA() {
   return (
-    <div className="rounded-2xl bg-gradient-to-r from-blue-700 to-cyan-600 p-10 text-white md:p-12">
+    <div className="relative rounded-2xl bg-gradient-to-r from-blue-700 to-cyan-600 p-10 text-white md:p-12">
+      <SparklesOverlay />
+
       <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
         <div>
           <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
