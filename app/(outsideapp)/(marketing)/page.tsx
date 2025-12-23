@@ -67,20 +67,17 @@ export default function Page() {
               </div>
 
               <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-gray-600">
-                <Link href="/help/getting-started" className="hover:underline">
-                  Getting started
-                </Link>
-                <Link href="/help/recipes" className="hover:underline">
+                <Link href="#recipes" className="hover:underline">
                   Recipes
                 </Link>
-                <Link
-                  href="/help/shopping-planning"
-                  className="hover:underline"
-                >
+                <Link href="#shopping" className="hover:underline">
                   Shopping list
                 </Link>
-                <Link href="/help/troubleshooting" className="hover:underline">
-                  Troubleshooting
+                <Link href="#ingredients" className="hover:underline">
+                  Ingredients
+                </Link>
+                <Link href="#discover" className="hover:underline">
+                  Discover
                 </Link>
               </div>
             </div>
@@ -137,7 +134,10 @@ export default function Page() {
         ========================= */}
       <section className="mx-auto flex max-w-6xl flex-col gap-36 px-4 py-20 md:px-6 md:py-28">
         {/* Feature 1 */}
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div
+          id="recipes"
+          className="grid gap-12 lg:grid-cols-2 lg:items-center"
+        >
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
               Provide clarity instantly
@@ -180,7 +180,10 @@ export default function Page() {
           </div>
         </div>
         {/* Feature 2 */}
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div
+          id="shopping"
+          className="grid gap-12 lg:grid-cols-2 lg:items-center"
+        >
           <div className="lg:order-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
               Shop smarter
@@ -222,7 +225,10 @@ export default function Page() {
           </div>
         </div>
         {/* Feature 3 */}
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div
+          id="ingredients"
+          className="grid gap-12 lg:grid-cols-2 lg:items-center"
+        >
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
               Keep things consistent
@@ -264,7 +270,10 @@ export default function Page() {
           </div>
         </div>
         {/* Feature 4 (Discover) */}
-        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+        <div
+          id="discover"
+          className="grid gap-12 lg:grid-cols-2 lg:items-center"
+        >
           <div className="lg:order-2">
             <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
               Discover & share
