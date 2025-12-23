@@ -85,7 +85,7 @@ export default function Page() {
               </div>
             </div>
 
-            <div className="flex justify-start lg:justify-end">
+            <div className="flex justify-start z-10 lg:justify-end">
               <AppMock label="RecetApp — dashboard preview" />
             </div>
           </div>
