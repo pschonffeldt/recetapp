@@ -41,16 +41,16 @@ export default function SignupForm() {
     state.errors?.[k as string]?.[0];
 
   return (
-    <form action={formAction} className="space-y-3">
-      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-8">
-        <h1 className={`${inter.className} mb-3 text-2xl`}>
+    <form action={formAction} className="space-y-2">
+      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-4">
+        <h1 className={`${inter.className} mb-1 text-2xl`}>
           Create your account.
         </h1>
 
         {/* User name */}
         <div className="">
           <label
-            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+            className="mb-1 mt-2 block text-xs font-medium text-gray-900"
             htmlFor="user_name"
           >
             User name
@@ -72,7 +72,7 @@ export default function SignupForm() {
         {/* First name */}
         <div className="">
           <label
-            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+            className="mb-1 mt-2 block text-xs font-medium text-gray-900"
             htmlFor="name"
           >
             First name
@@ -95,7 +95,7 @@ export default function SignupForm() {
         {/* Last name */}
         <div className="mt-4">
           <label
-            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+            className="mb-1 mt-2 block text-xs font-medium text-gray-900"
             htmlFor="last_name"
           >
             Last name
@@ -167,7 +167,7 @@ export default function SignupForm() {
         {/* Email */}
         <div className="mt-4">
           <label
-            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+            className="mb-1 mt-2 block text-xs font-medium text-gray-900"
             htmlFor="email"
           >
             Email
@@ -191,7 +191,7 @@ export default function SignupForm() {
         {/* Password */}
         <div className="mt-4">
           <label
-            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+            className="mb-1 mt-2 block text-xs font-medium text-gray-900"
             htmlFor="password"
           >
             Password
@@ -216,7 +216,7 @@ export default function SignupForm() {
         {/* Confirm */}
         <div className="mt-4">
           <label
-            className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+            className="mb-1 mt-2 block text-xs font-medium text-gray-900"
             htmlFor="confirm"
           >
             Confirm password
