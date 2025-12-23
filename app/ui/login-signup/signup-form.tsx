@@ -42,7 +42,7 @@ export default function SignupForm() {
 
   return (
     <form action={formAction} className="space-y-2">
-      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-4">
+      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-4 shadow-md">
         <h1 className={`${inter.className} mb-1 text-2xl`}>
           Create your account.
         </h1>
