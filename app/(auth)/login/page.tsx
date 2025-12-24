@@ -2,7 +2,6 @@ import Logo from "@/app/ui/branding/branding-recetapp-logo";
 import { Suspense } from "react";
 import { Metadata } from "next";
 import LoginForm from "@/app/ui/login-signup/login-form";
-
 // Set title for metadata
 export const metadata: Metadata = {
   title: "Login",
@@ -21,6 +20,7 @@ export default function LoginPage() {
           <LoginForm />
         </Suspense>
       </div>
+      s{" "}
     </main>
   );
 }
