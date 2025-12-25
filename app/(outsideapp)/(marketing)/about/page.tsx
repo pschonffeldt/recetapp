@@ -9,14 +9,27 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* =========================
-          2) About hero (same blob background vibe)
-         ========================= */}
+    2) About hero (same blob background vibe + purple accents)
+   ========================= */}
       <section className="relative overflow-hidden bg-white">
         <div aria-hidden className="pointer-events-none absolute inset-0">
+          {/* Blue/Sky base blobs */}
           <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-blue-500/18 blur-3xl" />
           <div className="absolute -left-40 top-28 h-[520px] w-[520px] rounded-full bg-sky-400/18 blur-3xl" />
           <div className="absolute -right-52 bottom-[-240px] h-[640px] w-[640px] rounded-full bg-indigo-500/14 blur-3xl" />
+
+          {/* Purple "thingy" accents (subtle) */}
+          <div className="absolute -top-28 right-[-140px] h-[520px] w-[520px] rounded-full bg-fuchsia-500/10 blur-3xl" />
+          <div className="absolute left-[-160px] bottom-[-260px] h-[620px] w-[620px] rounded-full bg-violet-500/10 blur-3xl" />
+          <div className="absolute left-1/2 top-10 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-purple-500/8 blur-3xl" />
+
+          {/* Soft arc wash */}
           <div className="absolute inset-x-0 bottom-[-260px] h-[520px] rounded-[999px] bg-gradient-to-t from-blue-500/10 via-sky-400/5 to-transparent blur-2xl" />
+
+          {/* Optional: subtle purple tint wash (very light) */}
+          <div className="absolute inset-x-0 top-[-220px] h-[520px] rounded-[999px] bg-gradient-to-b from-purple-500/6 via-transparent to-transparent blur-2xl" />
+
+          {/* Bottom fade for smooth transition */}
           <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white" />
         </div>
 
@@ -54,7 +67,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 z-10">
               <div className="rounded-2xl border bg-white shadow-sm">
                 <div className="flex items-center gap-2 border-b px-4 py-3">
                   <span className="h-3 w-3 rounded-full bg-red-400" />
