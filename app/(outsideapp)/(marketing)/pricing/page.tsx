@@ -269,6 +269,165 @@ export default function Page() {
           <Wave className="relative z-10 text-white" />
         </div>
       </section>
+
+      {/* =========================
+          4) What you're investing in (value + roadmap)
+         ========================= */}
+      <section className="relative overflow-hidden bg-white">
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          {/* blue/sphere base */}
+          <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-blue-500/14 blur-3xl" />
+          <div className="absolute -left-56 top-20 h-[520px] w-[520px] rounded-full bg-sky-400/14 blur-3xl" />
+          <div className="absolute -right-60 bottom-[-220px] h-[640px] w-[640px] rounded-full bg-indigo-500/12 blur-3xl" />
+
+          {/* purple accents */}
+          <div className="absolute -top-28 right-[-160px] h-[540px] w-[540px] rounded-full bg-fuchsia-500/10 blur-3xl" />
+          <div className="absolute left-[-180px] bottom-[-260px] h-[620px] w-[620px] rounded-full bg-violet-500/10 blur-3xl" />
+          <div className="absolute left-1/2 top-10 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-purple-500/8 blur-3xl" />
+
+          {/* bottom fade */}
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white" />
+        </div>
+
+        <div className="relative mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
+            <div className="lg:col-span-5">
+              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                Built for the long term
+              </p>
+              <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+                More than features a system you can trust.
+              </h2>
+              <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
+                RecetApp isn&apos;t about cramming in every possible feature.
+                I&apos;s about building a calm, dependable system for people who
+                cook at home — one that grows thoughtfully without becoming
+                overwhelming.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  href="/roadmap"
+                  className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 hover:bg-gray-50"
+                >
+                  View roadmap
+                </Link>
+                <Link
+                  href="/signup"
+                  className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-500"
+                >
+                  Start free
+                </Link>
+              </div>
+            </div>
+
+            <div className="lg:col-span-7">
+              <div className="grid gap-4 md:grid-cols-2">
+                {[
+                  {
+                    title: "Meal planning (coming)",
+                    body: "Plan a week without turning cooking into a chore.",
+                  },
+                  {
+                    title: "Smarter ingredient insights (coming)",
+                    body: "Understand what you cook most and reuse it better.",
+                  },
+                  {
+                    title: "Discover, done right (coming)",
+                    body: "Browse community recipes without losing control of your system.",
+                  },
+                  {
+                    title: "Export & portability (coming)",
+                    body: "Your data stays yours — always.",
+                  },
+                ].map((c) => (
+                  <div
+                    key={c.title}
+                    className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+                  >
+                    <div className="text-sm font-semibold text-gray-900">
+                      {c.title}
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-gray-700">
+                      {c.body}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <p className="mt-6 text-sm text-gray-600">
+                We build slowly, deliberately, and in public — so you always
+                know what you’re paying for.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================
+          5) Lifetime deal waitlist (high-value capture)
+         ========================= */}
+      <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-24">
+        <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm md:p-10">
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-7">
+              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                Limited offer (exploring)
+              </p>
+              <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+                Lifetime access, one payment.
+              </h2>
+              <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
+                To thank early supporters, we’re exploring a limited lifetime
+                plan that unlocks full access to RecetApp with a single one-time
+                payment.
+              </p>
+
+              <div className="mt-7 space-y-2 text-sm text-gray-700">
+                {[
+                  "One payment, no monthly fees",
+                  "Full access to current and future core features",
+                  "Priority feedback + early access to new tools",
+                  "Joining the waitlist doesn’t commit you to anything",
+                ].map((t) => (
+                  <div key={t} className="flex gap-2">
+                    <Check />
+                    <span>{t}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="lg:col-span-5">
+              <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
+                <div className="text-sm font-semibold text-gray-900">
+                  Join the lifetime waitlist
+                </div>
+                <p className="mt-2 text-sm leading-6 text-gray-700">
+                  Get notified if and when lifetime access becomes available.
+                </p>
+
+                {/* Replace this href with your real waitlist route/form later */}
+                {/* <Link
+                  href=""
+                  className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-500"
+                >
+                  Join waitlist
+                </Link> */}
+                <div className="p-4">
+                  <div className="flex h-10 items-center rounded-lg bg-red-500 px-4 text-sm font-medium text-white transition-colors hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50">
+                    Join waitlist (not open yet)
+                  </div>
+                </div>
+
+                <p className="mt-3 text-xs text-gray-500">
+                  No spam. One email when it launches (if it launches).
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
