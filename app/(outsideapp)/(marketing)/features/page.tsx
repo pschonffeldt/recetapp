@@ -48,8 +48,8 @@ export default function Page() {
               </h1>
 
               <p className="mt-5 text-sm leading-6 text-gray-700 md:text-base">
-                RecetApp gives you a clean system for recipes and ingredients —
-                plus a shopping list that’s actually usable at the store.
+                RecetApp gives you a clean system for recipes and ingredients
+                plus a shopping list that&apos;s actually usable at the store.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -150,8 +150,8 @@ export default function Page() {
             </h2>
             <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
               No more screenshots and scattered notes. Keep ingredients, steps,
-              and personal notes in a clean structure that’s easy to read while
-              you cook.
+              and personal notes in a clean structure that&apos;s easy to read
+              while you cook.
             </p>
 
             <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -248,8 +248,8 @@ export default function Page() {
               Build a shopping list from multiple recipes.
             </h2>
             <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-              Pick the recipes you’re making and generate a list that’s actually
-              usable at the store.
+              Pick the recipes you&apos;re making and generate a list that’s
+              actually usable at the store.
             </p>
 
             <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -259,7 +259,7 @@ export default function Page() {
               />
               <StatCard
                 value="Less forgetting"
-                label="Organize items so you don’t miss essentials."
+                label="Organize items so you don't miss essentials."
               />
             </div>
 

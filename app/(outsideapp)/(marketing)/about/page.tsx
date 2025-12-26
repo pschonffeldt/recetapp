@@ -126,20 +126,6 @@ export default function AboutPage() {
                 </p>
               </div>
             </div>
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              <InfoCard
-                title="Clarity"
-                body="Structured recipes that stay readable and easy to edit."
-              />
-              <InfoCard
-                title="Consistency"
-                body="Reuse ingredients so your data stays clean over time."
-              />
-              <InfoCard
-                title="Calm"
-                body="Less searching, less retyping, more cooking."
-              />
-            </div>
           </div>
 
           <Wave className="relative z-10 text-white" />
@@ -218,7 +204,7 @@ export default function AboutPage() {
               Crafted by a small team that cooks at home.
             </h2>
             <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-              RecetApp is developed in Chile by its founder and a small team —
+              RecetApp is developed in Chile by its founder and a small team
               with a simple goal: make everyday cooking feel calmer, faster, and
               more organized.
             </p>

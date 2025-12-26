@@ -168,8 +168,11 @@ export default function Page() {
             Start free. Upgrade only if you need more.
           </h1>
           <p className="mt-5 max-w-2xl text-sm leading-6 text-gray-700 md:text-base">
-            Keep your cookbook organized with a plan that fits your needs. The
-            free plan is great to get started — upgrade when you want more room.
+            Keep your cookbook organized with a plan that fits your needs.
+          </p>
+          <p className="max-w-2xl text-sm leading-6 text-gray-700 md:text-base">
+            The free plan is great to get started, upgrade when you want more
+            room.
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -243,8 +246,8 @@ export default function Page() {
               A calm system you can grow into.
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-center text-sm text-white/85 md:text-base">
-              Start small, then expand your cookbook when you’re ready. No
-              pressure — just a cleaner way to keep recipes organized.
+              Start small, then expand your cookbook when you&apos;re ready. No
+              pressure just a cleaner way to keep recipes organized.
             </p>
 
             <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -301,7 +304,7 @@ export default function Page() {
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
                 RecetApp isn&apos;t about cramming in every possible feature.
                 I&apos;s about building a calm, dependable system for people who
-                cook at home — one that grows thoughtfully without becoming
+                cook at home one that grows thoughtfully without becoming
                 overwhelming.
               </p>
 
@@ -338,7 +341,7 @@ export default function Page() {
                   },
                   {
                     title: "Export & portability (coming)",
-                    body: "Your data stays yours — always.",
+                    body: "Your data stays yours always.",
                   },
                 ].map((c) => (
                   <div
@@ -356,8 +359,8 @@ export default function Page() {
               </div>
 
               <p className="mt-6 text-sm text-gray-600">
-                We build slowly, deliberately, and in public — so you always
-                know what you’re paying for.
+                We build slowly, deliberately, and in public so you always know
+                what you&apos;re paying for.
               </p>
             </div>
           </div>
@@ -378,9 +381,9 @@ export default function Page() {
                 Lifetime access, one payment.
               </h2>
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                To thank early supporters, we’re exploring a limited lifetime
-                plan that unlocks full access to RecetApp with a single one-time
-                payment.
+                To thank early supporters, we&apos;re exploring a limited
+                lifetime plan that unlocks full access to RecetApp with a single
+                one-time payment.
               </p>
 
               <div className="mt-7 space-y-2 text-sm text-gray-700">
@@ -388,7 +391,7 @@ export default function Page() {
                   "One payment, no monthly fees",
                   "Full access to current and future core features",
                   "Priority feedback + early access to new tools",
-                  "Joining the waitlist doesn’t commit you to anything",
+                  "Joining the waitlist doesn&apos;t commit you to anything",
                 ].map((t) => (
                   <div key={t} className="flex gap-2">
                     <Check />

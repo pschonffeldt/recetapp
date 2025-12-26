@@ -141,7 +141,7 @@ export default function MarketingFooter() {
       </div>
 
       <div className="mt-10 pt-4 flex flex-col flex-wrap items-start justify-between gap-3 text-xs text-gray-500 border-t">
-        <div>© {new Date().getFullYear()} RecetApp, app version 1.0.0.</div>
+        <div>© {new Date().getFullYear()} RecetApp, app version 1.0.0</div>
         <div>Developed in Chile 🇨🇱</div>
       </div>
     </footer>
