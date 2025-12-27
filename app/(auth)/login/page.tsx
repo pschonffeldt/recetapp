@@ -1,26 +1,22 @@
 import Logo from "@/app/ui/branding/branding-recetapp-logo";
-import { Suspense } from "react";
-import { Metadata } from "next";
 import LoginForm from "@/app/ui/login-signup/login-form";
-// Set title for metadata
-export const metadata: Metadata = {
-  title: "Login",
-};
+import type { Metadata } from "next";
+import { Suspense } from "react";
+
+export const metadata: Metadata = { title: "Login" };
 
 export default function LoginPage() {
   return (
-    <main className="flex items-center justify-center md:h-screen">
-      <div className="relative mx-auto flex w-full max-w-[400px] flex-col space-y-2.5 p-4 md:-mt-32">
-        <div className="flex h-20 w-full items-end rounded-lg bg-gradient-to-r from-blue-700 to-cyan-600 p-3 md:h-36">
-          <div className="w-32 text-white md:w-36">
-            <Logo />
-          </div>
+    <div className="mx-auto flex w-full max-w-[400px] flex-col space-y-2">
+      <div className="flex h-12 w-full items-end rounded-lg bg-gradient-to-r from-blue-700 to-cyan-600 p-3 md:h-20">
+        <div className="w-28 text-white md:w-32">
+          <Logo />
         </div>
-        <Suspense>
-          <LoginForm />
-        </Suspense>
       </div>
-      s{" "}
-    </main>
+
+      <Suspense>
+        <LoginForm />
+      </Suspense>
+    </div>
   );
 }
