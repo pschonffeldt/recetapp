@@ -23,13 +23,11 @@ type SignupState = {
 const initial: SignupState = { ok: false, message: null, errors: {} };
 
 export default function SignupForm() {
-  // Adapter ensures the reducer signature matches <S, A> = <SignupState, FormData>
   const reducer = async (
     _prev: SignupState,
     formData: FormData
   ): Promise<SignupState> => {
     const res = await createAccount(_prev, formData);
-    // shape already matches; cast keeps TS happy across module boundaries
     return res as SignupState;
   };
 
@@ -37,18 +35,19 @@ export default function SignupForm() {
     reducer,
     initial
   );
+
   const err = (k: keyof SignupState["errors"] | string) =>
     state.errors?.[k as string]?.[0];
 
   return (
     <form action={formAction} className="space-y-2">
-      <div className="flex-1 rounded-lg bg-gray-50 px-6 pb-4 pt-4 shadow-md">
+      <div className="rounded-lg bg-gray-50 px-6 pb-4 pt-4 shadow-md">
         <h1 className={`${inter.className} mb-1 text-2xl`}>
           Create your account.
         </h1>
 
         {/* User name */}
-        <div className="">
+        <div>
           <label
             className="mb-1 mt-2 block text-xs font-medium text-gray-900"
             htmlFor="user_name"
@@ -69,8 +68,9 @@ export default function SignupForm() {
             )}
           </div>
         </div>
+
         {/* First name */}
-        <div className="">
+        <div>
           <label
             className="mb-1 mt-2 block text-xs font-medium text-gray-900"
             htmlFor="name"
@@ -108,14 +108,14 @@ export default function SignupForm() {
               placeholder="Your last name (optional)"
             />
             <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
-            {err("name") && (
+            {err("last_name") && (
               <p className="mt-2 text-sm text-red-500">{err("last_name")}</p>
             )}
           </div>
         </div>
 
+        {/* Country */}
         <div className="mt-4">
-          {/* Country */}
           <label
             htmlFor="country"
             className="mb-1 block text-sm font-medium text-gray-700"
@@ -147,8 +147,8 @@ export default function SignupForm() {
           )}
         </div>
 
+        {/* Date of birth */}
         <div className="mt-4">
-          {/* Date of birth */}
           <label
             htmlFor="date_of_birth"
             className="mb-1 block text-sm font-medium text-gray-700"
@@ -250,7 +250,7 @@ export default function SignupForm() {
           )}
         </div>
 
-        <p className="mt-2 text-center text-sm">
+        <p className="flex min-h-14 items-center justify-center text-center text-sm">
           Already have an account?{" "}
           <Link href="/login" className="text-blue-600 hover:underline">
             Log in
