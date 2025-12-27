@@ -6,7 +6,7 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   /**
-   * 🎛️ “Purple thingy” controls (edit these)
+   *  “Purple thingy” controls (edit these)
    * - Opacity:   /10 is VERY subtle, try /20–/35
    * - Size:      h-[520px] w-[520px] → bigger = more visible wash
    * - Position:  keep blobs INSIDE the viewport (avoid huge negative offsets)
@@ -25,17 +25,17 @@ export default function AuthLayout({
         <div className="absolute -left-40 top-24 h-[520px] w-[520px] rounded-full bg-sky-400/18 blur-3xl" />
         <div className="absolute -right-40 bottom-[-220px] h-[640px] w-[640px] rounded-full bg-indigo-500/14 blur-3xl" />
 
-        {/* ✅ Purple “thingy” (put it where it will be visible) */}
+        {/* Purple “thingy” */}
         <div className="absolute -right-24 -top-24 h-[620px] w-[620px] rounded-full bg-purple-500/22 blur-3xl" />
         <div className="absolute -left-28 bottom-[-180px] h-[680px] w-[680px] rounded-full bg-purple-600/16 blur-3xl" />
 
-        {/* Optional extra purple punch (safe) */}
+        {/* Optional extra purple punch */}
         <div className="absolute left-1/2 top-[55%] h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-purple-400/10 blur-3xl" />
 
         {/* Soft arc wash */}
         <div className="absolute inset-x-0 bottom-[-260px] h-[520px] rounded-[999px] bg-gradient-to-t from-blue-500/10 via-purple-500/8 to-transparent blur-2xl" />
 
-        {/* Subtle noise overlay (optional) */}
+        {/* Subtle noise overlay */}
         <div
           className="absolute inset-0 opacity-[0.06] mix-blend-overlay"
           style={{
