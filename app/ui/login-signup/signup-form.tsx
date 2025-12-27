@@ -250,7 +250,7 @@ export default function SignupForm() {
           )}
         </div>
 
-        <p className="flex min-h-14 items-center justify-center text-center text-sm">
+        <p className="flex min-h-12 items-center justify-center text-center text-sm">
           Already have an account?{" "}
           <Link href="/login" className="text-blue-600 hover:underline">
             Log in
