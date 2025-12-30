@@ -127,8 +127,6 @@ export default async function Page({
       <section className="mt-4 space-y-4">
         {/* Top card: context + picker */}
         <div className="rounded-md bg-gray-50 p-4 md:p-6">
-          <h1 className="text-xl font-semibold">Shopping list</h1>
-
           <p className="mt-1 text-sm text-gray-600">
             {!hasRecipes
               ? "You don't have any recipes yet. Create a recipe to start building a shopping list."
