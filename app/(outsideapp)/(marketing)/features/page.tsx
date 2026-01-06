@@ -101,14 +101,14 @@ export default function Page() {
           <div className="relative z-10 mx-auto max-w-6xl px-4 py-18 md:px-6 md:py-24">
             <SectionHeader
               title="A clean system that stays out of your way."
-              subtitle="Structured recipes, reusable ingredients, and shopping lists that help you move faster — without clutter."
+              subtitle="Structured recipes, reusable ingredients, and shopping lists that help you move faster, without clutter."
             />
 
             <div className="mt-12 grid gap-6 lg:grid-cols-3">
               <div className="rounded-2xl border border-white/15 bg-white/10 p-6">
                 <div className="text-sm font-semibold">Structured recipes</div>
                 <p className="mt-2 text-sm text-white/85">
-                  Ingredients, steps, and notes — formatted the same every time.
+                  Ingredients, steps, and notes formatted the same every time.
                 </p>
               </div>
               <div className="rounded-2xl border border-white/15 bg-white/10 p-6">

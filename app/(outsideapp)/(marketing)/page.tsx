@@ -94,13 +94,14 @@ export default function Page() {
       <section className="relative">
         <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
           {/* Top wave */}
+          <Wave flip className="relative z-10 text-white" />
 
           <SparklesOverlay />
 
           <div className="relative mt-12 z-10 mx-auto max-w-6xl px-4 py-18 md:px-6 md:py-24">
             <SectionHeader
               title="Reimagine the limits of what’s possible in your kitchen."
-              subtitle="From “where did I save that recipe?” to a clean system you can trust — RecetApp keeps everything organized."
+              subtitle="From “where did I save that recipe?” to a clean system you can trust, RecetApp keeps everything organized."
             />
 
             <div className="mt-12 grid gap-6 lg:grid-cols-2 lg:items-center">
@@ -143,7 +144,7 @@ export default function Page() {
               Provide clarity instantly
             </p>
             <h3 className="mt-3 text-4xl font-semibold tracking-tight md:text-[2.75rem]">
-              Find recipes fast — and trust what you saved.
+              Find recipes fast, and trust what you saved.
             </h3>
             <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
               Save recipes with clean structure (ingredients, steps, notes) so
@@ -162,11 +163,13 @@ export default function Page() {
             <div className="mt-7 space-y-2 text-sm text-gray-700">
               <div className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Search by title and summary</span>
+                <span>Search by title and type</span>
               </div>
               <div className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Clean sections (ingredients / steps)</span>
+                <span>
+                  Clean sections (ingredients / steps / dietary details)
+                </span>
               </div>
               <div className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
@@ -261,7 +264,7 @@ export default function Page() {
               </div>
               <div className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Ready for future features (Discover, planning)</span>
+                <span>Ready for future features</span>
               </div>
             </div>
           </div>
@@ -280,13 +283,13 @@ export default function Page() {
             </p>
 
             <h3 className="mt-3 text-4xl font-semibold tracking-tight md:text-[2.75rem]">
-              Discover recipes — and share yours when you’re ready.
+              Discover recipes, and share only when you&apos;re ready.
             </h3>
 
             <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
               Explore a growing library of community recipes and save them into
-              your cookbook. Publish your own favorites only if you choose —
-              with privacy controls that keep it simple.
+              your cookbook. Publish your own favorites only if you choose, with
+              privacy controls that keep it simple.
             </p>
 
             <div className="mt-8 grid gap-4 md:grid-cols-2">
@@ -311,7 +314,7 @@ export default function Page() {
               </div>
               <div className="flex gap-2">
                 <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Publish selectively with simple privacy controls</span>
+                <span>Share selectively with simple privacy controls</span>
               </div>
             </div>
           </div>
@@ -347,7 +350,7 @@ export default function Page() {
                       Private-first
                     </div>
                     <p className="mt-1 text-sm text-white/85">
-                      Keep recipes private by default; publish selectively.
+                      Keep recipes private by default; share selectively.
                     </p>
                   </div>
 
@@ -390,7 +393,7 @@ export default function Page() {
         </h2>
 
         {/* Featured panel + thumbnail strip */}
-        <div className="mt-8 grid gap-6 lg:grid-cols-12 lg:items-stretch">
+        <div className="mt-8 grid gap-6 lg:grid-cols-1 lg:items-stretch">
           {/* Featured */}
           <div className="lg:col-span-8">
             <div className="relative overflow-hidden rounded-2xl border bg-white shadow-sm">
@@ -405,16 +408,14 @@ export default function Page() {
                   </h3>
                   <p className="mt-3 text-sm leading-6 text-gray-700">
                     I stopped saving recipes in 5 different places. Now I can
-                    actually find what I need — and my shopping list is done in
+                    actually find what I need, and my shopping list is done in
                     minutes.
                   </p>
 
                   <div className="mt-5 flex items-center gap-3 text-sm text-gray-700">
                     <span className="h-9 w-9 rounded-full bg-gray-200" />
                     <div>
-                      <div className="font-semibold text-gray-900">
-                        Home cook
-                      </div>
+                      <div className="font-semibold text-gray-900">Erin S.</div>
                       <div className="text-xs text-gray-600">
                         Weekly meal prep
                       </div>
@@ -443,7 +444,7 @@ export default function Page() {
           </div>
 
           {/* Thumbnails column */}
-          <div className="lg:col-span-4">
+          {/* <div className="lg:col-span-4">
             <div className="grid gap-4">
               {[
                 {
@@ -468,7 +469,7 @@ export default function Page() {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
       </section>
       {/* =========================
