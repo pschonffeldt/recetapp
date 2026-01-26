@@ -23,7 +23,7 @@ export default function Page() {
         rightSlot={<AppMock label="RecetApp — dashboard preview" />}
       />
       {/* =========================
-          2) Big gradient band (wave top + bottom)
+          2) Big gradient band (wave top + bottom for extra style)
         ========================= */}
       <SectionGradientBand
         title="Reimagine the limits of what’s possible in your kitchen."
