@@ -18,7 +18,7 @@ export default function Page() {
         ========================= */}
       <SectionHero
         title="The easiest way to keep your recipes organized."
-        description="RecetApp helps you save structured recipes, reuse ingredients, and generate shopping lists fast — so meal planning feels effortless."
+        description="RecetApp helps you save structured recipes, reuse ingredients, and generate shopping lists fast so meal planning feels effortless."
         rightSlot={<AppMock label="RecetApp — dashboard preview" />}
       />
       {/* =========================
