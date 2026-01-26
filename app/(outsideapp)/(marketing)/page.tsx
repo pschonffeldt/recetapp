@@ -5,6 +5,7 @@ import {
   Wave,
   StatCard,
 } from "@/app/lib/marketing/helpers";
+import { SectionGradientBand } from "@/app/ui/marketing/sections/section-gradient-band";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import Link from "next/link";
 
@@ -24,44 +25,13 @@ export default function Page() {
       {/* =========================
           2) Big gradient band (wave top + bottom)
         ========================= */}
-      <section className="relative">
-        <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
-          {/* Top wave */}
-          <Wave flip className="relative z-10 text-white" />
-
-          <SparklesOverlay />
-
-          <div className="relative mt-12 z-10 mx-auto max-w-6xl px-4 py-18 md:px-6 md:py-24">
-            <SectionHeader
-              title="Reimagine the limits of what’s possible in your kitchen."
-              subtitle="From “where did I save that recipe?” to a clean system you can trust, RecetApp keeps everything organized."
-            />
-
-            <div className="mt-12 grid gap-6 lg:grid-cols-2 lg:items-center">
-              <div className="flex justify-center lg:justify-start">
-                <AppMock label="Structured recipe view" />
-              </div>
-              <div className="flex justify-center lg:justify-end">
-                <AppMock label="Shopping list builder" />
-              </div>
-            </div>
-
-            <div className="mt-12 flex flex-wrap justify-center gap-2">
-              {["Convenient", "Private", "Organized"].map((t) => (
-                <span
-                  key={t}
-                  className="rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs font-medium text-white/95"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom wave */}
-          <Wave className="relative z-10 text-white" />
-        </div>
-      </section>
+      <SectionGradientBand
+        title="Reimagine the limits of what’s possible in your kitchen."
+        subtitle="From “where did I save that recipe?” to a clean system you can trust, RecetApp keeps everything organized."
+        leftSlot={<AppMock label="Structured recipe view" />}
+        rightSlot={<AppMock label="Shopping list builder" />}
+        tags={["Convenient", "Private", "Organized"]}
+      />
 
       {/* =========================
           3) Alternating feature rows
