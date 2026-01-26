@@ -5,6 +5,7 @@ import {
   Wave,
   StatCard,
 } from "@/app/lib/marketing/helpers";
+import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import Link from "next/link";
 
 export const metadata = { title: "RecetApp" };
@@ -15,79 +16,11 @@ export default function Page() {
       {/* =========================
           1) HERO
         ========================= */}
-      <section className="relative overflow-hidden bg-white">
-        {/* Background: blobs + subtle noise */}
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          {/* Big soft blobs */}
-          <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-blue-500/20 blur-3xl" />
-          <div className="absolute -left-40 top-24 h-[520px] w-[520px] rounded-full bg-sky-400/20 blur-3xl" />
-          <div className="absolute -right-52 bottom-[-220px] h-[640px] w-[640px] rounded-full bg-indigo-500/15 blur-3xl" />
-
-          {/* Soft arc wash */}
-          <div className="absolute inset-x-0 bottom-[-260px] h-[520px] rounded-[999px] bg-gradient-to-t from-blue-500/10 via-sky-400/5 to-transparent blur-2xl" />
-
-          {/* Subtle noise overlay */}
-          <div
-            className="absolute inset-0 opacity-[0.07] mix-blend-overlay"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E")`,
-            }}
-          />
-
-          {/* Bottom fade (smooth transition) */}
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white" />
-        </div>
-
-        <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20 lg:min-h-[70vh] lg:flex lg:items-center">
-          <div className="grid w-full gap-12 lg:grid-cols-2 lg:items-center">
-            <div>
-              <h1 className="text-5xl font-semibold tracking-tight md:text-6xl">
-                The easiest way to keep your recipes organized.
-              </h1>
-
-              <p className="mt-5 text-sm leading-6 text-gray-700 md:text-base">
-                RecetApp helps you save structured recipes, reuse ingredients,
-                and generate shopping lists fast — so meal planning feels
-                effortless.
-              </p>
-
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="/signup"
-                  className="flex h-10 items-center rounded-lg bg-blue-500 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
-                >
-                  Get started free
-                </Link>
-                <Link
-                  href="/help"
-                  className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 hover:bg-gray-50"
-                >
-                  See how it works
-                </Link>
-              </div>
-
-              <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-gray-600">
-                <Link href="#recipes" className="hover:underline">
-                  Recipes
-                </Link>
-                <Link href="#shopping" className="hover:underline">
-                  Shopping list
-                </Link>
-                <Link href="#ingredients" className="hover:underline">
-                  Ingredients
-                </Link>
-                <Link href="#discover" className="hover:underline">
-                  Discover
-                </Link>
-              </div>
-            </div>
-
-            <div className="flex justify-start z-10 lg:justify-end">
-              <AppMock label="RecetApp — dashboard preview" />
-            </div>
-          </div>
-        </div>
-      </section>
+      <SectionHero
+        title="The easiest way to keep your recipes organized."
+        description="RecetApp helps you save structured recipes, reuse ingredients, and generate shopping lists fast — so meal planning feels effortless."
+        rightSlot={<AppMock label="RecetApp — dashboard preview" />}
+      />
       {/* =========================
           2) Big gradient band (wave top + bottom)
         ========================= */}
@@ -442,34 +375,6 @@ export default function Page() {
               </div>
             </div>
           </div>
-
-          {/* Thumbnails column */}
-          {/* <div className="lg:col-span-4">
-            <div className="grid gap-4">
-              {[
-                {
-                  title: "Weeknight cooking",
-                  body: "Save favorites and repeat them fast.",
-                },
-                { title: "Family recipes", body: "Keep traditions organized." },
-                {
-                  title: "New favorites",
-                  body: "Test, tweak, and keep notes.",
-                },
-              ].map((t) => (
-                <div
-                  key={t.title}
-                  className="rounded-2xl border bg-white p-5 shadow-sm"
-                >
-                  <div className="text-sm font-semibold text-gray-900">
-                    {t.title}
-                  </div>
-                  <p className="mt-2 text-sm text-gray-700">{t.body}</p>
-                  <div className="mt-4 h-20 w-full rounded-lg bg-gray-100" />
-                </div>
-              ))}
-            </div>
-          </div> */}
         </div>
       </section>
       {/* =========================
