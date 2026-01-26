@@ -1,4 +1,4 @@
-import { AppMock, SparklesOverlay, Wave } from "@/app/lib/marketing/helpers";
+import { AppMock } from "@/app/lib/marketing/helpers";
 import { FeatureContent } from "@/app/ui/marketing/sections/feature-content";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
 import { FeaturedTestimonialCard } from "@/app/ui/marketing/sections/featured-testimonial-card";
@@ -6,6 +6,7 @@ import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { SectionGradientBand } from "@/app/ui/marketing/sections/section-gradient-band";
 import { SectionGradientSplit } from "@/app/ui/marketing/sections/section-gradient-split";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
+import { SectionStatsBand } from "@/app/ui/marketing/sections/section-stats-band";
 import { SectionTestimonials } from "@/app/ui/marketing/sections/section-testimonials";
 import Link from "next/link";
 
@@ -190,45 +191,24 @@ export default function Page() {
       {/* =========================
           6) Big stats band (wave top + bottom + taller)
         ========================= */}
-      <section className="relative">
-        <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
-          <Wave flip className="relative z-10 text-white" />
-
-          <SparklesOverlay />
-
-          <div className="relative z-10 mx-auto max-w-6xl px-4 py-18 md:px-6 md:py-24">
-            <h2 className="text-center text-4xl font-semibold tracking-tight md:text-5xl">
-              A calmer way to plan meals.
-            </h2>
-
-            <div className="mt-12 grid gap-10 md:grid-cols-3">
-              <div className="text-center">
-                <div className="text-5xl font-semibold">1</div>
-                <p className="mt-3 text-sm text-white/90 md:text-base">
-                  place for recipes, ingredients, and shopping lists
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="text-5xl font-semibold">Less</div>
-                <p className="mt-3 text-sm text-white/90 md:text-base">
-                  retyping and fewer forgotten items
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="text-5xl font-semibold">More</div>
-                <p className="mt-3 text-sm text-white/90 md:text-base">
-                  time cooking (and less time searching)
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom wave */}
-          <Wave className="relative z-10 text-white" />
-        </div>
-      </section>
+      <SectionStatsBand
+        title="A calmer way to plan meals."
+        items={[
+          {
+            value: "1",
+            label: "place for recipes, ingredients, and shopping lists",
+          },
+          {
+            value: "Less",
+            label: "retyping and fewer forgotten items",
+          },
+          {
+            value: "More",
+            label: "time cooking (and less time searching)",
+          },
+        ]}
+      />
+      ;
       {/* =========================
           7) Cards grid
         ========================= */}
