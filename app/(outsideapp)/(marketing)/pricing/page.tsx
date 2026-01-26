@@ -1,145 +1,102 @@
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
+import { Plan } from "@/app/ui/marketing/sections/plan-card";
 import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
+import { SectionLifetimeDeal } from "@/app/ui/marketing/sections/section-lifetime-deal";
+import { SectionPlans } from "@/app/ui/marketing/sections/section-plans";
 import { SectionStatsBand } from "@/app/ui/marketing/sections/section-stats-band";
 import Link from "next/link";
 
 export const metadata = { title: "Pricing" };
 
-function Check() {
-  return (
-    <span
-      aria-hidden
-      className="mt-2 inline-block h-1.5 w-1.5 rounded-full bg-blue-600"
-    />
-  );
-}
+const VALUE_ROW = {
+  id: "long-term",
+  eyebrow: "Built for the long term",
+  title: "More than features, a system you can trust.",
+  description:
+    "RecetApp isn&apos;t about cramming in every possible feature. It&apos;s about building a calm, dependable system for people who cook at home — one that grows thoughtfully without becoming overwhelming.",
+  ctas: [
+    {
+      href: "/roadmap",
+      label: "View roadmap",
+      variant: "secondary" as const,
+    },
+    {
+      href: "/signup",
+      label: "Start free",
+      variant: "primary" as const,
+    },
+  ],
+  cards: [
+    {
+      title: "Meal planning (coming)",
+      body: "Plan a week without turning cooking into a chore.",
+    },
+    {
+      title: "Smarter ingredient insights (coming)",
+      body: "Understand what you cook most and reuse it better.",
+    },
+    {
+      title: "Discover, done right (coming)",
+      body: "Browse community recipes without losing control of your system.",
+    },
+    {
+      title: "Export & portability (coming)",
+      body: "Your data stays yours always.",
+    },
+  ],
+  note: "We build slowly, deliberately, and in public so you always know what you&apos;re paying for.",
+} as const;
 
-function PlanCard({
-  label,
-  title,
-  price,
-  sub,
-  highlight,
-  ctaHref,
-  ctaText,
-  features,
-}: {
-  label: string;
-  title: string;
-  price: string;
-  sub: string;
-  highlight?: boolean;
-  ctaHref: string;
-  ctaText: string;
-  features: string[];
-}) {
-  return (
-    <div
-      className={[
-        "relative rounded-2xl border bg-white p-7 shadow-sm",
-        highlight ? "border-blue-200 ring-1 ring-blue-200" : "border-gray-200",
-      ].join(" ")}
-    >
-      {highlight && (
-        <div className="absolute -top-3 left-6 rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">
-          Most popular
-        </div>
-      )}
-
-      <div className="text-xs font-semibold uppercase tracking-wide text-gray-600">
-        {label}
-      </div>
-
-      <div className="mt-2 text-2xl font-semibold tracking-tight text-gray-900">
-        {title}
-      </div>
-
-      <div className="mt-4 flex items-baseline gap-2">
-        <div className="text-4xl font-semibold tracking-tight text-gray-900">
-          {price}
-        </div>
-        <div className="text-sm text-gray-600">{sub}</div>
-      </div>
-
-      <p className="mt-3 text-sm leading-6 text-gray-700">{sub}</p>
-
-      <Link
-        href={ctaHref}
-        className={[
-          "mt-6 inline-flex h-10 w-full items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
-          highlight
-            ? "bg-blue-600 text-white hover:bg-blue-500 focus-visible:outline-blue-600"
-            : "border border-gray-200 bg-white text-gray-900 hover:bg-gray-50 focus-visible:outline-blue-600",
-        ].join(" ")}
-      >
-        {ctaText}
-      </Link>
-
-      <div className="mt-7 border-t pt-6">
-        <div className="text-sm font-semibold text-gray-900">Includes</div>
-        <div className="mt-4 space-y-3 text-sm text-gray-700">
-          {features.map((f) => (
-            <div key={f} className="flex gap-2">
-              <Check />
-              <span>{f}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+const plans: Plan[] = [
+  {
+    label: "Free",
+    title: "Starter",
+    price: "$0",
+    sub: "Forever",
+    highlight: false,
+    ctaHref: "/signup",
+    ctaText: "Get started free",
+    features: [
+      "Up to 10 recipes",
+      "Structured ingredients + steps",
+      "Search your cookbook",
+      "Basic shopping list",
+    ],
+  },
+  {
+    label: "Pro",
+    title: "Home cook",
+    price: "$5",
+    sub: "per month",
+    highlight: true,
+    ctaHref: "/signup",
+    ctaText: "Start Pro",
+    features: [
+      "Up to 50 recipes",
+      "Reusable ingredients",
+      "Shopping lists from multiple recipes",
+      "Priority improvements (fast iterations)",
+    ],
+  },
+  {
+    label: "Plus",
+    title: "Power cook",
+    price: "$12",
+    sub: "per month",
+    highlight: false,
+    ctaHref: "/signup",
+    ctaText: "Start Plus",
+    features: [
+      "Up to 100 recipes",
+      "Everything in Pro",
+      "Best for meal prep + families",
+      "Early access to new features",
+    ],
+  },
+];
 
 export default function Page() {
-  const plans = [
-    {
-      label: "Free",
-      title: "Starter",
-      price: "$0",
-      sub: "Forever",
-      highlight: false,
-      ctaHref: "/signup",
-      ctaText: "Get started free",
-      features: [
-        "Up to 10 recipes",
-        "Structured ingredients + steps",
-        "Search your cookbook",
-        "Basic shopping list",
-      ],
-    },
-    {
-      label: "Pro",
-      title: "Home cook",
-      price: "$5",
-      sub: "per month",
-      highlight: true,
-      ctaHref: "/signup",
-      ctaText: "Start Pro",
-      features: [
-        "Up to 50 recipes",
-        "Reusable ingredients",
-        "Shopping lists from multiple recipes",
-        "Priority improvements (fast iterations)",
-      ],
-    },
-    {
-      label: "Plus",
-      title: "Power cook",
-      price: "$12",
-      sub: "per month",
-      highlight: false,
-      ctaHref: "/signup",
-      ctaText: "Start Plus",
-      features: [
-        "Up to 100 recipes",
-        "Everything in Pro",
-        "Best for meal prep + families",
-        "Early access to new features",
-      ],
-    },
-  ];
-
   return (
     <>
       {/* =========================
@@ -184,39 +141,7 @@ export default function Page() {
       {/* =========================
           2) Plans
          ========================= */}
-      <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
-        <div className="grid gap-6 md:grid-cols-3">
-          {plans.map((p) => (
-            <PlanCard key={p.title} {...p} />
-          ))}
-        </div>
-
-        {/* mini FAQ */}
-        <div className="mt-16 grid gap-6 lg:grid-cols-3">
-          {[
-            {
-              q: "Can I change plans later?",
-              a: "Yes. Upgrade or downgrade anytime from your account settings.",
-            },
-            {
-              q: "What happens if I hit my recipe limit?",
-              a: "You can upgrade to a higher tier to add more.",
-            },
-            {
-              q: "Is the free plan really free?",
-              a: "Yes. No credit card required to start.",
-            },
-          ].map((f) => (
-            <div
-              key={f.q}
-              className="rounded-2xl border bg-white p-6 shadow-sm"
-            >
-              <div className="text-sm font-semibold text-gray-900">{f.q}</div>
-              <p className="mt-2 text-sm leading-6 text-gray-700">{f.a}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <SectionPlans plans={plans} />
 
       {/* =========================
           3) Trust band (gradient + waves)
@@ -235,149 +160,83 @@ export default function Page() {
           4) What you're investing in (value + roadmap)
          ========================= */}
       <SectionFeatures gapClassName="gap-24">
-        <FeatureRow
-          content={
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-                Built for the long term
-              </p>
+        {[VALUE_ROW].map((row) => (
+          <FeatureRow
+            key={row.id}
+            content={
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                  {row.eyebrow}
+                </p>
 
-              <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-                More than features, a system you can trust.
-              </h2>
+                <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+                  {row.title}
+                </h2>
 
-              <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                RecetApp isn&apos;t about cramming in every possible feature.
-                It&apos;s about building a calm, dependable system for people
-                who cook at home — one that grows thoughtfully without becoming
-                overwhelming.
-              </p>
+                <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
+                  {row.description}
+                </p>
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="/roadmap"
-                  className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 hover:bg-gray-50"
-                >
-                  View roadmap
-                </Link>
-
-                <Link
-                  href="/signup"
-                  className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-500"
-                >
-                  Start free
-                </Link>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  {row.ctas.map((c) => (
+                    <Link
+                      key={c.href}
+                      href={c.href}
+                      className={[
+                        "inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors",
+                        c.variant === "primary"
+                          ? "bg-blue-600 text-white hover:bg-blue-500"
+                          : "border border-gray-200 bg-white text-gray-900 hover:bg-gray-50",
+                      ].join(" ")}
+                    >
+                      {c.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
-          }
-          media={
-            <div>
-              <div className="grid gap-4 md:grid-cols-2">
-                {[
-                  {
-                    title: "Meal planning (coming)",
-                    body: "Plan a week without turning cooking into a chore.",
-                  },
-                  {
-                    title: "Smarter ingredient insights (coming)",
-                    body: "Understand what you cook most and reuse it better.",
-                  },
-                  {
-                    title: "Discover, done right (coming)",
-                    body: "Browse community recipes without losing control of your system.",
-                  },
-                  {
-                    title: "Export & portability (coming)",
-                    body: "Your data stays yours always.",
-                  },
-                ].map((c) => (
-                  <div
-                    key={c.title}
-                    className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
-                  >
-                    <div className="text-sm font-semibold text-gray-900">
-                      {c.title}
+            }
+            media={
+              <div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {row.cards.map((c) => (
+                    <div
+                      key={c.title}
+                      className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+                    >
+                      <div className="text-sm font-semibold text-gray-900">
+                        {c.title}
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-gray-700">
+                        {c.body}
+                      </p>
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-gray-700">
-                      {c.body}
-                    </p>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              <p className="mt-6 text-sm text-gray-600">
-                We build slowly, deliberately, and in public so you always know
-                what you&apos;re paying for.
-              </p>
-            </div>
-          }
-        />
+                <p className="mt-6 text-sm text-gray-600">{row.note}</p>
+              </div>
+            }
+          />
+        ))}
       </SectionFeatures>
 
       {/* =========================
           5) Lifetime deal waitlist
          ========================= */}
-      <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-24">
-        <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm md:p-10">
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
-            <div className="lg:col-span-7">
-              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-                Limited offer (exploring)
-              </p>
-              <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-                Lifetime access, one payment.
-              </h2>
-              <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                To thank early supporters, we&apos;re exploring a limited
-                lifetime plan that unlocks full access to RecetApp with a single
-                one-time payment.
-              </p>
-
-              <div className="mt-7 space-y-2 text-sm text-gray-700">
-                {[
-                  "One payment, no monthly fees",
-                  "Full access to current and future core features",
-                  "Priority feedback + early access to new tools",
-                  "Joining the waitlist doesn&apos;t commit you to anything",
-                ].map((t) => (
-                  <div key={t} className="flex gap-2">
-                    <Check />
-                    <span>{t}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="lg:col-span-5">
-              <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
-                <div className="text-sm font-semibold text-gray-900">
-                  Join the lifetime waitlist
-                </div>
-                <p className="mt-2 text-sm leading-6 text-gray-700">
-                  Get notified if and when lifetime access becomes available.
-                </p>
-
-                {/* Replace this href with your real waitlist route/form later */}
-                {/* <Link
-                  href=""
-                  className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-500"
-                >
-                  Join waitlist
-                </Link> */}
-                <div className="p-4">
-                  <div className="flex h-10 items-center rounded-lg bg-red-500 px-4 text-sm font-medium text-white transition-colors hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50">
-                    Join waitlist (not open yet)
-                  </div>
-                </div>
-
-                <p className="mt-3 text-xs text-gray-500">
-                  No spam. One email when it launches (if it launches).
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <SectionLifetimeDeal
+        title="Lifetime access, one payment."
+        description="To thank early supporters, we're exploring a limited lifetime plan that unlocks full access to RecetApp with a single one-time payment."
+        bullets={[
+          "One payment, no monthly fees",
+          "Full access to current and future core features",
+          "Priority feedback + early access to new tools",
+          "Joining the waitlist doesn&apos;t commit you to anything",
+        ]}
+        cardTitle="Join the lifetime waitlist"
+        cardDescription="Get notified if and when lifetime access becomes available."
+        disabledCtaText="Join waitlist (not open yet)"
+        footnote="No spam. One email when it launches (if it launches)."
+      />
     </>
   );
 }
