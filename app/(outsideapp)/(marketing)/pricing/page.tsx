@@ -1,3 +1,5 @@
+import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
+import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import { SectionStatsBand } from "@/app/ui/marketing/sections/section-stats-band";
 import Link from "next/link";
@@ -232,35 +234,22 @@ export default function Page() {
       {/* =========================
           4) What you're investing in (value + roadmap)
          ========================= */}
-      <section className="relative overflow-hidden bg-white">
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          {/* blue/sphere base */}
-          <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-blue-500/14 blur-3xl" />
-          <div className="absolute -left-56 top-20 h-[520px] w-[520px] rounded-full bg-sky-400/14 blur-3xl" />
-          <div className="absolute -right-60 bottom-[-220px] h-[640px] w-[640px] rounded-full bg-indigo-500/12 blur-3xl" />
-
-          {/* purple accents */}
-          <div className="absolute -top-28 right-[-160px] h-[540px] w-[540px] rounded-full bg-fuchsia-500/10 blur-3xl" />
-          <div className="absolute left-[-180px] bottom-[-260px] h-[620px] w-[620px] rounded-full bg-violet-500/10 blur-3xl" />
-          <div className="absolute left-1/2 top-10 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-purple-500/8 blur-3xl" />
-
-          {/* bottom fade */}
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white" />
-        </div>
-
-        <div className="relative mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-start">
-            <div className="lg:col-span-5">
+      <SectionFeatures gapClassName="gap-24">
+        <FeatureRow
+          content={
+            <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
                 Built for the long term
               </p>
+
               <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-                More than features a system you can trust.
+                More than features, a system you can trust.
               </h2>
+
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
                 RecetApp isn&apos;t about cramming in every possible feature.
-                I&apos;s about building a calm, dependable system for people who
-                cook at home one that grows thoughtfully without becoming
+                It&apos;s about building a calm, dependable system for people
+                who cook at home — one that grows thoughtfully without becoming
                 overwhelming.
               </p>
 
@@ -271,6 +260,7 @@ export default function Page() {
                 >
                   View roadmap
                 </Link>
+
                 <Link
                   href="/signup"
                   className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-500"
@@ -279,8 +269,9 @@ export default function Page() {
                 </Link>
               </div>
             </div>
-
-            <div className="lg:col-span-7">
+          }
+          media={
+            <div>
               <div className="grid gap-4 md:grid-cols-2">
                 {[
                   {
@@ -319,12 +310,12 @@ export default function Page() {
                 what you&apos;re paying for.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
+          }
+        />
+      </SectionFeatures>
 
       {/* =========================
-          5) Lifetime deal waitlist (high-value capture)
+          5) Lifetime deal waitlist
          ========================= */}
       <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-24">
         <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm md:p-10">
