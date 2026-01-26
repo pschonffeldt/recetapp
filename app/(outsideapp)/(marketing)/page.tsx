@@ -2,13 +2,14 @@ import { AppMock } from "@/app/lib/marketing/helpers";
 import { FeatureContent } from "@/app/ui/marketing/sections/feature-content";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
 import { FeaturedTestimonialCard } from "@/app/ui/marketing/sections/featured-testimonial-card";
+import { GuideCard } from "@/app/ui/marketing/sections/guide-card";
+import { SectionCardsGrid } from "@/app/ui/marketing/sections/section-cards-grid";
 import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { SectionGradientBand } from "@/app/ui/marketing/sections/section-gradient-band";
 import { SectionGradientSplit } from "@/app/ui/marketing/sections/section-gradient-split";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import { SectionStatsBand } from "@/app/ui/marketing/sections/section-stats-band";
 import { SectionTestimonials } from "@/app/ui/marketing/sections/section-testimonials";
-import Link from "next/link";
 
 export const metadata = { title: "RecetApp" };
 
@@ -104,6 +105,27 @@ const FEATURES = [
       "Share selectively with simple privacy controls",
     ],
     mediaLabel: "Discover feed preview",
+  },
+] as const;
+
+const GUIDES = [
+  {
+    type: "Guide",
+    title: "Add your first recipe",
+    body: "The fastest way to start building your personal cookbook.",
+    href: "/help/getting-started",
+  },
+  {
+    type: "Feature",
+    title: "Make a shopping list",
+    body: "Pick recipes and generate a clean list for the store.",
+    href: "/help/shopping-list",
+  },
+  {
+    type: "Help",
+    title: "Troubleshooting",
+    body: "Quick fixes for the most common issues.",
+    href: "/help/troubleshooting",
   },
 ] as const;
 
@@ -212,77 +234,21 @@ export default function Page() {
       {/* =========================
           7) Cards grid
         ========================= */}
-      <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
-        <div className="text-center">
-          <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
-            Get started in minutes.
-          </h2>
-          <p className="mt-4 text-sm text-gray-700 md:text-base">
-            Quick guides to unlock value fast.
-          </p>
-        </div>
-
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {[
-            {
-              type: "Guide",
-              title: "Add your first recipe",
-              body: "The fastest way to start building your personal cookbook.",
-              href: "/help/getting-started",
-              image: "/images/help/getting-started.png", // replace with new path
-            },
-            {
-              type: "Feature",
-              title: "Make a shopping list",
-              body: "Pick recipes and generate a clean list for the store.",
-              href: "/help/shopping-list",
-              image: "/images/help/shopping-list.png", // replace with new path
-            },
-            {
-              type: "Help",
-              title: "Troubleshooting",
-              body: "Quick fixes for the most common issues.",
-              href: "/help/troubleshooting",
-              image: "/images/help/troubleshooting.png", // replace with new path
-            },
-          ].map((c) => (
-            <Link
-              key={c.title}
-              href={c.href}
-              className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              {/* Image header */}
-              <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100">
-                {/* <img
-                  src={c.image}
-                  alt=""
-                  className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
-                /> */}
-              </div>
-
-              {/* Body */}
-              <div className="p-7">
-                <div className="text-sm text-gray-600">{c.type}</div>
-
-                <div className="mt-2 text-2xl font-semibold leading-tight tracking-tight text-gray-900">
-                  {c.title}
-                </div>
-
-                <p className="mt-3 text-sm leading-6 text-gray-700">{c.body}</p>
-
-                <div className="mt-10 flex items-center justify-between">
-                  <span className="text-sm font-semibold uppercase tracking-wide text-blue-600">
-                    Read more
-                  </span>
-                  <span className="text-blue-600 transition-transform group-hover:translate-x-0.5">
-                    →
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+      <SectionCardsGrid
+        title="Get started in minutes."
+        subtitle="Quick guides to unlock value fast."
+      >
+        {GUIDES.map((c) => (
+          <GuideCard
+            key={c.title}
+            type={c.type}
+            title={c.title}
+            body={c.body}
+            href={c.href}
+          />
+        ))}
+      </SectionCardsGrid>
+      ;
     </div>
   );
 }
