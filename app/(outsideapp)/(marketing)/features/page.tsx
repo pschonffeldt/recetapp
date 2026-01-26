@@ -2,9 +2,9 @@ import {
   AppMock,
   Wave,
   SparklesOverlay,
-  SectionHeader,
   StatCard,
 } from "@/app/lib/marketing/helpers";
+import { SectionGradientCards } from "@/app/ui/marketing/sections/section-gradient-cards";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import Link from "next/link";
 
@@ -46,49 +46,28 @@ export default function Page() {
           { href: "#discover", label: "Discover" },
         ]}
       />
-
       {/* =========================
           2) Feature band (gradient + waves)
          ========================= */}
-      <section className="relative">
-        <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
-          <Wave flip className="relative z-10 text-white" />
-          <SparklesOverlay />
-
-          <div className="relative z-10 mx-auto max-w-6xl px-4 py-18 md:px-6 md:py-24">
-            <SectionHeader
-              title="A clean system that stays out of your way."
-              subtitle="Structured recipes, reusable ingredients, and shopping lists that help you move faster, without clutter."
-            />
-
-            <div className="mt-12 grid gap-6 lg:grid-cols-3">
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-6">
-                <div className="text-sm font-semibold">Structured recipes</div>
-                <p className="mt-2 text-sm text-white/85">
-                  Ingredients, steps, and notes formatted the same every time.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-6">
-                <div className="text-sm font-semibold">
-                  Reusable ingredients
-                </div>
-                <p className="mt-2 text-sm text-white/85">
-                  Keep names consistent so your cookbook stays tidy.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-6">
-                <div className="text-sm font-semibold">Shopping lists</div>
-                <p className="mt-2 text-sm text-white/85">
-                  Pick recipes and generate a list you can actually shop from.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <Wave className="relative z-10 text-white" />
-        </div>
-      </section>
-
+      <SectionGradientCards
+        title="A clean system that stays out of your way."
+        subtitle="Structured recipes, reusable ingredients, and shopping lists that help you move faster, without clutter."
+        cards={[
+          {
+            title: "Structured recipes",
+            body: "Ingredients, steps, and notes formatted the same every time.",
+          },
+          {
+            title: "Reusable ingredients",
+            body: "Keep names consistent so your cookbook stays tidy.",
+          },
+          {
+            title: "Shopping lists",
+            body: "Pick recipes and generate a list you can actually shop from.",
+          },
+        ]}
+      />
+      ;
       {/* =========================
           3) Feature rows
          ========================= */}
@@ -291,7 +270,6 @@ export default function Page() {
           </div>
         </div>
       </section>
-
       {/* =========================
           3) Privacy section
         ========================= */}
