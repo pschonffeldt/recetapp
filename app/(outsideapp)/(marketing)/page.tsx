@@ -1,15 +1,107 @@
-import {
-  AppMock,
-  SparklesOverlay,
-  SectionHeader,
-  Wave,
-  StatCard,
-} from "@/app/lib/marketing/helpers";
+import { AppMock, SparklesOverlay, Wave } from "@/app/lib/marketing/helpers";
+import { FeatureContent } from "@/app/ui/marketing/sections/feature-content";
+import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
+import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { SectionGradientBand } from "@/app/ui/marketing/sections/section-gradient-band";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import Link from "next/link";
 
 export const metadata = { title: "RecetApp" };
+
+const FEATURES = [
+  {
+    id: "recipes",
+    eyebrow: "Provide clarity instantly",
+    title: "Find recipes fast, and trust what you saved.",
+    description:
+      "Save recipes with clean structure (ingredients, steps, notes) so they’re easy to read, edit, and cook from later.",
+    stats: [
+      {
+        value: "Less scrolling",
+        label: "Stop hunting through screenshots and messy notes.",
+      },
+      {
+        value: "More cooking",
+        label: "Get to the steps quickly with clear formatting.",
+      },
+    ],
+    bullets: [
+      "Search by title and type",
+      "Clean sections (ingredients / steps / dietary details)",
+      "Easy edits without losing structure",
+    ],
+    mediaLabel: "Recipe page preview",
+  },
+  {
+    id: "shopping",
+    eyebrow: "Shop smarter",
+    title: "Build a shopping list from multiple recipes.",
+    description:
+      "Pick the recipes you’re making and generate a list that’s actually usable at the store.",
+    stats: [
+      {
+        value: "Fewer repeats",
+        label: "Combine ingredients across recipes into one list.",
+      },
+      {
+        value: "Less forgetting",
+        label: "Keep items organized so you don’t miss essentials.",
+      },
+    ],
+    bullets: [
+      "Recipe picker → list in seconds",
+      "Better organization for real shopping",
+      "Less manual retyping",
+    ],
+    mediaLabel: "Shopping list preview",
+  },
+  {
+    id: "ingredients",
+    eyebrow: "Keep things consistent",
+    title: "Reuse ingredients instead of rewriting them.",
+    description:
+      "Consistent ingredient naming keeps your recipes cleaner and your lists easier to manage over time.",
+    stats: [
+      {
+        value: "Cleaner data",
+        label: "Ingredient names stay consistent across recipes.",
+      },
+      {
+        value: "Less work",
+        label: "Stop rewriting the same items again and again.",
+      },
+    ],
+    bullets: [
+      "Structured ingredients",
+      "Better long-term organization",
+      "Ready for future features",
+    ],
+    mediaLabel: "Ingredient structure preview",
+  },
+  {
+    id: "discover",
+    eyebrow: "Discover & share",
+    title: "Discover recipes, and share only when you&apos;re ready.",
+    description:
+      "Explore a growing library of community recipes and save them into your cookbook. Publish your own favorites only if you choose, with privacy controls that keep it simple.",
+    stats: [
+      {
+        value: "More inspiration",
+        label: "Find new ideas without losing your own system.",
+      },
+      {
+        value: "Your rules",
+        label: "Share publicly, share privately, or don’t share at all.",
+      },
+    ],
+    bullets: [
+      "Browse categories and trending recipes",
+      "Save to your cookbook with one click",
+      "Share selectively with simple privacy controls",
+    ],
+    mediaLabel: "Discover feed preview",
+  },
+] as const;
 
 export default function Page() {
   return (
@@ -32,201 +124,29 @@ export default function Page() {
         rightSlot={<AppMock label="Shopping list builder" />}
         tags={["Convenient", "Private", "Organized"]}
       />
-
       {/* =========================
           3) Alternating feature rows
         ========================= */}
-      <section className="mx-auto flex max-w-6xl flex-col gap-36 px-4 py-20 md:px-6 md:py-28">
-        {/* Feature 1 */}
-        <div
-          id="recipes"
-          className="grid gap-12 lg:grid-cols-2 lg:items-center"
-        >
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-              Provide clarity instantly
-            </p>
-            <h3 className="mt-3 text-4xl font-semibold tracking-tight md:text-[2.75rem]">
-              Find recipes fast, and trust what you saved.
-            </h3>
-            <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-              Save recipes with clean structure (ingredients, steps, notes) so
-              they’re easy to read, edit, and cook from later.
-            </p>
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
-              <StatCard
-                value="Less scrolling"
-                label="Stop hunting through screenshots and messy notes."
+      <SectionFeatures>
+        {FEATURES.map((f, idx) => (
+          <FeatureRow
+            key={f.id}
+            id={f.id}
+            reverse={idx % 2 === 1}
+            content={
+              <FeatureContent
+                eyebrow={f.eyebrow}
+                title={f.title}
+                description={f.description}
+                stats={[...f.stats]}
+                bullets={[...f.bullets]}
               />
-              <StatCard
-                value="More cooking"
-                label="Get to the steps quickly with clear formatting."
-              />
-            </div>
-            <div className="mt-7 space-y-2 text-sm text-gray-700">
-              <div className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Search by title and type</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>
-                  Clean sections (ingredients / steps / dietary details)
-                </span>
-              </div>
-              <div className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Easy edits without losing structure</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-start lg:justify-end">
-            {/* Force same width as other sections */}
-            <AppMock label="Recipe page preview" />
-          </div>
-        </div>
-        {/* Feature 2 */}
-        <div
-          id="shopping"
-          className="grid gap-12 lg:grid-cols-2 lg:items-center"
-        >
-          <div className="lg:order-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-              Shop smarter
-            </p>
-            <h3 className="mt-3 text-4xl font-semibold tracking-tight md:text-[2.75rem]">
-              Build a shopping list from multiple recipes.
-            </h3>
-            <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-              Pick the recipes you’re making and generate a list that’s actually
-              usable at the store.
-            </p>
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
-              <StatCard
-                value="Fewer repeats"
-                label="Combine ingredients across recipes into one list."
-              />
-              <StatCard
-                value="Less forgetting"
-                label="Keep items organized so you don’t miss essentials."
-              />
-            </div>
-            <div className="mt-7 space-y-2 text-sm text-gray-700">
-              <div className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Recipe picker → list in seconds</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Better organization for real shopping</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Less manual retyping</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-start lg:order-1">
-            <AppMock label="Shopping list preview" />
-          </div>
-        </div>
-        {/* Feature 3 */}
-        <div
-          id="ingredients"
-          className="grid gap-12 lg:grid-cols-2 lg:items-center"
-        >
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-              Keep things consistent
-            </p>
-            <h3 className="mt-3 text-4xl font-semibold tracking-tight md:text-[2.75rem]">
-              Reuse ingredients instead of rewriting them.
-            </h3>
-            <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-              Consistent ingredient naming keeps your recipes cleaner and your
-              lists easier to manage over time.
-            </p>
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
-              <StatCard
-                value="Cleaner data"
-                label="Ingredient names stay consistent across recipes."
-              />
-              <StatCard
-                value="Less work"
-                label="Stop rewriting the same items again and again."
-              />
-            </div>
-            <div className="mt-7 space-y-2 text-sm text-gray-700">
-              <div className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Structured ingredients</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Better long-term organization</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Ready for future features</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-start lg:justify-end">
-            <AppMock label="Ingredient structure preview" />
-          </div>
-        </div>
-        {/* Feature 4 (Discover) */}
-        <div
-          id="discover"
-          className="grid gap-12 lg:grid-cols-2 lg:items-center"
-        >
-          <div className="lg:order-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-              Discover & share
-            </p>
-
-            <h3 className="mt-3 text-4xl font-semibold tracking-tight md:text-[2.75rem]">
-              Discover recipes, and share only when you&apos;re ready.
-            </h3>
-
-            <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-              Explore a growing library of community recipes and save them into
-              your cookbook. Publish your own favorites only if you choose, with
-              privacy controls that keep it simple.
-            </p>
-
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
-              <StatCard
-                value="More inspiration"
-                label="Find new ideas without losing your own system."
-              />
-              <StatCard
-                value="Your rules"
-                label="Share publicly, share privately, or don’t share at all."
-              />
-            </div>
-
-            <div className="mt-7 space-y-2 text-sm text-gray-700">
-              <div className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Browse categories and trending recipes</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Save to your cookbook with one click</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="mt-2 h-1.5 w-1.5 rounded-full bg-blue-600" />
-                <span>Share selectively with simple privacy controls</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-start lg:order-1">
-            <AppMock label="Discover feed preview" />
-          </div>
-        </div>
-      </section>
+            }
+            media={<AppMock label={f.mediaLabel} />}
+          />
+        ))}
+      </SectionFeatures>
+      ;
       {/* =========================
           4) Privacy section
         ========================= */}
