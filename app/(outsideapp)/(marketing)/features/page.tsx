@@ -5,6 +5,7 @@ import {
   SectionHeader,
   StatCard,
 } from "@/app/lib/marketing/helpers";
+import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import Link from "next/link";
 
 export const metadata = { title: "Features" };
@@ -15,80 +16,36 @@ export default function Page() {
       {/* =========================
           1) HERO
          ========================= */}
-      <section className="relative overflow-hidden bg-white">
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          {/* soft blobs */}
-          <div className="absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-blue-500/20 blur-3xl" />
-          <div className="absolute -left-52 top-24 h-[520px] w-[520px] rounded-full bg-sky-400/20 blur-3xl" />
-          <div className="absolute -right-52 bottom-[-220px] h-[680px] w-[680px] rounded-full bg-indigo-500/15 blur-3xl" />
-
-          {/* arc wash */}
-          <div className="absolute inset-x-0 bottom-[-260px] h-[520px] rounded-[999px] bg-gradient-to-t from-blue-500/10 via-sky-400/5 to-transparent blur-2xl" />
-
-          {/* subtle noise */}
-          <div
-            className="absolute inset-0 opacity-[0.07] mix-blend-overlay"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E")`,
-            }}
-          />
-
-          {/* smooth bottom fade */}
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white" />
-        </div>
-
-        <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20 lg:min-h-[60vh] lg:flex lg:items-center">
-          <div className="grid w-full gap-10 lg:grid-cols-2 lg:items-center">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-                Features
-              </p>
-              <h1 className="mt-3 text-5xl font-semibold tracking-tight md:text-6xl">
-                Everything you need to save, reuse, and plan.
-              </h1>
-
-              <p className="mt-5 text-sm leading-6 text-gray-700 md:text-base">
-                RecetApp gives you a clean system for recipes and ingredients
-                plus a shopping list that&apos;s actually usable at the store.
-              </p>
-
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="/signup"
-                  className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-500"
-                >
-                  Get started free
-                </Link>
-                <Link
-                  href="/pricing"
-                  className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 hover:bg-gray-50"
-                >
-                  View pricing
-                </Link>
-              </div>
-
-              <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-gray-600">
-                <a href="#recipes" className="hover:underline">
-                  Recipes
-                </a>
-                <a href="#ingredients" className="hover:underline">
-                  Ingredients
-                </a>
-                <a href="#shopping" className="hover:underline">
-                  Shopping lists
-                </a>
-                <a href="#discover" className="hover:underline">
-                  Discover
-                </a>
-              </div>
-            </div>
-
-            <div className="flex justify-start z-10 lg:justify-end">
-              <AppMock label="RecetApp — features preview" />
-            </div>
+      <SectionHero
+        eyebrow="Features"
+        title="Everything you need to save, reuse, and plan."
+        description="RecetApp gives you a clean system for recipes and ingredients plus a shopping list that's actually usable at the store."
+        minHeightClass="lg:min-h-[60vh]"
+        backgroundVariant="features"
+        rightSlot={<AppMock label="RecetApp — features preview" />}
+        actions={
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/signup"
+              className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-500"
+            >
+              Get started free
+            </Link>
+            <Link
+              href="/pricing"
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 hover:bg-gray-50"
+            >
+              View pricing
+            </Link>
           </div>
-        </div>
-      </section>
+        }
+        quickLinks={[
+          { href: "#recipes", label: "Recipes" },
+          { href: "#ingredients", label: "Ingredients" },
+          { href: "#shopping", label: "Shopping lists" },
+          { href: "#discover", label: "Discover" },
+        ]}
+      />
 
       {/* =========================
           2) Feature band (gradient + waves)
