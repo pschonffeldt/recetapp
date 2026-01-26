@@ -1,4 +1,5 @@
-import { Wave, SparklesOverlay } from "@/app/lib/marketing/helpers";
+import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
+import { SectionStatsBand } from "@/app/ui/marketing/sections/section-stats-band";
 import Link from "next/link";
 
 export const metadata = { title: "Pricing" };
@@ -142,59 +143,41 @@ export default function Page() {
       {/* =========================
           1) HERO
          ========================= */}
-      <section className="relative overflow-hidden bg-white">
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-40 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-blue-500/20 blur-3xl" />
-          <div className="absolute -left-52 top-24 h-[520px] w-[520px] rounded-full bg-sky-400/20 blur-3xl" />
-          <div className="absolute -right-52 bottom-[-220px] h-[680px] w-[680px] rounded-full bg-indigo-500/15 blur-3xl" />
+      <SectionHero
+        eyebrow="Pricing"
+        title="Start free. Upgrade only if you need more."
+        description="Keep your cookbook organized with a plan that fits your needs."
+        backgroundVariant="features"
+        minHeightClass="" // pricing hero does not need forced min height
+        actions={
+          <>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-700 md:text-base">
+              The free plan is great to get started. Upgrade only when you want
+              more room.
+            </p>
 
-          <div className="absolute inset-x-0 bottom-[-260px] h-[520px] rounded-[999px] bg-gradient-to-t from-blue-500/10 via-sky-400/5 to-transparent blur-2xl" />
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/signup"
+                className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              >
+                Get started free
+              </Link>
 
-          <div
-            className="absolute inset-0 opacity-[0.07] mix-blend-overlay"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E")`,
-            }}
-          />
+              <Link
+                href="/features"
+                className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              >
+                See features
+              </Link>
+            </div>
 
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white" />
-        </div>
-
-        <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20">
-          <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-            Pricing
-          </p>
-          <h1 className="mt-3 text-5xl font-semibold tracking-tight md:text-6xl">
-            Start free. Upgrade only if you need more.
-          </h1>
-          <p className="mt-5 max-w-2xl text-sm leading-6 text-gray-700 md:text-base">
-            Keep your cookbook organized with a plan that fits your needs.
-          </p>
-          <p className="max-w-2xl text-sm leading-6 text-gray-700 md:text-base">
-            The free plan is great to get started, upgrade when you want more
-            room.
-          </p>
-
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link
-              href="/signup"
-              className="inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-500"
-            >
-              Get started free
-            </Link>
-            <Link
-              href="/features"
-              className="inline-flex h-10 items-center justify-center rounded-lg border border-gray-200 bg-white px-4 text-sm font-medium text-gray-900 hover:bg-gray-50"
-            >
-              See features
-            </Link>
-          </div>
-
-          <p className="mt-6 text-xs text-gray-600">
-            Prices shown in USD. Cancel anytime.
-          </p>
-        </div>
-      </section>
+            <p className="mt-6 text-xs text-gray-600">
+              Prices shown in USD. Cancel anytime.
+            </p>
+          </>
+        }
+      />
 
       {/* =========================
           2) Plans
@@ -236,42 +219,15 @@ export default function Page() {
       {/* =========================
           3) Trust band (gradient + waves)
          ========================= */}
-      <section className="relative">
-        <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 to-cyan-600 text-white">
-          <Wave flip className="relative z-10 text-white" />
-          <SparklesOverlay />
-
-          <div className="relative z-10 mx-auto max-w-6xl px-4 py-18 md:px-6 md:py-24">
-            <h2 className="text-center text-4xl font-semibold tracking-tight md:text-5xl">
-              A calm system you can grow into.
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-center text-sm text-white/85 md:text-base">
-              Start small, then expand your cookbook when you&apos;re ready. No
-              pressure just a cleaner way to keep recipes organized.
-            </p>
-
-            <div className="mt-12 grid gap-6 md:grid-cols-3">
-              {[
-                { value: "10", label: "recipes on the free plan" },
-                { value: "50", label: "recipes on Pro ($5/mo)" },
-                { value: "100", label: "recipes on Plus ($12/mo)" },
-              ].map((s) => (
-                <div
-                  key={s.label}
-                  className="rounded-2xl border border-white/15 bg-white/10 p-6 text-center"
-                >
-                  <div className="text-5xl font-semibold">{s.value}</div>
-                  <p className="mt-3 text-sm text-white/90 md:text-base">
-                    {s.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <Wave className="relative z-10 text-white" />
-        </div>
-      </section>
+      <SectionStatsBand
+        title="A calm system you can grow into."
+        subtitle="Start small, then expand your cookbook when you're ready. No pressure—just a cleaner way to keep recipes organized."
+        items={[
+          { value: "10", label: "recipes on the free plan" },
+          { value: "50", label: "recipes on Pro ($5/mo)" },
+          { value: "100", label: "recipes on Plus ($12/mo)" },
+        ]}
+      />
 
       {/* =========================
           4) What you're investing in (value + roadmap)

@@ -9,12 +9,11 @@ type SectionHeroProps = {
 
   eyebrow?: string;
 
-  // allow full control when you need it
   actions?: React.ReactNode;
 
   quickLinks?: HeroLink[];
 
-  rightSlot: React.ReactNode;
+  rightSlot?: React.ReactNode;
 
   minHeightClass?: string; // e.g. "lg:min-h-[60vh]"
   backgroundVariant?: "home" | "features";
@@ -33,6 +32,8 @@ export function SectionHero({
   backgroundVariant = "home",
   className,
 }: SectionHeroProps) {
+  const hasRight = Boolean(rightSlot);
+
   return (
     <section className={`relative overflow-hidden bg-white ${className ?? ""}`}>
       <SectionHeroBackground variant={backgroundVariant} />
@@ -40,7 +41,12 @@ export function SectionHero({
       <div
         className={`mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-20 ${minHeightClass} lg:flex lg:items-center`}
       >
-        <div className="grid w-full gap-12 lg:grid-cols-2 lg:items-center">
+        <div
+          className={[
+            "grid w-full gap-12 lg:items-center",
+            hasRight ? "lg:grid-cols-2" : "lg:grid-cols-1",
+          ].join(" ")}
+        >
           <div>
             {eyebrow && (
               <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
@@ -73,9 +79,11 @@ export function SectionHero({
             )}
           </div>
 
-          <div className="z-10 flex justify-start lg:justify-end">
-            {rightSlot}
-          </div>
+          {hasRight && (
+            <div className="z-10 flex justify-start lg:justify-end">
+              {rightSlot}
+            </div>
+          )}
         </div>
       </div>
     </section>
