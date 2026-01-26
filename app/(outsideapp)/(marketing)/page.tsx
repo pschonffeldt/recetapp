@@ -1,10 +1,12 @@
 import { AppMock, SparklesOverlay, Wave } from "@/app/lib/marketing/helpers";
 import { FeatureContent } from "@/app/ui/marketing/sections/feature-content";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
+import { FeaturedTestimonialCard } from "@/app/ui/marketing/sections/featured-testimonial-card";
 import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { SectionGradientBand } from "@/app/ui/marketing/sections/section-gradient-band";
 import { SectionGradientSplit } from "@/app/ui/marketing/sections/section-gradient-split";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
+import { SectionTestimonials } from "@/app/ui/marketing/sections/section-testimonials";
 import Link from "next/link";
 
 export const metadata = { title: "RecetApp" };
@@ -174,63 +176,17 @@ export default function Page() {
       {/* =========================
           5) People using it
          ========================= */}
-      <section className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-24">
-        <h2 className="text-center text-sm font-semibold text-gray-700">
-          People who cook at home love RecetApp.
-        </h2>
-
-        {/* Featured panel + thumbnail strip */}
-        <div className="mt-8 grid gap-6 lg:grid-cols-1 lg:items-stretch">
-          {/* Featured */}
-          <div className="lg:col-span-8">
-            <div className="relative overflow-hidden rounded-2xl border bg-white shadow-sm">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-cyan-50" />
-              <div className="relative grid gap-6 p-6 md:grid-cols-2 md:p-8">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-                    Featured story
-                  </p>
-                  <h3 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
-                    “Meal planning finally feels calm.”
-                  </h3>
-                  <p className="mt-3 text-sm leading-6 text-gray-700">
-                    I stopped saving recipes in 5 different places. Now I can
-                    actually find what I need, and my shopping list is done in
-                    minutes.
-                  </p>
-
-                  <div className="mt-5 flex items-center gap-3 text-sm text-gray-700">
-                    <span className="h-9 w-9 rounded-full bg-gray-200" />
-                    <div>
-                      <div className="font-semibold text-gray-900">Erin S.</div>
-                      <div className="text-xs text-gray-600">
-                        Weekly meal prep
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6">
-                    <Link
-                      href="/signup"
-                      className="inline-flex h-10 items-center rounded-lg bg-blue-500 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
-                    >
-                      Try it free
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Big media placeholder */}
-                <div className="rounded-xl border bg-white p-3 shadow-sm">
-                  <div className="h-52 w-full rounded-lg bg-gray-100 md:h-56" />
-                  <div className="mt-3 text-xs text-gray-500">
-                    Featured preview (swap for video/image later)
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <SectionTestimonials title="People who cook at home love RecetApp.">
+        <FeaturedTestimonialCard
+          quote="“Meal planning finally feels calm.”"
+          body="I stopped saving recipes in 5 different places. Now I can actually find what I need, and my shopping list is done in minutes."
+          authorName="Erin S."
+          authorMeta="Weekly meal prep"
+          cta={{ href: "/signup", label: "Try it free" }}
+          // media={<YourImageOrVideo />}
+        />
+      </SectionTestimonials>
+      ;
       {/* =========================
           6) Big stats band (wave top + bottom + taller)
         ========================= */}
