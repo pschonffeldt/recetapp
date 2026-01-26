@@ -4,6 +4,7 @@ type FeatureRowProps = {
   content: React.ReactNode;
   media: React.ReactNode;
   className?: string;
+  scrollMtClassName?: string;
 };
 
 export function FeatureRow({
@@ -12,11 +13,13 @@ export function FeatureRow({
   content,
   media,
   className,
+  scrollMtClassName,
 }: FeatureRowProps) {
   return (
     <div
       id={id}
       className={[
+        scrollMtClassName ?? "",
         "grid gap-12 lg:grid-cols-2 lg:items-center",
         className ?? "",
       ].join(" ")}
