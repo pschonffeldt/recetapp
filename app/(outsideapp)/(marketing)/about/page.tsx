@@ -41,11 +41,11 @@ export default function AboutPage() {
       />
 
       {/* =========================
-          3) Gradient band: mission / why (same structure)
+          2) Mission
          ========================= */}
       <SectionValueBand
         title="Built around real cooking habits."
-        subtitle="Most people cook from a mix of screenshots, bookmarks, and notes. RecetApp turns that into one trustworthy system — without overcomplicating your kitchen life."
+        subtitle="Most people cook from a mix of screenshots, bookmarks, and notes. RecetApp turns that into one trustworthy system without overcomplicating your kitchen life."
         items={[
           {
             title: "Clarity",
@@ -63,7 +63,7 @@ export default function AboutPage() {
       />
 
       {/* =========================
-          4) Values
+          3) Values
          ========================= */}
       <SectionFeatures gapClassName="gap-28">
         <FeatureRow
@@ -81,7 +81,7 @@ export default function AboutPage() {
               </h2>
 
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                The app should feel like a quiet helper — not another system you
+                The app should feel like a quiet helper, not another system you
                 have to maintain.
               </p>
 
@@ -147,12 +147,12 @@ export default function AboutPage() {
               </h2>
 
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                RecetApp is developed in Chile by its founder and a small team
-                with a simple goal: make everyday cooking feel calmer, faster,
-                and more organized.
+                RecetApp is developed in Chile by its founder with a simple
+                goal: make everyday cooking feel calmer, faster, and more
+                organized.
               </p>
 
-              {/* keep your commented bullets here if you want to re-enable later */}
+              {/* keep our commented bullets here if we want to re-enable later */}
             </div>
           }
           media={
@@ -171,7 +171,7 @@ export default function AboutPage() {
               />
               <InfoCard
                 title="Shipping in public"
-                body="Roadmap + releases stay visible so you can track what’s coming next."
+                body="Roadmap + releases stay visible so you can track what's coming next."
               />
             </div>
           }
