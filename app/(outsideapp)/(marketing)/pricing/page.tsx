@@ -14,7 +14,7 @@ const VALUE_ROW = {
   eyebrow: "Built for the long term",
   title: "More than features, a system you can trust.",
   description:
-    "RecetApp isn&apos;t about cramming in every possible feature. It&apos;s about building a calm, dependable system for people who cook at home — one that grows thoughtfully without becoming overwhelming.",
+    "RecetApp isn't about cramming in every possible feature. It's about building a calm, dependable system for people who cook at home — one that grows thoughtfully without becoming overwhelming.",
   ctas: [
     {
       href: "/roadmap",
@@ -37,7 +37,7 @@ const VALUE_ROW = {
       body: "Understand what you cook most and reuse it better.",
     },
     {
-      title: "Discover, done right (coming)",
+      title: "Discover, done right (now available)",
       body: "Browse community recipes without losing control of your system.",
     },
     {
@@ -45,7 +45,7 @@ const VALUE_ROW = {
       body: "Your data stays yours always.",
     },
   ],
-  note: "We build slowly, deliberately, and in public so you always know what you&apos;re paying for.",
+  note: "We build slowly, deliberately, and in public so you always know what you're paying for.",
 } as const;
 
 const plans: Plan[] = [
@@ -157,7 +157,7 @@ export default function Page() {
       />
 
       {/* =========================
-          4) What you're investing in (value + roadmap)
+          4) Values & roadmap
          ========================= */}
       <SectionFeatures gapClassName="gap-24">
         {[VALUE_ROW].map((row) => (
@@ -178,18 +178,18 @@ export default function Page() {
                 </p>
 
                 <div className="mt-8 flex flex-wrap gap-3">
-                  {row.ctas.map((c) => (
+                  {row.ctas.map((button) => (
                     <Link
-                      key={c.href}
-                      href={c.href}
+                      key={button.href}
+                      href={button.href}
                       className={[
                         "inline-flex h-10 items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors",
-                        c.variant === "primary"
+                        button.variant === "primary"
                           ? "bg-blue-600 text-white hover:bg-blue-500"
                           : "border border-gray-200 bg-white text-gray-900 hover:bg-gray-50",
                       ].join(" ")}
                     >
-                      {c.label}
+                      {button.label}
                     </Link>
                   ))}
                 </div>
@@ -198,16 +198,16 @@ export default function Page() {
             media={
               <div>
                 <div className="grid gap-4 md:grid-cols-2">
-                  {row.cards.map((c) => (
+                  {row.cards.map((cards) => (
                     <div
-                      key={c.title}
+                      key={cards.title}
                       className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
                     >
                       <div className="text-sm font-semibold text-gray-900">
-                        {c.title}
+                        {cards.title}
                       </div>
                       <p className="mt-2 text-sm leading-6 text-gray-700">
-                        {c.body}
+                        {cards.body}
                       </p>
                     </div>
                   ))}
@@ -230,7 +230,7 @@ export default function Page() {
           "One payment, no monthly fees",
           "Full access to current and future core features",
           "Priority feedback + early access to new tools",
-          "Joining the waitlist doesn&apos;t commit you to anything",
+          "Joining the waitlist doesn't commit you to anything",
         ]}
         cardTitle="Join the lifetime waitlist"
         cardDescription="Get notified if and when lifetime access becomes available."
