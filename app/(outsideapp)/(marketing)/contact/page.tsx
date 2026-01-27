@@ -66,11 +66,20 @@ function ContactFormCard() {
 
           <button
             type="button"
-            className="mt-1 inline-flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            className="mt-1 inline-flex h-10 items-center justify-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           >
-            Send message (hook up later)
+            Send message (under maintenance)
           </button>
 
+          <p className="text-xs text-gray-500 text-center">
+            Email us at{" "}
+            <a
+              href="mailto:info@mitkof.cl?subject=Support"
+              className="underline underline-offset-2"
+            >
+              info@mitkof.cl
+            </a>
+          </p>
           <p className="text-xs text-gray-500">
             By sending this message you agree to our{" "}
             <Link href="/privacy" className="underline underline-offset-2">
@@ -93,7 +102,7 @@ export default function ContactPage() {
       <SectionHero
         eyebrow="Contact"
         title="Talk to the RecetApp team."
-        description="Questions, feedback, or support — send a message and we’ll get back to you."
+        description="Questions, feedback, or support, send a message and we'll get back to you."
         backgroundVariant="features"
         minHeightClass="lg:min-h-[55vh]"
         actions={
@@ -138,7 +147,7 @@ export default function ContactPage() {
       />
 
       {/* =========================
-          3) FINAL CTA (small)
+          3) CTA
          ========================= */}
       <section className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-14">
         <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-sm md:p-10">
