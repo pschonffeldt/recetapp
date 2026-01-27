@@ -99,8 +99,8 @@ export function SectionHero({
           {rightSlot ? (
             <div
               className={[
-                "z-10 flex justify-start",
-                rightAlignClassName,
+                "z-10 flex justify-center", // mobile default
+                rightAlignClassName, // e.g. lg:justify-end
                 rightClass ?? "",
               ].join(" ")}
             >
