@@ -107,7 +107,7 @@ export default function Page() {
         title="Start free. Upgrade only if you need more."
         description="Keep your cookbook organized with a plan that fits your needs."
         backgroundVariant="features"
-        minHeightClass="" // pricing hero does not need forced min height
+        minHeightClass=""
         actions={
           <>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-700 md:text-base">
