@@ -31,7 +31,7 @@ export function SectionGradientSplit({
         <SparklesOverlay />
 
         <div className="relative z-10 mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+          <div className="text-center grid gap-12 lg:grid-cols-2 lg:items-center lg:text-left">
             <div>
               <h2 className="text-4xl font-semibold tracking-tight md:text-5xl">
                 {title}
