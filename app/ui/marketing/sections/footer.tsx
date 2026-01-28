@@ -63,6 +63,9 @@ export default function MarketingFooter() {
               >
                 Troubleshooting
               </Link>
+              <Link href="/contact" className="block hover:underline">
+                Contact
+              </Link>
             </div>
           </div>
           {/* Company */}
