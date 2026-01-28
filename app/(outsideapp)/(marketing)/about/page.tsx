@@ -1,6 +1,6 @@
 import { AppMock } from "@/app/lib/marketing/helpers";
-import InfoCard from "@/app/ui/marketing/home/home-infocards";
-import SoftDot from "@/app/ui/marketing/home/home-soft-dot";
+import InfoCard from "@/app/ui/marketing/sections/infocards";
+import SoftDot from "@/app/ui/marketing/sections/soft-dot";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
 import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";

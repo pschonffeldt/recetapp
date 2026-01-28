@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import MarketingCTA from "@/app/ui/marketing/home/home-cta";
-import MarketingFooter from "@/app/ui/marketing/home/home-footer";
-import MarketingTopNavBar from "@/app/ui/marketing/home/home-topnav";
+import MarketingCTA from "@/app/ui/marketing/sections/cta";
+import MarketingFooter from "@/app/ui/marketing/sections/footer";
+import MarketingTopNavBar from "@/app/ui/marketing/sections/topnav";
 
 export const metadata: Metadata = {
   title: {
