@@ -195,7 +195,6 @@ export default function Page() {
         ]}
         media={<AppMock label="Account / privacy controls preview" />}
       />
-      ;
       {/* =========================
           5) People using it
          ========================= */}
