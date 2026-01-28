@@ -50,8 +50,6 @@ export function PlanCard({
         <div className="text-sm text-gray-600">{sub}</div>
       </div>
 
-      <p className="mt-3 text-sm leading-6 text-gray-700">{sub}</p>
-
       <Link
         href={ctaHref}
         className={[

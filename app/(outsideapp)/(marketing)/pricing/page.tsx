@@ -1,5 +1,5 @@
+import { PLANS, VALUE_ROW } from "@/app/lib/content/pricing";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
-import { Plan } from "@/app/ui/marketing/sections/plan-card";
 import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import { SectionLifetimeDeal } from "@/app/ui/marketing/sections/section-lifetime-deal";
@@ -9,96 +9,9 @@ import Link from "next/link";
 
 export const metadata = { title: "Pricing" };
 
-const VALUE_ROW = {
-  id: "long-term",
-  eyebrow: "Built for the long term",
-  title: "More than features, a system you can trust.",
-  description:
-    "RecetApp isn't about cramming in every possible feature. It's about building a calm, dependable system for people who cook at home — one that grows thoughtfully without becoming overwhelming.",
-  ctas: [
-    {
-      href: "/roadmap",
-      label: "View roadmap",
-      variant: "secondary" as const,
-    },
-    {
-      href: "/signup",
-      label: "Start free",
-      variant: "primary" as const,
-    },
-  ],
-  cards: [
-    {
-      title: "Meal planning (coming)",
-      body: "Plan a week without turning cooking into a chore.",
-    },
-    {
-      title: "Smarter ingredient insights (coming)",
-      body: "Understand what you cook most and reuse it better.",
-    },
-    {
-      title: "Discover, done right (now available)",
-      body: "Browse community recipes without losing control of your system.",
-    },
-    {
-      title: "Export & portability (coming)",
-      body: "Your data stays yours always.",
-    },
-  ],
-  note: "We build slowly, deliberately, and in public so you always know what you're paying for.",
-} as const;
-
-const plans: Plan[] = [
-  {
-    label: "Free",
-    title: "Starter",
-    price: "$0",
-    sub: "Forever",
-    highlight: false,
-    ctaHref: "/signup",
-    ctaText: "Get started free",
-    features: [
-      "Up to 10 recipes",
-      "Structured ingredients + steps",
-      "Search your cookbook",
-      "Basic shopping list",
-    ],
-  },
-  {
-    label: "Pro",
-    title: "Home cook",
-    price: "$5",
-    sub: "per month",
-    highlight: true,
-    ctaHref: "/signup",
-    ctaText: "Start Pro",
-    features: [
-      "Up to 50 recipes",
-      "Reusable ingredients",
-      "Shopping lists from multiple recipes",
-      "Priority improvements (fast iterations)",
-    ],
-  },
-  {
-    label: "Plus",
-    title: "Power cook",
-    price: "$12",
-    sub: "per month",
-    highlight: false,
-    ctaHref: "/signup",
-    ctaText: "Start Plus",
-    features: [
-      "Up to 100 recipes",
-      "Everything in Pro",
-      "Best for meal prep + families",
-      "Early access to new features",
-    ],
-  },
-];
-
 export default function Page() {
   return (
-    <>
+    <div className="min-h-screen bg-white">
       {/* =========================
           1) HERO
          ========================= */}
@@ -106,10 +19,10 @@ export default function Page() {
         eyebrow="Pricing"
         title="Start free. Upgrade only if you need more."
         description="Keep your cookbook organized with a plan that fits your needs."
-        backgroundVariant="features"
+        backgroundVariant="home"
         minHeightClass=""
         actions={
-          <>
+          <div className="z-10">
             <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-700 md:text-base">
               The free plan is great to get started. Upgrade only when you want
               more room.
@@ -131,31 +44,30 @@ export default function Page() {
               </Link>
             </div>
 
-            <p className="mt-6 text-xs text-gray-600">
+            <p className="mt-6 text-xs text-gray-900 pb-10">
               Prices shown in USD. Cancel anytime.
             </p>
-          </>
+          </div>
         }
       />
 
       {/* =========================
           2) Plans
          ========================= */}
-      <SectionPlans plans={plans} />
+      <SectionPlans plans={PLANS} />
 
       {/* =========================
-          3) Trust band (gradient + waves)
+          3) Trust band 
          ========================= */}
       <SectionStatsBand
         title="A calm system you can grow into."
-        subtitle="Start small, then expand your cookbook when you're ready. No pressure—just a cleaner way to keep recipes organized."
+        subtitle="Start small, then expand your cookbook when you're ready. No pressure, just a cleaner way to keep recipes organized."
         items={[
           { value: "10", label: "recipes on the free plan" },
           { value: "50", label: "recipes on Pro ($5/mo)" },
           { value: "100", label: "recipes on Plus ($12/mo)" },
         ]}
       />
-
       {/* =========================
           4) Values & roadmap
          ========================= */}
@@ -219,7 +131,6 @@ export default function Page() {
           />
         ))}
       </SectionFeatures>
-
       {/* =========================
           5) Lifetime deal waitlist
          ========================= */}
@@ -237,6 +148,6 @@ export default function Page() {
         disabledCtaText="Join waitlist (not open yet)"
         footnote="No spam. One email when it launches (if it launches)."
       />
-    </>
+    </div>
   );
 }

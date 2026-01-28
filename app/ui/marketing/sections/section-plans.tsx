@@ -13,7 +13,7 @@ export function SectionPlans({ plans, className }: SectionPlansProps) {
         className ?? "",
       ].join(" ")}
     >
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-4">
         {plans.map((p) => (
           <PlanCard key={p.title} {...p} />
         ))}
