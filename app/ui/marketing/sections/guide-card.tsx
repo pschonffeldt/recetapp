@@ -1,11 +1,19 @@
+import Image from "next/image";
 import Link from "next/link";
+
+type GuideCardImage = {
+  src: string;
+  alt: string;
+  priority?: boolean;
+};
 
 type GuideCardProps = {
   type: string;
   title: string;
   body: string;
   href: string;
-  imageSlot?: React.ReactNode; // optional for later
+  image?: GuideCardImage;
+  imageSlot?: React.ReactNode;
   className?: string;
 };
 
@@ -14,6 +22,7 @@ export function GuideCard({
   title,
   body,
   href,
+  image,
   imageSlot,
   className,
 }: GuideCardProps) {
@@ -26,8 +35,23 @@ export function GuideCard({
       ].join(" ")}
     >
       {/* Image header */}
-      <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100">
-        {imageSlot}
+      <div className="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">
+        {imageSlot ? (
+          imageSlot
+        ) : image ? (
+          <>
+            <Image
+              src={image.src}
+              alt={image.alt}
+              fill
+              sizes="(min-width: 768px) 33vw, 100vw"
+              className="object-cover"
+              priority={image.priority ?? false}
+            />
+            {/* subtle polish overlay (optional but nice) */}
+            {/* <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" /> */}
+          </>
+        ) : null}
       </div>
 
       {/* Body */}

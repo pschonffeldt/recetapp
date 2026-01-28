@@ -99,17 +99,29 @@ export const GUIDES = [
     title: "Add your first recipe",
     body: "The fastest way to start building your personal cookbook.",
     href: "/help/getting-started",
+    image: {
+      src: "/images/guides/getting-started.webp",
+      alt: "Add your first recipe",
+    },
   },
   {
     type: "Feature",
     title: "Make a shopping list",
     body: "Pick recipes and generate a clean list for the store.",
     href: "/help/shopping-list",
+    image: {
+      src: "/images/guides/shopping-list.webp",
+      alt: "Make a shopping list",
+    },
   },
   {
     type: "Help",
     title: "Troubleshooting",
     body: "Quick fixes for the most common issues.",
     href: "/help/troubleshooting",
+    image: {
+      src: "/images/guides/troubleshooting.webp",
+      alt: "Troubleshooting",
+    },
   },
 ] as const;

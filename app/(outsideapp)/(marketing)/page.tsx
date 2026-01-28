@@ -126,6 +126,7 @@ export default function Page() {
             title={c.title}
             body={c.body}
             href={c.href}
+            image={c.image}
           />
         ))}
       </SectionCardsGrid>
