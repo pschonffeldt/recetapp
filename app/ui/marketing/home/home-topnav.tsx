@@ -50,6 +50,9 @@ export default function MarketingTopNavBar() {
 
         {/* Desktop nav */}
         <nav className="hidden items-start justify-start gap-6 text-base text-gray-700 md:flex">
+          <Link href="/" className="hover:text-gray-900 hover:underline">
+            Home
+          </Link>
           <Link
             href="/features"
             className="hover:text-gray-900 hover:underline"
@@ -58,9 +61,6 @@ export default function MarketingTopNavBar() {
           </Link>
           <Link href="/pricing" className="hover:text-gray-900 hover:underline">
             Pricing
-          </Link>
-          <Link href="/help" className="hover:text-gray-900 hover:underline">
-            Help
           </Link>
           <Link href="/about" className="hover:text-gray-900 hover:underline">
             About
@@ -142,13 +142,6 @@ export default function MarketingTopNavBar() {
                   Home
                 </Link>
                 <Link
-                  href="/about"
-                  onClick={close}
-                  className="rounded-lg px-2 py-2 hover:bg-blue-50"
-                >
-                  About
-                </Link>
-                <Link
                   href="/features"
                   onClick={close}
                   className="rounded-lg px-2 py-2 hover:bg-blue-50"
@@ -163,13 +156,12 @@ export default function MarketingTopNavBar() {
                   Pricing
                 </Link>
                 <Link
-                  href="/help"
+                  href="/about"
                   onClick={close}
                   className="rounded-lg px-2 py-2 hover:bg-blue-50"
                 >
-                  Help
+                  About
                 </Link>
-
                 <div className="mt-1 border-t pt-3">
                   <Link
                     href="/login"
