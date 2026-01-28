@@ -1,7 +1,8 @@
+import { ABOUT_ROWS } from "@/app/lib/content/about";
 import { AppMock } from "@/app/lib/marketing/helpers";
-import InfoCard from "@/app/ui/marketing/sections/infocards";
-import SoftDot from "@/app/ui/marketing/sections/soft-dot";
+import { AboutRowContent } from "@/app/ui/marketing/sections/about-row-content";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
+import InfoCard from "@/app/ui/marketing/sections/infocards";
 import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import { SectionValueBand } from "@/app/ui/marketing/sections/section-value-band";
@@ -39,7 +40,6 @@ export default function AboutPage() {
           </div>
         }
       />
-
       {/* =========================
           2) Mission
          ========================= */}
@@ -61,121 +61,35 @@ export default function AboutPage() {
           },
         ]}
       />
-
       {/* =========================
           3) Values
          ========================= */}
       <SectionFeatures gapClassName="gap-28">
-        <FeatureRow
-          layout="twelveCol"
-          leftColSpanClass="lg:col-span-5"
-          rightColSpanClass="lg:col-span-7"
-          content={
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-                Principles
-              </p>
-
-              <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-                Simple by design.
-              </h2>
-
-              <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                The app should feel like a quiet helper, not another system you
-                have to maintain.
-              </p>
-
-              <div className="mt-8 space-y-3 text-sm text-gray-700">
-                <div className="flex gap-3">
-                  <SoftDot />
-                  <span>Keep the main flows fast: save → find → cook.</span>
-                </div>
-
-                <div className="flex gap-3">
-                  <SoftDot />
-                  <span>
-                    Structure matters: ingredients and steps stay clean.
-                  </span>
-                </div>
-
-                <div className="flex gap-3">
-                  <SoftDot />
-                  <span>Privacy-first: your recipes are yours.</span>
-                </div>
-
-                <div className="flex gap-3">
-                  <SoftDot />
-                  <span>Helpful docs: a public Help Center for answers.</span>
-                </div>
+        {ABOUT_ROWS.map((row) => (
+          <FeatureRow
+            key={row.id}
+            id={row.id}
+            layout="twelveCol"
+            leftColSpanClass="lg:col-span-5"
+            rightColSpanClass="lg:col-span-7"
+            scrollMtClassName="scroll-mt-28"
+            content={
+              <AboutRowContent
+                eyebrow={row.eyebrow}
+                title={row.title}
+                description={row.description}
+                bullets={row.bullets}
+              />
+            }
+            media={
+              <div className="grid gap-6 md:grid-cols-2">
+                {row.cards.map((c) => (
+                  <InfoCard key={c.title} title={c.title} body={c.body} />
+                ))}
               </div>
-            </div>
-          }
-          media={
-            <div className="grid gap-6 md:grid-cols-2">
-              <InfoCard
-                title="Private by default"
-                body="Recipes stay private unless you choose to share. No surprises."
-              />
-              <InfoCard
-                title="Built for repeat cooking"
-                body="Favorites, notes, and ingredient reuse make weeknights easier."
-              />
-              <InfoCard
-                title="Organized shopping"
-                body="Generate lists from multiple recipes so you stop retyping."
-              />
-              <InfoCard
-                title="Iterating in public"
-                body="Roadmap + releases are visible so you can track what's shipping."
-              />
-            </div>
-          }
-        />
-
-        <FeatureRow
-          layout="twelveCol"
-          leftColSpanClass="lg:col-span-5"
-          rightColSpanClass="lg:col-span-7"
-          content={
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
-                Built in Chile
-              </p>
-
-              <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-                Crafted by a small team that cooks at home.
-              </h2>
-
-              <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                RecetApp is developed in Chile by its founder with a simple
-                goal: make everyday cooking feel calmer, faster, and more
-                organized.
-              </p>
-
-              {/* keep our commented bullets here if we want to re-enable later */}
-            </div>
-          }
-          media={
-            <div className="grid gap-6 md:grid-cols-2">
-              <InfoCard
-                title="Founder-led"
-                body="Built with a clear direction: reduce friction for real home cooking."
-              />
-              <InfoCard
-                title="Small team, big focus"
-                body="We prioritize the core flows that matter: save → find → cook."
-              />
-              <InfoCard
-                title="Made in Chile"
-                body="Designed and developed in Chile with a strong craft-first mindset."
-              />
-              <InfoCard
-                title="Shipping in public"
-                body="Roadmap + releases stay visible so you can track what's coming next."
-              />
-            </div>
-          }
-        />
+            }
+          />
+        ))}
       </SectionFeatures>
     </div>
   );
