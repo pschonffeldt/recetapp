@@ -25,7 +25,7 @@ const initial: SignupState = { ok: false, message: null, errors: {} };
 export default function SignupForm() {
   const reducer = async (
     _prev: SignupState,
-    formData: FormData
+    formData: FormData,
   ): Promise<SignupState> => {
     const res = await createAccount(_prev, formData);
     return res as SignupState;
@@ -33,7 +33,7 @@ export default function SignupForm() {
 
   const [state, formAction, isPending] = useActionState<SignupState, FormData>(
     reducer,
-    initial
+    initial,
   );
 
   const err = (k: keyof SignupState["errors"] | string) =>
@@ -252,7 +252,7 @@ export default function SignupForm() {
 
         <p className="flex min-h-12 items-center justify-center text-center text-sm">
           Already have an account?{" "}
-          <Link href="/login" className="text-blue-600 hover:underline">
+          <Link href="/login" className="text-blue-600 pl-1 hover:underline">
             Log in
           </Link>
         </p>
