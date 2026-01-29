@@ -96,7 +96,7 @@ export const PLANS: Plan[] = [
     features: [
       "Unlimited recipes",
       "Everything in Power Cook",
-      "Team access (multiple users)",
+      "Team access ($5 per user)",
       "Operational shopping lists",
       "Priority support",
     ],
