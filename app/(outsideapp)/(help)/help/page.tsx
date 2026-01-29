@@ -2,6 +2,7 @@ import Link from "next/link";
 import HelpHero from "@/app/ui/help/help-hero";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { fetchHelpCategories, searchHelpArticles } from "@/app/lib/help/data";
+import { Button } from "@/app/ui/general/button";
 
 export const metadata = { title: "Help • RecetApp" };
 
@@ -28,12 +29,14 @@ export default async function HelpHome({
           breadcrumbs={[{ label: "Topics", href: "/help", active: true }]}
         />
 
+        <Link href="/help" className="inline-block">
+          <Button type="button" className="mb-6">
+            ← Help home
+          </Button>
+        </Link>
+
         {q ? (
           <>
-            <h2 className="mb-4 text-lg font-semibold">
-              Search results for “{q}”
-            </h2>
-
             {results.length === 0 ? (
               <p className="text-sm text-gray-600">
                 No results found. Try a different search.
