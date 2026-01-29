@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 
 export default function MarketingTopNavBar() {
   const [open, setOpen] = useState(false);
@@ -16,7 +17,7 @@ export default function MarketingTopNavBar() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  // Close on click outside
+  // Close on click outside (panel)
   useEffect(() => {
     function onClick(e: MouseEvent) {
       if (!open) return;
@@ -93,7 +94,6 @@ export default function MarketingTopNavBar() {
             aria-controls="marketing-mobile-menu"
             onClick={() => setOpen((v) => !v)}
           >
-            {/* simple hamburger / close icon */}
             <span className="sr-only">Toggle menu</span>
             <svg
               viewBox="0 0 24 24"
@@ -120,62 +120,86 @@ export default function MarketingTopNavBar() {
         </div>
       </div>
 
-      {/* Mobile menu overlay + panel */}
-      {open && (
-        <div className="md:hidden">
-          {/* overlay */}
-          <div className="fixed inset-0 z-40 bg-black/20" onClick={close} />
+      {/* Mobile menu overlay + panel (PORTAL to body so it covers the entire site) */}
+      {open &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div className="md:hidden">
+            {/* Full-screen overlay */}
+            <div
+              className="fixed inset-0 z-[90] bg-black/40 backdrop-blur-[2px]"
+              onClick={close}
+              aria-hidden="true"
+            />
 
-          {/* panel */}
-          <div
-            id="marketing-mobile-menu"
-            ref={panelRef}
-            className="fixed inset-x-0 top-[65px] z-50 border-b bg-white backdrop-blur"
-          >
-            <div className="mx-auto max-w-6xl px-4 py-4 md:px-6">
-              <nav className="grid gap-3 text-base text-gray-800">
-                <Link
-                  href="/"
+            {/* Panel */}
+            <div
+              id="marketing-mobile-menu"
+              ref={panelRef}
+              className="fixed inset-x-0 top-0 z-[100] border-b bg-white"
+            >
+              {/* Optional: keep the top bar area consistent */}
+              <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
+                <span className="text-base font-semibold tracking-tight">
+                  RecetApp
+                </span>
+                <button
+                  type="button"
                   onClick={close}
-                  className="rounded-lg px-2 py-2 hover:bg-blue-50"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                  aria-label="Close menu"
                 >
-                  Home
-                </Link>
-                <Link
-                  href="/features"
-                  onClick={close}
-                  className="rounded-lg px-2 py-2 hover:bg-blue-50"
-                >
-                  Features
-                </Link>
-                <Link
-                  href="/pricing"
-                  onClick={close}
-                  className="rounded-lg px-2 py-2 hover:bg-blue-50"
-                >
-                  Pricing
-                </Link>
-                <Link
-                  href="/about"
-                  onClick={close}
-                  className="rounded-lg px-2 py-2 hover:bg-blue-50"
-                >
-                  About
-                </Link>
-                <div className="mt-1 border-t pt-3">
+                  ✕
+                </button>
+              </div>
+
+              <div className="mx-auto max-w-6xl px-4 pb-5 md:px-6">
+                <div className="mt-2 border-t pt-3"></div>
+                <nav className="grid gap-2 text-base text-gray-800">
                   <Link
-                    href="/login"
+                    href="/"
                     onClick={close}
-                    className="block rounded-lg px-2 py-2 text-gray-700 hover:bg-blue-50"
+                    className="rounded-lg px-2 py-3 hover:bg-blue-50"
                   >
-                    Log in
+                    Home
                   </Link>
-                </div>
-              </nav>
+                  <Link
+                    href="/features"
+                    onClick={close}
+                    className="rounded-lg px-2 py-3 hover:bg-blue-50"
+                  >
+                    Features
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    onClick={close}
+                    className="rounded-lg px-2 py-3 hover:bg-blue-50"
+                  >
+                    Pricing
+                  </Link>
+                  <Link
+                    href="/about"
+                    onClick={close}
+                    className="rounded-lg px-2 py-3 hover:bg-blue-50"
+                  >
+                    About
+                  </Link>
+
+                  <div className="mt-2 border-t pt-3">
+                    <Link
+                      href="/login"
+                      onClick={close}
+                      className="block rounded-lg px-2 py-3 text-gray-700 hover:bg-blue-50"
+                    >
+                      Log in
+                    </Link>
+                  </div>
+                </nav>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </header>
   );
 }
