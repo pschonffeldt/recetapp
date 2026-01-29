@@ -68,16 +68,18 @@ export function FeatureRow({
         " ",
       )}
     >
-      <div className={leftFinalClass}>{content}</div>
+      {/* Content column */}
+      <div className={["min-w-0", leftFinalClass].join(" ")}>{content}</div>
 
+      {/* Media column */}
       <div
         className={[
-          "flex justify-start",
+          "flex w-full min-w-0 justify-start",
           mediaAlignClassName,
           rightFinalClass,
         ].join(" ")}
       >
-        {media}
+        <div className="w-full min-w-0">{media}</div>
       </div>
     </div>
   );

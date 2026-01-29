@@ -6,8 +6,8 @@ export const metadata = { title: "Contact Center • RecetApp" };
 
 export default function ContactCenterPage() {
   return (
-    <div className="min-h-screen bg-white">
-      <section className="relative overflow-hidden bg-white">
+    <div className="bg-white">
+      <section className="pb-20 relative overflow-hidden bg-white">
         {/* Subtle background only */}
         <SectionHeroBackground variant="features" />
 
@@ -21,9 +21,6 @@ export default function ContactCenterPage() {
               <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
                 Send a message
               </h1>
-              {/* <p className="mt-2 text-sm text-gray-700">
-                We typically reply within 1–2 business days.
-              </p> */}
             </div>
 
             <div className="flex flex-wrap gap-2">
