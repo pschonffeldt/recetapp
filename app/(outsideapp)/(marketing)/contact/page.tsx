@@ -3,95 +3,9 @@ import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import { SectionValueBand } from "@/app/ui/marketing/sections/section-value-band";
 import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
+import { ContactFormCard } from "@/app/ui/marketing/sections/contact-form-card";
 
 export const metadata = { title: "Contact • RecetApp" };
-
-function ContactFormCard() {
-  return (
-    <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
-      <div className="border-b px-5 py-4">
-        <div className="text-sm font-semibold text-gray-900">
-          Send a message
-        </div>
-        <p className="mt-1 text-sm text-gray-600">
-          We usually reply within 1–2 business days.
-        </p>
-      </div>
-
-      <form className="p-5">
-        <div className="grid gap-4">
-          <label className="grid gap-1">
-            <span className="text-xs font-semibold text-gray-700">Name</span>
-            <input
-              name="name"
-              placeholder="Your name"
-              className="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-            />
-          </label>
-
-          <label className="grid gap-1">
-            <span className="text-xs font-semibold text-gray-700">Email</span>
-            <input
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              className="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-            />
-          </label>
-
-          <label className="grid gap-1">
-            <span className="text-xs font-semibold text-gray-700">Topic</span>
-            <select
-              name="topic"
-              className="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm text-gray-900 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-              defaultValue="support"
-            >
-              <option value="support">Support</option>
-              <option value="feedback">Product feedback</option>
-              <option value="billing">Billing / pricing</option>
-              <option value="partnerships">Partnerships</option>
-              <option value="other">Other</option>
-            </select>
-          </label>
-
-          <label className="grid gap-1">
-            <span className="text-xs font-semibold text-gray-700">Message</span>
-            <textarea
-              name="message"
-              rows={5}
-              placeholder="Tell us what you need…"
-              className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-            />
-          </label>
-
-          <button
-            type="button"
-            className="mt-1 inline-flex h-10 items-center justify-center rounded-lg bg-red-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-          >
-            Send message (under maintenance)
-          </button>
-
-          <p className="text-xs text-gray-500 text-center">
-            Email us at{" "}
-            <a
-              href="mailto:info@mitkof.cl?subject=Support"
-              className="underline underline-offset-2"
-            >
-              info@mitkof.cl
-            </a>
-          </p>
-          <p className="text-xs text-gray-500">
-            By sending this message you agree to our{" "}
-            <Link href="/privacy" className="underline underline-offset-2">
-              Privacy Policy
-            </Link>
-            .
-          </p>
-        </div>
-      </form>
-    </div>
-  );
-}
 
 export default function ContactPage() {
   return (
