@@ -1,4 +1,5 @@
 import { fetchReleaseNotes } from "@/app/lib/marketing/data";
+import { APP } from "@/app/lib/utils/app";
 
 function formatReleaseDate(value: string) {
   const date = new Date(value);
@@ -9,8 +10,9 @@ function formatReleaseDate(value: string) {
     day: "2-digit",
   });
 }
-
-export const metadata = { title: "Release notes • RecetApp" };
+export const metadata = {
+  title: `Release notes • ${APP.name}`,
+};
 
 export default async function ReleasesPage() {
   const releases = await fetchReleaseNotes();
@@ -20,7 +22,7 @@ export default async function ReleasesPage() {
       <h1 className="text-3xl font-semibold tracking-tight mb-2">
         Release notes
       </h1>
-      <p className="text-sm text-gray-500 mb-6">What&apos;s new in RecetApp.</p>
+      <p className="text-sm text-gray-500 mb-6">{`What's new in ${APP.legalName}.`}</p>
 
       {releases.length === 0 && (
         <p className="text-sm text-gray-500">No releases yet.</p>
