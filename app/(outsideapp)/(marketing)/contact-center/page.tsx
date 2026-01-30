@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { SectionHeroBackground } from "@/app/ui/marketing/sections/section-hero-background";
 import { ContactFormCard } from "@/app/ui/marketing/sections/contact-form-card";
+import { APP } from "@/app/lib/utils/app";
 
-export const metadata = { title: "Contact Center • RecetApp" };
+export const metadata = {
+  title: `Contact center • ${APP.name}`,
+};
 
 export default function ContactCenterPage() {
   return (

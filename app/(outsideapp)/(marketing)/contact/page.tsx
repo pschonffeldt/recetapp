@@ -1,4 +1,5 @@
 import { CONTACT_ROWS } from "@/app/lib/content/contact";
+import { APP } from "@/app/lib/utils/app";
 import { AboutRowContent } from "@/app/ui/marketing/sections/about-row-content";
 import { ContactFormCard } from "@/app/ui/marketing/sections/contact-form-card";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
@@ -8,7 +9,9 @@ import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import { SectionValueBand } from "@/app/ui/marketing/sections/section-value-band";
 import Link from "next/link";
 
-export const metadata = { title: "Contact • RecetApp" };
+export const metadata = {
+  title: `Contact • ${APP.name}`,
+};
 
 export default function ContactPage() {
   return (
@@ -18,7 +21,7 @@ export default function ContactPage() {
          ========================= */}
       <SectionHero
         eyebrow="Contact"
-        title="Talk to the RecetApp team."
+        title={`Talk to the ${APP.legalName} team.`}
         description="Questions, feedback, or support, send a message and we'll get back to you."
         backgroundVariant="features"
         minHeightClass="lg:min-h-[55vh]"

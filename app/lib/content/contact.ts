@@ -1,12 +1,9 @@
 export type ContactRow = {
   id: string;
-
   eyebrow: string;
   title: string;
   description: string;
-
   bullets: string[];
-
   cards: {
     title: string;
     body: string;
@@ -19,7 +16,7 @@ export const CONTACT_ROWS: ContactRow[] = [
     eyebrow: "Ways to reach us",
     title: "Pick the channel that fits.",
     description:
-      "For most questions, the form is the fastest. If you’re already a user, include the email you signed up with.",
+      "For most questions, the form is the fastest. If you're already a user, include the email you signed up with.",
     bullets: [
       "Help Center: docs + troubleshooting",
       "Roadmap: what we're building",
