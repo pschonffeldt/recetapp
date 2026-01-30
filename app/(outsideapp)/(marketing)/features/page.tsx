@@ -1,5 +1,6 @@
 import { FEATURE_ROWS } from "@/app/lib/content/features";
 import { AppMock } from "@/app/lib/marketing/helpers";
+import { APP } from "@/app/lib/utils/app";
 import { FeatureContent } from "@/app/ui/marketing/sections/feature-content";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
 import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
@@ -8,7 +9,9 @@ import { SectionGradientSplit } from "@/app/ui/marketing/sections/section-gradie
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import Link from "next/link";
 
-export const metadata = { title: "Features" };
+export const metadata = {
+  title: `Features • ${APP.name}`,
+};
 
 export default function Page() {
   return (
@@ -19,14 +22,14 @@ export default function Page() {
       <SectionHero
         eyebrow="Features"
         title="Everything you need to save, reuse, and plan."
-        description="RecetApp gives you a clean system for recipes and ingredients plus a shopping list that's actually usable at the store."
+        description={`${APP.legalName} gives you a clean system for recipes and ingredients plus a shopping list that's actually usable at the store.`}
         minHeightClass="lg:min-h-[60vh]"
         backgroundVariant="features"
         rightSlot={
           <AppMock
-            label="RecetApp — dashboard preview"
+            label={`${APP.legalName} — dashboard preview`}
             imageSrc="/images/homepage/home-dashboard.webp"
-            imageAlt="RecetApp dashboard dashboard preview"
+            imageAlt={`${APP.legalName} dashboard dashboard preview`}
             priority
             fit="contain"
             aspectClassName="aspect-[16/9]"
@@ -124,9 +127,9 @@ export default function Page() {
         ]}
         media={
           <AppMock
-            label="RecetApp — dashboard preview"
+            label={`${APP.legalName} — dashboard preview`}
             imageSrc="/images/homepage/home-dashboard.webp"
-            imageAlt="RecetApp dashboard dashboard preview"
+            imageAlt={`${APP.legalName} dashboard dashboard preview`}
             priority
             fit="contain"
             aspectClassName="aspect-[16/9]"
