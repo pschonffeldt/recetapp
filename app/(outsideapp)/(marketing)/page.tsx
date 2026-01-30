@@ -23,7 +23,17 @@ export default function Page() {
       <SectionHero
         title="The easiest way to keep your recipes organized."
         description="RecetApp helps you save structured recipes, reuse ingredients, and generate shopping lists fast so meal planning feels effortless."
-        rightSlot={<AppMock label="RecetApp — dashboard preview" />}
+        rightSlot={
+          <AppMock
+            label="RecetApp — dashboard preview"
+            imageSrc="/images/homepage/home-dashboard.webp"
+            imageAlt="RecetApp dashboard dashboard preview"
+            priority
+            fit="contain"
+            aspectClassName="aspect-[16/9]"
+            innerPaddingClassName="p-4"
+          />
+        }
       />
       {/* =========================
           2) Big gradient band

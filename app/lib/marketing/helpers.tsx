@@ -48,14 +48,38 @@ export function SparklesOverlay() {
   );
 }
 
+import Image from "next/image";
+
+type AppMockProps = {
+  label: string;
+  wide?: boolean;
+
+  imageSrc?: string;
+  imageAlt?: string;
+
+  priority?: boolean;
+  sizes?: string;
+
+  /** new */
+  fit?: "contain" | "cover";
+  aspectClassName?: string; // e.g. "aspect-[16/9]" | "aspect-[4/3]" | "aspect-[3/2]"
+  innerPaddingClassName?: string; // e.g. "p-2" | "p-3"
+};
+
 export function AppMock({
   label,
   wide = true,
-}: {
-  label: string;
-  wide?: boolean;
-}) {
-  // Always enforce consistent width + prevent narrow shrink in grid layouts
+  imageSrc,
+  imageAlt = "",
+  priority = false,
+  sizes,
+
+  fit = "contain",
+  aspectClassName = "aspect-[16/9]",
+  innerPaddingClassName = "p-2",
+}: AppMockProps) {
+  const objectClass = fit === "cover" ? "object-cover" : "object-contain";
+
   return (
     <div
       className={[
@@ -70,8 +94,38 @@ export function AppMock({
         <span className="h-3 w-3 rounded-full bg-green-400" />
         <div className="ml-2 text-xs text-gray-500">{label}</div>
       </div>
-      <div className="p-4 md:p-6">
-        <div className="h-60 w-full rounded-xl bg-gray-100 md:h-72" />
+
+      <div className="">
+        <div
+          className={[
+            "relative w-full overflow-hidden border border-gray-100",
+            // friendly background so “empty space” looks designed
+            "bg-gradient-to-b from-gray-50 to-white",
+            aspectClassName,
+          ].join(" ")}
+        >
+          <div
+            className={["absolute inset-0", innerPaddingClassName].join(" ")}
+          >
+            {imageSrc ? (
+              <div className="relative h-full w-full">
+                <Image
+                  src={imageSrc}
+                  alt={imageAlt || label}
+                  fill
+                  className={["rounded-lg", objectClass].join(" ")}
+                  priority={priority}
+                  sizes={
+                    sizes ??
+                    "(min-width: 1024px) 560px, (min-width: 768px) 520px, 92vw"
+                  }
+                />
+              </div>
+            ) : (
+              <div className="h-full w-full rounded-lg bg-gray-100" />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
