@@ -22,7 +22,17 @@ export default function AboutPage() {
         description="RecetApp exists to remove the “where did I save that?” chaos. It helps you keep recipes clean and structured, reuse ingredients across dishes, and generate shopping lists that are actually useful at the store."
         minHeightClass="lg:min-h-[60vh]"
         backgroundVariant="about"
-        rightSlot={<AppMock label="RecetApp — features preview" />}
+        rightSlot={
+          <AppMock
+            label="RecetApp — dashboard preview"
+            imageSrc="/images/homepage/home-dashboard.webp"
+            imageAlt="RecetApp dashboard dashboard preview"
+            priority
+            fit="contain"
+            aspectClassName="aspect-[16/9]"
+            innerPaddingClassName="p-4"
+          />
+        }
         actions={
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
