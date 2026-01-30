@@ -1,5 +1,6 @@
 import { FEATURES, GUIDES } from "@/app/lib/content/home";
 import { AppMock } from "@/app/lib/marketing/helpers";
+import { APP } from "@/app/lib/utils/app";
 import { FeatureContent } from "@/app/ui/marketing/sections/feature-content";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
 import { FeaturedTestimonialCard } from "@/app/ui/marketing/sections/featured-testimonial-card";
@@ -12,7 +13,9 @@ import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import { SectionStatsBand } from "@/app/ui/marketing/sections/section-stats-band";
 import { SectionTestimonials } from "@/app/ui/marketing/sections/section-testimonials";
 
-export const metadata = { title: "RecetApp" };
+export const metadata = {
+  title: `Home • ${APP.name}`,
+};
 
 export default function Page() {
   return (
@@ -22,12 +25,12 @@ export default function Page() {
         ========================= */}
       <SectionHero
         title="The easiest way to keep your recipes organized."
-        description="RecetApp helps you save structured recipes, reuse ingredients, and generate shopping lists fast so meal planning feels effortless."
+        description={`${APP.description} helps you save structured recipes, reuse ingredients, and generate shopping lists fast so meal planning feels effortless.`}
         rightSlot={
           <AppMock
-            label="RecetApp — dashboard preview"
+            label={`${APP.legalName} — dashboard preview`}
             imageSrc="/images/homepage/home-dashboard.webp"
-            imageAlt="RecetApp dashboard dashboard preview"
+            imageAlt={`${APP.legalName} dashboard dashboard preview`}
             priority
             fit="contain"
             aspectClassName="aspect-[16/9]"
@@ -39,13 +42,13 @@ export default function Page() {
           2) Big gradient band
         ========================= */}
       <SectionGradientBand
-        title="Reimagine the limits of what’s possible in your kitchen."
-        subtitle="From “where did I save that recipe?” to a clean system you can trust, RecetApp keeps everything organized."
+        title="Reimagine the limits of what's possible in your kitchen."
+        subtitle={`From “where did I save that recipe?” to a clean system you can trust, ${APP.legalName} keeps everything organized.`}
         leftSlot={
           <AppMock
-            label="RecetApp — dashboard preview"
+            label={`${APP.legalName} — dashboard preview`}
             imageSrc="/images/homepage/home-dashboard.webp"
-            imageAlt="RecetApp dashboard dashboard preview"
+            imageAlt={`${APP.legalName} dashboard dashboard preview`}
             priority
             fit="contain"
             aspectClassName="aspect-[16/9]"
@@ -54,9 +57,9 @@ export default function Page() {
         }
         rightSlot={
           <AppMock
-            label="RecetApp — dashboard preview"
+            label={`${APP.legalName} — dashboard preview`}
             imageSrc="/images/homepage/home-dashboard.webp"
-            imageAlt="RecetApp dashboard dashboard preview"
+            imageAlt={`${APP.legalName} dashboard dashboard preview`}
             priority
             fit="contain"
             aspectClassName="aspect-[16/9]"
@@ -116,9 +119,9 @@ export default function Page() {
         ]}
         media={
           <AppMock
-            label="RecetApp — dashboard preview"
+            label={`${APP.legalName} — dashboard preview`}
             imageSrc="/images/homepage/home-dashboard.webp"
-            imageAlt="RecetApp dashboard dashboard preview"
+            imageAlt={`${APP.legalName} dashboard dashboard preview`}
             priority
             fit="contain"
             aspectClassName="aspect-[16/9]"
@@ -129,7 +132,9 @@ export default function Page() {
       {/* =========================
           5) People using it
          ========================= */}
-      <SectionTestimonials title="People who cook at home love RecetApp.">
+      <SectionTestimonials
+        title={`People who cook at home love ${APP.legalName}.`}
+      >
         <FeaturedTestimonialCard
           quote="“Meal planning finally feels calm.”"
           body="I stopped saving recipes in 5 different places. Now I can actually find what I need, and my shopping list is done in minutes."

@@ -1,3 +1,5 @@
+import { APP } from "../utils/app";
+
 export const FEATURES = [
   {
     id: "recipes",
@@ -20,9 +22,9 @@ export const FEATURES = [
       "Clean sections (ingredients / steps / dietary details)",
       "Easy edits without losing structure",
     ],
-    mediaLabel: "Recipe page preview",
+    mediaLabel: `${APP.legalName} — recipe preview`,
     imageSrc: "/images/homepage/home-dashboard.webp",
-    imageAlt: "RecetApp recipe page preview",
+    imageAlt: `${APP.legalName} recipe page preview`,
   },
   {
     id: "shopping",
@@ -45,9 +47,9 @@ export const FEATURES = [
       "Better organization for real shopping",
       "Less manual retyping",
     ],
-    mediaLabel: "Shopping list preview",
+    mediaLabel: `${APP.legalName} — shopping list preview`,
     imageSrc: "/images/homepage/home-dashboard.webp",
-    imageAlt: "RecetApp shopping list preview",
+    imageAlt: `${APP.legalName} shopping list preview`,
   },
   {
     id: "ingredients",
@@ -70,9 +72,9 @@ export const FEATURES = [
       "Better long-term organization",
       "Ready for future features",
     ],
-    mediaLabel: "Ingredient structure preview",
+    mediaLabel: `${APP.legalName} — ingredient structure preview`,
     imageSrc: "/images/homepage/home-dashboard.webp",
-    imageAlt: "RecetApp ingredient structure preview",
+    imageAlt: `${APP.legalName} ingredient structure preview`,
   },
   {
     id: "discover",
@@ -95,9 +97,9 @@ export const FEATURES = [
       "Save to your cookbook with one click",
       "Share selectively with simple privacy controls",
     ],
-    mediaLabel: "Discover feed preview",
+    mediaLabel: `${APP.legalName} — discover feed preview`,
     imageSrc: "/images/homepage/home-dashboard.webp",
-    imageAlt: "RecetApp discover feed preview",
+    imageAlt: `${APP.legalName} discover feed preview`,
   },
 ] as const;
 
@@ -109,7 +111,7 @@ export const GUIDES = [
     href: "/help/getting-started",
     image: {
       src: "/images/guides/getting-started.webp",
-      alt: "Add your first recipe",
+      alt: `Add your first recipe in ${APP.legalName}`,
     },
   },
   {
@@ -119,7 +121,7 @@ export const GUIDES = [
     href: "/help/shopping-list",
     image: {
       src: "/images/guides/shopping-list.webp",
-      alt: "Make a shopping list",
+      alt: `Make a shopping list with ${APP.legalName}`,
     },
   },
   {
@@ -129,7 +131,7 @@ export const GUIDES = [
     href: "/help/troubleshooting",
     image: {
       src: "/images/guides/troubleshooting.webp",
-      alt: "Troubleshooting",
+      alt: `${APP.legalName} troubleshooting guide`,
     },
   },
 ] as const;
