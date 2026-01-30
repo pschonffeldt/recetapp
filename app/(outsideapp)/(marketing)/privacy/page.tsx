@@ -21,7 +21,17 @@ export default function PrivacyPage() {
         description="We collect the minimum data needed to run RecetApp, keep your account secure, and improve the product. We don’t sell your personal information, and we keep things clear and simple."
         minHeightClass="lg:min-h-[55vh]"
         backgroundVariant="about"
-        rightSlot={<AppMock label="RecetApp — privacy overview" />}
+        rightSlot={
+          <AppMock
+            label="RecetApp — dashboard preview"
+            imageSrc="/images/homepage/home-dashboard.webp"
+            imageAlt="RecetApp dashboard dashboard preview"
+            priority
+            fit="contain"
+            aspectClassName="aspect-[16/9]"
+            innerPaddingClassName="p-4"
+          />
+        }
         actions={
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
