@@ -1,3 +1,4 @@
+import { APP } from "@/app/lib/utils/app";
 import Link from "next/link";
 
 export default function MarketingFooter() {
@@ -5,7 +6,9 @@ export default function MarketingFooter() {
     <footer className="mt-14 border-t pt-10">
       <div className="grid gap-10 md:grid-cols-12">
         <div className="md:col-span-4">
-          <div className="text-sm font-semibold text-gray-900">RecetApp</div>
+          <div className="text-sm font-semibold text-gray-900">
+            {APP.legalName}
+          </div>
           <p className="mt-3 max-w-sm text-sm leading-6 text-gray-600">
             A calmer way to save recipes, reuse ingredients, and plan meals
             without chaos.
@@ -19,6 +22,9 @@ export default function MarketingFooter() {
               Product
             </div>
             <div className="mt-3 space-y-2 text-sm text-gray-600">
+              <Link href="/" className="block hover:underline">
+                Home
+              </Link>
               <Link href="/signup" className="block hover:underline">
                 Sign up
               </Link>
@@ -144,8 +150,10 @@ export default function MarketingFooter() {
       </div>
 
       <div className="mt-10 pt-4 flex flex-col flex-wrap items-start justify-between gap-3 text-xs text-gray-500 border-t">
-        <div>© {new Date().getFullYear()} RecetApp, app version 1.0.0</div>
-        <div>Developed in Chile 🇨🇱</div>
+        <div>
+          ©{APP.copyrightStartYear} {APP.legalName}, app version {APP.version}
+        </div>{" "}
+        <div>Developed in {APP.country} 🇨🇱</div>
       </div>
     </footer>
   );
