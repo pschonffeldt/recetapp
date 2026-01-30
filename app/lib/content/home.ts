@@ -21,6 +21,8 @@ export const FEATURES = [
       "Easy edits without losing structure",
     ],
     mediaLabel: "Recipe page preview",
+    imageSrc: "/images/homepage/home-dashboard.webp",
+    imageAlt: "RecetApp recipe page preview",
   },
   {
     id: "shopping",
@@ -44,6 +46,8 @@ export const FEATURES = [
       "Less manual retyping",
     ],
     mediaLabel: "Shopping list preview",
+    imageSrc: "/images/homepage/home-dashboard.webp",
+    imageAlt: "RecetApp shopping list preview",
   },
   {
     id: "ingredients",
@@ -67,6 +71,8 @@ export const FEATURES = [
       "Ready for future features",
     ],
     mediaLabel: "Ingredient structure preview",
+    imageSrc: "/images/homepage/home-dashboard.webp",
+    imageAlt: "RecetApp ingredient structure preview",
   },
   {
     id: "discover",
@@ -90,6 +96,8 @@ export const FEATURES = [
       "Share selectively with simple privacy controls",
     ],
     mediaLabel: "Discover feed preview",
+    imageSrc: "/images/homepage/home-dashboard.webp",
+    imageAlt: "RecetApp discover feed preview",
   },
 ] as const;
 

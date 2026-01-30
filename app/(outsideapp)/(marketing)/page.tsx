@@ -41,8 +41,28 @@ export default function Page() {
       <SectionGradientBand
         title="Reimagine the limits of what’s possible in your kitchen."
         subtitle="From “where did I save that recipe?” to a clean system you can trust, RecetApp keeps everything organized."
-        leftSlot={<AppMock label="Structured recipe view" />}
-        rightSlot={<AppMock label="Shopping list builder" />}
+        leftSlot={
+          <AppMock
+            label="RecetApp — dashboard preview"
+            imageSrc="/images/homepage/home-dashboard.webp"
+            imageAlt="RecetApp dashboard dashboard preview"
+            priority
+            fit="contain"
+            aspectClassName="aspect-[16/9]"
+            innerPaddingClassName="p-4"
+          />
+        }
+        rightSlot={
+          <AppMock
+            label="RecetApp — dashboard preview"
+            imageSrc="/images/homepage/home-dashboard.webp"
+            imageAlt="RecetApp dashboard dashboard preview"
+            priority
+            fit="contain"
+            aspectClassName="aspect-[16/9]"
+            innerPaddingClassName="p-4"
+          />
+        }
         tags={["Convenient", "Private", "Organized"]}
       />
       {/* =========================
@@ -63,7 +83,14 @@ export default function Page() {
                 bullets={[...f.bullets]}
               />
             }
-            media={<AppMock label={f.mediaLabel} />}
+            media={
+              <AppMock
+                label={f.mediaLabel}
+                imageSrc={f.imageSrc}
+                imageAlt={f.imageAlt}
+                priority={idx === 0}
+              />
+            }
           />
         ))}
       </SectionFeatures>
@@ -87,7 +114,17 @@ export default function Page() {
             body: "Guides + troubleshooting available anytime.",
           },
         ]}
-        media={<AppMock label="Account / privacy controls preview" />}
+        media={
+          <AppMock
+            label="RecetApp — dashboard preview"
+            imageSrc="/images/homepage/home-dashboard.webp"
+            imageAlt="RecetApp dashboard dashboard preview"
+            priority
+            fit="contain"
+            aspectClassName="aspect-[16/9]"
+            innerPaddingClassName="p-4"
+          />
+        }
       />
       {/* =========================
           5) People using it
