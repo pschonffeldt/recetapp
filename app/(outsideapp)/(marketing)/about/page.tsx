@@ -1,5 +1,6 @@
 import { ABOUT_ROWS } from "@/app/lib/content/about";
 import { AppMock } from "@/app/lib/marketing/helpers";
+import { APP } from "@/app/lib/utils/app";
 import { AboutRowContent } from "@/app/ui/marketing/sections/about-row-content";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
 import InfoCard from "@/app/ui/marketing/sections/infocards";
@@ -8,7 +9,9 @@ import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import { SectionValueBand } from "@/app/ui/marketing/sections/section-value-band";
 import Link from "next/link";
 
-export const metadata = { title: "About • RecetApp" };
+export const metadata = {
+  title: `About • ${APP.name}`,
+};
 
 export default function AboutPage() {
   return (
@@ -17,16 +20,16 @@ export default function AboutPage() {
           1) HERO
          ========================= */}
       <SectionHero
-        eyebrow="About RecetApp"
+        eyebrow={`About ${APP.legalName}`}
         title="A calmer way to cook at home."
-        description="RecetApp exists to remove the “where did I save that?” chaos. It helps you keep recipes clean and structured, reuse ingredients across dishes, and generate shopping lists that are actually useful at the store."
+        description={`${APP.legalName} exists to remove the “where did I save that?” chaos. It helps you keep recipes clean and structured, reuse ingredients across dishes, and generate shopping lists that are actually useful at the store.`}
         minHeightClass="lg:min-h-[60vh]"
         backgroundVariant="about"
         rightSlot={
           <AppMock
-            label="RecetApp — dashboard preview"
+            label={`${APP.legalName} — dashboard preview`}
             imageSrc="/images/homepage/home-dashboard.webp"
-            imageAlt="RecetApp dashboard dashboard preview"
+            imageAlt={`${APP.legalName} dashboard dashboard preview`}
             priority
             fit="contain"
             aspectClassName="aspect-[16/9]"
@@ -55,7 +58,7 @@ export default function AboutPage() {
          ========================= */}
       <SectionValueBand
         title="Built around real cooking habits."
-        subtitle="Most people cook from a mix of screenshots, bookmarks, and notes. RecetApp turns that into one trustworthy system without overcomplicating your kitchen life."
+        subtitle={`Most people cook from a mix of screenshots, bookmarks, and notes. ${APP.legalName} turns that into one trustworthy system without overcomplicating your kitchen life.`}
         items={[
           {
             title: "Clarity",

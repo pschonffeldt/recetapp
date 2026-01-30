@@ -1,3 +1,5 @@
+import { APP } from "../utils/app";
+
 export type AboutRow = {
   id: string;
 
@@ -49,8 +51,7 @@ export const ABOUT_ROWS: AboutRow[] = [
     id: "built-in-chile",
     eyebrow: "Built in Chile",
     title: "Crafted by a small team that cooks at home.",
-    description:
-      "RecetApp is developed in Chile by its founder with a simple goal: make everyday cooking feel calmer, faster, and more organized.",
+    description: `${APP.legalName} is developed in Chile by its founder with a simple goal: make everyday cooking feel calmer, faster, and more organized.`,
     bullets: [],
     cards: [
       {
