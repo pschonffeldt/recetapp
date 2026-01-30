@@ -22,7 +22,17 @@ export default function Page() {
         description="RecetApp gives you a clean system for recipes and ingredients plus a shopping list that's actually usable at the store."
         minHeightClass="lg:min-h-[60vh]"
         backgroundVariant="features"
-        rightSlot={<AppMock label="RecetApp — features preview" />}
+        rightSlot={
+          <AppMock
+            label="RecetApp — dashboard preview"
+            imageSrc="/images/homepage/home-dashboard.webp"
+            imageAlt="RecetApp dashboard dashboard preview"
+            priority
+            fit="contain"
+            aspectClassName="aspect-[16/9]"
+            innerPaddingClassName="p-4"
+          />
+        }
         actions={
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -80,10 +90,18 @@ export default function Page() {
                 bullets={[...f.bullets]}
               />
             }
-            media={<AppMock label={f.mediaLabel} />}
+            media={
+              <AppMock
+                label={f.mediaLabel}
+                imageSrc={f.imageSrc}
+                imageAlt={f.imageAlt}
+                priority={idx === 0}
+              />
+            }
           />
         ))}
       </SectionFeatures>
+
       {/* =========================
           3) Privacy section
         ========================= */}
@@ -104,7 +122,17 @@ export default function Page() {
             body: "Guides + troubleshooting available anytime.",
           },
         ]}
-        media={<AppMock label="Account / privacy controls preview" />}
+        media={
+          <AppMock
+            label="RecetApp — dashboard preview"
+            imageSrc="/images/homepage/home-dashboard.webp"
+            imageAlt="RecetApp dashboard dashboard preview"
+            priority
+            fit="contain"
+            aspectClassName="aspect-[16/9]"
+            innerPaddingClassName="p-4"
+          />
+        }
       />
     </div>
   );

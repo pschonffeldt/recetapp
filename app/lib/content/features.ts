@@ -15,6 +15,8 @@ export const FEATURE_ROWS = [
       "Edit without losing structure",
     ],
     mediaLabel: "Recipe page preview",
+    imageSrc: "/images/homepage/home-dashboard.webp",
+    imageAlt: "RecetApp preview",
   },
   {
     id: "ingredients",
@@ -32,6 +34,8 @@ export const FEATURE_ROWS = [
       "Ready for future planning features",
     ],
     mediaLabel: "Ingredient structure preview",
+    imageSrc: "/images/homepage/home-dashboard.webp",
+    imageAlt: "RecetApp preview",
   },
   {
     id: "shopping",
@@ -52,6 +56,8 @@ export const FEATURE_ROWS = [
       "Less manual retyping",
     ],
     mediaLabel: "Shopping list preview",
+    imageSrc: "/images/homepage/home-dashboard.webp",
+    imageAlt: "RecetApp preview",
   },
   {
     id: "discover",
@@ -75,5 +81,7 @@ export const FEATURE_ROWS = [
       "Publish selectively with simple privacy controls",
     ],
     mediaLabel: "Discover feed preview",
+    imageSrc: "/images/homepage/home-dashboard.webp",
+    imageAlt: "RecetApp preview",
   },
 ] as const;
