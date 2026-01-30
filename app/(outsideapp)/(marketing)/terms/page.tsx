@@ -1,14 +1,16 @@
 import { AppMock } from "@/app/lib/marketing/helpers";
-import InfoCard from "@/app/ui/marketing/sections/infocards";
-import SoftDot from "@/app/ui/marketing/sections/soft-dot";
+import { APP } from "@/app/lib/utils/app";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
+import InfoCard from "@/app/ui/marketing/sections/infocards";
 import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import { SectionValueBand } from "@/app/ui/marketing/sections/section-value-band";
+import SoftDot from "@/app/ui/marketing/sections/soft-dot";
 import Link from "next/link";
 
-export const metadata = { title: "Terms • RecetApp" };
-
+export const metadata = {
+  title: `Terms • ${APP.name}`,
+};
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-white">
@@ -18,14 +20,14 @@ export default function TermsPage() {
       <SectionHero
         eyebrow="Terms"
         title="Clear rules, calm cooking."
-        description="These Terms explain how RecetApp works, what you can expect from us, and what we expect from you. They’re written to be understandable — not intimidating."
+        description={`These Terms explain how ${APP.legalName} works, what you can expect from us, and what we expect from you. They're written to be understandable — not intimidating.`}
         minHeightClass="lg:min-h-[55vh]"
         backgroundVariant="about"
         rightSlot={
           <AppMock
-            label="RecetApp — dashboard preview"
+            label={`${APP.legalName} — dashboard preview`}
             imageSrc="/images/homepage/home-dashboard.webp"
-            imageAlt="RecetApp dashboard dashboard preview"
+            imageAlt={`${APP.legalName} dashboard dashboard preview`}
             priority
             fit="contain"
             aspectClassName="aspect-[16/9]"
@@ -55,7 +57,7 @@ export default function TermsPage() {
          ========================= */}
       <SectionValueBand
         title="A few simple principles."
-        subtitle="RecetApp is built to be helpful and respectful. These terms exist to protect both you and the service."
+        subtitle={`${APP.legalName} is built to be helpful and respectful. These terms exist to protect both you and the service.`}
         items={[
           {
             title: "You own your content",
@@ -67,7 +69,7 @@ export default function TermsPage() {
           },
           {
             title: "We keep improving",
-            body: "We’ll evolve RecetApp over time, and we’ll communicate meaningful changes.",
+            body: `We'll evolve ${APP.legalName} over time, and we'll communicate meaningful changes.`,
           },
         ]}
       />
@@ -88,12 +90,12 @@ export default function TermsPage() {
               </p>
 
               <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-                Using RecetApp means you agree to these Terms.
+                {`Using ${APP.legalName} means you agree to these Terms.`}
               </h2>
 
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                By accessing or using RecetApp, you agree to follow these Terms.
-                If you don’t agree, please don’t use the service.
+                {`By accessing or using ${APP.legalName}, you agree to follow
+                these Terms. If you don’t agree, please don’t use the service.`}
               </p>
 
               <div className="mt-8 space-y-3 text-sm text-gray-700">
@@ -122,15 +124,15 @@ export default function TermsPage() {
               />
               <InfoCard
                 title="Applies to the service"
-                body="Covers the website, app, and related RecetApp services."
+                body={`Covers the website, app, and related ${APP.legalName} services.`}
               />
               <InfoCard
                 title="Changes happen"
-                body="We’ll update terms as the product grows."
+                body="We'll update terms as the product grows."
               />
               <InfoCard
                 title="Questions welcome"
-                body="If anything is unclear, reach out and we’ll explain."
+                body="If anything is unclear, reach out and we'll explain."
               />
             </div>
           }
@@ -212,9 +214,10 @@ export default function TermsPage() {
               </h2>
 
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                Your recipes, notes, and other content you add to RecetApp
-                remain yours. To operate RecetApp, you give us permission to
-                host, store, and display your content within the service.
+                Your recipes, notes, and other content you add to{" "}
+                {APP.legalName} remain yours. To operate {APP.legalName}, you
+                give us permission to host, store, and display your content
+                within the service.
               </p>
 
               <div className="mt-8 space-y-3 text-sm text-gray-700">
@@ -228,9 +231,9 @@ export default function TermsPage() {
                 <div className="flex gap-3">
                   <SoftDot />
                   <span>
-                    <strong>License to operate:</strong> You grant RecetApp a
-                    limited license to store and process your content solely to
-                    provide the service.
+                    <strong>License to operate:</strong> You grant{" "}
+                    {APP.legalName} a limited license to store and process your
+                    content solely to provide the service.
                   </span>
                 </div>
                 <div className="flex gap-3">
@@ -247,7 +250,7 @@ export default function TermsPage() {
             <div className="grid gap-6 md:grid-cols-2">
               <InfoCard
                 title="Your recipes stay yours"
-                body="We don’t claim ownership over your personal cooking content."
+                body="We don't claim ownership over your personal cooking content."
               />
               <InfoCard
                 title="Limited license"
@@ -281,9 +284,9 @@ export default function TermsPage() {
               </h2>
 
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                RecetApp is for personal cooking organization and related
-                workflows. Don’t use it in ways that harm others, violate laws,
-                or disrupt the service.
+                {`${APP.legalName} is for personal cooking organization and
+                related workflows. Don't use it in ways that harm others,
+                violate laws, or disrupt the service.`}
               </p>
 
               <div className="mt-8 space-y-3 text-sm text-gray-700">
@@ -320,11 +323,11 @@ export default function TermsPage() {
             <div className="grid gap-6 md:grid-cols-2">
               <InfoCard
                 title="Be respectful"
-                body="Use RecetApp in a way that’s safe for others."
+                body={`Use ${APP.legalName} in a way that's safe for others.`}
               />
               <InfoCard
                 title="No attacks"
-                body="Don’t probe, hack, or disrupt the platform."
+                body="Don't probe, hack, or disrupt the platform."
               />
               <InfoCard
                 title="No scraping"
@@ -354,9 +357,9 @@ export default function TermsPage() {
               </h2>
 
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                We aim to keep RecetApp available and reliable, but we can’t
-                guarantee uninterrupted access. Features may change as we
-                improve the product.
+                {`We aim to keep ${APP.legalName} available and reliable, but we
+                can’t guarantee uninterrupted access. Features may change as we
+                improve the product.`}
               </p>
 
               <div className="mt-8 space-y-3 text-sm text-gray-700">
@@ -370,15 +373,15 @@ export default function TermsPage() {
                 <div className="flex gap-3">
                   <SoftDot />
                   <span>
-                    You’re responsible for how you use RecetApp and any outcomes
-                    from that use.
+                    {`You're responsible for how you use ${APP.legalName} and any
+                    outcomes from that use.`}
                   </span>
                 </div>
                 <div className="flex gap-3">
                   <SoftDot />
                   <span>
-                    To the extent permitted by law, RecetApp is not liable for
-                    indirect damages or losses.
+                    {`To the extent permitted by law, ${APP.legalName} is not
+                    liable for indirect damages or losses.`}
                   </span>
                 </div>
               </div>
@@ -392,11 +395,11 @@ export default function TermsPage() {
               />
               <InfoCard
                 title="Product evolves"
-                body="We’ll improve things over time — and sometimes that means changes."
+                body="We'll improve things over time, and sometimes that means changes."
               />
               <InfoCard
                 title="Use with judgment"
-                body="RecetApp helps you organize cooking — you decide how to apply it."
+                body={`${APP.legalName} helps you organize cooking, you decide how to apply it.`}
               />
               <InfoCard
                 title="Limits of liability"
@@ -418,13 +421,13 @@ export default function TermsPage() {
               </p>
 
               <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-                We keep things fair — and we need some safeguards.
+                We keep things fair, and we need some safeguards.
               </h2>
 
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                You can stop using RecetApp at any time. We may suspend or
-                terminate accounts that violate these Terms or create risk for
-                others or the service.
+                {`You can stop using ${APP.legalName} at any time. We may suspend
+                or terminate accounts that violate these Terms or create risk
+                for others or the service.`}
               </p>
 
               <div className="mt-8 space-y-3 text-sm text-gray-700">
@@ -440,9 +443,9 @@ export default function TermsPage() {
                 <div className="flex gap-3">
                   <SoftDot />
                   <span>
-                    <strong>Paid plans (if applicable):</strong> If RecetApp
-                    offers paid features, pricing and billing terms will be
-                    presented at purchase.
+                    <strong>Paid plans (if applicable):</strong> If{" "}
+                    {APP.legalName} offers paid features, pricing and billing
+                    terms will be presented at purchase.
                   </span>
                 </div>
 
@@ -457,7 +460,7 @@ export default function TermsPage() {
                 <div className="flex gap-3">
                   <SoftDot />
                   <span>
-                    <strong>Contact:</strong> info@mitkof.cl
+                    <strong>Contact:</strong> {APP.supportEmail}
                   </span>
                 </div>
               </div>
@@ -482,7 +485,7 @@ export default function TermsPage() {
             <div className="grid gap-6 md:grid-cols-2">
               <InfoCard
                 title="Leave anytime"
-                body="You can stop using RecetApp whenever you want."
+                body={`You can stop using ${APP.legalName} whenever you want.`}
               />
               <InfoCard
                 title="We protect the platform"
@@ -494,7 +497,7 @@ export default function TermsPage() {
               />
               <InfoCard
                 title="Policy updates"
-                body="We’ll keep the last updated date visible and changes understandable."
+                body="We'll keep the last updated date visible and changes understandable."
               />
             </div>
           }

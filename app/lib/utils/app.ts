@@ -17,8 +17,8 @@ export const APP = {
   pricingUrl: "/pricing",
 
   /** Contact */
-  supportEmail: "support@recetapp.com",
-  infoEmail: "info@recetapp.com",
+  supportEmail: "info@mitkof.cl",
+  infoEmail: "info@mitkof.cl",
 
   /** Legal */
   country: "Chile",
