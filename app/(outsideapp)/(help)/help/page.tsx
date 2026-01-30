@@ -3,9 +3,11 @@ import HelpHero from "@/app/ui/help/help-hero";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { fetchHelpCategories, searchHelpArticles } from "@/app/lib/help/data";
 import { Button } from "@/app/ui/general/button";
+import { APP } from "@/app/lib/utils/app";
 
-export const metadata = { title: "Help • RecetApp" };
-
+export const metadata = {
+  title: `Help • ${APP.name}`,
+};
 export default async function HelpHome({
   searchParams,
 }: {
