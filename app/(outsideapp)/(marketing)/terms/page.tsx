@@ -21,7 +21,17 @@ export default function TermsPage() {
         description="These Terms explain how RecetApp works, what you can expect from us, and what we expect from you. They’re written to be understandable — not intimidating."
         minHeightClass="lg:min-h-[55vh]"
         backgroundVariant="about"
-        rightSlot={<AppMock label="RecetApp — terms overview" />}
+        rightSlot={
+          <AppMock
+            label="RecetApp — dashboard preview"
+            imageSrc="/images/homepage/home-dashboard.webp"
+            imageAlt="RecetApp dashboard dashboard preview"
+            priority
+            fit="contain"
+            aspectClassName="aspect-[16/9]"
+            innerPaddingClassName="p-4"
+          />
+        }
         actions={
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
