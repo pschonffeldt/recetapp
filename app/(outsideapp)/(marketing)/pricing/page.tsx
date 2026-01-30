@@ -1,4 +1,5 @@
 import { PLANS, VALUE_ROW } from "@/app/lib/content/pricing";
+import { APP } from "@/app/lib/utils/app";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
 import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
@@ -7,7 +8,9 @@ import { SectionPlans } from "@/app/ui/marketing/sections/section-plans";
 import { SectionStatsBand } from "@/app/ui/marketing/sections/section-stats-band";
 import Link from "next/link";
 
-export const metadata = { title: "Pricing" };
+export const metadata = {
+  title: `Pricing • ${APP.name}`,
+};
 
 export default function Page() {
   return (
@@ -136,7 +139,7 @@ export default function Page() {
          ========================= */}
       <SectionLifetimeDeal
         title="Lifetime access, one payment."
-        description="To thank early supporters, we're exploring a limited lifetime plan that unlocks full access to RecetApp with a single one-time payment."
+        description={`To thank early supporters, we're exploring a limited lifetime plan that unlocks full access to ${APP.name} with a single one-time payment.`}
         bullets={[
           "One payment, no monthly fees",
           "Full access to current and future core features",

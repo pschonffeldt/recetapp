@@ -1,11 +1,11 @@
 import { Plan } from "@/app/ui/marketing/sections/plan-card";
+import { APP } from "../utils/app";
 
 export const VALUE_ROW = {
   id: "long-term",
   eyebrow: "Built for the long term",
   title: "More than features, a system you can trust.",
-  description:
-    "RecetApp isn't about cramming in every possible feature. It's about building a calm, dependable system for people who cook at home, one that grows thoughtfully without becoming overwhelming.",
+  description: `${APP.name} isn't about cramming in every possible feature. It's about building a calm, dependable system for people who cook at home — one that grows thoughtfully without becoming overwhelming.`,
   ctas: [
     {
       href: "/roadmap",
