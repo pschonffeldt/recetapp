@@ -1,13 +1,16 @@
 import { AppMock } from "@/app/lib/marketing/helpers";
-import InfoCard from "@/app/ui/marketing/sections/infocards";
-import SoftDot from "@/app/ui/marketing/sections/soft-dot";
+import { APP } from "@/app/lib/utils/app";
 import { FeatureRow } from "@/app/ui/marketing/sections/feature-row";
+import InfoCard from "@/app/ui/marketing/sections/infocards";
 import { SectionFeatures } from "@/app/ui/marketing/sections/section-features";
 import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import { SectionValueBand } from "@/app/ui/marketing/sections/section-value-band";
+import SoftDot from "@/app/ui/marketing/sections/soft-dot";
 import Link from "next/link";
 
-export const metadata = { title: "Privacy • RecetApp" };
+export const metadata = {
+  title: `Privacy • ${APP.name}`,
+};
 
 export default function PrivacyPage() {
   return (
@@ -18,14 +21,14 @@ export default function PrivacyPage() {
       <SectionHero
         eyebrow="Privacy"
         title="Your recipes are yours."
-        description="We collect the minimum data needed to run RecetApp, keep your account secure, and improve the product. We don’t sell your personal information, and we keep things clear and simple."
+        description={`We collect the minimum data needed to run ${APP.legalName}, keep your account secure, and improve the product. We don’t sell your personal information, and we keep things clear and simple.`}
         minHeightClass="lg:min-h-[55vh]"
         backgroundVariant="about"
         rightSlot={
           <AppMock
-            label="RecetApp — dashboard preview"
+            label={`${APP.legalName} — dashboard preview`}
             imageSrc="/images/homepage/home-dashboard.webp"
-            imageAlt="RecetApp dashboard dashboard preview"
+            imageAlt={`${APP.legalName} dashboard preview`}
             priority
             fit="contain"
             aspectClassName="aspect-[16/9]"
@@ -59,7 +62,7 @@ export default function PrivacyPage() {
         items={[
           {
             title: "Minimal",
-            body: "We only collect what we need to run the app and keep it reliable.",
+            body: `We only collect what we need to run ${APP.legalName} and keep it reliable.`,
           },
           {
             title: "Transparent",
@@ -92,9 +95,9 @@ export default function PrivacyPage() {
               </h2>
 
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                RecetApp collects information you provide and some standard
-                technical data that helps us keep the service secure and running
-                smoothly.
+                {APP.legalName} collects information you provide and some
+                standard technical data that helps us keep the service secure
+                and running smoothly.
               </p>
 
               <div className="mt-8 space-y-3 text-sm text-gray-700">
@@ -111,7 +114,7 @@ export default function PrivacyPage() {
                   <SoftDot />
                   <span>
                     <strong>Your content:</strong> recipes, ingredients, notes,
-                    categories, and other things you save in RecetApp.
+                    categories, and other things you save in {APP.legalName}.
                   </span>
                 </div>
 
@@ -160,7 +163,7 @@ export default function PrivacyPage() {
               </p>
 
               <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-                To run RecetApp, improve it, and support you.
+                To run {APP.legalName}, improve it, and support you.
               </h2>
 
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
@@ -237,9 +240,9 @@ export default function PrivacyPage() {
               </h2>
 
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                RecetApp relies on trusted service providers (for things like
-                hosting and databases). They process data only as needed to run
-                RecetApp.
+                {APP.legalName} relies on trusted service providers (for things
+                like hosting and databases). They process data only as needed to
+                run {APP.legalName}.
               </p>
 
               <div className="mt-8 space-y-3 text-sm text-gray-700">
@@ -254,14 +257,15 @@ export default function PrivacyPage() {
                   <SoftDot />
                   <span>
                     <strong>Legal requests:</strong> we may disclose information
-                    if required by law or to protect RecetApp and users.
+                    if required by law or to protect {APP.legalName} and users.
                   </span>
                 </div>
                 <div className="flex gap-3">
                   <SoftDot />
                   <span>
-                    <strong>Business changes:</strong> if RecetApp changes
-                    hands, data may be transferred as part of that transaction.
+                    <strong>Business changes:</strong> if {APP.legalName}{" "}
+                    changes hands, data may be transferred as part of that
+                    transaction.
                   </span>
                 </div>
               </div>
@@ -374,9 +378,9 @@ export default function PrivacyPage() {
               </h2>
 
               <p className="mt-4 text-sm leading-6 text-gray-700 md:text-base">
-                As RecetApp evolves, we may update this Privacy Policy. When we
-                do, we&apos;ll update the “Last updated” date and, if changes
-                are significant, we&apos;ll provide a clear notice.
+                As {APP.legalName} evolves, we may update this Privacy Policy.
+                When we do, we&apos;ll update the “Last updated” date and, if
+                changes are significant, we&apos;ll provide a clear notice.
               </p>
 
               <div className="mt-8 space-y-3 text-sm text-gray-700">
@@ -435,7 +439,7 @@ export default function PrivacyPage() {
               />
               <InfoCard
                 title="Built in public"
-                body="RecetApp evolves transparently with a public roadmap and releases."
+                body={`${APP.legalName} evolves transparently with a public roadmap and releases.`}
               />
             </div>
           }
