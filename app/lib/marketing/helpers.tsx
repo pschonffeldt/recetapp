@@ -95,11 +95,12 @@ export function AppMock({
         <div className="ml-2 text-xs text-gray-500">{label}</div>
       </div>
 
-      <div className="">
+      <div>
         <div
           className={[
-            "relative w-full overflow-hidden border border-gray-100",
-            // friendly background so “empty space” looks designed
+            "relative w-full overflow-hidden",
+            "rounded-b-xl rounded-t-none",
+            "border border-gray-100 border-t-0",
             "bg-gradient-to-b from-gray-50 to-white",
             aspectClassName,
           ].join(" ")}
@@ -113,7 +114,9 @@ export function AppMock({
                   src={imageSrc}
                   alt={imageAlt || label}
                   fill
-                  className={["rounded-lg", objectClass].join(" ")}
+                  className={["rounded-b-lg rounded-t-none", objectClass].join(
+                    " ",
+                  )}
                   priority={priority}
                   sizes={
                     sizes ??
