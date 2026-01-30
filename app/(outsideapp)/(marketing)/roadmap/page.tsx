@@ -1,7 +1,8 @@
 import { fetchRoadmapGrouped } from "@/app/lib/marketing/data";
+import { APP } from "@/app/lib/utils/app";
 
 export const metadata = {
-  title: "Roadmap – RecetApp",
+  title: `Roadmap • ${APP.name}`,
 };
 
 const COLUMN_LABELS: Record<"planned" | "in_progress" | "shipped", string> = {
