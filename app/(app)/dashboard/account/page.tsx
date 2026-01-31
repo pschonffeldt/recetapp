@@ -3,10 +3,11 @@ import EditAccountMembershipForm from "@/app/ui/account/account-membership-setti
 import EditAccountSettingsForm from "@/app/ui/account/account-settings-form";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { auth } from "@/auth";
-import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-export const metadata: Metadata = { title: "Account Settings" };
+export const metadata = {
+  title: "Account Settings",
+};
 
 export default async function Page() {
   const session = await auth();

@@ -1,9 +1,9 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import { fetchSupportInbox } from "@/app/lib/support/admin-data";
 import SupportInboxTable from "@/app/ui/support/admin/support-inbox-table";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-export const metadata = { title: "Admin – Support inbox" };
+export const metadata = { title: "Support inbox" };
 
 export default async function Page() {
   const session = await auth();

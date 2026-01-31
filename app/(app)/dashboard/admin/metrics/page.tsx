@@ -1,17 +1,15 @@
 import LatestRecipes from "@/app/ui/dashboard/dashboard-latest-recipes";
-import CardWrapper from "@/app/ui/general/cards";
 import PieChart from "@/app/ui/dashboard/dashboard-pie-chart";
-import { Suspense } from "react";
-import { Metadata } from "next";
 import {
-  LatestRecipesSkeleton,
   CardsSkeleton,
+  LatestRecipesSkeleton,
 } from "@/app/ui/dashboard/dashboard-skeletons";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
+import CardWrapper from "@/app/ui/general/cards";
+import { Suspense } from "react";
 
-// Set title for metadata
-export const metadata: Metadata = {
-  title: "Dashboard",
+export const metadata = {
+  title: "User metrics",
 };
 
 // This should be gone and we should actually bring data from the users to feed the latest signups and charts

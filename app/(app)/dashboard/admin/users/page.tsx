@@ -1,12 +1,12 @@
+import { fetchUserById } from "@/app/lib/recipes/data";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
+import AdminUsersTable from "@/app/ui/users/users-table";
+import { auth } from "@/auth";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { auth } from "@/auth";
-import Breadcrumbs from "@/app/ui/general/breadcrumbs";
-import { fetchUserById } from "@/app/lib/recipes/data";
-import AdminUsersTable from "@/app/ui/users/users-table";
 
 export const metadata: Metadata = {
-  title: "Admin · Users",
+  title: "User management",
 };
 
 export default async function AdminUsersPage() {

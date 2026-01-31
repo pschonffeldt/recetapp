@@ -1,18 +1,18 @@
-import { auth } from "@/auth";
-import { notFound, redirect } from "next/navigation";
 import { fetchSupportMessageById } from "@/app/lib/support/admin-data";
-import Link from "next/link";
-import { capitalizeFirst } from "@/app/lib/utils/format";
-import { timeAgoFromIso } from "@/app/lib/utils/time";
 import {
   supportCategoryLabel,
   supportCategoryPillClass,
   supportStatusLabel,
   supportStatusPillClass,
 } from "@/app/lib/support/pills";
+import { capitalizeFirst } from "@/app/lib/utils/format";
+import { timeAgoFromIso } from "@/app/lib/utils/time";
 import MarkSolvedButton from "@/app/ui/support/admin/mark-solved-button";
+import { auth } from "@/auth";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 
-export const metadata = { title: "Admin – Support message" };
+export const metadata = { title: "Support message" };
 
 type PageProps = { params: Promise<{ id: string }> };
 

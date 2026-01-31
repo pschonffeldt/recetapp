@@ -14,7 +14,7 @@ import { SectionStatsBand } from "@/app/ui/marketing/sections/section-stats-band
 import { SectionTestimonials } from "@/app/ui/marketing/sections/section-testimonials";
 
 export const metadata = {
-  title: `Home • ${APP.name}`,
+  title: "Home",
 };
 
 export default function Page() {

@@ -1,8 +1,8 @@
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
+import { fetchPublicRecipeById } from "@/app/lib/discover/data";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import ViewerRecipe from "@/app/ui/recipes/recipes-viewer";
-import { fetchPublicRecipeById } from "@/app/lib/discover/data";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = { title: "View Recipe" };
 

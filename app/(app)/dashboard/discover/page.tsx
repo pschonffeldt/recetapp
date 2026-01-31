@@ -1,16 +1,17 @@
-import { Metadata } from "next";
-import Breadcrumbs from "@/app/ui/general/breadcrumbs";
-import { auth } from "@/auth";
-import DiscoverGrid from "@/app/ui/discover/discover-grid";
-import RecipesFiltersToolbar from "@/app/ui/filters/filters-toolbar";
-import Pagination from "@/app/ui/recipes/recipes-pagination";
 import {
-  fetchDiscoverRecipes,
   fetchDiscoverPages,
+  fetchDiscoverRecipes,
 } from "@/app/lib/discover/data";
 import type { Difficulty, RecipeForm } from "@/app/lib/types/definitions";
+import DiscoverGrid from "@/app/ui/discover/discover-grid";
+import RecipesFiltersToolbar from "@/app/ui/filters/filters-toolbar";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
+import Pagination from "@/app/ui/recipes/recipes-pagination";
+import { auth } from "@/auth";
+import { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Discover" };
+
 export const dynamic = "force-dynamic";
 
 type DiscoverSearchParams = {

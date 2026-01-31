@@ -1,8 +1,8 @@
-import { Metadata } from "next";
-import Link from "next/link";
+import { fetchNotifications } from "@/app/lib/notifications/data";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import NotificationsList from "@/app/ui/notifications/notifications-list";
-import { fetchNotifications } from "@/app/lib/notifications/data";
+import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Notifications" };
 

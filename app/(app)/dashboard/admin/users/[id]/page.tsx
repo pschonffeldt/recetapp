@@ -1,11 +1,11 @@
+import { fetchUserByIdForAdmin } from "@/app/lib/recipes/data";
+import type { MembershipTier } from "@/app/lib/types/definitions";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
+import AdminUserEditForm from "@/app/ui/users/users-edit-form";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Breadcrumbs from "@/app/ui/general/breadcrumbs";
-import { fetchUserByIdForAdmin } from "@/app/lib/recipes/data";
-import AdminUserEditForm from "@/app/ui/users/users-edit-form";
-import type { MembershipTier } from "@/app/lib/types/definitions";
 
-export const metadata: Metadata = { title: "Admin – Edit user" };
+export const metadata: Metadata = { title: "Edit user" };
 
 type PageProps = {
   params: Promise<{ id: string }>;

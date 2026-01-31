@@ -1,9 +1,9 @@
-import EditRecipeForm from "@/app/ui/recipes/recipes-edit-form";
-import Breadcrumbs from "@/app/ui/general/breadcrumbs";
-import { notFound } from "next/navigation";
-import { Metadata } from "next";
 import { requireUserId } from "@/app/lib/auth/helpers";
 import { fetchRecipeByIdForOwner } from "@/app/lib/recipes/data";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
+import EditRecipeForm from "@/app/ui/recipes/recipes-edit-form";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = { title: "Edit Recipe" };
 
