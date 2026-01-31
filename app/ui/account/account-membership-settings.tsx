@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { PLAN_PRICING } from "@/app/lib/membership/plans";
+import type { MembershipTier, UserForm } from "@/app/lib/types/definitions";
+import { APP } from "@/app/lib/utils/app";
+import { useToast } from "@/app/ui/toast/toast-provider";
 import { useRouter } from "next/navigation";
-import type { UserForm, MembershipTier } from "@/app/lib/types/definitions";
+import { useState } from "react";
 import { inter } from "../branding/branding-fonts";
 import { Button } from "../general/button";
-import { useToast } from "@/app/ui/toast/toast-provider";
-import { PLAN_PRICING } from "@/app/lib/membership/plans";
 
 type Props = {
   user: UserForm;
@@ -26,7 +27,7 @@ const PLAN_LABEL: Record<MembershipTier, string> = {
 };
 
 const PLAN_HELP: Record<MembershipTier, string> = {
-  free: `Great for getting started and trying RecetApp with up to ${PLAN_LIMITS.free} recipes (${PLAN_PRICING.free}).`,
+  free: `Great for getting started and trying ${APP.legalName} with up to ${PLAN_LIMITS.free} recipes (${PLAN_PRICING.free}).`,
   tier1: `For more serious cooking: more space for your recipes and imports (up to ${PLAN_LIMITS.tier1} recipes) for ${PLAN_PRICING.tier1}.`,
   tier2: `For power users and meal planners: even more room for your recipes and imports (up to ${PLAN_LIMITS.tier2} recipes) for ${PLAN_PRICING.tier2}.`,
 };
@@ -111,7 +112,7 @@ export default function EditAccountMembershipForm({
 
     // Upgrade → go to payment page, passing from/to tiers
     router.push(
-      `/payments/membership-payment?from=${currentTier}&to=${selectedTier}`
+      `/payments/membership-payment?from=${currentTier}&to=${selectedTier}`,
     );
   };
 
