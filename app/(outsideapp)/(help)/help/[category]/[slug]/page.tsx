@@ -1,10 +1,14 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import HelpHero from "@/app/ui/help/help-hero";
-import HelpMarkdown from "@/app/ui/help/help-markdown";
+import { fetchHelpArticleBySlugs } from "@/app/lib/help/data";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { Button } from "@/app/ui/general/button";
-import { fetchHelpArticleBySlugs } from "@/app/lib/help/data";
+import HelpHero from "@/app/ui/help/help-hero";
+import HelpMarkdown from "@/app/ui/help/help-markdown";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+export const metadata = {
+  title: `Help articles`,
+};
 
 export default async function HelpArticlePage({
   params,

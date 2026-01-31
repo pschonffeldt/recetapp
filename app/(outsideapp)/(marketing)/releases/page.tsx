@@ -11,7 +11,7 @@ function formatReleaseDate(value: string) {
   });
 }
 export const metadata = {
-  title: `Release notes • ${APP.name}`,
+  title: `Release notes`,
 };
 
 export default async function ReleasesPage() {

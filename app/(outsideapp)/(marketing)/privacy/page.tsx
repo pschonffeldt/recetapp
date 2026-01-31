@@ -9,7 +9,7 @@ import SoftDot from "@/app/ui/marketing/sections/soft-dot";
 import Link from "next/link";
 
 export const metadata = {
-  title: `Privacy • ${APP.name}`,
+  title: `Privacy`,
 };
 
 export default function PrivacyPage() {

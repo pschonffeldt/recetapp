@@ -1,13 +1,13 @@
-import Link from "next/link";
-import HelpHero from "@/app/ui/help/help-hero";
-import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { fetchHelpCategories, searchHelpArticles } from "@/app/lib/help/data";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { Button } from "@/app/ui/general/button";
-import { APP } from "@/app/lib/utils/app";
+import HelpHero from "@/app/ui/help/help-hero";
+import Link from "next/link";
 
 export const metadata = {
-  title: `Help • ${APP.name}`,
+  title: `Help`,
 };
+
 export default async function HelpHome({
   searchParams,
 }: {

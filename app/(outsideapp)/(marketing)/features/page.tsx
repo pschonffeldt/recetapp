@@ -10,7 +10,7 @@ import { SectionHero } from "@/app/ui/marketing/sections/section-hero";
 import Link from "next/link";
 
 export const metadata = {
-  title: `Features • ${APP.name}`,
+  title: `Features`,
 };
 
 export default function Page() {

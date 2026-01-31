@@ -1,12 +1,16 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import HelpHero from "@/app/ui/help/help-hero";
+import {
+  fetchHelpArticlesByCategory,
+  fetchHelpCategoryBySlug,
+} from "@/app/lib/help/data";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { Button } from "@/app/ui/general/button";
-import {
-  fetchHelpCategoryBySlug,
-  fetchHelpArticlesByCategory,
-} from "@/app/lib/help/data";
+import HelpHero from "@/app/ui/help/help-hero";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+export const metadata = {
+  title: `Help topics`,
+};
 
 export default async function HelpCategoryPage({
   params,

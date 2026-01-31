@@ -9,7 +9,7 @@ import SoftDot from "@/app/ui/marketing/sections/soft-dot";
 import Link from "next/link";
 
 export const metadata = {
-  title: `Terms • ${APP.name}`,
+  title: `Terms`,
 };
 export default function TermsPage() {
   return (

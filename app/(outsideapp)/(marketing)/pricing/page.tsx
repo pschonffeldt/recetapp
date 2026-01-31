@@ -9,7 +9,7 @@ import { SectionStatsBand } from "@/app/ui/marketing/sections/section-stats-band
 import Link from "next/link";
 
 export const metadata = {
-  title: `Pricing • ${APP.name}`,
+  title: `Pricing`,
 };
 
 export default function Page() {

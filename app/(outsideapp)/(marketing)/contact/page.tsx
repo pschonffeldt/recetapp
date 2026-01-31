@@ -10,7 +10,7 @@ import { SectionValueBand } from "@/app/ui/marketing/sections/section-value-band
 import Link from "next/link";
 
 export const metadata = {
-  title: `Contact • ${APP.name}`,
+  title: `Contact`,
 };
 
 export default function ContactPage() {
