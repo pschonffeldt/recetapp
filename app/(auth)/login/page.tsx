@@ -1,9 +1,11 @@
+import { APP } from "@/app/lib/utils/app";
 import Logo from "@/app/ui/branding/branding-recetapp-logo";
 import LoginForm from "@/app/ui/login-signup/login-form";
-import type { Metadata } from "next";
 import { Suspense } from "react";
 
-export const metadata: Metadata = { title: "Login" };
+export const metadata = {
+  title: `Login • ${APP.name}`,
+};
 
 export default function LoginPage() {
   return (
