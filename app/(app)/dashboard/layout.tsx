@@ -1,18 +1,7 @@
-import { APP } from "@/app/lib/utils/app";
 import Logo from "@/app/ui/branding/branding-recetapp-logo";
 import SideNav from "@/app/ui/navigation/navigation-sidenav";
 import UserMenuServer from "@/app/ui/navigation/navigation-user-menu-server";
 import { ToastProvider } from "@/app/ui/toast/toast-provider";
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: {
-    template: `%s | ${APP.name}`,
-    default: APP.name,
-  },
-  description: "Cook and shop for your recipes with ease.",
-  metadataBase: new URL("https://pschonffeldt.dev/"),
-};
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

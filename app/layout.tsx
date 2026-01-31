@@ -25,6 +25,17 @@
 
 import "@/app/ui/global.css";
 import { inter } from "@/app/ui/branding/branding-fonts";
+import { Metadata } from "next";
+import { APP } from "./lib/utils/app";
+
+export const metadata: Metadata = {
+  title: {
+    template: `%s | ${APP.name}`,
+    default: APP.name,
+  },
+  description: "Cook and shop for your recipes with ease.",
+  metadataBase: new URL("https://pschonffeldt.dev/"),
+};
 
 export default function RootLayout({
   children,

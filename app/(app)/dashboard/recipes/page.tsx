@@ -1,13 +1,13 @@
-import Pagination from "@/app/ui/recipes/recipes-pagination";
-import RecipesTable from "@/app/ui/recipes/recipes-table";
-import { CreateRecipe } from "@/app/ui/recipes/recipes-buttons";
-import { Suspense } from "react";
-import type { Metadata } from "next";
-import { RecipesTableSkeleton } from "@/app/ui/dashboard/dashboard-skeletons";
 import { requireUserId } from "@/app/lib/auth/helpers";
 import { fetchRecipesPages } from "@/app/lib/recipes/data";
-import Breadcrumbs from "@/app/ui/general/breadcrumbs";
+import { RecipesTableSkeleton } from "@/app/ui/dashboard/dashboard-skeletons";
 import RecipesFiltersToolbar from "@/app/ui/filters/filters-toolbar";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
+import { CreateRecipe } from "@/app/ui/recipes/recipes-buttons";
+import Pagination from "@/app/ui/recipes/recipes-pagination";
+import RecipesTable from "@/app/ui/recipes/recipes-table";
+import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Recipes",
