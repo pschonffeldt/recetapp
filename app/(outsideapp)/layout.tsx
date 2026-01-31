@@ -1,17 +1,17 @@
-import type { Metadata } from "next";
-import type { ReactNode } from "react";
 import MarketingCTA from "@/app/ui/marketing/sections/cta";
 import MarketingFooter from "@/app/ui/marketing/sections/footer";
 import MarketingTopNavBar from "@/app/ui/marketing/sections/topnav";
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { APP } from "../lib/utils/app";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | RecetApp",
-    default: "RecetApp",
+    template: `%s | ${APP.name}`,
+    default: APP.name,
   },
-  description:
-    "A calmer way to save recipes, reuse ingredients, and plan meals.",
-  metadataBase: new URL("https://pschonffeldt.dev/"),
+  description: APP.description,
+  metadataBase: new URL(APP.url),
 };
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {
