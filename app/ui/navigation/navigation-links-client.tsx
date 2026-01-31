@@ -1,9 +1,14 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import Link from "next/link";
 import clsx from "clsx";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
+import {
+  DocumentPlusIcon,
+  ShieldCheckIcon,
+  UsersIcon,
+} from "@heroicons/react/20/solid";
 import {
   ArrowDownIcon,
   ChartPieIcon,
@@ -15,11 +20,6 @@ import {
   ShoppingCartIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
-import {
-  DocumentPlusIcon,
-  ShieldCheckIcon,
-  UsersIcon,
-} from "@heroicons/react/20/solid";
 
 type Props = { isAdmin: boolean };
 
@@ -35,26 +35,26 @@ export default function NavLinksClient({ isAdmin }: Props) {
   // Links for everyone
   const baseLinks: NavItem[] = [
     { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
-    { name: "Recipes", href: "/dashboard/recipes", icon: DocumentPlusIcon },
+    { name: "Recipes", href: "/recipes", icon: DocumentPlusIcon },
     {
       name: "Shopping list",
-      href: "/dashboard/shopping-list",
+      href: "/shopping-list",
       icon: ShoppingCartIcon,
     },
     {
       name: "Discover",
-      href: "/dashboard/discover",
+      href: "/discover",
       icon: GlobeAltIcon,
     },
     {
       name: "Notifications",
-      href: "/dashboard/notifications",
+      href: "/notifications",
       icon: MegaphoneIcon,
     },
-    { name: "Account", href: "/dashboard/account", icon: UserIcon },
+    { name: "Account", href: "/account", icon: UserIcon },
     {
       name: "Support",
-      href: "/dashboard/support",
+      href: "/support",
       icon: InformationCircleIcon,
     },
   ];
@@ -63,14 +63,14 @@ export default function NavLinksClient({ isAdmin }: Props) {
   const adminLinks: NavItem[] = [
     {
       name: "New notification",
-      href: "/dashboard/admin/notification-center",
+      href: "/admin/notification-center",
       icon: ShieldCheckIcon,
     },
-    { name: "Users", href: "/dashboard/admin/users", icon: UsersIcon },
-    { name: "Metrics", href: "/dashboard/admin/metrics", icon: ChartPieIcon },
+    { name: "Users", href: "/admin/users", icon: UsersIcon },
+    { name: "Metrics", href: "/admin/metrics", icon: ChartPieIcon },
     {
       name: "Support inbox",
-      href: "/dashboard/admin/support",
+      href: "/admin/support",
       icon: InboxIcon,
     },
   ];
@@ -85,7 +85,7 @@ export default function NavLinksClient({ isAdmin }: Props) {
         href={link.href}
         className={clsx(
           "flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 lg:flex-none lg:justify-start lg:p-2 lg:px-3",
-          active && "bg-sky-100 text-blue-600"
+          active && "bg-sky-100 text-blue-600",
         )}
       >
         <LinkIcon className="w-6" />

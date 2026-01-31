@@ -1,24 +1,24 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  UserCircleIcon,
-  PowerIcon,
-  MegaphoneIcon,
-  ShoppingCartIcon,
-  ArrowDownIcon,
-  GlobeAltIcon,
-  InformationCircleIcon,
-  ChartPieIcon,
-  InboxIcon,
-} from "@heroicons/react/24/outline";
 import {
   ChartBarIcon,
   PlusIcon,
   ShieldCheckIcon,
   UsersIcon,
 } from "@heroicons/react/20/solid";
+import {
+  ArrowDownIcon,
+  ChartPieIcon,
+  GlobeAltIcon,
+  InboxIcon,
+  InformationCircleIcon,
+  MegaphoneIcon,
+  PowerIcon,
+  ShoppingCartIcon,
+  UserCircleIcon,
+} from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   dashboardleHref?: string;
@@ -43,18 +43,18 @@ type Props = {
 
 export default function UserSettingsFab({
   dashboardleHref = "/dashboard",
-  profileHref = "/dashboard/account",
-  recipesHref = "/dashboard/recipes",
-  notificationsHref = "/dashboard/notifications",
-  shoppinglistHref = "/dashboard/shopping-list",
-  discoverHref = "/dashboard/discover",
-  helpHref = "/dashboard/support",
+  profileHref = "/account",
+  recipesHref = "/recipes",
+  notificationsHref = "/notifications",
+  shoppinglistHref = "/shopping-list",
+  discoverHref = "/discover",
+  helpHref = "/support",
 
   isAdmin = false,
-  adminNotificationHref = "/dashboard/admin/notification-center",
-  adminUsersHref = "/dashboard/admin/users",
-  metricsHref = "/dashboard/admin/metrics",
-  supportHref = "/dashboard/admin/support",
+  adminNotificationHref = "/admin/notification-center",
+  adminUsersHref = "/admin/users",
+  metricsHref = "/admin/metrics",
+  supportHref = "/admin/support",
 
   logoutAction,
   title = "User menu",
