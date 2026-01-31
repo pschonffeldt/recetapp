@@ -1,3 +1,4 @@
+import { APP } from "@/app/lib/utils/app";
 import Link from "next/link";
 
 export default function HelpFooter() {
@@ -5,7 +6,7 @@ export default function HelpFooter() {
     <footer className="mt-16 border-t bg-white">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm text-gray-500">
-          © {new Date().getFullYear()} RecetApp · Help Center
+          © {new Date().getFullYear()} {APP.legalName} · Help Center
         </div>
 
         <nav className="flex flex-wrap gap-x-6 gap-y-2 text-sm">

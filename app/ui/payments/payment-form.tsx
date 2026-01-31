@@ -1,15 +1,16 @@
 "use client";
 
+import { APP } from "@/app/lib/utils/app";
 import { inter } from "@/app/ui/branding/branding-fonts";
-import {
-  CreditCardIcon,
-  UserIcon,
-  CalendarDaysIcon,
-  LockClosedIcon,
-} from "@heroicons/react/24/outline";
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
-import { useSearchParams } from "next/navigation";
+import {
+  CalendarDaysIcon,
+  CreditCardIcon,
+  LockClosedIcon,
+  UserIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button } from "../general/button";
 
 export default function PaymentForm() {
@@ -24,8 +25,8 @@ export default function PaymentForm() {
           Add your payment details
         </h1>
         <p className="mb-4 text-sm text-gray-600">
-          Your card will be used to pay for your RecetApp membership. You can
-          update or cancel your plan at any time in Account Settings.
+          {`Your card will be used to pay for your ${APP.legalName} membership. You can
+          update or cancel your plan at any time in Account Settings.`}
         </p>
 
         <div className="w-full space-y-4">

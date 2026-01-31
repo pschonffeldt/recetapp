@@ -1,19 +1,20 @@
-import RecipesType from "../recipes/recipes-status";
-import RecipesDifficulty from "../recipes/recipes-difficulty";
+import { DiscoverRecipeCard } from "@/app/lib/discover/data";
+import { APP } from "@/app/lib/utils/app";
+import { formatDateToLocal } from "@/app/lib/utils/format";
+import PrepTimePill from "../general/time-pill";
 import {
   ImportRecipeFromDiscoverCard,
   ViewPublicRecipe,
 } from "../recipes/recipes-buttons";
-import { formatDateToLocal } from "@/app/lib/utils/format";
-import { DiscoverRecipeCard } from "@/app/lib/discover/data";
-import PrepTimePill from "../general/time-pill";
+import RecipesDifficulty from "../recipes/recipes-difficulty";
+import RecipesType from "../recipes/recipes-status";
 
 type Props = {
   recipe: DiscoverRecipeCard;
 };
 
 export default function DiscoverCard({ recipe }: Props) {
-  const creator = recipe.created_by_display_name ?? "RecetApp cook";
+  const creator = recipe.created_by_display_name ?? `${APP.legalName} cook`;
   const savedCount = recipe.saved_by_count ?? 0;
 
   return (

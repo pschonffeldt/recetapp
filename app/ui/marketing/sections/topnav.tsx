@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { APP } from "@/app/lib/utils/app";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 export default function MarketingTopNavBar() {
@@ -46,7 +47,7 @@ export default function MarketingTopNavBar() {
     <header className="sticky top-0 z-40 border-b bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
         <Link href="/" className="text-base font-semibold tracking-tight">
-          RecetApp
+          ${APP.legalName}
         </Link>
 
         {/* Desktop nav */}
@@ -141,7 +142,7 @@ export default function MarketingTopNavBar() {
               {/* Optional: keep the top bar area consistent */}
               <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
                 <span className="text-base font-semibold tracking-tight">
-                  RecetApp
+                  ${APP.legalName}
                 </span>
                 <button
                   type="button"

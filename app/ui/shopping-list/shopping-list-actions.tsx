@@ -123,7 +123,7 @@ export default function ShoppingListActions({
         .from(html)
         .set({
           margin: 10,
-          filename: "recetapp-shopping-list.pdf",
+          filename: `${APP.legalName.toLowerCase().replace(/\s+/g, "-")}-shopping-list.pdf`,
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         })
         .save();

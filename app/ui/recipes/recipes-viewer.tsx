@@ -14,6 +14,7 @@ import { MetricCard, MetricCardMobile } from "./recipes-indicators";
 import { buildIngredientLines } from "@/app/lib/ingredients";
 import { formatDateToLocal, capitalizeFirst } from "@/app/lib/utils/format";
 import clsx from "clsx";
+import { APP } from "@/app/lib/utils/app";
 
 type ViewerMode = "dashboard" | "discover" | "imported";
 
@@ -76,7 +77,8 @@ export default function ViewerRecipe({
                   <span>
                     Created by{" "}
                     <span className="font-medium">
-                      {recipe.created_by_display_name ?? "RecetApp cook"}
+                      {recipe.created_by_display_name ??
+                        `${APP.legalName} cook`}
                     </span>
                   </span>
                 </div>
@@ -88,7 +90,7 @@ export default function ViewerRecipe({
               <span
                 className={clsx(
                   "inline-flex h-2 w-2 rounded-full",
-                  isPublic ? "bg-emerald-500" : "bg-gray-400"
+                  isPublic ? "bg-emerald-500" : "bg-gray-400",
                 )}
                 aria-hidden="true"
               />
@@ -194,7 +196,7 @@ export default function ViewerRecipe({
               recipe.servings > 0
                 ? Math.round(
                     (Number(recipe.estimated_cost_total) / recipe.servings) *
-                      100
+                      100,
                   ) / 100
                 : null
             }
@@ -300,7 +302,7 @@ export default function ViewerRecipe({
               recipe.servings > 0
                 ? Math.round(
                     (Number(recipe.estimated_cost_total) / recipe.servings) *
-                      100
+                      100,
                   ) / 100
                 : null
             }
