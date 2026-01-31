@@ -1,13 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { ShoppingListRecipe } from "@/app/lib/recipes/data";
+import { APP } from "@/app/lib/utils/app";
 import { Button } from "@/app/ui/general/button";
 import { useToast } from "@/app/ui/toast/toast-provider";
-import {
-  RECETAPP_BRAND_NAME,
-  RECETAPP_PUBLIC_URL,
-} from "@/app/lib/utils/constants";
-import { ShoppingListRecipe } from "@/app/lib/recipes/data";
+import { useMemo, useState } from "react";
 
 type Props = {
   recipes: ShoppingListRecipe[];
@@ -27,7 +24,7 @@ export default function ShoppingListActions({
 
   const appliedRecipes = useMemo(
     () => recipes.filter((r) => selectedIds.includes(r.id)),
-    [recipes, selectedIds]
+    [recipes, selectedIds],
   );
 
   const handleCopy = async () => {
@@ -64,11 +61,7 @@ export default function ShoppingListActions({
     }
 
     // Footer with brand + URL from constants
-    sections.push(
-      "",
-      `Generated with ${RECETAPP_BRAND_NAME}`,
-      `Try it: ${RECETAPP_PUBLIC_URL}`
-    );
+    sections.push("", `Generated with ${APP.legalName}`, `Try it: ${APP.url}`);
 
     const text = sections.join("\n");
 
@@ -121,7 +114,7 @@ export default function ShoppingListActions({
           ${ingredientsListHtml}
 
           <p style="margin-top: 16px; font-size: 11px; color: #555;">
-            Generated with ${RECETAPP_BRAND_NAME} · <a href="${RECETAPP_PUBLIC_URL}">${RECETAPP_PUBLIC_URL}</a>
+            Generated with ${APP.legalName} · <a href="${APP.url}">${APP.url}</a>
           </p>
         </div>
       `;

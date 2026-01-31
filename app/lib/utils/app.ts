@@ -10,7 +10,7 @@ export const APP = {
   version: "1.0.0",
 
   /** URLs */
-  url: "https://recetapp.com",
+  url: "https://recetapp-mu.vercel.app/",
   supportUrl: "/contact",
   helpCenterUrl: "/help",
   roadmapUrl: "/roadmap",
