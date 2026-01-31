@@ -100,31 +100,22 @@ export default function MarketingFooter() {
               <Link href="/dashboard" className="block hover:underline">
                 Dashboard
               </Link>
-              <Link href="/dashboard/recipes" className="block hover:underline">
+              <Link href="/recipes" className="block hover:underline">
                 Recipes
               </Link>
-              <Link
-                href="/dashboard/shopping-list"
-                className="block hover:underline"
-              >
+              <Link href="/shopping-list" className="block hover:underline">
                 Shopping list
               </Link>
-              <Link
-                href="/dashboard/discover"
-                className="block hover:underline"
-              >
+              <Link href="/discover" className="block hover:underline">
                 Discover
               </Link>
-              <Link
-                href="/dashboard/notifications"
-                className="block hover:underline"
-              >
+              <Link href="/notifications" className="block hover:underline">
                 Notifications
               </Link>
-              <Link href="/dashboard/account" className="block hover:underline">
+              <Link href="/account" className="block hover:underline">
                 Acount
               </Link>
-              <Link href="/dashboard/support" className="block hover:underline">
+              <Link href="/support" className="block hover:underline">
                 Support
               </Link>
             </div>

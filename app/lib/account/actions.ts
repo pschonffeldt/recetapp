@@ -75,7 +75,7 @@ function toOptional(v: FormDataEntryValue | null): string | undefined {
 
 export async function updateUserProfile(
   _prev: AccountFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<AccountFormState> {
   const session = await auth();
 
@@ -95,7 +95,7 @@ export async function updateUserProfile(
 
   // keep empty string ("") so optional fields can be cleared
   const toOptionalKeepEmpty = (
-    v: FormDataEntryValue | null
+    v: FormDataEntryValue | null,
   ): string | undefined => {
     if (v === null) return undefined;
     return v.toString().trim(); // may be ""
@@ -203,7 +203,7 @@ export async function updateUserProfile(
   // Nullable text fields ("" clears -> NULL)
   if (d.country !== undefined) {
     sets.push(
-      d.country === "" ? sql`country = NULL` : sql`country = ${d.country}`
+      d.country === "" ? sql`country = NULL` : sql`country = ${d.country}`,
     );
   }
   if (d.gender !== undefined) {
@@ -215,7 +215,7 @@ export async function updateUserProfile(
     sets.push(
       d.date_of_birth === ""
         ? sql`date_of_birth = NULL`
-        : sql`date_of_birth = ${d.date_of_birth}::date`
+        : sql`date_of_birth = ${d.date_of_birth}::date`,
     );
   }
 
@@ -225,7 +225,7 @@ export async function updateUserProfile(
       sets.push(sql`allergies = ARRAY[]::text[]`);
     } else {
       sets.push(
-        sql`allergies = array_remove(regexp_split_to_array(${d.allergies}, '\\s*,\\s*'), '')`
+        sql`allergies = array_remove(regexp_split_to_array(${d.allergies}, '\\s*,\\s*'), '')`,
       );
     }
   }
@@ -235,7 +235,7 @@ export async function updateUserProfile(
       sets.push(sql`dietary_flags = ARRAY[]::text[]`);
     } else {
       sets.push(
-        sql`dietary_flags = array_remove(regexp_split_to_array(${d.dietary_flags}, '\\s*,\\s*'), '')`
+        sql`dietary_flags = array_remove(regexp_split_to_array(${d.dietary_flags}, '\\s*,\\s*'), '')`,
       );
     }
   }
@@ -283,14 +283,14 @@ export async function updateUserProfile(
     const emailTaken =
       code === "23505" &&
       (/(users_email_unique|users_email_key|users_email_lower_unique)/i.test(
-        constraint
+        constraint,
       ) ||
         /duplicate key.*email/i.test(msg));
 
     const userNameTaken =
       code === "23505" &&
       (/(users_user_name_unique|users_user_name_key|users_user_name_lower_unique)/i.test(
-        constraint
+        constraint,
       ) ||
         /duplicate key.*user_name/i.test(msg));
 
@@ -316,10 +316,10 @@ export async function updateUserProfile(
 
   // Revalidate the right UI
   if (targetUserId === actorId) {
-    revalidatePath("/dashboard/account");
+    revalidatePath("/account");
   } else {
-    revalidatePath("/dashboard/admin/users");
-    revalidatePath(`/dashboard/admin/users/${targetUserId}`);
+    revalidatePath("/admin/users");
+    revalidatePath(`/admin/users/${targetUserId}`);
   }
 
   return { ok: true, message: null, errors: {}, shouldRefresh: true };
@@ -339,7 +339,7 @@ const MEMBERSHIP_LIMITS: Record<MembershipTier, number> = {
 
 export async function updateUserMembership(
   _prev: ActionResult,
-  formData: FormData
+  formData: FormData,
 ): Promise<ActionResult> {
   try {
     const userId = await requireUserId();
@@ -416,7 +416,7 @@ export async function updateUserMembership(
  */
 export async function updateUserPassword(
   _prev: AccountFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<AccountFormState> {
   const session = await auth();
   const userId = (session?.user as any)?.id as string | undefined;

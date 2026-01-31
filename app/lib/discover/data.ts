@@ -159,8 +159,8 @@ export async function fetchDiscoverRecipes({
         sort === "oldest"
           ? sql`r.recipe_created_at ASC`
           : sort === "shortest"
-          ? sql`r.prep_time_min ASC NULLS LAST, r.recipe_created_at DESC`
-          : sql`r.recipe_created_at DESC`
+            ? sql`r.prep_time_min ASC NULLS LAST, r.recipe_created_at DESC`
+            : sql`r.recipe_created_at DESC`
       }
     LIMIT ${DISCOVER_PAGE_SIZE}
     OFFSET ${offset}
@@ -188,7 +188,7 @@ export async function fetchDiscoverRecipes({
 /* ========================================================================== */
 
 export async function fetchDiscoverPages(
-  filters: Omit<DiscoverFilters, "sort" | "page">
+  filters: Omit<DiscoverFilters, "sort" | "page">,
 ): Promise<{ pages: number; total: number }> {
   const whereSql = buildDiscoverWhere(filters);
 
@@ -219,7 +219,7 @@ export type PublicRecipeWithCreator = RecipeForm & {
  * Used by /dashboard/discover/[id] → ViewerRecipe.
  */
 export async function fetchPublicRecipeById(
-  id: string
+  id: string,
 ): Promise<PublicRecipeDetail | null> {
   const rows = await sql<PublicRecipeDetail[]>`
     SELECT

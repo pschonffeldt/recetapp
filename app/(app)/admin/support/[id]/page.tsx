@@ -68,7 +68,7 @@ export default async function Page({ params }: PageProps) {
 
         <div className="flex items-center gap-2">
           <Link
-            href="/dashboard/admin/support"
+            href="/admin/support"
             className="rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             Back to inbox

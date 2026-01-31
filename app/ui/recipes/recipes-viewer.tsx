@@ -37,8 +37,7 @@ export default function ViewerRecipe({
   recipe: ViewerRecipeData;
   mode?: ViewerMode;
 }) {
-  const backHref =
-    mode === "discover" ? "/dashboard/discover" : "/dashboard/recipes";
+  const backHref = mode === "discover" ? "/discover" : "/recipes";
 
   const canEdit = mode === "dashboard"; // imported + discover = read-only
 

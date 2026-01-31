@@ -105,21 +105,21 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
 
   const [profileState, profileAction] = useActionState<ActionResult, FormData>(
     updateUserProfile,
-    emptyState
+    emptyState,
   );
   const [pwdState, pwdAction] = useActionState<ActionResult, FormData>(
     updateUserPassword,
-    emptyState
+    emptyState,
   );
 
   // Controlled gender so it doesn't snap back
   const [gender, setGender] = useState<string>(
-    () => ((user as any).gender ?? "") as string
+    () => ((user as any).gender ?? "") as string,
   );
 
   // Controlled country so it doesn't snap back
   const [country, setCountry] = useState<string>(
-    () => ((user as any).country ?? "") as string
+    () => ((user as any).country ?? "") as string,
   );
 
   // Pending flags that only clear once we have a real result
@@ -259,7 +259,7 @@ export default function EditAccountSettingsForm({ user }: { user: UserForm }) {
   const allergiesText = useMemo(() => pgArrayToCsv(allergies), [allergies]);
   const dietaryFlagsText = useMemo(
     () => pgArrayToCsv(dietaryFlags),
-    [dietaryFlags]
+    [dietaryFlags],
   );
 
   const dobValue = user.date_of_birth

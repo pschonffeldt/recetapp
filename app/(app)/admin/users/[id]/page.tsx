@@ -31,11 +31,11 @@ export default async function Page({ params }: PageProps) {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: "Admin", href: "/dashboard/admin" },
-          { label: "Users", href: "/dashboard/admin/users" },
+          { label: "Admin", href: "/admin" },
+          { label: "Users", href: "/admin/users" },
           {
             label: "Edit user",
-            href: `/dashboard/admin/users/${id}`,
+            href: `/admin/users/${id}`,
             active: true,
           },
         ]}

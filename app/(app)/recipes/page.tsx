@@ -57,9 +57,7 @@ export default async function Page(props: {
   return (
     <div className="w-full min-h-0">
       <Breadcrumbs
-        breadcrumbs={[
-          { label: "Recipes", href: "/dashboard/recipes", active: true },
-        ]}
+        breadcrumbs={[{ label: "Recipes", href: "/recipes", active: true }]}
       />
 
       {/* Header row: title is in breadcrumbs; keep only Create button here */}
@@ -70,7 +68,7 @@ export default async function Page(props: {
       {/* Filters toolbar – same layout as Discover */}
       <section className="mt-4">
         <RecipesFiltersToolbar
-          basePath="/dashboard/recipes"
+          basePath="/recipes"
           query={query}
           type={rawType ?? ""}
           difficultyRaw={difficultyRaw}

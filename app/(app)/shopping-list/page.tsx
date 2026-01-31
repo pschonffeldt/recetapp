@@ -1,19 +1,19 @@
-import { Metadata } from "next";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { auth } from "@/auth";
+import {
+  fetchIngredientsForUser,
+  fetchRecipesForUser,
+  fetchUserById,
+} from "@/app/lib/recipes/data";
 import {
   IncomingIngredientPayload,
   IngredientUnit,
   UNIT_LABELS,
 } from "@/app/lib/types/definitions";
 import ShoppingListRecipePicker from "@/app/ui/shopping-list/shopping-list-recipe-picker";
-import {
-  fetchUserById,
-  fetchRecipesForUser,
-  fetchIngredientsForUser,
-} from "@/app/lib/recipes/data";
+import { auth } from "@/auth";
 
 export const metadata: Metadata = { title: "Shopping list" };
 
@@ -26,7 +26,7 @@ type AggregatedItem = {
 };
 
 function aggregateIngredients(
-  ingredients: IncomingIngredientPayload[]
+  ingredients: IncomingIngredientPayload[],
 ): AggregatedItem[] {
   const map = new Map<string, AggregatedItem>();
 
@@ -55,12 +55,12 @@ function aggregateIngredients(
   }
 
   return Array.from(map.values()).sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+    a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
   );
 }
 
 function formatAggregatedItem(item: AggregatedItem): string {
-  const unitLabel = item.unit ? UNIT_LABELS[item.unit] ?? item.unit : "";
+  const unitLabel = item.unit ? (UNIT_LABELS[item.unit] ?? item.unit) : "";
   const qtyPart =
     item.quantity != null
       ? unitLabel
@@ -118,7 +118,7 @@ export default async function Page({
         breadcrumbs={[
           {
             label: "Shopping list",
-            href: "/dashboard/shopping-list",
+            href: "/shopping-list",
             active: true,
           },
         ]}
@@ -131,10 +131,10 @@ export default async function Page({
             {!hasRecipes
               ? "You don't have any recipes yet. Create a recipe to start building a shopping list."
               : selectedCount === 0
-              ? "Select one or more recipes below to generate your shopping list."
-              : `Based on ${selectedCount} selected recipe${
-                  selectedCount > 1 ? "s" : ""
-                }.`}
+                ? "Select one or more recipes below to generate your shopping list."
+                : `Based on ${selectedCount} selected recipe${
+                    selectedCount > 1 ? "s" : ""
+                  }.`}
           </p>
 
           <div className="mt-4">

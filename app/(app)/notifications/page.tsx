@@ -96,7 +96,7 @@ export default async function Page({
 
     // UX: when switching tabs, reset pagination
     // (don’t include `page` here)
-    return `/dashboard/notifications?${params.toString()}`;
+    return `/notifications?${params.toString()}`;
   }
 
   return (
@@ -107,7 +107,7 @@ export default async function Page({
           breadcrumbs={[
             {
               label: "Notifications",
-              href: "/dashboard/notifications",
+              href: "/notifications",
               active: true,
             },
           ]}

@@ -85,7 +85,7 @@ const NewNotificationSchema = z
         .refine((v) => !Number.isNaN(Date.parse(v)), {
           message: "Must be a valid date/time",
         })
-        .optional()
+        .optional(),
     ),
   })
   .superRefine((data, ctx) => {
@@ -108,7 +108,7 @@ const NewNotificationSchema = z
  */
 export async function markNotificationRead(
   _prev: ActionResult | undefined,
-  formData: FormData
+  formData: FormData,
 ): Promise<ActionResult> {
   const userId = await requireUserId();
   const id = formData.get("id");
@@ -118,14 +118,14 @@ export async function markNotificationRead(
   }
 
   try {
-    await sql/* sql */ `
+    await sql /* sql */ `
       UPDATE public.notifications
       SET status = 'read'::notification_status
       WHERE id = ${id}::uuid
         AND user_id = ${userId}::uuid  -- only *this* user's notification
     `;
 
-    revalidatePath("/dashboard/notifications");
+    revalidatePath("/notifications");
     return { ok: true, message: null };
   } catch (e) {
     console.error("markNotificationRead failed:", e);
@@ -137,19 +137,19 @@ export async function markNotificationRead(
  * Mark all notifications as read for the current user.
  */
 export async function markAllNotificationsRead(): Promise<ActionResult> {
-// _prev: ActionResult | undefined,
-// _formData: FormData
+  // _prev: ActionResult | undefined,
+  // _formData: FormData
   const userId = await requireUserId();
 
   try {
-    await sql/* sql */ `
+    await sql /* sql */ `
       UPDATE public.notifications
       SET status = 'read'::notification_status
       WHERE user_id = ${userId}::uuid
         AND status = 'unread'::notification_status
     `;
 
-    revalidatePath("/dashboard/notifications");
+    revalidatePath("/notifications");
     return { ok: true, message: null };
   } catch (e) {
     console.error("markAllNotificationsRead failed:", e);
@@ -166,7 +166,7 @@ export async function markAllNotificationsRead(): Promise<ActionResult> {
  */
 export async function createNotification(
   _prev: ActionResult | undefined,
-  formData: FormData
+  formData: FormData,
 ): Promise<ActionResult> {
   await requireAdmin();
 
@@ -178,8 +178,8 @@ export async function createNotification(
     audience === "broadcast"
       ? null
       : typeof rawUserId === "string" && rawUserId.trim().length > 0
-      ? rawUserId.trim()
-      : null;
+        ? rawUserId.trim()
+        : null;
 
   // Normalize linkUrl: empty string -> undefined
   const rawLinkUrl = formData.get("linkUrl");
@@ -223,7 +223,7 @@ export async function createNotification(
   const initialStatus: "unread" | "read" = d.userId ? "unread" : "read";
 
   try {
-    const result = await sql/* sql */ `
+    const result = await sql /* sql */ `
       INSERT INTO public.notifications (
         user_id,
         title,

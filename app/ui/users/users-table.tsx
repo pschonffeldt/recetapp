@@ -113,7 +113,7 @@ export default async function AdminUsersTable() {
                     <td className="whitespace-nowrap py-3 pl-3 pr-6 align-middle">
                       <div className="flex justify-end gap-2">
                         <Link
-                          href={`/dashboard/admin/users/${u.id}`}
+                          href={`/admin/users/${u.id}`}
                           className="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50"
                         >
                           Edit
@@ -204,7 +204,7 @@ export default async function AdminUsersTable() {
                   {/* Actions */}
                   <div className="mt-2 flex justify-end">
                     <Link
-                      href={`/dashboard/admin/users/${u.id}`}
+                      href={`/admin/users/${u.id}`}
                       className="rounded-md border border-gray-200 px-3 py-1 text-xs text-gray-700 hover:bg-gray-50"
                     >
                       Edit

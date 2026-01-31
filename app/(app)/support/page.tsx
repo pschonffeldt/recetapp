@@ -8,7 +8,7 @@ export const metadata = { title: "Support" };
 export default async function Page() {
   const session = await auth();
   if (!session?.user) {
-    redirect(`/login?callbackUrl=/dashboard/support`);
+    redirect(`/login?callbackUrl=/support`);
   }
 
   return (

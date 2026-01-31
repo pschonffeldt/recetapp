@@ -13,10 +13,10 @@ export default async function Page() {
       {/* Breadcrumb trail */}
       <Breadcrumbs
         breadcrumbs={[
-          { label: "Recipes", href: "/dashboard/recipes" },
+          { label: "Recipes", href: "/recipes" },
           {
             label: "Create Recipe",
-            href: "/dashboard/recipes/create",
+            href: "/recipes/create",
             active: true,
           },
         ]}

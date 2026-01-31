@@ -26,7 +26,7 @@ export default async function Page() {
         breadcrumbs={[
           {
             label: "Account settings",
-            href: "/dashboard/account",
+            href: "/account",
             active: true,
           },
         ]}

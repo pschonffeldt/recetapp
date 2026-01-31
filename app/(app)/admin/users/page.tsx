@@ -24,8 +24,8 @@ export default async function AdminUsersPage() {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: "Admin", href: "/dashboard/admin" },
-          { label: "Users", href: "/dashboard/admin/users", active: true },
+          { label: "Admin", href: "/admin" },
+          { label: "Users", href: "/admin/users", active: true },
         ]}
       />
       <AdminUsersTable />

@@ -43,7 +43,7 @@ export type DiscoverOwnershipRow = {
  * - Otherwise appends userId to saved_by_user_ids[] and redirects
  */
 export async function importRecipeFromDiscover(
-  recipeId: string
+  recipeId: string,
 ): Promise<never> {
   const userId = await requireUserId(); // ensure logged in
 
@@ -68,8 +68,8 @@ export async function importRecipeFromDiscover(
 
   // 2) If the user is already the owner OR has it saved, just go back
   if (row.user_id === userId || savedBy.includes(userId)) {
-    revalidatePath("/dashboard/recipes");
-    redirect("/dashboard/recipes");
+    revalidatePath("/recipes");
+    redirect("/recipes");
   }
 
   // 3) Add this user to saved_by_user_ids
@@ -79,12 +79,12 @@ export async function importRecipeFromDiscover(
     WHERE id = ${recipeId}::uuid
   `;
 
-  revalidatePath("/dashboard/recipes");
-  redirect("/dashboard/recipes");
+  revalidatePath("/recipes");
+  redirect("/recipes");
 }
 
 export async function importRecipeFromDiscoverInline(
-  recipeId: string
+  recipeId: string,
 ): Promise<void> {
   const userId = await requireUserId(); // ensure logged in
 
@@ -110,8 +110,8 @@ export async function importRecipeFromDiscoverInline(
   // 2) If the user already owns or saved the recipe, just no-op
   if (row.user_id === userId || savedBy.includes(userId)) {
     // still refresh recipes so badges etc. are up to date
-    revalidatePath("/dashboard/recipes");
-    revalidatePath("/dashboard/discover");
+    revalidatePath("/recipes");
+    revalidatePath("/discover");
     return;
   }
 
@@ -123,8 +123,8 @@ export async function importRecipeFromDiscoverInline(
   `;
 
   // Refresh lists, but **no redirect**
-  revalidatePath("/dashboard/recipes");
-  revalidatePath("/dashboard/discover");
+  revalidatePath("/recipes");
+  revalidatePath("/discover");
 }
 
 /**
@@ -135,7 +135,7 @@ export async function importRecipeFromDiscoverInline(
  * - Returns "imported" if we actually add it
  */
 export async function importRecipeFromDiscoverSoft(
-  recipeId: string
+  recipeId: string,
 ): Promise<"already" | "imported"> {
   const userId = await requireUserId();
 
@@ -160,7 +160,7 @@ export async function importRecipeFromDiscoverSoft(
   // Already owned or already saved in library
   if (row.user_id === userId || savedBy.includes(userId)) {
     // keep recipes list fresh, but NO redirect
-    revalidatePath("/dashboard/recipes");
+    revalidatePath("/recipes");
     return "already";
   }
 
@@ -171,6 +171,6 @@ export async function importRecipeFromDiscoverSoft(
     WHERE id = ${recipeId}::uuid
   `;
 
-  revalidatePath("/dashboard/recipes");
+  revalidatePath("/recipes");
   return "imported";
 }

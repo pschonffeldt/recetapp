@@ -16,14 +16,11 @@ export default function HelpFooter() {
           <Link href="/dashboard" className="text-gray-600 hover:text-gray-900">
             Dashboard
           </Link>
-          <Link
-            href="/dashboard/account"
-            className="text-gray-600 hover:text-gray-900"
-          >
+          <Link href="/account" className="text-gray-600 hover:text-gray-900">
             Account settings
           </Link>
           <Link
-            href="/dashboard/notifications"
+            href="/notifications"
             className="text-gray-600 hover:text-gray-900"
           >
             Notifications

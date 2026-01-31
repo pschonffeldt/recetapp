@@ -29,7 +29,7 @@ export default async function Page() {
         breadcrumbs={[
           {
             label: "Usage Metrics",
-            href: "/dashboard/admin/metrics",
+            href: "/admin/metrics",
             active: true,
           },
         ]}

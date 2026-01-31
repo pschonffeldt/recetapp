@@ -15,8 +15,7 @@ import { Button } from "../general/button";
 
 export default function PaymentForm() {
   const searchParams = useSearchParams();
-  const callbackUrl =
-    searchParams.get("callbackUrl") || "/dashboard/membership";
+  const callbackUrl = searchParams.get("callbackUrl") || "/membership";
 
   return (
     <form className="space-y-3">
@@ -136,7 +135,7 @@ export default function PaymentForm() {
 
         <p className="mt-2 text-center text-xs">
           <Link
-            href="/dashboard/account" // ← change this to your actual settings route
+            href="/account" // ← change this to your actual settings route
             className="text-blue-600 underline hover:opacity-80"
           >
             Cancel and go back to Account Settings

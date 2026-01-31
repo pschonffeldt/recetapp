@@ -47,7 +47,7 @@ type RecipeFormErrors = RecipeFormState["errors"];
  * Reads `ingredientsJson` (stringified array of IncomingIngredientPayload).
  */
 function parseStructuredIngredients(
-  formData: FormData
+  formData: FormData,
 ): IncomingIngredientPayload[] {
   const raw = formData.get("ingredientsJson");
 
@@ -79,7 +79,7 @@ function mapZodErrorsToFormErrors(issues: ZodIssue[]): RecipeFormErrors {
 /** Small helper to build a RecipeFormState with message + errors. */
 function recipeFormError(
   message: string,
-  errors: RecipeFormErrors = {}
+  errors: RecipeFormErrors = {},
 ): RecipeFormState {
   return { message, errors };
 }
@@ -100,7 +100,7 @@ function recipeFormError(
  */
 export async function createRecipe(
   _prev: RecipeFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<RecipeFormState> {
   // 1) Enforce auth
   const userId = await requireUserId();
@@ -131,7 +131,7 @@ export async function createRecipe(
   if (!parsed.success) {
     return recipeFormError(
       "Please correct the errors above.",
-      mapZodErrorsToFormErrors(parsed.error.issues)
+      mapZodErrorsToFormErrors(parsed.error.issues),
     );
   }
 
@@ -145,7 +145,7 @@ export async function createRecipe(
 
   // 4) Persist to DB
   try {
-    await sql/* sql */ `
+    await sql /* sql */ `
       INSERT INTO public.recipes (
         recipe_name,
         recipe_ingredients,
@@ -193,8 +193,8 @@ export async function createRecipe(
     return recipeFormError("Failed to create recipe.", {});
   }
 
-  revalidatePath("/dashboard/recipes");
-  redirect("/dashboard/recipes");
+  revalidatePath("/recipes");
+  redirect("/recipes");
 }
 
 /**
@@ -207,7 +207,7 @@ export async function createRecipe(
  */
 export async function updateRecipe(
   _prev: RecipeFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<RecipeFormState> {
   const userId = await requireUserId();
   const id = String(formData.get("id") ?? "");
@@ -241,7 +241,7 @@ export async function updateRecipe(
   if (!parsed.success) {
     return recipeFormError(
       "Please correct the errors above.",
-      mapZodErrorsToFormErrors(parsed.error.issues)
+      mapZodErrorsToFormErrors(parsed.error.issues),
     );
   }
 
@@ -249,7 +249,7 @@ export async function updateRecipe(
 
   // 3) Persist to DB (both text[] + structured jsonb)
   try {
-    await sql/* sql */ `
+    await sql /* sql */ `
       UPDATE public.recipes
       SET
         recipe_name                   = ${d.recipe_name},
@@ -287,8 +287,8 @@ export async function updateRecipe(
     return recipeFormError("Failed to update recipe.", {});
   }
 
-  revalidatePath("/dashboard/recipes");
-  redirect("/dashboard/recipes");
+  revalidatePath("/recipes");
+  redirect("/recipes");
 }
 
 /**
@@ -297,7 +297,7 @@ export async function updateRecipe(
  */
 export async function deleteRecipe(id: string): Promise<void> {
   const userId = await requireUserId();
-  const rows = await sql/* sql */ `
+  const rows = await sql /* sql */ `
     DELETE FROM public.recipes
     WHERE id = ${id}::uuid
       AND user_id = ${userId}::uuid
@@ -307,11 +307,11 @@ export async function deleteRecipe(id: string): Promise<void> {
   if (!rows.length) {
     // nothing matched: either not found or not owned by user
     throw new Error(
-      "Recipe not found or you don’t have permission to delete it."
+      "Recipe not found or you don’t have permission to delete it.",
     );
   }
 
-  revalidatePath("/dashboard/recipes");
+  revalidatePath("/recipes");
 }
 
 /**
@@ -320,7 +320,7 @@ export async function deleteRecipe(id: string): Promise<void> {
  */
 export async function deleteRecipeFromViewer(id: string): Promise<never> {
   const userId = await requireUserId();
-  const rows = await sql/* sql */ `
+  const rows = await sql /* sql */ `
     DELETE FROM public.recipes
     WHERE id = ${id}::uuid
       AND user_id = ${userId}::uuid
@@ -329,12 +329,12 @@ export async function deleteRecipeFromViewer(id: string): Promise<never> {
 
   if (!rows.length) {
     throw new Error(
-      "Recipe not found or you don’t have permission to delete it."
+      "Recipe not found or you don’t have permission to delete it.",
     );
   }
 
-  revalidatePath("/dashboard/recipes");
-  redirect("/dashboard/recipes");
+  revalidatePath("/recipes");
+  redirect("/recipes");
 }
 
 /**
@@ -348,13 +348,13 @@ export async function reviewRecipe(id: string): Promise<void> {
   const userId = (session?.user as any)?.id as string | undefined;
   if (!userId) return;
 
-  await sql/* sql */ `
+  await sql /* sql */ `
     DELETE FROM public.recipes
     WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
     RETURNING id
   `;
 
-  revalidatePath(`/dashboard/recipes/${id}/review`);
+  revalidatePath(`/recipes/${id}/review`);
 }
 
 /**
@@ -365,7 +365,7 @@ export async function reviewRecipe(id: string): Promise<void> {
  * Used by the table/list icon button.
  */
 export async function removeImportedRecipeInline(
-  recipeId: string
+  recipeId: string,
 ): Promise<void> {
   const userId = await requireUserId();
 
@@ -382,7 +382,7 @@ export async function removeImportedRecipeInline(
   }
 
   // Just refresh the list; caller stays on the same page
-  revalidatePath("/dashboard/recipes");
+  revalidatePath("/recipes");
 }
 
 /**
@@ -399,8 +399,8 @@ export async function removeRecipeFromLibrary(recipeId: string) {
       AND ${userId}::uuid = ANY(saved_by_user_ids)
   `;
 
-  revalidatePath("/dashboard/recipes");
-  revalidatePath(`/dashboard/recipes/${recipeId}/viewer`);
+  revalidatePath("/recipes");
+  revalidatePath(`/recipes/${recipeId}/viewer`);
 
-  redirect("/dashboard/recipes");
+  redirect("/recipes");
 }

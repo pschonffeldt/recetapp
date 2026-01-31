@@ -27,7 +27,7 @@ import {
 export function CreateRecipe() {
   return (
     <Link
-      href="/dashboard/recipes/create"
+      href="/recipes/create"
       className="flex h-10 items-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
       aria-label="Create recipe"
       title="Create recipe"
@@ -47,7 +47,7 @@ export function ViewRecipe({ id }: { id: string }) {
 
   return (
     <Link
-      href={`/dashboard/recipes/${id}/viewer`}
+      href={`/recipes/${id}/viewer`}
       className="rounded-md border p-2 hover:bg-gray-100"
       aria-label="View recipe details"
       title="View recipe details"
@@ -65,7 +65,7 @@ export function ViewRecipe({ id }: { id: string }) {
 export function ViewPublicRecipe({ id }: { id: string }) {
   return (
     <Link
-      href={`/dashboard/discover/${id}`}
+      href={`/discover/${id}`}
       className="rounded-md border p-2 hover:bg-gray-100"
       aria-label="View recipe details"
       title="View recipe details"
@@ -149,7 +149,7 @@ export function ImportRecipeFromDiscoverCard({ id }: { id: string }) {
 export function UpdateRecipe({ id }: { id: string }) {
   return (
     <Link
-      href={`/dashboard/recipes/${id}/edit`}
+      href={`/recipes/${id}/edit`}
       className="rounded-md border p-2 hover:bg-gray-100"
       aria-label="Edit recipe"
       title="Edit recipe"
@@ -167,7 +167,7 @@ export function UpdateRecipe({ id }: { id: string }) {
 export function UpdateRecipeOnViewer({ id }: { id: string }) {
   return (
     <Link
-      href={`/dashboard/recipes/${id}/edit`}
+      href={`/recipes/${id}/edit`}
       className="flex h-10 items-center rounded-lg bg-blue-500 px-4 text-sm font-medium text-white transition-colors hover:bg-blue-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 active:bg-blue-600 aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
       aria-label="Edit recipe"
       title="Edit recipe"

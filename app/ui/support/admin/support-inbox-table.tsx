@@ -38,8 +38,8 @@ export default function SupportInboxTable({
             typeof r.solved_minutes_ago === "number"
               ? minutesToAgo(r.solved_minutes_ago)
               : r.solved_at
-              ? timeAgoFromIso(r.solved_at)
-              : null;
+                ? timeAgoFromIso(r.solved_at)
+                : null;
 
           return (
             <div
@@ -123,7 +123,7 @@ export default function SupportInboxTable({
               {/* Actions */}
               <div className="mt-4 flex items-center justify-end gap-2">
                 <Link
-                  href={`/dashboard/admin/support/${r.id}`}
+                  href={`/admin/support/${r.id}`}
                   className="rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
                 >
                   View
@@ -162,8 +162,8 @@ export default function SupportInboxTable({
                   typeof r.solved_minutes_ago === "number"
                     ? minutesToAgo(r.solved_minutes_ago)
                     : r.solved_at
-                    ? timeAgoFromIso(r.solved_at)
-                    : null;
+                      ? timeAgoFromIso(r.solved_at)
+                      : null;
 
                 return (
                   <tr key={r.id} className="hover:bg-gray-50/70">
@@ -236,7 +236,7 @@ export default function SupportInboxTable({
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
                         <Link
-                          href={`/dashboard/admin/support/${r.id}`}
+                          href={`/admin/support/${r.id}`}
                           className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
                         >
                           View

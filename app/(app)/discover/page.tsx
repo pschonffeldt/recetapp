@@ -88,9 +88,7 @@ export default async function Page({
   return (
     <main>
       <Breadcrumbs
-        breadcrumbs={[
-          { label: "Discover", href: "/dashboard/discover", active: true },
-        ]}
+        breadcrumbs={[{ label: "Discover", href: "/discover", active: true }]}
       />
 
       {/* Page intro */}
@@ -102,7 +100,7 @@ export default async function Page({
       {/* Filters toolbar */}
       <section className="mt-4">
         <RecipesFiltersToolbar
-          basePath="/dashboard/discover"
+          basePath="/discover"
           query={query}
           type={typeRaw}
           difficultyRaw={difficultyRaw}

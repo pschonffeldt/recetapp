@@ -63,12 +63,12 @@ export default function AdminUserEditForm({
 
   const [profileState, profileAction] = useActionState<ActionResult, FormData>(
     updateUserProfile,
-    emptyState
+    emptyState,
   );
 
   const [pwdState, pwdAction] = useActionState<ActionResult, FormData>(
     updateUserPassword,
-    emptyState
+    emptyState,
   );
 
   // ✅ Remount the form when server props update (so defaultValue updates too)
@@ -440,7 +440,7 @@ export default function AdminUserEditForm({
             <p className="mt-3 text-sm text-red-600">{profileState.message}</p>
           )}
           <Link
-            href="/dashboard/admin/users"
+            href="/admin/users"
             className="flex h-10 items-center rounded-lg bg-gray-100 px-4 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-200"
           >
             Back to users

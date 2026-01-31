@@ -1,20 +1,20 @@
-import RecipesType from "./recipes-status";
-import SortButton from "./recipes-sort-button";
-import {
-  ViewRecipe,
-  UpdateRecipe,
-  DeleteRecipe,
-  RemoveImportedRecipe,
-} from "./recipes-buttons";
-import RecipesDifficulty from "./recipes-difficulty";
-import { formatDateToLocal } from "@/app/lib/utils/format";
 import {
   fetchFilteredRecipes,
   SortKey,
   type RecipeListItem,
 } from "@/app/lib/recipes/data";
+import { formatDateToLocal } from "@/app/lib/utils/format";
 import clsx from "clsx";
 import PrepTimePill from "../general/time-pill";
+import {
+  DeleteRecipe,
+  RemoveImportedRecipe,
+  UpdateRecipe,
+  ViewRecipe,
+} from "./recipes-buttons";
+import RecipesDifficulty from "./recipes-difficulty";
+import SortButton from "./recipes-sort-button";
+import RecipesType from "./recipes-status";
 
 type RecipesTableProps = {
   userId: string;
@@ -36,7 +36,7 @@ function OwnershipBadge({ owner }: { owner: "owned" | "imported" }) {
     <span
       className={clsx(
         "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
-        style
+        style,
       )}
     >
       {label}
@@ -55,7 +55,7 @@ function VisibilityBadge({ status }: { status: "public" | "private" }) {
     <span
       className={clsx(
         "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
-        style
+        style,
       )}
     >
       {label}
@@ -79,7 +79,7 @@ export default async function RecipesTable({
       order,
       type,
       userId,
-    }
+    },
   );
 
   const isEmpty = !recipes || recipes.length === 0;
@@ -139,7 +139,7 @@ export default async function RecipesTable({
                                     step
                                       .replace(/[^\p{L}\p{N}\s]/gu, "")
                                       .replace(/\s+/g, " ")
-                                      .trim()
+                                      .trim(),
                                   )
                                   .join(". ") + ".";
                               const MAX_CHARS = 200;
@@ -157,7 +157,7 @@ export default async function RecipesTable({
                         <p className="pr-1">Created at -</p>
                         <time
                           dateTime={new Date(
-                            recipe.recipe_created_at!
+                            recipe.recipe_created_at!,
                           ).toISOString()}
                         >
                           {formatDateToLocal(recipe.recipe_created_at!)}
@@ -257,7 +257,7 @@ export default async function RecipesTable({
                     <td className="whitespace-nowrap px-3 py-3 text-gray-600 align-middle">
                       <time
                         dateTime={new Date(
-                          recipe.recipe_created_at!
+                          recipe.recipe_created_at!,
                         ).toISOString()}
                       >
                         {formatDateToLocal(recipe.recipe_created_at!)}

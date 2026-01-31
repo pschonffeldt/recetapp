@@ -21,7 +21,7 @@ export default function ShoppingListRecipePicker({
   const searchParams = useSearchParams();
 
   const [selected, setSelected] = useState<Set<string>>(
-    () => new Set(selectedIds ?? [])
+    () => new Set(selectedIds ?? []),
   );
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function ShoppingListRecipePicker({
     sp.delete("recipes");
 
     const qs = sp.toString();
-    router.replace(`/dashboard/shopping-list${qs ? `?${qs}` : ""}`);
+    router.replace(`/shopping-list${qs ? `?${qs}` : ""}`);
   };
 
   const applyFilter = () => {
@@ -76,7 +76,7 @@ export default function ShoppingListRecipePicker({
     }
 
     const qs = sp.toString();
-    router.replace(`/dashboard/shopping-list${qs ? `?${qs}` : ""}`);
+    router.replace(`/shopping-list${qs ? `?${qs}` : ""}`);
   };
 
   if (recipes.length === 0) {

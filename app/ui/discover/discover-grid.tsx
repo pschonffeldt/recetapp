@@ -22,7 +22,7 @@ export default function DiscoverGrid({ recipes, hasFilters = false }: Props) {
             </p>
             <div className="pt-2">
               <Link
-                href="/dashboard/discover"
+                href="/discover"
                 className="inline-flex items-center rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
               >
                 Clear filters
@@ -38,7 +38,7 @@ export default function DiscoverGrid({ recipes, hasFilters = false }: Props) {
             </p>
             <div className="pt-2">
               <Link
-                href="/dashboard/recipes/create"
+                href="/recipes/create"
                 className="inline-flex items-center rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-500"
               >
                 Create your first public recipe
