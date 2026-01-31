@@ -1,10 +1,11 @@
+import { APP } from "@/app/lib/utils/app";
+
 export const FEATURE_ROWS = [
   {
     id: "recipes",
     eyebrow: "Recipes",
     title: "Save recipes in a format you can trust.",
-    description:
-      "No more screenshots and scattered notes. Keep ingredients, steps, and personal notes in a clean structure that's easy to read while you cook.",
+    description: `No more screenshots and scattered notes. Keep ingredients, steps, and personal notes in a clean structure that's easy to read while you cook with ${APP.legalName}.`,
     stats: [
       { value: "Less scrolling", label: "Jump to ingredients and steps fast." },
       { value: "More cooking", label: "A calm layout that stays readable." },
@@ -16,14 +17,13 @@ export const FEATURE_ROWS = [
     ],
     mediaLabel: "Recipe page preview",
     imageSrc: "/images/homepage/home-dashboard.webp",
-    imageAlt: "RecetApp preview",
+    imageAlt: `${APP.legalName} recipe preview`,
   },
   {
     id: "ingredients",
     eyebrow: "Ingredients",
     title: "Reuse ingredients instead of rewriting them.",
-    description:
-      "Consistent ingredient naming keeps your recipes cleaner and helps you build better lists over time.",
+    description: `Consistent ingredient naming keeps your recipes cleaner and helps you build better lists over time in ${APP.legalName}.`,
     stats: [
       { value: "Cleaner data", label: "Keep names consistent across recipes." },
       { value: "Less work", label: "Stop retyping the same items." },
@@ -35,14 +35,13 @@ export const FEATURE_ROWS = [
     ],
     mediaLabel: "Ingredient structure preview",
     imageSrc: "/images/homepage/home-dashboard.webp",
-    imageAlt: "RecetApp preview",
+    imageAlt: `${APP.legalName} ingredient structure preview`,
   },
   {
     id: "shopping",
     eyebrow: "Shopping lists",
     title: "Build a shopping list from multiple recipes.",
-    description:
-      "Pick the recipes you're making and generate a list that’s actually usable at the store.",
+    description: `Pick the recipes you're making and generate a list that's actually usable at the store with ${APP.legalName}.`,
     stats: [
       { value: "Fewer repeats", label: "Combine ingredients across recipes." },
       {
@@ -57,14 +56,13 @@ export const FEATURE_ROWS = [
     ],
     mediaLabel: "Shopping list preview",
     imageSrc: "/images/homepage/home-dashboard.webp",
-    imageAlt: "RecetApp preview",
+    imageAlt: `${APP.legalName} shopping list preview`,
   },
   {
     id: "discover",
     eyebrow: "Discover & share",
     title: "Discover recipes and share yours when you're ready.",
-    description:
-      "Explore a growing library of community recipes and save them into your cookbook. Publish your own favorites only if you choose — with privacy controls that keep it simple.",
+    description: `Explore a growing library of community recipes and save them into your cookbook in ${APP.legalName}. Publish your own favorites only if you choose — with privacy controls that keep it simple.`,
     stats: [
       {
         value: "More inspiration",
@@ -82,6 +80,6 @@ export const FEATURE_ROWS = [
     ],
     mediaLabel: "Discover feed preview",
     imageSrc: "/images/homepage/home-dashboard.webp",
-    imageAlt: "RecetApp preview",
+    imageAlt: `${APP.legalName} discover feed preview`,
   },
 ] as const;
