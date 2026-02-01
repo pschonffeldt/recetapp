@@ -142,7 +142,7 @@ export default function MarketingTopNavBar() {
               {/* Optional: keep the top bar area consistent */}
               <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
                 <span className="text-base font-semibold tracking-tight">
-                  ${APP.legalName}
+                  {APP.legalName}
                 </span>
                 <button
                   type="button"
