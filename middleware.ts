@@ -1,27 +1,39 @@
-// middleware.ts
-import { NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { NextResponse } from "next/server";
+
+const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/recipes",
+  "/shopping-list",
+  "/notifications",
+  "/discover",
+  "/account",
+  "/admin",
+  "/support",
+];
+
+const AUTH_ROUTES = ["/login", "/signup"];
+
+function isProtectedPath(path: string) {
+  return PROTECTED_PREFIXES.some((p) => path === p || path.startsWith(p + "/"));
+}
 
 export default auth((req) => {
   const { nextUrl } = req;
   const path = nextUrl.pathname;
 
-  // Skip obvious asset requests (handle this in code, not in the matcher)
-  // If the request is for a static image file, don’t run any auth/redirect logic—just let it through.
-  if (/\.(png|jpg|jpeg|svg|gif|ico)$/i.test(path)) {
-    return NextResponse.next();
-  }
-
   const isLoggedIn = !!req.auth?.user;
-  const isDashboard = path.startsWith("/dashboard");
-  const isAuthRoute = path === "/login" || path === "/signup";
+  const isAuthRoute = AUTH_ROUTES.includes(path);
 
-  if (!isLoggedIn && isDashboard) {
-    const url = new URL("/login", nextUrl);
+  // Redirect unauthenticated users away from protected routes
+  if (!isLoggedIn && isProtectedPath(path)) {
+    const url = nextUrl.clone();
+    url.pathname = "/login";
     url.searchParams.set("callbackUrl", nextUrl.pathname + nextUrl.search);
     return NextResponse.redirect(url);
   }
 
+  // Redirect logged-in users away from login/signup
   if (isLoggedIn && isAuthRoute) {
     return NextResponse.redirect(new URL("/dashboard", nextUrl));
   }
@@ -30,7 +42,19 @@ export default auth((req) => {
 });
 
 export const config = {
-  // Simple, capture-free matcher per Next.js docs
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
-  runtime: "nodejs",
+  matcher: [
+    // protected areas
+    "/dashboard/:path*",
+    "/recipes/:path*",
+    "/shopping-list/:path*",
+    "/notifications/:path*",
+    "/discover/:path*",
+    "/account/:path*",
+    "/admin/:path*",
+    "/support/:path*",
+
+    // auth routes (so logged-in users get bounced)
+    "/login",
+    "/signup",
+  ],
 };

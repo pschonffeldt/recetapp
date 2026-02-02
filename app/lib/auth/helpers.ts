@@ -1,10 +1,15 @@
 import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 /** Require a signed-in user and return their id. */
 export async function requireUserId() {
   const session = await auth();
   const id = (session?.user as any)?.id as string | undefined;
-  if (!id) throw new Error("Unauthorized");
+
+  if (!id) {
+    redirect("/login");
+  }
+
   return id;
 }
 
