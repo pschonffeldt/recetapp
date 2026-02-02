@@ -30,7 +30,7 @@ export default async function HelpArticlePage({
 
       <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
         <Breadcrumbs
-          className="text-sm md:text-base"
+          className="text-xl md:text-2xl"
           breadcrumbs={[
             { label: "Topics", href: "/help" },
             {

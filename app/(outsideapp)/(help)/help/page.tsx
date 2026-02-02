@@ -27,16 +27,9 @@ export default async function HelpHome({
 
       <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
         <Breadcrumbs
-          className="text-sm md:text-base"
-          breadcrumbs={[{ label: "Topics", href: "/help", active: true }]}
+          className="text-xl md:text-2xl"
+          breadcrumbs={[{ label: "Help topics", href: "/help", active: true }]}
         />
-
-        <Link href="/help" className="inline-block">
-          <Button type="button" className="mb-6">
-            ← Help home
-          </Button>
-        </Link>
-
         {q ? (
           <>
             {results.length === 0 ? (

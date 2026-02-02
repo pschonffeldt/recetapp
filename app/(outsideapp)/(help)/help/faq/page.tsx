@@ -23,12 +23,12 @@ export default async function FAQPage({
 
   return (
     <>
-      <HelpHero action="/help" defaultValue={q} />
+      <HelpHero action="/faq" defaultValue={q} />
 
       <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
         <Breadcrumbs
           className="text-sm md:text-base"
-          breadcrumbs={[{ label: "Topics", href: "/help", active: true }]}
+          breadcrumbs={[{ label: "FAQ", href: "/faq", active: true }]}
         />
 
         <Link href="/help" className="inline-block">
