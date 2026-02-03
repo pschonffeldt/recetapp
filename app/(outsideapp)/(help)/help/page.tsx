@@ -1,6 +1,5 @@
 import { fetchHelpCategories, searchHelpArticles } from "@/app/lib/help/data";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
-import { Button } from "@/app/ui/general/button";
 import HelpHero from "@/app/ui/help/help-hero";
 import Link from "next/link";
 
@@ -57,6 +56,29 @@ export default async function HelpHome({
           </>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Link
+              href="/help/faq"
+              className="rounded-md border bg-white p-6 shadow-sm transition hover:shadow"
+            >
+              <div className="text-base font-semibold group-hover:underline">
+                FAQ
+              </div>
+              <p className="mt-2 text-sm text-gray-600">
+                Fast answers to the most common questions, all in one place.
+              </p>
+            </Link>
+            <Link
+              href="/help/guides"
+              className="rounded-md border bg-white p-6 shadow-sm transition hover:shadow"
+            >
+              <div className="text-base font-semibold group-hover:underline">
+                Guides
+              </div>
+              <p className="mt-2 text-sm text-gray-600">
+                Step-by-step tutorials to help you get the most out of RecetApp.
+              </p>
+            </Link>
+
             {categories.map((c) => (
               <Link
                 key={c.id}
