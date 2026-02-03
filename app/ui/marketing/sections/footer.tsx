@@ -51,17 +51,20 @@ export default function MarketingFooter() {
               Help
             </div>
             <div className="mt-3 space-y-2 text-sm text-gray-600">
-              <Link href="/help" className="block hover:underline">
-                Help Center
-              </Link>
               <Link
                 href="/help/getting-started"
                 className="block hover:underline"
               >
                 Getting started
               </Link>
-              <Link href="/help/recipes" className="block hover:underline">
-                Recipes
+              <Link href="/help" className="block hover:underline">
+                Help Center
+              </Link>
+              <Link href="/help/faq" className="block hover:underline">
+                FAQ
+              </Link>
+              <Link href="/help/guides" className="block hover:underline">
+                Guides
               </Link>
               <Link
                 href="/help/troubleshooting"
@@ -128,12 +131,6 @@ export default function MarketingFooter() {
             <div className="mt-3 space-y-2 text-sm text-gray-600">
               <Link href="/about" className="block hover:underline">
                 Youtube
-              </Link>
-              <Link href="/privacy" className="block hover:underline">
-                Privacy
-              </Link>
-              <Link href="/terms" className="block hover:underline">
-                Terms
               </Link>
             </div>
           </div> */}
