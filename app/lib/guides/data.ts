@@ -13,8 +13,7 @@ export const GUIDES: readonly Guide[] = [
     id: "what-is-recetapp",
     slug: "what-is-recetapp",
     title: "What is RecetApp?",
-    summary:
-      "A quick overview of what RecetApp does and how your recipes stay private by default.",
+    summary: "A quick overview of what RecetApp does.",
     youtubeId: "dQw4w9WgXcQ",
     bodyMd: `
 ## What you'll learn
@@ -98,7 +97,7 @@ Examples:
 Your public username appears on public recipes (it does not show your email).
 
 ## Tips
-Pick something simple and recognizable. If it’s taken, try a variation.
+Pick something simple and recognizable. If it's taken, try a variation.
 `.trim(),
     updatedAt: "2026-02-03",
   },
@@ -120,7 +119,7 @@ Pick something simple and recognizable. If it’s taken, try a variation.
 - Others can save a copy to their library (your original stays yours)
 
 ## Best practice
-Keep recipes public-friendly: avoid personal info you wouldn’t want displayed.
+Keep recipes public-friendly: avoid personal info you wouldn't want displayed.
 `.trim(),
     updatedAt: "2026-02-03",
   },
