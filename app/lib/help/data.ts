@@ -133,7 +133,7 @@ export const FAQS = [
     category: "getting-started",
     question: "Do I need an account to use RecetApp?",
     answer:
-      "You can browse the public Help Center without an account, but you need to sign in to use the app's private features (like creating and managing your own recipes) and to contact support. RecetApp is designed around personal recipe libraries, so most core features are available after you create an account and sign in.",
+      "Yes. You need an account to use RecetApp and access the app experience (recipes, Discover, shopping list, and support). The public website and Help Center are available without signing in. If you don't have an account yet, you can create one for free.",
   },
   {
     id: "private-vs-public-recipes",
@@ -147,19 +147,19 @@ export const FAQS = [
     category: "getting-started",
     question: "Where do I start if I'm new to RecetApp?",
     answer:
-      "Start by creating your first recipe and writing ingredients in a consistent format (amount + unit + ingredient). Once you're comfortable, set a public username if you plan to share recipes and explore Discover for ideas you can save into your own library.",
+      "Start by creating your first recipe and writing ingredients in a consistent format (amount + unit + ingredient). Once you're comfortable, set a public username if you plan to share recipes and explore Discover for ideas.",
   },
   {
     id: "cant-edit-or-delete-recipe",
     category: "recipes",
     question: "Why can't I edit or delete a recipe?",
     answer:
-      "RecetApp restricts destructive actions like edit and delete to the recipe owner for safety. If you're viewing a recipe that isn't yours (for example, a public recipe from Discover), you may not be able to edit or delete it. If you want to customize it, save/copy it to your library first.",
+      "You can always edit and delete recipes you created in your library. If you're not seeing the edit/delete actions, double-check that you're signed in and that you're viewing a recipe you created (not a copied recipe, as copied recipes can't be edited yet).",
   },
   {
     id: "recipe-not-saving-or-showing",
     category: "recipes",
-    question: "My recipe isn't saving or isn't showing up — what should I do?",
+    question: "My recipe isn't saving or isn't showing up, what should I do?",
     answer:
       "First, confirm you're signed in, then refresh the page once. If you were using search or filters, clear them and look again. If it still doesn't appear, try signing out and signing back in. If the issue continues, contact support and include what you tried, what you expected to happen, and what happened instead.",
   },
@@ -176,21 +176,21 @@ export const FAQS = [
     category: "discover",
     question: "Can I copy a recipe and customize it?",
     answer:
-      "Yes. If you save/copy a public recipe from Discover, RecetApp creates your own copy inside your recipe library. You can edit your copy freely, and your changes won't affect the original creator's recipe.",
+      "Right now, copied recipes are saved as a copy you can keep, but editing copied recipes isn't available yet. You can still copy public recipes from Discover to save them to your collection as-is.",
   },
   {
     id: "make-recipe-public-or-private",
     category: "discover",
     question: "How do I make a recipe public (or private again)?",
     answer:
-      "Open the recipe, find the visibility setting (or similar control), and switch it to Public or Private. Public recipes may appear in Discover and show your public username as the creator. If you switch it back to Private, it should no longer be listed publicly.",
+      "Open your recipe and use the visibility control to set it to Public or Private. Public recipes can appear in Discover and show your public username as the creator.",
   },
   {
     id: "public-recipe-not-showing-in-discover",
     category: "discover",
     question: "Why isn't my public recipe showing up in Discover?",
     answer:
-      "Make sure the recipe is set to Public and refresh the page once. If you have search terms or filters in Discover, clear them and try again. During early releases, Discover can feel quiet, so it may take a moment to find your recipe through browsing—try searching by recipe name or keyword. If it still doesn't show, contact support with the recipe title and your public username.",
+      "Make sure the recipe is set to Public and refresh the page once. If you have search terms or filters in Discover, clear them and try again. During early releases, Discover can feel quiet, so it may take a moment to find your recipe through browsing. If it still doesn't show, contact support with the recipe title and your public username.",
   },
   {
     id: "saving-from-discover-changes-original",
@@ -198,7 +198,7 @@ export const FAQS = [
     question:
       "When I save a recipe from Discover, does it change the original?",
     answer:
-      "No. Saving a recipe from Discover creates a copy in your library. Editing your copy does not change the original recipe, and you don't gain access to the creator's private recipes.",
+      "No. Saving a recipe from Discover does not modify the original recipe. It simply saves a copy to your collection.",
   },
   {
     id: "duplicate-shopping-list-items",
@@ -212,7 +212,7 @@ export const FAQS = [
     category: "shopping",
     question: "Why are some ingredients missing from my shopping list?",
     answer:
-      "Confirm the recipe that contains the ingredient was included when generating the list. If the ingredient is marked optional, it may be hidden depending on your list behavior. Also check whether formatting is too vague (e.g., “salt & pepper to taste”)—splitting into separate lines can help.",
+      "Confirm the recipe that contains the ingredient was included when generating the list. If the ingredient is marked optional, it may be hidden depending on your list behavior. Also check whether formatting is too vague (e.g., “salt & pepper to taste”) splitting into separate lines can help.",
   },
   {
     id: "optional-items-shopping-list",
@@ -233,6 +233,6 @@ export const FAQS = [
     category: "support",
     question: "How do I contact support, and why do I need to be signed in?",
     answer:
-      "Use the Contact Support form inside the Help Center. RecetApp requires you to be signed in so support requests can be tied to the correct account and so sensitive account details aren't shared anonymously. When you submit a request, include what you were trying to do, what happened, and any error message you saw.",
+      "Use the Contact Support form inside the Help Center. You need to be signed in so support requests can be tied to the correct account and so sensitive account details aren't shared anonymously. When you submit a request, include what you were trying to do, what happened, and any error message you saw.",
   },
 ] as const;
