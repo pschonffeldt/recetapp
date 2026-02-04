@@ -1,4 +1,5 @@
 import { fetchHelpArticleBySlugs } from "@/app/lib/help/data";
+import { formatDate } from "@/app/lib/utils/format-date";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { Button } from "@/app/ui/general/button";
 import HelpHero from "@/app/ui/help/help-hero";
@@ -53,12 +54,7 @@ export default async function HelpArticlePage({
 
         <article className="rounded-md border bg-white p-6">
           <div className="text-sm text-gray-500">
-            Updated{" "}
-            {new Intl.DateTimeFormat("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            }).format(new Date(article.updated_at))}
+            Updated {formatDate(article.updated_at)}
           </div>
 
           <h1 className="mt-2 text-2xl font-semibold">{article.title}</h1>

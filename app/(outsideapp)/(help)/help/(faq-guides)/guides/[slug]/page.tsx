@@ -5,6 +5,7 @@ import HelpMarkdown from "@/app/ui/help/help-markdown";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getGuideBySlug } from "@/app/lib/guides/data";
+import { formatDate } from "@/app/lib/utils/format-date";
 
 export const metadata = { title: "Guide" };
 
@@ -48,12 +49,7 @@ export default async function GuideDetailPage({
         <article className="rounded-md border bg-white p-6">
           {guide.updatedAt ? (
             <div className="text-sm text-gray-500">
-              Updated{" "}
-              {new Intl.DateTimeFormat("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              }).format(new Date(guide.updatedAt))}
+              Updated {formatDate(guide.updatedAt)}
             </div>
           ) : null}
 
