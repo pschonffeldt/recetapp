@@ -1,6 +1,6 @@
 import { DiscoverRecipeCard } from "@/app/lib/discover/data";
 import { APP } from "@/app/lib/utils/app";
-import { formatDateToLocal } from "@/app/lib/utils/format";
+import { formatDate } from "@/app/lib/utils/format-date";
 import PrepTimePill from "../general/time-pill";
 import {
   ImportRecipeFromDiscoverCard,
@@ -63,7 +63,7 @@ export default function DiscoverCard({ recipe }: Props) {
           <div className="flex flex-row">
             <p className="pr-1">Created at -</p>
             <time dateTime={new Date(recipe.recipe_created_at!).toISOString()}>
-              {formatDateToLocal(recipe.recipe_created_at!)}
+              {formatDate(recipe.recipe_created_at!)}
             </time>
           </div>
           <div className="flex flex-row">
