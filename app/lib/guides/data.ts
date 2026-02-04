@@ -61,7 +61,7 @@ Start simple. You can always edit and improve later.
     slug: "write-ingredients-recetapp-understands",
     title: "Write ingredients RecetApp understands",
     summary:
-      "Use a consistent format so recipes work better with shopping lists and future tools.",
+      "Use a consistent format so recipes work better with shopping list.",
     youtubeId: "dQw4w9WgXcQ",
     bodyMd: `
 ## Best format
