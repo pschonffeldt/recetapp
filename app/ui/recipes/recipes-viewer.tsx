@@ -1,20 +1,20 @@
 "use client";
 
+import { buildIngredientLines } from "@/app/lib/ingredients";
+import { RecipeForm } from "@/app/lib/types/definitions";
+import { APP } from "@/app/lib/utils/app";
+import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils/format";
 import { Button } from "@/app/ui/general/button";
+import clsx from "clsx";
 import Link from "next/link";
+import { inter } from "../branding/branding-fonts";
 import {
   DeleteRecipeOnViewer,
   ImportRecipeFromDiscover,
   RemoveImportedRecipeOnViewer,
   UpdateRecipeOnViewer,
 } from "./recipes-buttons";
-import { RecipeForm } from "@/app/lib/types/definitions";
-import { inter } from "../branding/branding-fonts";
 import { MetricCard, MetricCardMobile } from "./recipes-indicators";
-import { buildIngredientLines } from "@/app/lib/ingredients";
-import { formatDateToLocal, capitalizeFirst } from "@/app/lib/utils/format";
-import clsx from "clsx";
-import { APP } from "@/app/lib/utils/app";
 
 type ViewerMode = "dashboard" | "discover" | "imported";
 
@@ -138,21 +138,10 @@ export default function ViewerRecipe({
 
         {/* Stats mobile */}
         <section className="mb-6 grid grid-cols-2 gap-4 md:hidden">
-          {/* <MetricCardMobile
-            title="Creation date"
-            value={formatDateToLocal(recipe.recipe_created_at!)}
-            fontClassName={inter.className}
-          /> */}
           <MetricCardMobile
             title="Creation date"
             value={createdAtIso ? formatDateToLocal(createdAtIso) : "—"}
           />
-
-          {/* <MetricCardMobile
-            title="Last edit"
-            value={formatDateToLocal(recipe.recipe_updated_at!)}
-            fontClassName={inter.className}
-          /> */}
           <MetricCardMobile
             title="Last edit"
             value={updatedAtIso ? formatDateToLocal(updatedAtIso) : "—"}
@@ -242,21 +231,10 @@ export default function ViewerRecipe({
 
         {/* Stats desktop */}
         <section className="mb-6 hidden gap-4 md:grid md:grid-cols-4">
-          {/* <MetricCard
-            title="Creation date"
-            value={formatDateToLocal(recipe.recipe_created_at!)}
-            fontClassName={inter.className}
-          /> */}
           <MetricCard
             title="Creation date"
             value={createdAtIso ? formatDateToLocal(createdAtIso) : "—"}
           />
-
-          {/* <MetricCard
-            title="Last edit"
-            value={formatDateToLocal(recipe.recipe_updated_at!)}
-            fontClassName={inter.className}
-          /> */}
           <MetricCard
             title="Last edit"
             value={updatedAtIso ? formatDateToLocal(updatedAtIso) : "—"}
