@@ -1,16 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useActionState, useEffect, useMemo, useState } from "react";
 
-import type { AppNotification } from "@/app/lib/types/definitions";
-import { Button } from "../general/button";
 import {
-  markNotificationRead,
   markAllNotificationsRead,
+  markNotificationRead,
 } from "@/app/lib/notifications/actions";
+import type { AppNotification } from "@/app/lib/types/definitions";
 import { capitalizeFirst } from "@/app/lib/utils/format";
+import { formatDateTime } from "@/app/lib/utils/format-date";
+import { Button } from "../general/button";
 
 /* =============================================================================
  * Client-only date formatter (prevents hydration mismatch)
@@ -26,22 +27,8 @@ function useClientDateTime(value?: string | null) {
       return;
     }
 
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) {
-      setText("");
-      return;
-    }
-
-    // Locale-aware formatting ONLY on the client
-    setText(
-      d.toLocaleString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    );
+    const formatted = formatDateTime(value); // client-only formatting
+    setText(formatted || "");
   }, [value]);
 
   return text;
@@ -78,7 +65,7 @@ export default function NotificationsList({
     {
       ok: false,
       message: null,
-    } as any
+    } as any,
   );
 
   const [allState, markAll] = useActionState(
@@ -86,13 +73,13 @@ export default function NotificationsList({
     {
       ok: false,
       message: null,
-    } as any
+    } as any,
   );
 
   // true if there is at least one unread notification
   const hasUnread = useMemo(
     () => items.some((n) => n.status === "unread"),
-    [items]
+    [items],
   );
 
   // --- Pagination helpers (URLSearchParams) ---
