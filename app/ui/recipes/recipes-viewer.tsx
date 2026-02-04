@@ -60,6 +60,18 @@ export default function ViewerRecipe({
     html2pdf(element, { margin: 20 });
   }
 
+  const createdAtIso =
+    recipe.recipe_created_at &&
+    !Number.isNaN(new Date(recipe.recipe_created_at).getTime())
+      ? new Date(recipe.recipe_created_at).toISOString()
+      : undefined;
+
+  const updatedAtIso =
+    recipe.recipe_updated_at &&
+    !Number.isNaN(new Date(recipe.recipe_updated_at).getTime())
+      ? new Date(recipe.recipe_updated_at).toISOString()
+      : undefined;
+
   return (
     <div>
       <div id="print" className="rounded-md border-gray-200 bg-gray-50 p-6">
@@ -126,16 +138,26 @@ export default function ViewerRecipe({
 
         {/* Stats mobile */}
         <section className="mb-6 grid grid-cols-2 gap-4 md:hidden">
-          <MetricCardMobile
+          {/* <MetricCardMobile
             title="Creation date"
             value={formatDateToLocal(recipe.recipe_created_at!)}
             fontClassName={inter.className}
-          />
+          /> */}
           <MetricCardMobile
+            title="Creation date"
+            value={createdAtIso ? formatDateToLocal(createdAtIso) : "—"}
+          />
+
+          {/* <MetricCardMobile
             title="Last edit"
             value={formatDateToLocal(recipe.recipe_updated_at!)}
             fontClassName={inter.className}
+          /> */}
+          <MetricCardMobile
+            title="Last edit"
+            value={updatedAtIso ? formatDateToLocal(updatedAtIso) : "—"}
           />
+
           <MetricCardMobile
             title="Recipe type"
             value={capitalizeFirst(recipe.recipe_type)}
@@ -220,16 +242,26 @@ export default function ViewerRecipe({
 
         {/* Stats desktop */}
         <section className="mb-6 hidden gap-4 md:grid md:grid-cols-4">
-          <MetricCard
+          {/* <MetricCard
             title="Creation date"
             value={formatDateToLocal(recipe.recipe_created_at!)}
             fontClassName={inter.className}
-          />
+          /> */}
           <MetricCard
+            title="Creation date"
+            value={createdAtIso ? formatDateToLocal(createdAtIso) : "—"}
+          />
+
+          {/* <MetricCard
             title="Last edit"
             value={formatDateToLocal(recipe.recipe_updated_at!)}
             fontClassName={inter.className}
+          /> */}
+          <MetricCard
+            title="Last edit"
+            value={updatedAtIso ? formatDateToLocal(updatedAtIso) : "—"}
           />
+
           <MetricCard
             title="Recipe type"
             value={capitalizeFirst(recipe.recipe_type)}
