@@ -14,7 +14,7 @@ export const GUIDES: readonly Guide[] = [
     slug: "what-is-recetapp",
     title: "What is RecetApp?",
     summary: "A quick overview of what RecetApp does.",
-    youtubeId: "dQw4w9WgXcQ",
+    // youtubeId: "dQw4w9WgXcQ",
     bodyMd: `
 ## What you'll learn
 - What RecetApp is designed for
@@ -37,7 +37,7 @@ export const GUIDES: readonly Guide[] = [
     slug: "add-your-first-recipe",
     title: "Add your first recipe",
     summary: "The fastest way to start building your personal cookbook.",
-    youtubeId: "dQw4w9WgXcQ",
+    // youtubeId: "dQw4w9WgXcQ",
     bodyMd: `
 ## What you'll do
 - Create a recipe
@@ -46,7 +46,7 @@ export const GUIDES: readonly Guide[] = [
 - Save it to your library
 
 ## Quick structure
-- Title
+- Recipe title
 - Ingredients (one per line)
 - Steps (short, numbered)
 
@@ -61,7 +61,7 @@ Start simple. You can always edit and improve later.
     title: "Write ingredients RecetApp understands",
     summary:
       "Use a consistent format so recipes work better with shopping list.",
-    youtubeId: "dQw4w9WgXcQ",
+    // youtubeId: "dQw4w9WgXcQ",
     bodyMd: `
 ## Best format
 Use:
@@ -86,7 +86,7 @@ Examples:
     slug: "set-up-your-public-username",
     title: "Set up your public username",
     summary: "Choose the name people see when you share recipes in Discover.",
-    youtubeId: "dQw4w9WgXcQ",
+    // youtubeId: "dQw4w9WgXcQ",
     bodyMd: `
 ## What you'll do
 - Open Account Settings
@@ -107,7 +107,7 @@ Pick something simple and recognizable. If it's taken, try a variation.
     title: "Private vs public recipes",
     summary:
       "Control who can see your recipes and what happens when you share publicly.",
-    youtubeId: "dQw4w9WgXcQ",
+    // youtubeId: "dQw4w9WgXcQ",
     bodyMd: `
 ## Private recipes
 - Visible only to you when signed in
