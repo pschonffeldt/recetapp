@@ -25,7 +25,7 @@ export default async function GuideDetailPage({
         action="/help/guides"
       />
 
-      <main className="mx-auto w-full max-w-5xl px-4 py-10 md:px-6">
+      <main className="mx-auto w-full max-w-5xl px-4 pt-10 pb-20 md:px-6">
         <Breadcrumbs
           className="text-xl md:text-2xl"
           breadcrumbs={[

@@ -30,7 +30,7 @@ export default async function FaqPage({
             ← Help home
           </Button>
         </Link>
-        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-1">
+        <div className="grid gap-4 pb-10 sm:grid-cols-1 lg:grid-cols-1">
           {FAQS.map((f) => (
             <div
               key={f.id}
