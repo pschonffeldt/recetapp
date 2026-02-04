@@ -48,7 +48,12 @@ export default async function GuideDetailPage({
         <article className="rounded-md border bg-white p-6">
           {guide.updatedAt ? (
             <div className="text-sm text-gray-500">
-              Updated {new Date(guide.updatedAt).toLocaleDateString()}
+              Updated{" "}
+              {new Intl.DateTimeFormat("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              }).format(new Date(guide.updatedAt))}
             </div>
           ) : null}
 

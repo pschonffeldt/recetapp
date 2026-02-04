@@ -4,12 +4,14 @@ import { APP } from "@/app/lib/utils/app";
 function formatReleaseDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleDateString(undefined, {
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
     year: "numeric",
-    month: "long",
-    day: "2-digit",
-  });
+  }).format(date);
 }
+
 export const metadata = {
   title: `Release notes`,
 };
@@ -19,10 +21,12 @@ export default async function ReleasesPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-0">
-      <h1 className="text-3xl font-semibold tracking-tight mb-2">
+      <h1 className="mb-2 text-3xl font-semibold tracking-tight">
         Release notes
       </h1>
-      <p className="text-sm text-gray-500 mb-6">{`What's new in ${APP.legalName}.`}</p>
+      <p className="mb-6 text-sm text-gray-500">
+        {`What's new in ${APP.legalName}.`}
+      </p>
 
       {releases.length === 0 && (
         <p className="text-sm text-gray-500">No releases yet.</p>
@@ -37,15 +41,13 @@ export default async function ReleasesPage() {
             <div className="mb-2 flex items-center justify-between gap-3">
               <div className="flex flex-col gap-1">
                 <h2 className="text-lg font-semibold">{release.title}</h2>
-                <div className="flex flex-row gap-1">
-                  <span className="text-xs text-gray-500">Released:</span>
-                  <span className="text-xs text-gray-500">
-                    {formatReleaseDate(release.releasedAt)}
-                  </span>
+                <div className="flex flex-row gap-1 text-xs text-gray-500">
+                  <span>Released:</span>
+                  <span>{formatReleaseDate(release.releasedAt)}</span>
                 </div>
               </div>
             </div>
-            {/* simple markdown-ish rendering: keep as text for now */}
+
             <p className="whitespace-pre-line text-sm text-gray-700">
               {release.body}
             </p>

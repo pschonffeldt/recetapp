@@ -53,7 +53,12 @@ export default async function HelpArticlePage({
 
         <article className="rounded-md border bg-white p-6">
           <div className="text-sm text-gray-500">
-            Updated {new Date(article.updated_at).toLocaleDateString()}
+            Updated{" "}
+            {new Intl.DateTimeFormat("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            }).format(new Date(article.updated_at))}
           </div>
 
           <h1 className="mt-2 text-2xl font-semibold">{article.title}</h1>
