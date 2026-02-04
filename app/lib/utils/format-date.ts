@@ -1,5 +1,3 @@
-// app/lib/utils/format-date.ts
-
 export type DateFormatStyle = "short" | "long";
 
 /** "Nov 15, 2025" / "November 15, 2025" */
