@@ -3,7 +3,8 @@
 import { buildIngredientLines } from "@/app/lib/ingredients";
 import { RecipeForm } from "@/app/lib/types/definitions";
 import { APP } from "@/app/lib/utils/app";
-import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils/format";
+import { capitalizeFirst } from "@/app/lib/utils/format";
+import { formatDate } from "@/app/lib/utils/format-date";
 import { Button } from "@/app/ui/general/button";
 import clsx from "clsx";
 import Link from "next/link";
@@ -29,6 +30,13 @@ type ViewerRecipeData = RecipeForm & {
   saved_by_count?: number | null;
   created_by_display_name?: string | null;
 };
+
+function safeIso(value?: string | null) {
+  if (!value) return undefined;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return undefined;
+  return d.toISOString();
+}
 
 export default function ViewerRecipe({
   recipe,
@@ -60,17 +68,9 @@ export default function ViewerRecipe({
     html2pdf(element, { margin: 20 });
   }
 
-  const createdAtIso =
-    recipe.recipe_created_at &&
-    !Number.isNaN(new Date(recipe.recipe_created_at).getTime())
-      ? new Date(recipe.recipe_created_at).toISOString()
-      : undefined;
-
-  const updatedAtIso =
-    recipe.recipe_updated_at &&
-    !Number.isNaN(new Date(recipe.recipe_updated_at).getTime())
-      ? new Date(recipe.recipe_updated_at).toISOString()
-      : undefined;
+  // ISO values ONLY for <time dateTime="..."> (valid + accessible)
+  const createdAtIso = safeIso(recipe.recipe_created_at);
+  const updatedAtIso = safeIso(recipe.recipe_updated_at);
 
   return (
     <div>
@@ -113,8 +113,7 @@ export default function ViewerRecipe({
               </span>
               {isPublic && (savedByCount ?? 0) > 0 && (
                 <span className="text-gray-400">
-                  • Saved by {savedByCount} cook
-                  {savedByCount === 1 ? "" : "s"}
+                  • Saved by {savedByCount} cook{savedByCount === 1 ? "" : "s"}
                 </span>
               )}
             </div>
@@ -140,11 +139,19 @@ export default function ViewerRecipe({
         <section className="mb-6 grid grid-cols-2 gap-4 md:hidden">
           <MetricCardMobile
             title="Creation date"
-            value={createdAtIso ? formatDateToLocal(createdAtIso) : "—"}
+            value={
+              recipe.recipe_created_at
+                ? formatDate(recipe.recipe_created_at)
+                : "—"
+            }
           />
           <MetricCardMobile
             title="Last edit"
-            value={updatedAtIso ? formatDateToLocal(updatedAtIso) : "—"}
+            value={
+              recipe.recipe_updated_at
+                ? formatDate(recipe.recipe_updated_at)
+                : "—"
+            }
           />
 
           <MetricCardMobile
@@ -233,11 +240,19 @@ export default function ViewerRecipe({
         <section className="mb-6 hidden gap-4 md:grid md:grid-cols-4">
           <MetricCard
             title="Creation date"
-            value={createdAtIso ? formatDateToLocal(createdAtIso) : "—"}
+            value={
+              recipe.recipe_created_at
+                ? formatDate(recipe.recipe_created_at)
+                : "—"
+            }
           />
           <MetricCard
             title="Last edit"
-            value={updatedAtIso ? formatDateToLocal(updatedAtIso) : "—"}
+            value={
+              recipe.recipe_updated_at
+                ? formatDate(recipe.recipe_updated_at)
+                : "—"
+            }
           />
 
           <MetricCard
@@ -350,6 +365,26 @@ export default function ViewerRecipe({
             />
           </div>
         </section>
+
+        {/* Optional: semantic time tags (nice + accessible). Doesn’t change UI. */}
+        <div className="mt-2 flex flex-col gap-1 text-xs text-gray-500">
+          <div className="flex items-center gap-2">
+            <span>Created:</span>
+            {createdAtIso ? (
+              <time dateTime={createdAtIso}>{formatDate(createdAtIso)}</time>
+            ) : (
+              <span>—</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <span>Updated:</span>
+            {updatedAtIso ? (
+              <time dateTime={updatedAtIso}>{formatDate(updatedAtIso)}</time>
+            ) : (
+              <span>—</span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Buttons */}

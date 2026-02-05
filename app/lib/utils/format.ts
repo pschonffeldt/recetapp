@@ -8,24 +8,6 @@ export const formatCurrency = (amount: number) => {
   });
 };
 
-// Date formatter, should be updated as there is a 1 day offset
-export function formatDateToLocal(
-  dateStr: string | null | undefined,
-  locale: string = "en-US"
-): string {
-  if (!dateStr) return "—";
-
-  const date = new Date(dateStr);
-  if (Number.isNaN(date.getTime())) return "—";
-
-  return new Intl.DateTimeFormat(locale, {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC", // <<< important so server & client match
-  }).format(date);
-}
-
 // This I think is for the chart, but still need to research
 export const generateYAxis = (revenue: Revenue[]) => {
   // Calculate what labels we need to display on the y-axis
