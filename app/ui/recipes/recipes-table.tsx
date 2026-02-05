@@ -3,7 +3,7 @@ import {
   SortKey,
   type RecipeListItem,
 } from "@/app/lib/recipes/data";
-import { formatDateToLocal } from "@/app/lib/utils/format";
+import { formatDate } from "@/app/lib/utils/format-date";
 import clsx from "clsx";
 import PrepTimePill from "../general/time-pill";
 import {
@@ -169,7 +169,7 @@ export default async function RecipesTable({
                           <p className="pr-1">Created at -</p>
                           {createdIso ? (
                             <time dateTime={createdIso}>
-                              {formatDateToLocal(recipe.recipe_created_at!)}
+                              {formatDate(recipe.recipe_created_at!)}
                             </time>
                           ) : (
                             <span>—</span>
@@ -180,7 +180,7 @@ export default async function RecipesTable({
                           <p className="pr-1">Last update at -</p>
                           {updatedIso ? (
                             <time dateTime={updatedIso}>
-                              {formatDateToLocal(recipe.recipe_updated_at!)}
+                              {formatDate(recipe.recipe_updated_at!)}
                             </time>
                           ) : (
                             <span>—</span>
@@ -271,7 +271,7 @@ export default async function RecipesTable({
                         <RecipesDifficulty type={recipe.difficulty} />
                       </td>
 
-                      {/* Time (prep_time_min) */}
+                      {/* Time */}
                       <td className="whitespace-nowrap px-3 py-3 align-middle">
                         <PrepTimePill minutes={recipe.prep_time_min} />
                       </td>
@@ -280,7 +280,7 @@ export default async function RecipesTable({
                       <td className="whitespace-nowrap px-3 py-3 text-gray-600 align-middle">
                         {createdIso ? (
                           <time dateTime={createdIso}>
-                            {formatDateToLocal(recipe.recipe_created_at!)}
+                            {formatDate(recipe.recipe_created_at!)}
                           </time>
                         ) : (
                           <span>—</span>

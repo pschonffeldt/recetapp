@@ -1,21 +1,22 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
 import {
-  type UserForm,
+  updateUserPassword,
+  updateUserProfile,
+} from "@/app/lib/account/actions";
+import {
   type MembershipTier,
+  type UserForm,
   COUNTRIES,
 } from "@/app/lib/types/definitions";
+import { capitalizeFirst } from "@/app/lib/utils/format";
+import { formatDateTime } from "@/app/lib/utils/format-date";
 import { inter } from "@/app/ui/branding/branding-fonts";
-import Link from "next/link";
 import { Button } from "@/app/ui/general/button";
 import { useToast } from "@/app/ui/toast/toast-provider";
-import {
-  updateUserProfile,
-  updateUserPassword,
-} from "@/app/lib/account/actions";
-import { capitalizeFirst, formatDateToLocal } from "@/app/lib/utils/format";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useActionState, useEffect } from "react";
 
 type ActionResult = {
   ok: boolean;
@@ -143,7 +144,7 @@ export default function AdminUserEditForm({
   const totalRecipes = owned + imported;
 
   const safeDate = (value?: string | null) =>
-    value ? formatDateToLocal(value) : "—";
+    value ? formatDateTime(value, "short") : "—";
 
   const membershipLabel: Record<MembershipTier, string> = {
     free: "Free plan",

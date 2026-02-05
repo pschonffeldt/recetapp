@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { formatDateToLocal } from "@/app/lib/utils/format";
 import { fetchAdminUsers } from "@/app/lib/recipes/data";
-import ActivityCell from "./users-activity-cell";
+import { formatDate, formatDateTime } from "@/app/lib/utils/format-date";
+import Link from "next/link";
 import RecipesSummaryCell from "./user-recipes-summary-cell";
+import ActivityCell from "./users-activity-cell";
 import MembershipBadge from "./users-membership-badge";
 import RoleBadge from "./users-role-badge";
 
@@ -36,7 +36,7 @@ export default async function AdminUsersTable() {
                 // If no users :(
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={10}
                     className="px-6 py-10 text-center text-sm text-gray-500"
                   >
                     No users found.
@@ -96,7 +96,7 @@ export default async function AdminUsersTable() {
                     {/* Joined */}
                     <td className="whitespace-nowrap px-3 py-3 text-gray-600 align-middle">
                       <time dateTime={u.created_at}>
-                        {formatDateToLocal(u.created_at)}
+                        {formatDate(u.created_at)}
                       </time>
                     </td>
 
@@ -166,38 +166,34 @@ export default async function AdminUsersTable() {
                       {u.imported_recipes_count})
                     </span>
                   </p>
-
                   {/* Joined date */}
                   <p className="mt-2 text-xs text-gray-500">
                     Joined{" "}
                     <time dateTime={u.created_at}>
-                      {formatDateToLocal(u.created_at)}
+                      {formatDate(u.created_at)}
                     </time>
                   </p>
-
                   {/* Activity snapshot */}
                   <div className="mt-1 space-y-0.5 text-[11px] text-gray-500">
                     <p>
                       Updated:{" "}
-                      {u.updated_at ? formatDateToLocal(u.updated_at) : "—"}
+                      {u.updated_at ? formatDateTime(u.updated_at) : "—"}
                     </p>
                     <p>
                       Password:{" "}
                       {u.password_changed_at
-                        ? formatDateToLocal(u.password_changed_at)
+                        ? formatDateTime(u.password_changed_at)
                         : "—"}
                     </p>
                     <p>
                       Profile:{" "}
                       {u.profile_updated_at
-                        ? formatDateToLocal(u.profile_updated_at)
+                        ? formatDateTime(u.profile_updated_at)
                         : "—"}
                     </p>
                     <p>
                       Last login:{" "}
-                      {u.last_login_at
-                        ? formatDateToLocal(u.last_login_at)
-                        : "—"}
+                      {u.last_login_at ? formatDateTime(u.last_login_at) : "—"}
                     </p>
                   </div>
 
