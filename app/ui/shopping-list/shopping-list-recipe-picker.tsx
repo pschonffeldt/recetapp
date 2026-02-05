@@ -91,29 +91,32 @@ export default function ShoppingListRecipePicker({
   return (
     <div className="min-h-20">
       <div className="mb-4 rounded-md border border-gray-200 bg-white p-4">
-        <div className="flex items-center justify-between gap-2 border-b p-2">
+        <div className="flex flex-col gap-3 border-b p-2 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-sm font-medium text-gray-800">
             Recipes to include
           </h2>
-          <div className="flex flex-row gap-2">
+
+          {/* Mobile: 2-col grid. sm+: row */}
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:gap-2">
             <Button
-              className="rounded-md bg-blue-600 px-3 py-4 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
+              className="w-full rounded-md bg-blue-600 px-3 py-2.5 text-sm text-white hover:bg-blue-500 disabled:opacity-50 sm:w-auto sm:min-w-[120px]"
               type="button"
               onClick={selectAll}
             >
               Select all
             </Button>
+
             <Button
-              className="rounded-md bg-blue-600 px-3 py-4 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
+              className="w-full rounded-md bg-blue-600 px-3 py-2.5 text-sm text-white hover:bg-blue-500 disabled:opacity-50 sm:w-auto sm:min-w-[120px]"
               type="button"
               onClick={unSelectAll}
             >
-              Clear selection and list
+              Clear all
             </Button>
           </div>
         </div>
 
-        <ul className="mt-2 min-h-80 max-h-160 space-y-1 overflow-auto text-sm p-1">
+        <ul className="mt-2 min-h-80 max-h-160 space-y-1 overflow-auto p-1 text-sm">
           {recipes.map((r) => (
             <li key={r.id} className="flex items-center gap-2">
               <label className="flex cursor-pointer items-center gap-2">
@@ -131,9 +134,9 @@ export default function ShoppingListRecipePicker({
       </div>
 
       {/* Bottom actions: Update + Copy + Export PDF */}
-      <div className="mt-3 flex flex-wrap justify-end gap-2">
+      <div className="mt-4 space-y-2 sm:mt-3 sm:flex sm:items-center sm:justify-end sm:gap-2 sm:space-y-0">
         <Button
-          className="rounded-md bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
+          className="w-full rounded-md bg-blue-600 px-3 py-2.5 text-sm text-white hover:bg-blue-500 disabled:opacity-50 sm:w-auto"
           type="button"
           onClick={applyFilter}
         >

@@ -144,26 +144,24 @@ export default function ShoppingListActions({
   };
 
   return (
-    <>
-      {/* Copy list */}
+    <div className="space-y-2 sm:flex sm:items-center sm:gap-2 sm:space-y-0">
       <Button
         type="button"
         onClick={handleCopy}
         disabled={!hasList || isExporting}
-        className="rounded-md bg-blue-500 px-3 py-2 text-sm text-white hover:bg-blue-400 disabled:opacity-50"
+        className="w-full rounded-md bg-blue-500 px-3 py-2.5 text-sm text-white hover:bg-blue-400 disabled:opacity-50 sm:w-auto"
       >
         Copy list
       </Button>
 
-      {/* Export PDF */}
       <Button
         type="button"
         onClick={handleExportPdf}
         disabled={!hasList || isExporting}
-        className="rounded-md bg-blue-500 px-3 py-2 text-sm text-white hover:bg-blue-400 disabled:opacity-50"
+        className="w-full rounded-md bg-blue-500 px-3 py-2.5 text-sm text-white hover:bg-blue-400 disabled:opacity-50 sm:w-auto"
       >
         {isExporting ? "Exporting…" : "Export PDF"}
       </Button>
-    </>
+    </div>
   );
 }
