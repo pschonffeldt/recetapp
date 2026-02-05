@@ -116,24 +116,22 @@ export default async function Page({
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          {
-            label: "Shopping list",
-            href: "/shopping-list",
-            active: true,
-          },
+          { label: "Shopping list", href: "/shopping-list", active: true },
         ]}
       />
 
       <div className="grid gap-4 md:grid-cols-2 md:items-stretch">
         {/* LEFT: picker */}
-        <section className="space-y-4 mb-10 px-4 md:px-0">
-          <div className="h-full rounded-md bg-gray-50 p-4 md:p-6">
+        <section className="mb-10 space-y-4 px-4 md:px-0">
+          <div className="rounded-md bg-gray-50 p-4 md:h-[640px] md:p-6">
             <p className="mt-1 text-sm text-gray-600">
               {!hasRecipes
                 ? "You don't have any recipes yet. Create a recipe to start building a shopping list."
                 : selectedCount === 0
                   ? "Select recipes for your list."
-                  : `Based on ${selectedCount} selected recipe${selectedCount > 1 ? "s" : ""}.`}
+                  : `Based on ${selectedCount} selected recipe${
+                      selectedCount > 1 ? "s" : ""
+                    }.`}
             </p>
 
             <div className="mt-4">
@@ -147,8 +145,8 @@ export default async function Page({
         </section>
 
         {/* RIGHT: items */}
-        <section className="space-y-4 mb-10 px-4 md:px-0">
-          <div className="h-full rounded-md border bg-white p-4 shadow-sm md:p-6 md:overflow-auto">
+        <section className="mb-10 space-y-4 px-4 md:px-0">
+          <div className="rounded-md border bg-white p-4 shadow-sm md:h-[640px] md:overflow-auto md:p-6">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
                 Items
