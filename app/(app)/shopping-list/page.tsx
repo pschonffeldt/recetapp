@@ -7,71 +7,12 @@ import {
   fetchRecipesForUser,
   fetchUserById,
 } from "@/app/lib/recipes/data";
-import {
-  IncomingIngredientPayload,
-  IngredientUnit,
-  UNIT_LABELS,
-} from "@/app/lib/types/definitions";
+import { aggregateIngredients } from "@/app/lib/shopping-list/aggregate-ingredients";
+import { formatAggregatedItem } from "@/app/lib/shopping-list/format-aggregated-item";
 import ShoppingListRecipePicker from "@/app/ui/shopping-list/shopping-list-recipe-picker";
 import { auth } from "@/auth";
 
 export const metadata: Metadata = { title: "Shopping list" };
-
-// --- Helpers --------------------------------------------------
-
-type AggregatedItem = {
-  name: string;
-  unit: IngredientUnit | null;
-  quantity: number | null;
-};
-
-function aggregateIngredients(
-  ingredients: IncomingIngredientPayload[],
-): AggregatedItem[] {
-  const map = new Map<string, AggregatedItem>();
-
-  for (const ing of ingredients) {
-    // Skip optional items for now
-    if (ing.isOptional) continue;
-
-    const name = ing.ingredientName.trim();
-    const unit = ing.unit ?? null;
-    const hasQty = typeof ing.quantity === "number";
-
-    const key = `${name.toLowerCase()}|${unit ?? ""}|${hasQty ? "q" : "noq"}`;
-
-    const existing = map.get(key);
-    if (!existing) {
-      map.set(key, {
-        name,
-        unit,
-        quantity: hasQty ? ing.quantity! : null,
-      });
-    } else if (hasQty && existing.quantity != null) {
-      existing.quantity += ing.quantity!;
-    } else if (!hasQty) {
-      existing.quantity = null;
-    }
-  }
-
-  return Array.from(map.values()).sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
-  );
-}
-
-function formatAggregatedItem(item: AggregatedItem): string {
-  const unitLabel = item.unit ? (UNIT_LABELS[item.unit] ?? item.unit) : "";
-  const qtyPart =
-    item.quantity != null
-      ? unitLabel
-        ? `${item.quantity} ${unitLabel}`
-        : String(item.quantity)
-      : "";
-
-  return qtyPart ? `${qtyPart} ${item.name}` : item.name;
-}
-
-// --- Page -----------------------------------------------------
 
 export default async function Page({
   searchParams,
