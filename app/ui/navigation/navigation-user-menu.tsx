@@ -2,6 +2,7 @@
 
 import {
   ChartBarIcon,
+  InboxStackIcon,
   PlusIcon,
   ShieldCheckIcon,
   UsersIcon,
@@ -35,6 +36,7 @@ type Props = {
   adminUsersHref?: string;
   metricsHref?: string;
   supportHref?: string;
+  contacttHref?: string;
 
   logoutAction?: (formData: FormData) => Promise<void>;
   title?: string;
@@ -55,6 +57,7 @@ export default function UserSettingsFab({
   adminUsersHref = "/admin/users",
   metricsHref = "/admin/metrics",
   supportHref = "/admin/support",
+  contacttHref = "/admin/contact",
 
   logoutAction,
   title = "User menu",
@@ -210,8 +213,13 @@ export default function UserSettingsFab({
                 />
                 <MenuItem
                   icon={<InboxIcon className="h-5 w-5" />}
-                  label="Support inbox"
+                  label="Support"
                   onClick={() => go(supportHref)}
+                />
+                <MenuItem
+                  icon={<InboxStackIcon className="h-5 w-5" />}
+                  label="Public inbox"
+                  onClick={() => go(contacttHref)}
                 />
               </div>
             )}

@@ -16,9 +16,9 @@ export default async function Page() {
 
   return (
     <main className="p-4 md:p-6">
-      <h1 className="text-2xl font-semibold">Support inbox</h1>
+      <h1 className="text-2xl font-semibold">Public inbox</h1>
       <p className="mt-1 text-sm text-gray-600">
-        Review incoming support messages and mark them as solved.
+        Review incoming messages from our public website.
       </p>
 
       <div className="mt-6">

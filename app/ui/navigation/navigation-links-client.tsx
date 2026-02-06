@@ -15,6 +15,7 @@ import {
   GlobeAltIcon,
   HomeIcon,
   InboxIcon,
+  InboxStackIcon,
   InformationCircleIcon,
   MegaphoneIcon,
   ShoppingCartIcon,
@@ -62,16 +63,21 @@ export default function NavLinksClient({ isAdmin }: Props) {
   // Admin only links
   const adminLinks: NavItem[] = [
     {
-      name: "New notification",
+      name: "Notifications center",
       href: "/admin/notification-center",
       icon: ShieldCheckIcon,
     },
-    { name: "Users", href: "/admin/users", icon: UsersIcon },
-    { name: "Metrics", href: "/admin/metrics", icon: ChartPieIcon },
+    { name: "Users management", href: "/admin/users", icon: UsersIcon },
+    { name: "Usage metrics", href: "/admin/metrics", icon: ChartPieIcon },
     {
-      name: "Support inbox",
+      name: "Support",
       href: "/admin/support",
       icon: InboxIcon,
+    },
+    {
+      name: "Public inbox",
+      href: "/admin/contact",
+      icon: InboxStackIcon,
     },
   ];
 
