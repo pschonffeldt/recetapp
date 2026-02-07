@@ -149,7 +149,7 @@ export default function ContactInboxTable({
             <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-600">
               <tr>
                 <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Category</th>
+                <th className="px-4 py-3 text-left">Topic</th>
                 <th className="px-4 py-3 text-left">Subject</th>
                 <th className="px-4 py-3 text-left">User</th>
                 <th className="px-4 py-3 text-left">Sent</th>

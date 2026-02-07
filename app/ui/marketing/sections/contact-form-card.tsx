@@ -2,14 +2,11 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { createContactRequest } from "@/app/lib/contact/actions"; // <-- update path if needed
-
+import { createContactRequest } from "@/app/lib/contact/actions";
 type ContactFormCardProps = {
   className?: string;
   title?: string;
   subtitle?: string;
-  emailSubject?: string;
-  supportEmail?: string;
 };
 
 type State = {
@@ -24,8 +21,6 @@ export function ContactFormCard({
   className,
   title = "Send a message",
   subtitle = "We usually reply within 1–2 business days.",
-  emailSubject = "Support",
-  supportEmail = "support@yourdomain.com",
 }: ContactFormCardProps) {
   const [state, formAction, pending] = useActionState(
     createContactRequest,
@@ -154,21 +149,10 @@ export function ContactFormCard({
           <button
             type="submit"
             disabled={pending || state.ok}
-            className="mt-1 inline-flex h-10 items-center justify-center rounded-lg bg-gray-900 px-4 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            className="mt-1 inline-flex h-10 items-center justify-center rounded-lg bg-green-600 px-4 text-sm font-medium text-white transition-colors hover:bg-green-500 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           >
             {pending ? "Sending..." : state.ok ? "Sent" : "Send message"}
           </button>
-
-          <p className="text-center text-xs text-gray-500">
-            Email us at{" "}
-            <a
-              href={`mailto:${supportEmail}?subject=${encodeURIComponent(emailSubject)}`}
-              className="underline underline-offset-2"
-            >
-              {supportEmail}
-            </a>
-          </p>
-
           <p className="text-xs text-gray-500">
             By sending this message you agree to our{" "}
             <Link href="/privacy" className="underline underline-offset-2">
