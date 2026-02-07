@@ -1,5 +1,5 @@
-import { fetchSupportInbox } from "@/app/lib/support/admin-data";
-import SupportInboxTable from "@/app/ui/support/admin/support-inbox-table";
+import { fetchContactInbox } from "@/app/lib/contact/contact-data";
+import ContactInboxTable from "@/app/ui/contact/admin/contact-inbox-table";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
@@ -12,7 +12,7 @@ export default async function Page() {
   if (!session?.user) redirect("/login?callbackUrl=/admin/support");
   if (role !== "admin") redirect("/dashboard"); // or notFound()
 
-  const rows = await fetchSupportInbox();
+  const rows = await fetchContactInbox();
 
   return (
     <main className="p-4 md:p-6">
@@ -22,7 +22,7 @@ export default async function Page() {
       </p>
 
       <div className="mt-6">
-        <SupportInboxTable rows={rows} />
+        <ContactInboxTable rows={rows} />
       </div>
     </main>
   );

@@ -1,26 +1,26 @@
 "use client";
 
-import Link from "next/link";
-import type { SupportInboxRow } from "@/app/lib/support/admin-data";
-import { minutesToAgo, timeAgoFromIso } from "@/app/lib/utils/time";
+import { ContactInboxRow } from "@/app/lib/contact/contact-data";
 import {
-  supportCategoryLabel,
-  supportCategoryPillClass,
-  supportStatusLabel,
-  supportStatusPillClass,
-} from "@/app/lib/support/pills";
-import MarkSolvedButton from "@/app/ui/support/admin/mark-solved-button";
+  contactCategoryLabel,
+  contactCategoryPillClass,
+  contactStatusLabel,
+  contactStatusPillClass,
+} from "@/app/lib/contact/contact-pills";
+import { minutesToAgo, timeAgoFromIso } from "@/app/lib/utils/time";
+import Link from "next/link";
+import ContactInboxMarkSolvedButton from "./contact-inbox-mark-solved-button";
 
-export default function SupportInboxTable({
+export default function ContactInboxTable({
   rows,
 }: {
-  rows: SupportInboxRow[];
+  rows: ContactInboxRow[];
 }) {
   // ---------- Empty state ----------
   if (rows.length === 0) {
     return (
       <div className="rounded-md border border-gray-200 bg-white px-4 py-10 text-center text-sm text-gray-600">
-        No support messages yet.
+        No contact messages yet.
       </div>
     );
   }
@@ -53,16 +53,16 @@ export default function SupportInboxTable({
                     {r.subject}
                   </p>
                   <p className="mt-1 text-xs text-gray-500">
-                    {r.user_name ?? "—"} · {r.email}
+                    {r.contact_name || "—"} · {r.contact_email}
                   </p>
                 </div>
 
                 <div className="flex shrink-0 flex-col items-end gap-2">
-                  <span className={supportStatusPillClass(isSolved)}>
-                    {supportStatusLabel(isSolved)}
+                  <span className={contactStatusPillClass(isSolved)}>
+                    {contactStatusLabel(isSolved)}
                   </span>
-                  <span className={supportCategoryPillClass(r.category)}>
-                    {supportCategoryLabel(r.category)}
+                  <span className={contactCategoryPillClass(r.category)}>
+                    {contactCategoryLabel(r.category)}
                   </span>
                 </div>
               </div>
@@ -123,13 +123,17 @@ export default function SupportInboxTable({
               {/* Actions */}
               <div className="mt-4 flex items-center justify-end gap-2">
                 <Link
-                  href={`/admin/support/${r.id}`}
+                  href={`/admin/contact/${r.id}`}
                   className="rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
                 >
                   View
                 </Link>
 
-                <MarkSolvedButton id={r.id} isSolved={isSolved} size="sm" />
+                <ContactInboxMarkSolvedButton
+                  id={r.id}
+                  isSolved={isSolved}
+                  size="sm"
+                />
               </div>
             </div>
           );
@@ -169,15 +173,15 @@ export default function SupportInboxTable({
                   <tr key={r.id} className="hover:bg-gray-50/70">
                     {/* STATUS */}
                     <td className="px-4 py-3">
-                      <span className={supportStatusPillClass(isSolved)}>
-                        {supportStatusLabel(isSolved)}
+                      <span className={contactStatusPillClass(isSolved)}>
+                        {contactStatusLabel(isSolved)}
                       </span>
                     </td>
 
                     {/* CATEGORY */}
                     <td className="px-4 py-3">
-                      <span className={supportCategoryPillClass(r.category)}>
-                        {supportCategoryLabel(r.category)}
+                      <span className={contactCategoryPillClass(r.category)}>
+                        {contactCategoryLabel(r.category)}
                       </span>
                     </td>
 
@@ -188,8 +192,10 @@ export default function SupportInboxTable({
 
                     {/* USER */}
                     <td className="px-4 py-3 text-gray-700">
-                      <div className="font-medium">{r.user_name ?? "—"}</div>
-                      <div className="text-xs text-gray-500">{r.email}</div>
+                      <div className="font-medium">{r.contact_name || "—"}</div>
+                      <div className="text-xs text-gray-500">
+                        {r.contact_email}
+                      </div>
                     </td>
 
                     {/* SENT */}
@@ -236,13 +242,13 @@ export default function SupportInboxTable({
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
                         <Link
-                          href={`/admin/support/${r.id}`}
+                          href={`/admin/contact/${r.id}`}
                           className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
                         >
                           View
                         </Link>
 
-                        <MarkSolvedButton
+                        <ContactInboxMarkSolvedButton
                           id={r.id}
                           isSolved={isSolved}
                           size="sm"

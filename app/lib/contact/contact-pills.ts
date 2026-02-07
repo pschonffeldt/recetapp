@@ -3,7 +3,7 @@ import { capitalizeFirst } from "@/app/lib/utils/format";
 const base =
   "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium";
 
-export function supportStatusPillClass(isSolved: boolean) {
+export function contactStatusPillClass(isSolved: boolean) {
   return [
     base,
     isSolved
@@ -12,11 +12,11 @@ export function supportStatusPillClass(isSolved: boolean) {
   ].join(" ");
 }
 
-export function supportStatusLabel(isSolved: boolean) {
+export function contactStatusLabel(isSolved: boolean) {
   return isSolved ? "Solved" : "Unsolved";
 }
 
-export function supportCategoryPillClass(category?: string | null) {
+export function contactCategoryPillClass(category?: string | null) {
   const c = (category ?? "").toLowerCase();
   switch (c) {
     case "billing":
@@ -32,6 +32,6 @@ export function supportCategoryPillClass(category?: string | null) {
   }
 }
 
-export function supportCategoryLabel(category?: string | null) {
+export function contactCategoryLabel(category?: string | null) {
   return capitalizeFirst(category ?? "other");
 }

@@ -1,7 +1,6 @@
 "use server";
 
 import { sql } from "@/app/lib/db";
-import { requireUserId } from "@/app/lib/auth/helpers";
 import { z } from "zod";
 
 type State = {
@@ -11,6 +10,16 @@ type State = {
 };
 
 const Schema = z.object({
+  contact_name: z
+    .string()
+    .trim()
+    .min(2, "Name is too short.")
+    .max(120, "Name is too long."),
+  contact_email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email("Please enter a valid email."),
   category: z.enum(["bug", "billing", "feature", "account", "other"]),
   subject: z
     .string()
@@ -22,18 +31,22 @@ const Schema = z.object({
     .trim()
     .min(10, "Please add more detail.")
     .max(5000, "Message is too long."),
+
+  // honeypot (optional but recommended)
+  company: z.string().optional(),
 });
 
-export async function createSupportRequest(
+export async function createContactRequest(
   _prev: State,
   formData: FormData,
 ): Promise<State> {
-  const userId = await requireUserId();
-
   const parsed = Schema.safeParse({
-    category: formData.get("category"),
+    contact_name: formData.get("name"),
+    contact_email: formData.get("email"),
+    category: formData.get("category") ?? formData.get("topic"),
     subject: formData.get("subject"),
     message: formData.get("message"),
+    company: formData.get("company") ?? undefined,
   });
 
   if (!parsed.success) {
@@ -45,18 +58,40 @@ export async function createSupportRequest(
     return { ok: false, message: "Please fix the errors.", errors };
   }
 
+  // spam bot trap
+  if (parsed.data.company && parsed.data.company.trim().length > 0) {
+    return { ok: false, message: "Invalid submission.", errors: {} };
+  }
+
   try {
-    const { category, subject, message } = parsed.data;
+    const { contact_name, contact_email, category, subject, message } =
+      parsed.data;
+
     await sql`
-      INSERT INTO public.support_requests (user_id, category, subject, message)
-      VALUES (${userId}::uuid, ${category}, ${subject}, ${message})
+      INSERT INTO public.public_inbox (
+        contact_name,
+        contact_email,
+        category,
+        subject,
+        message,
+        status
+      )
+      VALUES (
+        ${contact_name},
+        ${contact_email},
+        ${category},
+        ${subject},
+        ${message},
+        'open'::contact_status
+      )
     `;
-    return { ok: true, message: "Support request sent.", errors: {} };
+
+    return { ok: true, message: "Message sent.", errors: {} };
   } catch (e) {
-    console.error("createSupportRequest failed:", e);
+    console.error("createContactRequest failed:", e);
     return {
       ok: false,
-      message: "Failed to send support request.",
+      message: "Failed to send message.",
       errors: {},
     };
   }
