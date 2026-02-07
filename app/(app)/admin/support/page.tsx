@@ -21,7 +21,7 @@ export default async function Page() {
         Review incoming support messages and mark them as solved.
       </p>
 
-      <div className="mt-6">
+      <div className="mt-6 flex flex-col h-[calc(100vh-12rem)]">
         <SupportInboxTable rows={rows} />
       </div>
     </main>
