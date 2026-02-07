@@ -143,10 +143,10 @@ export default function ContactInboxTable({
       {/* =========================
           Desktop: Table
           ========================= */}
-      <div className="hidden md:block rounded-md border border-gray-200 bg-white">
-        <div className="w-full overflow-x-auto">
+      <div className="hidden md:block rounded-md border border-gray-200 bg-white h-full">
+        <div className="w-full h-full overflow-x-auto overflow-y-auto">
           <table className="min-w-[950px] w-full text-sm">
-            <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-600">
+            <thead className="sticky top-0 z-10 bg-gray-50 text-xs uppercase tracking-wide text-gray-600">
               <tr>
                 <th className="px-4 py-3 text-left">Status</th>
                 <th className="px-4 py-3 text-left">Topic</th>

@@ -21,7 +21,7 @@ export default async function Page() {
         Review incoming messages from our public website.
       </p>
 
-      <div className="mt-6">
+      <div className="mt-6 flex flex-col h-[calc(100vh-12rem)]">
         <ContactInboxTable rows={rows} />
       </div>
     </main>
