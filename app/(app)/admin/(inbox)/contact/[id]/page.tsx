@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/app/lib/auth/helpers";
 import { fetchContactMessageById } from "@/app/lib/contact/contact-data";
 import {
   contactCategoryLabel,
@@ -7,22 +8,20 @@ import {
 } from "@/app/lib/contact/contact-pills";
 import { timeAgoFromIso } from "@/app/lib/utils/time";
 import ContactInboxMarkSolvedButton from "@/app/ui/contact/admin/contact-inbox-mark-solved-button";
-import { auth } from "@/auth";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 export const metadata = { title: "Contact message" };
 
 type PageProps = { params: Promise<{ id: string }> };
 
 export default async function Page({ params }: PageProps) {
-  const session = await auth();
-  const role = (session?.user as { user_role?: string } | null)?.user_role;
-
-  if (!session?.user) redirect("/login");
-  if (role !== "admin") redirect("/dashboard");
-
   const { id } = await params;
+
+  await requireAdmin({
+    callbackUrl: `/admin/contact/${id}`,
+    redirectTo: "/dashboard",
+  });
 
   const msg = await fetchContactMessageById(id);
   if (!msg) notFound();
@@ -82,7 +81,7 @@ export default async function Page({ params }: PageProps) {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         {/* Message */}
-        <section className="lg:col-span-2 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm lg:col-span-2">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-base font-semibold text-gray-900">Message</h2>
@@ -126,7 +125,7 @@ export default async function Page({ params }: PageProps) {
 
                 <div className="flex items-start justify-between gap-3">
                   <p className="text-xs text-gray-500">Email</p>
-                  <p className="text-sm font-medium text-gray-900 text-right break-all">
+                  <p className="break-all text-sm font-medium text-gray-900 text-right">
                     {msg.contact_email}
                   </p>
                 </div>
@@ -169,7 +168,7 @@ export default async function Page({ params }: PageProps) {
             {msg.solved_by ? (
               <div className="rounded-lg border border-gray-100 p-3">
                 <p className="text-xs text-gray-500">Solved by (id)</p>
-                <p className="mt-1 text-xs font-medium text-gray-900 break-all">
+                <p className="mt-1 break-all text-xs font-medium text-gray-900">
                   {msg.solved_by}
                 </p>
               </div>

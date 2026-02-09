@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/app/lib/auth/helpers";
 import { fetchUserByIdForAdmin } from "@/app/lib/recipes/data";
 import type { MembershipTier } from "@/app/lib/types/definitions";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
@@ -18,12 +19,16 @@ function coerceTier(v: unknown): MembershipTier | undefined {
 export default async function Page({ params }: PageProps) {
   const { id } = await params;
 
+  await requireAdmin({
+    callbackUrl: `/admin/users/${id}`,
+    redirectTo: "/dashboard",
+  });
+
   const user = await fetchUserByIdForAdmin(id);
   if (!user) notFound();
 
   const userForForm = {
     ...user,
-    // never null / undefined
     membership_tier: coerceTier((user as any).membership_tier) ?? "free",
   };
 
@@ -33,11 +38,7 @@ export default async function Page({ params }: PageProps) {
         breadcrumbs={[
           { label: "Admin", href: "/admin" },
           { label: "Users", href: "/admin/users" },
-          {
-            label: "Edit user",
-            href: `/admin/users/${id}`,
-            active: true,
-          },
+          { label: "Edit user", href: `/admin/users/${id}`, active: true },
         ]}
       />
       <AdminUserEditForm user={userForForm} />

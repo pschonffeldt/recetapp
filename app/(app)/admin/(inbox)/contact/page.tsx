@@ -1,16 +1,14 @@
+import { requireAdmin } from "@/app/lib/auth/helpers";
 import { fetchContactInbox } from "@/app/lib/contact/contact-data";
 import ContactInboxTable from "@/app/ui/contact/admin/contact-inbox-table";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 
 export const metadata = { title: "Public inbox" };
 
 export default async function Page() {
-  const session = await auth();
-  const role = (session?.user as any)?.user_role;
-
-  if (!session?.user) redirect("/login?callbackUrl=/admin/contact");
-  if (role !== "admin") redirect("/dashboard"); // or notFound()
+  await requireAdmin({
+    callbackUrl: "/admin/contact",
+    redirectTo: "/dashboard",
+  });
 
   const rows = await fetchContactInbox();
 

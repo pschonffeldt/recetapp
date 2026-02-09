@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/app/lib/auth/helpers";
 import { fetchSupportMessageById } from "@/app/lib/support/admin-data";
 import {
   supportCategoryLabel,
@@ -8,20 +9,18 @@ import {
 import { capitalizeFirst } from "@/app/lib/utils/format";
 import { timeAgoFromIso } from "@/app/lib/utils/time";
 import MarkSolvedButton from "@/app/ui/support/admin/mark-solved-button";
-import { auth } from "@/auth";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 
 export const metadata = { title: "Support message" };
 
 type PageProps = { params: Promise<{ id: string }> };
 
 export default async function Page({ params }: PageProps) {
-  const session = await auth();
-  const role = (session?.user as any)?.user_role;
-
-  if (!session?.user) redirect("/login");
-  if (role !== "admin") redirect("/dashboard");
+  await requireAdmin({
+    callbackUrl: "/admin/support",
+    redirectTo: "/dashboard",
+  });
 
   const { id } = await params;
   const msg = await fetchSupportMessageById(id);

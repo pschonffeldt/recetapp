@@ -1,3 +1,4 @@
+import { requireAdmin } from "@/app/lib/auth/helpers";
 import LatestRecipes from "@/app/ui/dashboard/dashboard-latest-recipes";
 import PieChart from "@/app/ui/dashboard/dashboard-pie-chart";
 import {
@@ -21,10 +22,14 @@ const recipeBreakdown = [
 ];
 
 export default async function Page() {
+  await requireAdmin({
+    callbackUrl: "/admin/metrics",
+    redirectTo: "/dashboard",
+  });
+
   return (
     <main>
       {/* Page title */}
-
       <Breadcrumbs
         breadcrumbs={[
           {
