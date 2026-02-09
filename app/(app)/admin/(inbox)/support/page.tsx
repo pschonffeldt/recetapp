@@ -1,16 +1,14 @@
+import { requireAdmin } from "@/app/lib/auth/helpers";
 import { fetchSupportInbox } from "@/app/lib/support/admin-data";
 import SupportInboxTable from "@/app/ui/support/admin/support-inbox-table";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 
 export const metadata = { title: "Support inbox" };
 
 export default async function Page() {
-  const session = await auth();
-  const role = (session?.user as any)?.user_role;
-
-  if (!session?.user) redirect("/login?callbackUrl=/admin/support");
-  if (role !== "admin") redirect("/dashboard"); // or notFound()
+  await requireAdmin({
+    callbackUrl: "/admin/support",
+    redirectTo: "/dashboard",
+  });
 
   const rows = await fetchSupportInbox();
 
