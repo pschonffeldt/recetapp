@@ -13,7 +13,7 @@ export default async function Page() {
       <Breadcrumbs
         breadcrumbs={[
           { label: "Notifications", href: "/notifications" },
-          { label: "New", href: "/notifications/new", active: true },
+          { label: "New", href: "/admin/notification-center", active: true },
         ]}
       />
       <NewNotificationForm users={users} />
