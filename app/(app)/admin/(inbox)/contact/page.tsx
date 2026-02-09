@@ -9,7 +9,7 @@ export default async function Page() {
   const session = await auth();
   const role = (session?.user as any)?.user_role;
 
-  if (!session?.user) redirect("/login?callbackUrl=/admin/support");
+  if (!session?.user) redirect("/login?callbackUrl=/admin/contact");
   if (role !== "admin") redirect("/dashboard"); // or notFound()
 
   const rows = await fetchContactInbox();
