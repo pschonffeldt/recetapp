@@ -1,24 +1,17 @@
-import { fetchUserById } from "@/app/lib/recipes/data";
+import { requireAdmin } from "@/app/lib/auth/helpers";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import AdminUsersTable from "@/app/ui/users/users-table";
-import { auth } from "@/auth";
-import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "User management",
 };
 
 export default async function AdminUsersPage() {
-  const session = await auth();
-  const id = (session?.user as any)?.id as string | undefined;
-  if (!id) notFound();
-
-  const me = await fetchUserById(id);
-  // Only allow admins to see this page
-  if (!me || (me as any).user_role !== "admin") {
-    notFound();
-  }
+  await requireAdmin({
+    callbackUrl: "/admin/users",
+    redirectTo: "/dashboard",
+  });
 
   return (
     <main>
