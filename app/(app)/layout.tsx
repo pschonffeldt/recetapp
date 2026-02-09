@@ -1,36 +1,35 @@
-import Logo from "@/app/ui/branding/branding-recetapp-logo";
-import SideNav from "@/app/ui/navigation/navigation-sidenav";
-import UserMenuServer from "@/app/ui/navigation/navigation-user-menu-server";
-import { ToastProvider } from "@/app/ui/toast/toast-provider";
+import Logo from "../ui/branding/branding-recetapp-logo";
+import SideNav from "../ui/navigation/navigation-sidenav";
+import UserMenuServer from "../ui/navigation/navigation-user-menu-server";
+import { ToastProvider } from "../ui/toast/toast-provider";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    // Root flex layout:
-    <div className="flex h-screen flex-col lg:fixed lg:inset-0 lg:flex-row lg:overflow-hidden lg:min-h-0">
-      {/* Make the toast context available to ALL dashboard UI */}
-      <ToastProvider>
-        {/* Side navigation column - desktop only */}
-        <div className="hidden lg:block lg:w-60 lg:flex-none lg:min-h-0 lg:overflow-y-auto">
+    <ToastProvider>
+      <div className="min-h-screen lg:flex">
+        {/* Sidebar */}
+        <aside className="hidden lg:block lg:w-60 lg:shrink-0 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
           <SideNav />
-        </div>
+        </aside>
 
-        {/* Main content area (scrolls on lg+) */}
-        <div className="flex-grow min-h-0 pt-0 lg:overflow-y-auto lg:p-12 lg:overscroll-y-contain">
-          {/* Mobile header with RecetApp logo/brand */}
+        {/* Main */}
+        <div className="flex-1">
+          {/* Mobile header */}
           <div className="mb-4 flex items-center justify-between bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-6 lg:hidden">
             <div className="flex items-center gap-2 text-white">
               <Logo />
             </div>
           </div>
 
-          {children}
+          <div className="lg:p-12">
+            {children}
 
-          {/* Floating user menu / logout – mobile only (opposite of SideNav) */}
-          <div className="lg:hidden">
-            <UserMenuServer />
+            <div className="lg:hidden">
+              <UserMenuServer />
+            </div>
           </div>
         </div>
-      </ToastProvider>
-    </div>
+      </div>
+    </ToastProvider>
   );
 }
