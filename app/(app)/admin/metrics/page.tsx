@@ -29,17 +29,12 @@ export default async function Page() {
 
   return (
     <main>
-      {/* Page title */}
       <Breadcrumbs
         breadcrumbs={[
-          {
-            label: "Usage Metrics",
-            href: "/admin/metrics",
-            active: true,
-          },
+          { label: "Admin", href: "/admin", clickable: false },
+          { label: "Metrics", href: "/admin/metrics", active: true },
         ]}
       />
-
       {/* KPI Cards section */}
       <div className="rounded-md border-gray-200 bg-gray-50 p-6 shadow-sm">
         <Suspense fallback={<CardsSkeleton />}>

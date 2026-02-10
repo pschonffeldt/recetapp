@@ -1,4 +1,5 @@
 import { requireUserId } from "@/app/lib/auth/helpers";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import SupportForm from "@/app/ui/support/support-form";
 import Link from "next/link";
 
@@ -8,8 +9,10 @@ export default async function Page() {
   await requireUserId({ callbackUrl: "/support" });
 
   return (
-    <main className="p-4 md:p-6">
-      <h1 className="text-2xl font-semibold">Support</h1>
+    <main>
+      <Breadcrumbs
+        breadcrumbs={[{ label: "Support", href: "/support", active: true }]}
+      />
       <p className="mt-1 text-sm text-gray-600">
         Browse the Help Center for quick answers, or contact support if you’re
         stuck.

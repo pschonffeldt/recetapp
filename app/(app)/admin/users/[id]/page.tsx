@@ -36,11 +36,12 @@ export default async function Page({ params }: PageProps) {
     <main>
       <Breadcrumbs
         breadcrumbs={[
-          { label: "Admin", href: "/admin" },
+          { label: "Admin", href: "/admin", clickable: false },
           { label: "Users", href: "/admin/users" },
           { label: "Edit user", href: `/admin/users/${id}`, active: true },
         ]}
       />
+
       <AdminUserEditForm user={userForForm} />
     </main>
   );
