@@ -20,10 +20,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Logo />
             </div>
           </div>
-
           <div className="lg:p-12">
             {children}
-
             <div className="lg:hidden">
               <UserMenuServer />
             </div>

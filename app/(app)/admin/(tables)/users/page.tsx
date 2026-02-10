@@ -14,7 +14,7 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <main>
+    <main className="flex h-full min-h-0 flex-col">
       <Breadcrumbs
         breadcrumbs={[
           { label: "Admin", href: "/admin", clickable: false },

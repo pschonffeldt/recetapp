@@ -202,14 +202,14 @@ export default function UserSettingsFab({
                   onClick={() => go(metricsHref)}
                 />
                 <MenuItem
-                  icon={<UsersIcon className="h-5 w-5" />}
-                  label="User management"
-                  onClick={() => go(adminUsersHref)}
-                />
-                <MenuItem
                   icon={<ShieldCheckIcon className="h-5 w-5" />}
                   label="Notifications center"
                   onClick={() => go(adminNotificationHref)}
+                />
+                <MenuItem
+                  icon={<UsersIcon className="h-5 w-5" />}
+                  label="User management"
+                  onClick={() => go(adminUsersHref)}
                 />
                 <MenuItem
                   icon={<InboxIcon className="h-5 w-5" />}

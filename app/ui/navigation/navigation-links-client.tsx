@@ -63,12 +63,12 @@ export default function NavLinksClient({ isAdmin }: Props) {
   // Admin only links
   const adminLinks: NavItem[] = [
     { name: "Metrics", href: "/admin/metrics", icon: ChartPieIcon },
-    { name: "User management", href: "/admin/users", icon: UsersIcon },
     {
       name: "Notifications center",
       href: "/admin/notification-center",
       icon: ShieldCheckIcon,
     },
+    { name: "User management", href: "/admin/users", icon: UsersIcon },
     {
       name: "Support inbox",
       href: "/admin/support",

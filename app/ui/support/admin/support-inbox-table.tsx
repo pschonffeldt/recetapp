@@ -1,15 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import type { SupportInboxRow } from "@/app/lib/support/admin-data";
-import { minutesToAgo, timeAgoFromIso } from "@/app/lib/utils/time";
 import {
   supportCategoryLabel,
   supportCategoryPillClass,
   supportStatusLabel,
   supportStatusPillClass,
 } from "@/app/lib/support/pills";
+import { minutesToAgo, timeAgoFromIso } from "@/app/lib/utils/time";
 import MarkSolvedButton from "@/app/ui/support/admin/mark-solved-button";
+import Link from "next/link";
 
 export default function SupportInboxTable({
   rows,
