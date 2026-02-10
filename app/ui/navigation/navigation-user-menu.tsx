@@ -197,23 +197,23 @@ export default function UserSettingsFab({
                   <span>Admin tools</span>
                 </div>
                 <MenuItem
+                  icon={<ChartPieIcon className="h-5 w-5" />}
+                  label="Metrics"
+                  onClick={() => go(metricsHref)}
+                />
+                <MenuItem
+                  icon={<UsersIcon className="h-5 w-5" />}
+                  label="User management"
+                  onClick={() => go(adminUsersHref)}
+                />
+                <MenuItem
                   icon={<ShieldCheckIcon className="h-5 w-5" />}
                   label="Notifications center"
                   onClick={() => go(adminNotificationHref)}
                 />
                 <MenuItem
-                  icon={<UsersIcon className="h-5 w-5" />}
-                  label="Users management"
-                  onClick={() => go(adminUsersHref)}
-                />
-                <MenuItem
-                  icon={<ChartPieIcon className="h-5 w-5" />}
-                  label="Usage metrics"
-                  onClick={() => go(metricsHref)}
-                />
-                <MenuItem
                   icon={<InboxIcon className="h-5 w-5" />}
-                  label="Support"
+                  label="Support inbox"
                   onClick={() => go(supportHref)}
                 />
                 <MenuItem
