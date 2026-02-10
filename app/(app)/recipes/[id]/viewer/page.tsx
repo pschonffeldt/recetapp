@@ -14,9 +14,11 @@ export default async function Page({
 }) {
   const { id } = await params;
 
-  const userId = await requireUserId();
-  const recipe = await fetchRecipeByIdForOwnerOrSaved(id, userId);
+  const userId = await requireUserId({
+    callbackUrl: `/recipes/${id}/viewer`,
+  });
 
+  const recipe = await fetchRecipeByIdForOwnerOrSaved(id, userId);
   if (!recipe) notFound();
 
   const mode: "dashboard" | "imported" =

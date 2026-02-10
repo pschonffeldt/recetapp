@@ -10,13 +10,12 @@ export const metadata = {
 };
 
 export default async function Page() {
-  const id = await requireUserId({ callbackUrl: "/account" });
+  const userId = await requireUserId({ callbackUrl: "/account" });
 
   const [user, libraryCount] = await Promise.all([
-    fetchUserById(id),
-    fetchRecipeLibraryCount(id),
+    fetchUserById(userId),
+    fetchRecipeLibraryCount(userId),
   ]);
-
   if (!user) notFound();
 
   return (

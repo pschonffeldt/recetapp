@@ -26,10 +26,18 @@ type SearchParams = {
 export default async function Page(props: {
   searchParams?: Promise<SearchParams>;
 }) {
-  const userId = await requireUserId();
-
   const raw = props.searchParams ? await props.searchParams : undefined;
   const searchParams: SearchParams = raw ?? {};
+
+  const qs = new URLSearchParams(
+    Object.entries(searchParams).filter(
+      ([, v]) => typeof v === "string" && v.trim().length > 0,
+    ) as Array<[string, string]>,
+  ).toString();
+
+  const callbackUrl = `/recipes${qs ? `?${qs}` : ""}`;
+
+  const userId = await requireUserId({ callbackUrl });
 
   const query = searchParams.query ?? "";
   const pageFromUrl = Math.max(1, Number(searchParams.page) || 1);

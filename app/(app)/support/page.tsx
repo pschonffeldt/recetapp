@@ -1,15 +1,11 @@
+import { requireUserId } from "@/app/lib/auth/helpers";
 import SupportForm from "@/app/ui/support/support-form";
-import { auth } from "@/auth";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 export const metadata = { title: "Support" };
 
 export default async function Page() {
-  const session = await auth();
-  if (!session?.user) {
-    redirect(`/login?callbackUrl=/support`);
-  }
+  await requireUserId({ callbackUrl: "/support" });
 
   return (
     <main className="p-4 md:p-6">

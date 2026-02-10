@@ -1,59 +1,16 @@
 import { fetchNotifications } from "@/app/lib/notifications/data";
+import {
+  mapTabToFilters,
+  Search,
+  TabKey,
+  TABS,
+} from "@/app/lib/notifications/helpers";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import NotificationsList from "@/app/ui/notifications/notifications-list";
 import { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = { title: "Notifications" };
-
-type Search = {
-  page?: string;
-  only?: "all" | "personal" | "broadcasts";
-  status?: "any" | "unread" | "read" | "archived";
-  tab?: string;
-};
-
-/* =============================================================================
- * Filter
- * =============================================================================
- */
-
-// Tabs we show in the UI
-type TabKey =
-  | "all"
-  | "announcement"
-  | "maintenance"
-  | "support"
-  | "alert"
-  | "compliance";
-
-const TABS: { key: TabKey; label: string }[] = [
-  { key: "all", label: "All" },
-  { key: "announcement", label: "Announcement" },
-  { key: "maintenance", label: "Maintenance" },
-  { key: "support", label: "Support" },
-  { key: "alert", label: "Alert" },
-  { key: "compliance", label: "Compliance" },
-];
-
-// Maps a tab to the filters we pass into fetchNotifications
-function mapTabToFilters(tab: TabKey) {
-  switch (tab) {
-    case "announcement":
-      return { status: "any" as const, kind: "announcement" as const };
-    case "maintenance":
-      return { status: "any" as const, kind: "maintenance" as const };
-    case "support":
-      return { status: "any" as const, kind: "support" as const };
-    case "alert":
-      return { status: "any" as const, kind: "alert" as const };
-    case "compliance":
-      return { status: "any" as const, kind: "compliance" as const };
-    case "all":
-    default:
-      return { status: "any" as const, kind: "all" as const };
-  }
-}
 
 export default async function Page({
   searchParams,

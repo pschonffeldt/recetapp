@@ -1,3 +1,4 @@
+import { requireUserId } from "@/app/lib/auth/helpers";
 import LatestRecipes from "@/app/ui/dashboard/dashboard-latest-recipes";
 import {
   CardsSkeleton,
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
+  await requireUserId({ callbackUrl: "/dashboard" });
   return (
     <main>
       {/* Page title */}

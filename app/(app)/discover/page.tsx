@@ -1,3 +1,4 @@
+import { requireUserId } from "@/app/lib/auth/helpers";
 import {
   fetchDiscoverPages,
   fetchDiscoverRecipes,
@@ -7,7 +8,6 @@ import DiscoverGrid from "@/app/ui/discover/discover-grid";
 import RecipesFiltersToolbar from "@/app/ui/filters/filters-toolbar";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import Pagination from "@/app/ui/recipes/recipes-pagination";
-import { auth } from "@/auth";
 import { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Discover" };
@@ -28,8 +28,7 @@ export default async function Page({
 }: {
   searchParams?: Promise<DiscoverSearchParams>;
 }) {
-  const session = await auth();
-  const userId = session?.user?.id ?? null;
+  const userId = await requireUserId({ callbackUrl: "/discover" });
 
   const sp = (await searchParams) ?? {};
 

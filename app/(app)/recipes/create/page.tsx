@@ -1,3 +1,4 @@
+import { requireUserId } from "@/app/lib/auth/helpers";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import RecipeForm from "@/app/ui/recipes/recipes-create-form";
 import { Metadata } from "next";
@@ -8,6 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
+  await requireUserId({
+    callbackUrl: "/recipes/create",
+  });
+
   return (
     <main>
       {/* Breadcrumb trail */}
@@ -21,6 +26,7 @@ export default async function Page() {
           },
         ]}
       />
+
       {/* Recipe creation form */}
       <RecipeForm />
     </main>

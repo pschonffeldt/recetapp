@@ -1,3 +1,4 @@
+import { requireUserId } from "@/app/lib/auth/helpers";
 import { fetchPublicRecipeById } from "@/app/lib/discover/data";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import ViewerRecipe from "@/app/ui/recipes/recipes-viewer";
@@ -12,8 +13,9 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const recipe = await fetchPublicRecipeById(id);
+  await requireUserId({ callbackUrl: `/discover/${id}` });
 
+  const recipe = await fetchPublicRecipeById(id);
   if (!recipe) notFound();
 
   return (
@@ -21,14 +23,9 @@ export default async function Page({
       <Breadcrumbs
         breadcrumbs={[
           { label: "Discover", href: "/discover" },
-          {
-            label: "View Recipe",
-            href: `/discover/${id}`,
-            active: true,
-          },
+          { label: "View Recipe", href: `/discover/${id}`, active: true },
         ]}
       />
-      {/* mode='discover' so the chip shows */}
       <ViewerRecipe recipe={recipe} mode="discover" />
     </main>
   );
