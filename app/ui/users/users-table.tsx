@@ -1,5 +1,5 @@
 import { fetchAdminUsers } from "@/app/lib/recipes/data";
-import { formatDate, formatDateTime } from "@/app/lib/utils/format-date";
+import { formatDate } from "@/app/lib/utils/format-date";
 import Link from "next/link";
 import RecipesSummaryCell from "./user-recipes-summary-cell";
 import ActivityCell from "./users-activity-cell";
@@ -60,28 +60,11 @@ export default async function AdminUsersTable() {
               </p>
 
               <div className="mt-1 space-y-0.5 text-[11px] text-gray-500">
-                <p>
-                  Updated:{" "}
-                  {user.updated_at ? formatDateTime(user.updated_at) : "—"}
-                </p>
-                <p>
-                  Password:{" "}
-                  {user.password_changed_at
-                    ? formatDateTime(user.password_changed_at)
-                    : "—"}
-                </p>
-                <p>
-                  Profile:{" "}
-                  {user.profile_updated_at
-                    ? formatDateTime(user.profile_updated_at)
-                    : "—"}
-                </p>
-                <p>
-                  Last login:{" "}
-                  {user.last_login_at
-                    ? formatDateTime(user.last_login_at)
-                    : "—"}
-                </p>
+                <ActivityCell
+                  updated_at={user.updated_at}
+                  password_changed_at={user.password_changed_at}
+                  last_login_at={user.last_login_at}
+                />
               </div>
 
               <div className="mt-2 flex justify-end">
