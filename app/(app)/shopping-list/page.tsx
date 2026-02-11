@@ -6,9 +6,9 @@ import { fetchIngredientsForUser } from "@/app/lib/ingredients/data";
 import { fetchRecipesForUser } from "@/app/lib/recipes/data";
 import { aggregateIngredients } from "@/app/lib/shopping-list/aggregate-ingredients";
 import { formatAggregatedItem } from "@/app/lib/shopping-list/format-aggregated-item";
+import { fetchUserById } from "@/app/lib/users/data";
 import ShoppingListRecipePicker from "@/app/ui/shopping-list/shopping-list-recipe-picker";
 import { auth } from "@/auth";
-import { fetchUserById } from "@/app/lib/users/data";
 
 export const metadata: Metadata = { title: "Shopping list" };
 
