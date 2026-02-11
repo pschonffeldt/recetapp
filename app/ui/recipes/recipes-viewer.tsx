@@ -1,6 +1,5 @@
 "use client";
 
-import { buildIngredientLines } from "@/app/lib/ingredients";
 import { RecipeForm } from "@/app/lib/types/definitions";
 import { APP } from "@/app/lib/utils/app";
 import { capitalizeFirst } from "@/app/lib/utils/format";
@@ -16,6 +15,7 @@ import {
   UpdateRecipeOnViewer,
 } from "./recipes-buttons";
 import { MetricCard, MetricCardMobile } from "./recipes-indicators";
+import { buildIngredientLines } from "@/app/lib/ingredients/data";
 
 type ViewerMode = "dashboard" | "discover" | "imported";
 

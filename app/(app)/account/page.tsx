@@ -1,5 +1,6 @@
 import { requireUserId } from "@/app/lib/auth/helpers";
-import { fetchRecipeLibraryCount, fetchUserById } from "@/app/lib/recipes/data";
+import { fetchRecipeLibraryCount } from "@/app/lib/recipes/data";
+import { fetchUserById } from "@/app/lib/users/data";
 import EditAccountMembershipForm from "@/app/ui/account/account-membership-settings";
 import EditAccountSettingsForm from "@/app/ui/account/account-settings-form";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";

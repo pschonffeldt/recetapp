@@ -6,10 +6,10 @@ import Link from "next/link";
 import { DIFFICULTY, RECIPE_TYPES } from "@/app/lib/types/definitions";
 import { RecipeFormState } from "@/app/lib/forms/state";
 import IngredientsEditor from "@/app/ui/recipes/recipes-ingredients-editor";
-import { buildInitialIngredientsForEditor } from "@/app/lib/ingredients";
 import { updateRecipe } from "@/app/lib/recipes/actions";
 import { capitalizeFirst } from "@/app/lib/utils/format";
 import { RecipeWithOwner } from "@/app/lib/recipes/data";
+import { buildInitialIngredientsForEditor } from "@/app/lib/ingredients/data";
 
 // initial state with strong typing
 const initialState: RecipeFormState = { message: null, errors: {} };

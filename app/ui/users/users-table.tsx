@@ -1,21 +1,19 @@
 "use client";
 
-import Link from "next/link";
 import { formatDate } from "@/app/lib/utils/format-date";
+import Link from "next/link";
 import RecipesSummaryCell from "./user-recipes-summary-cell";
 import ActivityCell from "./users-activity-cell";
 import CountryBadge from "./users-country-badge";
 import LanguageBadge from "./users-language-badge";
 import MembershipBadge from "./users-membership-badge";
 import RoleBadge from "./users-role-badge";
-
-// ✅ easiest: infer from fetch return type
-// type AdminUserRow = Awaited<ReturnType<import("@/app/lib/recipes/data").fetchAdminUsers>>[number];
+import { AdminUserListItem } from "@/app/lib/users/data";
 
 export default function AdminUsersTableView({
   users,
 }: {
-  users: AdminUserRow[];
+  users: AdminUserListItem[];
 }) {
   const isEmpty = users.length === 0;
 
