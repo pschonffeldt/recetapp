@@ -8,6 +8,7 @@ import {
 } from "@/app/lib/contact/contact-pills";
 import { timeAgoFromIso } from "@/app/lib/utils/time";
 import ContactInboxMarkSolvedButton from "@/app/ui/contact/admin/contact-inbox-mark-solved-button";
+import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -30,10 +31,24 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <main className="p-4 md:p-6">
+      <Breadcrumbs
+        breadcrumbs={[
+          { label: "Admin", href: "/admin", clickable: false },
+          {
+            label: "Public inbox",
+            href: "/admin/contact",
+          },
+          {
+            label: "Message",
+            href: `/admin/contact/${id}`,
+            active: true,
+          },
+        ]}
+      />
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-semibold text-gray-900">
-            {msg.subject}
+            Subject: {msg.subject}
           </h1>
 
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600">
@@ -84,10 +99,12 @@ export default async function Page({ params }: PageProps) {
         <section className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm lg:col-span-2">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="text-base font-semibold text-gray-900">Message</h2>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <h2 className="text-base font-semibold text-gray-900">
+                Message body
+              </h2>
+              {/* <p className="mt-0.5 text-xs text-gray-500">
                 Full submission (preserves line breaks)
-              </p>
+              </p> */}
             </div>
 
             <span className={contactCategoryPillClass(msg.category)}>

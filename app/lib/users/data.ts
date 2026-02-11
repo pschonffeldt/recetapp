@@ -1,0 +1,117 @@
+// ===== Admin: single user with extra metadata =====
+
+import { sql } from "../db";
+import { AdminUserListItem } from "../recipes/data";
+import { UserForm } from "../types/definitions";
+
+type AdminUserRow = UserForm & {
+  membership_tier?: UserForm["membership_tier"];
+  user_role: string | null;
+  created_at: string;
+  profile_updated_at: string | null;
+  password_changed_at: string | null;
+  last_login_at?: string | null;
+  recipes_owned_count: number;
+  recipes_imported_count: number;
+};
+
+export async function fetchUserByIdForAdmin(
+  id: string,
+): Promise<AdminUserRow | null> {
+  if (!id) throw new Error("fetchUserByIdForAdmin: id is required");
+
+  const rows = await sql<AdminUserRow[]>`
+    WITH owned AS (
+      SELECT r.user_id, COUNT(*)::int AS cnt
+      FROM public.recipes r
+      WHERE r.user_id IS NOT NULL
+      GROUP BY r.user_id
+    ),
+    imported AS (
+      SELECT saver_id, COUNT(*)::int AS cnt
+      FROM (
+        SELECT UNNEST(r.saved_by_user_ids) AS saver_id
+        FROM public.recipes r
+        WHERE r.saved_by_user_ids IS NOT NULL
+      ) s
+      GROUP BY saver_id
+    )
+    SELECT
+      u.id,
+      u.name,
+      u.user_name,
+      u.last_name,
+      u.email,
+      ''::text AS password,
+      u.country,
+      u.language,
+      u.gender,
+      CASE
+        WHEN u.date_of_birth IS NOT NULL
+        THEN (u.date_of_birth AT TIME ZONE 'UTC')::timestamptz::text
+        ELSE NULL
+      END AS date_of_birth,
+      u.allergies,
+      u.dietary_flags,
+      u.height_cm,
+      u.weight_kg,
+      COALESCE(u.membership_tier, 'free')::membership_tier AS membership_tier,
+      u.user_role,
+      (u.created_at AT TIME ZONE 'UTC')::timestamptz::text          AS created_at,
+      (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
+      (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
+      (u.last_login_at AT TIME ZONE 'UTC')::timestamptz::text       AS last_login_at,
+      COALESCE(owned.cnt, 0)::int    AS recipes_owned_count,
+      COALESCE(imported.cnt, 0)::int AS recipes_imported_count
+    FROM public.users u
+    LEFT JOIN owned    ON owned.user_id     = u.id
+    LEFT JOIN imported ON imported.saver_id = u.id
+    WHERE u.id = ${id}::uuid
+    LIMIT 1
+  `;
+
+  return rows[0] ?? null;
+}
+
+/**
+ * Fetch all users for the admin users table.
+ * (Authorization is enforced at the route level.)
+ */
+export async function fetchAdminUsers(): Promise<AdminUserListItem[]> {
+  const rows = await sql<AdminUserListItem[]> /* sql */ `
+    SELECT
+      u.id,
+      u.name,
+      u.last_name,
+      u.user_name,
+      u.email,
+      u.country,
+      u.language,
+      u.user_role,
+      u.membership_tier,
+      (u.created_at AT TIME ZONE 'UTC')::timestamptz::text          AS created_at,
+      (u.updated_at AT TIME ZONE 'UTC')::timestamptz::text          AS updated_at,
+      (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
+      (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
+      (u.last_login_at AT TIME ZONE 'UTC')::timestamptz::text AS last_login_at,
+      COALESCE(owned.count, 0)::int    AS owned_recipes_count,
+      COALESCE(imported.count, 0)::int AS imported_recipes_count,
+      (COALESCE(owned.count, 0) + COALESCE(imported.count, 0))::int AS total_recipes_count
+    FROM public.users u
+    -- Owned recipes per user
+    LEFT JOIN LATERAL (
+      SELECT COUNT(*)::int AS count
+      FROM public.recipes r
+      WHERE r.user_id = u.id
+    ) AS owned ON TRUE
+    -- Imported/saved recipes per user
+    LEFT JOIN LATERAL (
+      SELECT COUNT(*)::int AS count
+      FROM public.recipes r
+      WHERE u.id = ANY(r.saved_by_user_ids)
+    ) AS imported ON TRUE
+    ORDER BY u.created_at DESC
+  `;
+
+  return rows;
+}

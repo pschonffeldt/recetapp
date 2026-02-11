@@ -20,10 +20,8 @@ export type RecipeListItem = RecipeForm & {
   owner_relationship: "owned" | "imported";
 };
 
-import { parseStructuredIngredients } from "../ingredients";
 import type {
   CardData,
-  IncomingIngredientPayload,
   LatestRecipeRaw,
   MembershipTier,
   RecipeField,
@@ -80,11 +78,6 @@ type RecipeRowForUser = RecipeForm & {
   saved_by_user_ids: string[] | null;
 };
 
-/** Row shape when we only care about the structured ingredients JSON. */
-type RecipeIngredientsRow = {
-  recipe_ingredients_structured: unknown;
-};
-
 /** Minimal shape used specifically by the shopping list picker UI. */
 export type ShoppingListRecipe = Pick<RecipeForm, "id" | "recipe_name">;
 
@@ -117,7 +110,7 @@ export async function fetchRevenue() {
  */
 export async function fetchLatestRecipes() {
   const userId = await requireUserId();
-  const data = await sql<LatestRecipeRaw[]>/* sql */ `
+  const data = await sql<LatestRecipeRaw[]> /* sql */ `
     SELECT
       id,
       recipe_name,
@@ -142,7 +135,7 @@ export async function fetchLatestRecipes() {
 export async function getRecipeById(id: string): Promise<DbRecipeRow | null> {
   const userId = await requireUserId();
 
-  const rows = await sql<DbRecipeRow[]>/* sql */ `
+  const rows = await sql<DbRecipeRow[]> /* sql */ `
     SELECT
       r.id,
       r.recipe_name,
@@ -215,7 +208,7 @@ export type RecipeForEdit = RecipeForm & {
 };
 
 export async function fetchRecipeForEdit(
-  id: string
+  id: string,
 ): Promise<RecipeForEdit | null> {
   const userId = await requireUserId();
 
@@ -278,7 +271,7 @@ type RecipeRowWithSavedBy = RecipeForm & {
 
 export async function fetchRecipeByIdForOwner(
   recipeId: string,
-  userId: string
+  userId: string,
 ): Promise<RecipeWithOwner | null> {
   const rows = await sql<RecipeRowWithSavedBy[]>`
     SELECT
@@ -341,21 +334,21 @@ export async function fetchCardData(): Promise<CardData> {
 
   try {
     // Total recipes created by user
-    const totalRecipesPromise = sql<{ count: number }[]>/* sql */ `
+    const totalRecipesPromise = sql<{ count: number }[]> /* sql */ `
       SELECT COUNT(*)::int AS count
       FROM public.recipes r
       WHERE r.user_id = ${userId}::uuid
     `;
 
     // Average number of ingredients per recipe
-    const avgIngredientsPromise = sql/* sql */ `
+    const avgIngredientsPromise = sql /* sql */ `
       SELECT COALESCE(AVG(CARDINALITY(r.recipe_ingredients)), 0)::float AS avg_count
       FROM public.recipes r
       WHERE r.user_id = ${userId}::uuid
     `;
 
     // Most common recipe_type for the user
-    const topCategoryPromise = sql/* sql */ `
+    const topCategoryPromise = sql /* sql */ `
       SELECT r.recipe_type, COUNT(*)::int AS c
       FROM public.recipes r
       WHERE r.user_id = ${userId}::uuid AND r.recipe_type IS NOT NULL
@@ -365,7 +358,7 @@ export async function fetchCardData(): Promise<CardData> {
     `;
 
     // Distinct ingredient names across all recipes
-    const totalIngredientsPromise = sql/* sql */ `
+    const totalIngredientsPromise = sql /* sql */ `
       SELECT COALESCE(COUNT(DISTINCT TRIM(LOWER(ing))), 0)::int AS count
       FROM (
         SELECT UNNEST(r.recipe_ingredients) AS ing
@@ -407,20 +400,20 @@ export async function fetchRecipeCardData() {
   const userId = await requireUserId();
 
   try {
-    const totalRecipesPromise = sql/* sql */ `
+    const totalRecipesPromise = sql /* sql */ `
       SELECT COUNT(*)::int AS count
       FROM public.recipes r
       WHERE r.user_id = ${userId}::uuid
     `;
 
-    const recentRecipesPromise = sql/* sql */ `
+    const recentRecipesPromise = sql /* sql */ `
       SELECT COUNT(*)::int AS count
       FROM public.recipes r
       WHERE r.user_id = ${userId}::uuid
         AND r.recipe_created_at >= NOW() - INTERVAL '7 days'
     `;
 
-    const typesBreakdownPromise = sql<TypeCountRow[]>/* sql */ `
+    const typesBreakdownPromise = sql<TypeCountRow[]> /* sql */ `
       SELECT r.recipe_type, COUNT(*)::int AS count
       FROM public.recipes r
       WHERE r.user_id = ${userId}::uuid
@@ -428,7 +421,7 @@ export async function fetchRecipeCardData() {
       ORDER BY count DESC, r.recipe_type ASC
     `;
 
-    const latestRecipePromise = sql<LatestRecipeRow[]>/* sql */ `
+    const latestRecipePromise = sql<LatestRecipeRow[]> /* sql */ `
       SELECT r.id, r.recipe_name, r.recipe_created_at
       FROM public.recipes r
       WHERE r.user_id = ${userId}::uuid
@@ -509,7 +502,7 @@ export async function fetchFilteredRecipes(
     order: SortOrder;
     type: string | null;
     userId: string;
-  }
+  },
 ): Promise<RecipeListItem[]> {
   const offset = (currentPage - 1) * RECIPES_PAGE_SIZE;
   const searchQuery = query.trim();
@@ -529,16 +522,16 @@ export async function fetchFilteredRecipes(
     sort === "name"
       ? sql`r.recipe_name`
       : sort === "type"
-      ? sql`r.recipe_type`
-      : sort === "difficulty"
-      ? sql`r.difficulty`
-      : sort === "time"
-      ? sql`r.prep_time_min`
-      : sort === "visibility"
-      ? sql`r.status`
-      : sort === "owner"
-      ? ownerExpr
-      : sql`r.recipe_created_at`; // default = date
+        ? sql`r.recipe_type`
+        : sort === "difficulty"
+          ? sql`r.difficulty`
+          : sort === "time"
+            ? sql`r.prep_time_min`
+            : sort === "visibility"
+              ? sql`r.status`
+              : sort === "owner"
+                ? ownerExpr
+                : sql`r.recipe_created_at`; // default = date
 
   const directionSql = order === "asc" ? sql`ASC` : sql`DESC`;
 
@@ -632,7 +625,7 @@ export async function fetchRecipes() {
  * Used by the Discover → “save/import” flows and the shopping list picker.
  */
 export async function fetchRecipesForUser(
-  userId: string
+  userId: string,
 ): Promise<RecipeForm[]> {
   const rows = await sql<RecipeRowForUser[]>`
     SELECT
@@ -756,7 +749,7 @@ export async function fetchRecipesTotal(params: {
 
   const whereSql = sql`WHERE ${andAll(parts)}`;
 
-  const totalRes = await sql<{ count: number }[]>/* sql */ `
+  const totalRes = await sql<{ count: number }[]> /* sql */ `
     SELECT COUNT(*)::int AS count
     FROM public.recipes AS r
     ${whereSql}
@@ -764,103 +757,6 @@ export async function fetchRecipesTotal(params: {
 
   const rows = pickRows<{ count: number }>(totalRes);
   return rows[0]?.count ?? 0;
-}
-
-/* =============================================================================
- * Shopping list / structured ingredients
- * =============================================================================
- */
-
-/**
- * Legacy helper: fetch all structured ingredients for a user.
- *
- * NOTE: This function is tolerant to two storage formats:
- *  - JSON array already deserialized by postgres.js
- *  - JSON string stored in the column
- */
-export async function fetchAllStructuredIngredientsForUser(
-  userId: string
-): Promise<IncomingIngredientPayload[]> {
-  const rows = await sql<RecipeIngredientsRow[]>/* sql */ `
-    SELECT recipe_ingredients_structured
-    FROM public.recipes
-    WHERE user_id = ${userId}::uuid
-  `;
-
-  const result: IncomingIngredientPayload[] = [];
-
-  for (const row of rows) {
-    const raw = row.recipe_ingredients_structured;
-    if (!raw) continue;
-
-    // Case 1: column already deserialized as array
-    if (Array.isArray(raw)) {
-      for (const ing of raw) {
-        if (ing && typeof (ing as any).ingredientName === "string") {
-          result.push(ing as IncomingIngredientPayload);
-        }
-      }
-      continue;
-    }
-
-    // Case 2: stored as JSON string
-    if (typeof raw === "string") {
-      try {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          for (const ing of parsed) {
-            if (ing && typeof (ing as any).ingredientName === "string") {
-              result.push(ing as IncomingIngredientPayload);
-            }
-          }
-        }
-      } catch (e) {
-        console.error(
-          "Failed to parse recipe_ingredients_structured for user %s:",
-          userId,
-          e
-        );
-      }
-    }
-  }
-
-  return result;
-}
-
-/**
- * Fetch all structured ingredients for a user.
- *
- * If `recipeIds` is provided, only those recipes are included.
- * This is the main entry point for the shopping list aggregation:
- * it returns a flat list of ingredients ready to be grouped/merged by the UI.
- */
-export async function fetchIngredientsForUser(
-  userId: string,
-  recipeIds?: string[]
-): Promise<IncomingIngredientPayload[]> {
-  const rows = await sql<RecipeIngredientsRow[]>`
-    SELECT recipe_ingredients_structured
-    FROM public.recipes
-    WHERE user_id = ${userId}::uuid
-    ${
-      recipeIds && recipeIds.length > 0
-        ? sql`AND id IN ${sql(recipeIds)}`
-        : sql``
-    }
-  `;
-
-  const all: IncomingIngredientPayload[] = [];
-
-  for (const row of rows) {
-    const parsed = parseStructuredIngredients(
-      row.recipe_ingredients_structured
-    );
-    if (parsed.length > 0) {
-      all.push(...parsed);
-    }
-  }
-
-  return all;
 }
 
 /* =============================================================================
@@ -935,120 +831,6 @@ export type AdminUserListItem = {
   total_recipes_count: number;
 };
 
-// ===== Admin: single user with extra metadata =====
-
-type AdminUserRow = UserForm & {
-  membership_tier?: UserForm["membership_tier"];
-  user_role: string | null;
-  created_at: string;
-  profile_updated_at: string | null;
-  password_changed_at: string | null;
-  last_login_at?: string | null;
-  recipes_owned_count: number;
-  recipes_imported_count: number;
-};
-
-export async function fetchUserByIdForAdmin(
-  id: string
-): Promise<AdminUserRow | null> {
-  if (!id) throw new Error("fetchUserByIdForAdmin: id is required");
-
-  const rows = await sql<AdminUserRow[]>`
-    WITH owned AS (
-      SELECT r.user_id, COUNT(*)::int AS cnt
-      FROM public.recipes r
-      WHERE r.user_id IS NOT NULL
-      GROUP BY r.user_id
-    ),
-    imported AS (
-      SELECT saver_id, COUNT(*)::int AS cnt
-      FROM (
-        SELECT UNNEST(r.saved_by_user_ids) AS saver_id
-        FROM public.recipes r
-        WHERE r.saved_by_user_ids IS NOT NULL
-      ) s
-      GROUP BY saver_id
-    )
-    SELECT
-      u.id,
-      u.name,
-      u.user_name,
-      u.last_name,
-      u.email,
-      ''::text AS password,
-      u.country,
-      u.language,
-      u.gender,
-      CASE
-        WHEN u.date_of_birth IS NOT NULL
-        THEN (u.date_of_birth AT TIME ZONE 'UTC')::timestamptz::text
-        ELSE NULL
-      END AS date_of_birth,
-      u.allergies,
-      u.dietary_flags,
-      u.height_cm,
-      u.weight_kg,
-      COALESCE(u.membership_tier, 'free')::membership_tier AS membership_tier,
-      u.user_role,
-      (u.created_at AT TIME ZONE 'UTC')::timestamptz::text          AS created_at,
-      (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
-      (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
-      (u.last_login_at AT TIME ZONE 'UTC')::timestamptz::text       AS last_login_at,
-      COALESCE(owned.cnt, 0)::int    AS recipes_owned_count,
-      COALESCE(imported.cnt, 0)::int AS recipes_imported_count
-    FROM public.users u
-    LEFT JOIN owned    ON owned.user_id     = u.id
-    LEFT JOIN imported ON imported.saver_id = u.id
-    WHERE u.id = ${id}::uuid
-    LIMIT 1
-  `;
-
-  return rows[0] ?? null;
-}
-
-/**
- * Fetch all users for the admin users table.
- * (Authorization is enforced at the route level.)
- */
-export async function fetchAdminUsers(): Promise<AdminUserListItem[]> {
-  const rows = await sql<AdminUserListItem[]>/* sql */ `
-    SELECT
-      u.id,
-      u.name,
-      u.last_name,
-      u.user_name,
-      u.email,
-      u.country,
-      u.language,
-      u.user_role,
-      u.membership_tier,
-      (u.created_at AT TIME ZONE 'UTC')::timestamptz::text          AS created_at,
-      (u.updated_at AT TIME ZONE 'UTC')::timestamptz::text          AS updated_at,
-      (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
-      (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
-      (u.last_login_at AT TIME ZONE 'UTC')::timestamptz::text AS last_login_at,
-      COALESCE(owned.count, 0)::int    AS owned_recipes_count,
-      COALESCE(imported.count, 0)::int AS imported_recipes_count,
-      (COALESCE(owned.count, 0) + COALESCE(imported.count, 0))::int AS total_recipes_count
-    FROM public.users u
-    -- Owned recipes per user
-    LEFT JOIN LATERAL (
-      SELECT COUNT(*)::int AS count
-      FROM public.recipes r
-      WHERE r.user_id = u.id
-    ) AS owned ON TRUE
-    -- Imported/saved recipes per user
-    LEFT JOIN LATERAL (
-      SELECT COUNT(*)::int AS count
-      FROM public.recipes r
-      WHERE u.id = ANY(r.saved_by_user_ids)
-    ) AS imported ON TRUE
-    ORDER BY u.created_at DESC
-  `;
-
-  return rows;
-}
-
 /* =============================================================================
  * Generic helpers (internal)
  * =============================================================================
@@ -1060,7 +842,7 @@ export async function fetchAdminUsers(): Promise<AdminUserListItem[]> {
  * - postgres.js      → result is already an array
  */
 function pickRows<T = any>(result: any): T[] {
-  return Array.isArray(result) ? result : result?.rows ?? [];
+  return Array.isArray(result) ? result : (result?.rows ?? []);
 }
 
 /**
@@ -1081,7 +863,7 @@ export type RecipeViewerItem = RecipeForm & {
 
 export async function fetchRecipeByIdForOwnerOrSaved(
   id: string,
-  userId: string
+  userId: string,
 ): Promise<RecipeViewerItem | null> {
   const rows = await sql<RecipeViewerItem[]>`
     SELECT

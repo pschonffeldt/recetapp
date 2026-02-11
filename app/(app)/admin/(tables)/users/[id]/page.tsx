@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/app/lib/auth/helpers";
-import { fetchUserByIdForAdmin } from "@/app/lib/recipes/data";
 import type { MembershipTier } from "@/app/lib/types/definitions";
+import { fetchUserByIdForAdmin } from "@/app/lib/users/data";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import AdminUserEditForm from "@/app/ui/users/users-edit-form";
 import type { Metadata } from "next";
