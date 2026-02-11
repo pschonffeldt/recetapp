@@ -3,6 +3,8 @@ import { formatDate, formatDateTime } from "@/app/lib/utils/format-date";
 import Link from "next/link";
 import RecipesSummaryCell from "./user-recipes-summary-cell";
 import ActivityCell from "./users-activity-cell";
+import CountryBadge from "./users-country-badge";
+import LanguageBadge from "./users-language-badge";
 import MembershipBadge from "./users-membership-badge";
 import RoleBadge from "./users-role-badge";
 
@@ -21,63 +23,70 @@ export default async function AdminUsersTable() {
             No users found.
           </div>
         ) : (
-          users.map((u) => (
+          users.map((users) => (
             <div
-              key={u.id}
+              key={users.id}
               className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
             >
               <p className="font-medium">
-                {u.name} {u.last_name}
+                {users.name} {users.last_name}
               </p>
-              {u.user_name && (
-                <p className="text-xs text-gray-500">@{u.user_name}</p>
+              {users.user_name && (
+                <p className="text-xs text-gray-500">@{users.user_name}</p>
               )}
-              <p className="mt-1 text-xs text-gray-500">{u.email}</p>
+              <p className="mt-1 text-xs text-gray-500">{users.email}</p>
 
               <div className="mt-2 flex flex-wrap gap-2">
-                <MembershipBadge tier={u.membership_tier} />
-                <RoleBadge role={u.user_role} />
+                <MembershipBadge tier={users.membership_tier} />
+                <RoleBadge role={users.user_role} />
               </div>
 
               <p className="mt-2 text-xs text-gray-500">
                 Recipes:{" "}
-                <span className="font-semibold">{u.total_recipes_count}</span>{" "}
+                <span className="font-semibold">
+                  {users.total_recipes_count}
+                </span>{" "}
                 <span className="text-[11px] text-gray-500">
-                  (own {u.owned_recipes_count} · imported{" "}
-                  {u.imported_recipes_count})
+                  (own {users.owned_recipes_count} · imported{" "}
+                  {users.imported_recipes_count})
                 </span>
               </p>
 
               <p className="mt-2 text-xs text-gray-500">
                 Joined{" "}
-                <time dateTime={u.created_at}>{formatDate(u.created_at)}</time>
+                <time dateTime={users.created_at}>
+                  {formatDate(users.created_at)}
+                </time>
               </p>
 
               <div className="mt-1 space-y-0.5 text-[11px] text-gray-500">
                 <p>
-                  Updated: {u.updated_at ? formatDateTime(u.updated_at) : "—"}
+                  Updated:{" "}
+                  {users.updated_at ? formatDateTime(users.updated_at) : "—"}
                 </p>
                 <p>
                   Password:{" "}
-                  {u.password_changed_at
-                    ? formatDateTime(u.password_changed_at)
+                  {users.password_changed_at
+                    ? formatDateTime(users.password_changed_at)
                     : "—"}
                 </p>
                 <p>
                   Profile:{" "}
-                  {u.profile_updated_at
-                    ? formatDateTime(u.profile_updated_at)
+                  {users.profile_updated_at
+                    ? formatDateTime(users.profile_updated_at)
                     : "—"}
                 </p>
                 <p>
                   Last login:{" "}
-                  {u.last_login_at ? formatDateTime(u.last_login_at) : "—"}
+                  {users.last_login_at
+                    ? formatDateTime(users.last_login_at)
+                    : "—"}
                 </p>
               </div>
 
               <div className="mt-2 flex justify-end">
                 <Link
-                  href={`/admin/users/${u.id}`}
+                  href={`/admin/users/${users.id}`}
                   className="rounded-md border border-gray-200 px-3 py-1 text-xs text-gray-700 hover:bg-gray-50"
                 >
                   Edit
@@ -89,29 +98,29 @@ export default async function AdminUsersTable() {
       </div>
 
       {/* =========================
-          Desktop: Table
-         ========================= */}
+    Desktop: Table
+   ========================= */}
       <div className="hidden md:block rounded-md border border-gray-200 bg-white h-full">
         <div className="w-full h-full overflow-x-auto overflow-y-auto">
           <table className="min-w-[950px] w-full text-sm">
             <thead className="sticky top-0 z-10 bg-gray-50 text-xs uppercase tracking-wide text-gray-600">
               <tr>
-                <th className="px-4 py-5 sm:pl-6">User</th>
-                <th className="px-3 py-5 font-medium">Email</th>
-                <th className="px-3 py-5 font-medium">Country</th>
-                <th className="px-3 py-5 font-medium">Language</th>
-                <th className="px-3 py-5 font-medium">Membership</th>
-                <th className="px-3 py-5 font-medium">Role</th>
-                <th className="px-3 py-5 font-medium">Recipes</th>
-                <th className="px-3 py-5 font-medium">Joined</th>
-                <th className="px-3 py-5 font-medium">Activity</th>
-                <th className="px-3 py-5 font-medium">Actions</th>
+                <th className="px-4 py-3 text-left">User</th>
+                <th className="px-4 py-3 text-left">Email</th>
+                <th className="px-4 py-3 text-left">Country</th>
+                <th className="px-4 py-3 text-left">Language</th>
+                <th className="px-4 py-3 text-left">Membership</th>
+                <th className="px-4 py-3 text-left">Role</th>
+                <th className="px-4 py-3 text-left">Recipes</th>
+                <th className="px-4 py-3 text-left">Joined</th>
+                <th className="px-4 py-3 text-left">Activity</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
 
-            <tbody className="bg-white">
+            <tbody className="divide-y divide-gray-100">
               {isEmpty ? (
-                <tr>
+                <tr className="hover:bg-gray-50/70">
                   <td
                     colSpan={10}
                     className="px-6 py-10 text-center text-sm text-gray-500"
@@ -120,67 +129,78 @@ export default async function AdminUsersTable() {
                   </td>
                 </tr>
               ) : (
-                users.map((u) => (
-                  <tr
-                    key={u.id}
-                    className="w-full border-b py-3 text-sm last-of-type:border-none"
-                  >
-                    <td className="whitespace-normal py-3 pl-6 pr-3 align-middle">
-                      <p className="font-medium">
-                        {u.name} {u.last_name}
+                users.map((users) => (
+                  <tr key={users.id} className="hover:bg-gray-50/70">
+                    {/* USER */}
+                    <td className="whitespace-normal py-3 pl-6 pr-3 align-middle text-sm text-gray-600">
+                      <p className="font-medium text-gray-900">
+                        {users.name} {users.last_name}
                       </p>
-                      {u.user_name && (
-                        <p className="text-xs text-gray-500">@{u.user_name}</p>
+                      {users.user_name && (
+                        <p className="text-xs text-gray-500">
+                          @{users.user_name}
+                        </p>
                       )}
                     </td>
 
-                    <td className="whitespace-nowrap px-3 py-3 align-middle">
-                      <span className="text-sm text-gray-700">{u.email}</span>
+                    {/* EMAIL */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle text-sm text-gray-600">
+                      {users.email}
                     </td>
 
-                    <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
-                      {u.country ?? "—"}
+                    {/* COUNTRY */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle text-sm text-gray-600">
+                      {/* {users.country ?? "—"} */}
+                      <CountryBadge country={users.country} />
                     </td>
 
-                    <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
-                      {u.language ?? "—"}
+                    {/* LANGUAGE */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle text-sm text-gray-600">
+                      {/* {users.language ?? "—"} */}
+                      <LanguageBadge language={users.language} />
                     </td>
 
-                    <td className="whitespace-nowrap px-3 py-3 align-middle">
-                      <MembershipBadge tier={u.membership_tier} />
+                    {/* MEMBERSHIP */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle text-sm text-gray-600">
+                      <MembershipBadge tier={users.membership_tier} />
                     </td>
 
-                    <td className="whitespace-nowrap px-3 py-3 align-middle">
-                      <RoleBadge role={u.user_role} />
+                    {/* ROLE */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle text-sm text-gray-600">
+                      <RoleBadge role={users.user_role} />
                     </td>
 
-                    <td className="whitespace-nowrap px-3 py-3 align-middle">
+                    {/* RECIPES */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle text-sm text-gray-600">
                       <RecipesSummaryCell
-                        owned={u.owned_recipes_count}
-                        imported={u.imported_recipes_count}
-                        total={u.total_recipes_count}
+                        owned={users.owned_recipes_count}
+                        imported={users.imported_recipes_count}
+                        total={users.total_recipes_count}
                       />
                     </td>
 
-                    <td className="whitespace-nowrap px-3 py-3 text-gray-600 align-middle">
-                      <time dateTime={u.created_at}>
-                        {formatDate(u.created_at)}
-                      </time>
+                    {/* JOINED */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle text-sm text-gray-600">
+                      <div className="text-xs text-gray-500">
+                        {formatDate(users.created_at)}
+                      </div>
                     </td>
 
-                    <td className="whitespace-nowrap px-3 py-3 align-middle">
+                    {/* ACTIVITY */}
+                    <td className="whitespace-nowrap px-3 py-3 align-middle text-sm text-gray-600">
                       <ActivityCell
-                        updated_at={u.updated_at}
-                        password_changed_at={u.password_changed_at}
-                        last_login_at={u.last_login_at}
+                        updated_at={users.updated_at}
+                        password_changed_at={users.password_changed_at}
+                        last_login_at={users.last_login_at}
                       />
                     </td>
 
-                    <td className="whitespace-nowrap py-3 pl-3 pr-6 align-middle">
+                    {/* ACTIONS */}
+                    <td className="whitespace-nowrap py-3 pl-3 pr-6 align-middle text-sm text-gray-600">
                       <div className="flex justify-end gap-2">
                         <Link
-                          href={`/admin/users/${u.id}`}
-                          className="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50"
+                          href={`/admin/users/${users.id}`}
+                          className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
                         >
                           Edit
                         </Link>

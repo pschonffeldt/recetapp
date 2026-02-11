@@ -31,29 +31,29 @@ export default function ContactInboxTable({
           Mobile: Cards
           ========================= */}
       <div className="md:hidden space-y-3">
-        {rows.map((r) => {
-          const isSolved = r.status === "solved";
+        {rows.map((rows) => {
+          const isSolved = rows.status === "solved";
 
           const solvedAgo =
-            typeof r.solved_minutes_ago === "number"
-              ? minutesToAgo(r.solved_minutes_ago)
-              : r.solved_at
-                ? timeAgoFromIso(r.solved_at)
+            typeof rows.solved_minutes_ago === "number"
+              ? minutesToAgo(rows.solved_minutes_ago)
+              : rows.solved_at
+                ? timeAgoFromIso(rows.solved_at)
                 : null;
 
           return (
             <div
-              key={r.id}
+              key={rows.id}
               className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
             >
               {/* Top row: subject + pills */}
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-gray-900">
-                    {r.subject}
+                    {rows.subject}
                   </p>
                   <p className="mt-1 text-xs text-gray-500">
-                    {r.contact_name || "—"} · {r.contact_email}
+                    {rows.contact_name || "—"} · {rows.contact_email}
                   </p>
                 </div>
 
@@ -61,8 +61,8 @@ export default function ContactInboxTable({
                   <span className={contactStatusPillClass(isSolved)}>
                     {contactStatusLabel(isSolved)}
                   </span>
-                  <span className={contactCategoryPillClass(r.category)}>
-                    {contactCategoryLabel(r.category)}
+                  <span className={contactCategoryPillClass(rows.category)}>
+                    {contactCategoryLabel(rows.category)}
                   </span>
                 </div>
               </div>
@@ -74,10 +74,10 @@ export default function ContactInboxTable({
                     Sent
                   </p>
                   <p className="mt-1 text-xs text-gray-600">
-                    {minutesToAgo(r.minutes_ago)}
+                    {minutesToAgo(rows.minutes_ago)}
                   </p>
                   <p className="mt-1 text-xs text-gray-500">
-                    {new Date(r.created_at).toLocaleString()}
+                    {new Date(rows.created_at).toLocaleString()}
                   </p>
                 </div>
 
@@ -110,9 +110,9 @@ export default function ContactInboxTable({
                           </p>
                         ) : null}
                       </div>
-                      {r.solved_at ? (
+                      {rows.solved_at ? (
                         <p className="mt-1 text-xs text-emerald-800/80">
-                          {new Date(r.solved_at).toLocaleString()}
+                          {new Date(rows.solved_at).toLocaleString()}
                         </p>
                       ) : null}
                     </>
@@ -123,14 +123,14 @@ export default function ContactInboxTable({
               {/* Actions */}
               <div className="mt-4 flex items-center justify-end gap-2">
                 <Link
-                  href={`/admin/contact/${r.id}`}
+                  href={`/admin/contact/${rows.id}`}
                   className="rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
                 >
                   View
                 </Link>
 
                 <ContactInboxMarkSolvedButton
-                  id={r.id}
+                  id={rows.id}
                   isSolved={isSolved}
                   size="sm"
                 />
@@ -159,64 +159,67 @@ export default function ContactInboxTable({
             </thead>
 
             <tbody className="divide-y divide-gray-100">
-              {rows.map((r) => {
-                const isSolved = r.status === "solved";
+              {rows.map((rows) => {
+                const isSolved = rows.status === "solved";
 
                 const solvedAgo =
-                  typeof r.solved_minutes_ago === "number"
-                    ? minutesToAgo(r.solved_minutes_ago)
-                    : r.solved_at
-                      ? timeAgoFromIso(r.solved_at)
+                  typeof rows.solved_minutes_ago === "number"
+                    ? minutesToAgo(rows.solved_minutes_ago)
+                    : rows.solved_at
+                      ? timeAgoFromIso(rows.solved_at)
                       : null;
 
                 return (
-                  <tr key={r.id} className="hover:bg-gray-50/70">
+                  <tr key={rows.id} className="hover:bg-gray-50/70">
                     {/* STATUS */}
-                    <td className="px-4 py-3">
+                    <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
                       <span className={contactStatusPillClass(isSolved)}>
                         {contactStatusLabel(isSolved)}
                       </span>
                     </td>
 
                     {/* CATEGORY */}
-                    <td className="px-4 py-3">
-                      <span className={contactCategoryPillClass(r.category)}>
-                        {contactCategoryLabel(r.category)}
+                    <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
+                      <span className={contactCategoryPillClass(rows.category)}>
+                        {contactCategoryLabel(rows.category)}
                       </span>
                     </td>
 
                     {/* SUBJECT */}
-                    <td className="px-4 py-3 font-medium text-gray-900">
-                      {r.subject}
+                    <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
+                      {rows.subject}
                     </td>
 
                     {/* USER */}
-                    <td className="px-4 py-3 text-gray-700">
-                      <div className="font-medium">{r.contact_name || "—"}</div>
+                    <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
+                      <div className="font-medium">
+                        {rows.contact_name || "—"}
+                      </div>
                       <div className="text-xs text-gray-500">
-                        {r.contact_email}
+                        {rows.contact_email}
                       </div>
                     </td>
 
                     {/* SENT */}
-                    <td className="px-4 py-3 text-gray-700">
+                    <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
                       <div className="text-xs text-gray-500">
-                        {minutesToAgo(r.minutes_ago)}
+                        {minutesToAgo(rows.minutes_ago)}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {new Date(r.created_at).toLocaleString()}
+                        {new Date(rows.created_at).toLocaleString()}
                       </div>
                     </td>
 
                     {/* RESOLUTION */}
-                    <td className="px-4 py-3 text-gray-700">
+                    <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
                       {!isSolved ? (
-                        <div className="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2.5 py-2 text-xs font-medium text-gray-700">
+                        <div className="inline-flex items-center rounded-md border border-red-100 bg-red-50 px-2.5 py-2 text-xs font-medium text-gray-700">
                           Not solved yet
                         </div>
                       ) : (
-                        (r.solved_at || r.solved_minutes_ago !== null) && (
-                          <div className="rounded-md border border-emerald-100 bg-emerald-50 px-2.5 py-2">
+                        (rows.solved_at ||
+                          rows.solved_minutes_ago !== null) && (
+                          <div className="rounded-md border border-emerald-100 bg-emerald-50 px-2.5 py-1">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <span className="text-xs font-semibold text-emerald-800">
                                 Solved
@@ -228,9 +231,10 @@ export default function ContactInboxTable({
                               ) : null}
                             </div>
 
-                            {r.solved_at ? (
-                              <div className="mt-1 text-[11px] text-emerald-800/80">
-                                {new Date(r.solved_at).toLocaleString()}
+                            {rows.solved_at ? (
+                              <div className="text-[11px] text-emerald-800/80">
+                                Solved at:{" "}
+                                {new Date(rows.solved_at).toLocaleString()}
                               </div>
                             ) : null}
                           </div>
@@ -239,17 +243,17 @@ export default function ContactInboxTable({
                     </td>
 
                     {/* ACTIONS */}
-                    <td className="px-4 py-3">
+                    <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
                       <div className="flex justify-end gap-2">
                         <Link
-                          href={`/admin/contact/${r.id}`}
+                          href={`/admin/contact/${rows.id}`}
                           className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
                         >
                           View
                         </Link>
 
                         <ContactInboxMarkSolvedButton
-                          id={r.id}
+                          id={rows.id}
                           isSolved={isSolved}
                           size="sm"
                         />
