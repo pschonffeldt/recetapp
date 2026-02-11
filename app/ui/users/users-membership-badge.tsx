@@ -1,35 +1,30 @@
 import { MembershipTier } from "@/app/lib/types/definitions";
-import clsx from "clsx";
+import { Badge, BadgeMuted } from "./badge";
+
+type MembershipValue = "free" | "tier1" | "tier2" | "other";
+
+function normalizeTier(input?: MembershipTier | null): MembershipValue {
+  if (!input) return "other";
+  if (input === "free" || input === "tier1" || input === "tier2") return input;
+  return "other";
+}
 
 export default function MembershipBadge({
   tier,
 }: {
   tier: MembershipTier | null;
 }) {
-  if (!tier) {
-    return (
-      <span className="inline-flex items-center rounded-full border border-gray-200 px-2 py-0.5 text-[11px] text-gray-500">
-        Not set
-      </span>
-    );
-  }
+  const value = normalizeTier(tier);
+
+  if (value === "other") return <BadgeMuted>Not set</BadgeMuted>;
 
   const label =
-    tier === "free" ? "Free" : tier === "tier1" ? "Tier 1" : "Tier 2";
+    value === "free" ? "Free" : value === "tier1" ? "Tier 1" : "Tier 2";
 
   const cls =
-    tier === "free"
+    value === "free"
       ? "border-emerald-200 bg-emerald-50 text-emerald-700"
       : "border-indigo-200 bg-indigo-50 text-indigo-700";
 
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
-        cls
-      )}
-    >
-      {label}
-    </span>
-  );
+  return <Badge className={cls}>{label}</Badge>;
 }

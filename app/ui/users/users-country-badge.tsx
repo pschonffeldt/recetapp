@@ -1,18 +1,25 @@
-import { clsx } from "clsx";
+import { Badge } from "./badge";
 
-export default function CountryBadge({
-  country,
-}: {
-  country: "USA" | "Chile" | "other";
-}) {
-  const base =
-    "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium";
-  const usa = "border-red-300 bg-red-50 text-red-700";
-  const chile = "border-blue-200 bg-blue-50 text-blue-700";
+type CountryValue = "USA" | "Chile" | "other";
 
-  return (
-    <span className={clsx(base, country === "USA" ? usa : chile)}>
-      {country === "USA" ? "USA" : "Chile"}
-    </span>
-  );
+function normalizeCountry(input?: string | null): CountryValue {
+  const c = (input ?? "").trim().toLowerCase();
+  if (c === "usa" || c === "us" || c === "united states") return "USA";
+  if (c === "chile" || c === "cl") return "Chile";
+  return "other";
+}
+
+export default function CountryBadge({ country }: { country?: string | null }) {
+  const value = normalizeCountry(country);
+
+  const cls =
+    value === "USA"
+      ? "border-red-300 bg-red-50 text-red-700"
+      : value === "Chile"
+        ? "border-blue-200 bg-blue-50 text-blue-700"
+        : "border-gray-200 bg-gray-50 text-gray-700";
+
+  const label = value === "other" ? "Other" : value;
+
+  return <Badge className={cls}>{label}</Badge>;
 }

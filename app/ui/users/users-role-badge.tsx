@@ -1,14 +1,26 @@
-import { clsx } from "clsx";
+import { Badge } from "./badge";
 
-export default function RoleBadge({ role }: { role: "user" | "admin" }) {
-  const base =
-    "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium";
-  const admin = "border-purple-300 bg-purple-50 text-purple-700";
-  const user = "border-gray-200 bg-gray-50 text-gray-700";
+type RoleValue = "admin" | "user" | "other";
 
-  return (
-    <span className={clsx(base, role === "admin" ? admin : user)}>
-      {role === "admin" ? "Admin" : "User"}
-    </span>
-  );
+function normalizeRole(input?: string | null): RoleValue {
+  const r = (input ?? "").trim().toLowerCase();
+  if (r === "admin") return "admin";
+  if (r === "user") return "user";
+  return "other";
+}
+
+export default function RoleBadge({ role }: { role?: string | null }) {
+  const value = normalizeRole(role);
+
+  const cls =
+    value === "admin"
+      ? "border-purple-300 bg-purple-50 text-purple-700"
+      : value === "user"
+        ? "border-gray-200 bg-gray-50 text-gray-700"
+        : "border-gray-200 bg-gray-50 text-gray-700";
+
+  const label =
+    value === "other" ? "Other" : value === "admin" ? "Admin" : "User";
+
+  return <Badge className={cls}>{label}</Badge>;
 }
