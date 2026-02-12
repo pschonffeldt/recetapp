@@ -177,19 +177,16 @@ export default function ContactInboxTable({
                         {contactStatusLabel(isSolved)}
                       </span>
                     </td>
-
                     {/* CATEGORY */}
                     <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
                       <span className={contactCategoryPillClass(rows.category)}>
                         {contactCategoryLabel(rows.category)}
                       </span>
                     </td>
-
                     {/* SUBJECT */}
                     <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
                       {rows.subject}
                     </td>
-
                     {/* USER */}
                     <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
                       <div className="font-medium">
@@ -199,7 +196,6 @@ export default function ContactInboxTable({
                         {rows.contact_email}
                       </div>
                     </td>
-
                     {/* SENT */}
                     <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
                       <div className="text-xs text-gray-500">
@@ -209,7 +205,6 @@ export default function ContactInboxTable({
                         {new Date(rows.created_at).toLocaleString()}
                       </div>
                     </td>
-
                     {/* RESOLUTION */}
                     <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
                       {!isSolved ? (
@@ -241,7 +236,6 @@ export default function ContactInboxTable({
                         )
                       )}
                     </td>
-
                     {/* ACTIONS */}
                     <td className="whitespace-nowrap px-3 py-3 text-sm text-gray-600 align-middle">
                       <div className="flex justify-end gap-2">
