@@ -1,7 +1,6 @@
-"use client";
-
-import clsx from "clsx";
 import type { RecipeForm } from "@/app/lib/types/definitions";
+import clsx from "clsx";
+import { Badge } from "../users/badge";
 
 type Status = RecipeForm["status"]; // 'private' | 'public'
 
@@ -21,23 +20,27 @@ export function VisibilityBadge({
       ? `Saved by ${count} cook${count === 1 ? "" : "s"}`
       : "";
 
+  const cls = isPublic
+    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+    : "border-gray-200 bg-gray-50 text-gray-700";
+
   return (
-    <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs">
+    <Badge
+      className={cls}
+      title={isPublic ? "Public recipe" : "Private recipe"}
+    >
       <span
         className={clsx(
-          "inline-flex h-2 w-2 rounded-full",
-          isPublic ? "bg-green-500" : "bg-gray-400"
+          "mr-2 inline-flex h-2 w-2 rounded-full",
+          isPublic ? "bg-emerald-500" : "bg-gray-400",
         )}
         aria-hidden="true"
       />
       <span className="font-medium">{isPublic ? "Public" : "Private"}</span>
-      <span className="text-gray-500">
-        {/* always show base text */}
-        {" • "}
-        {baseText}
-        {/* only show count when >= 1 */}
-        {savedText && ` • ${savedText}`}
+      <span className="ml-2 text-gray-600/80">
+        {"• "} {baseText}
+        {savedText ? ` • ${savedText}` : ""}
       </span>
-    </div>
+    </Badge>
   );
 }

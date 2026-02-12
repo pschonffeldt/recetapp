@@ -1,13 +1,10 @@
 import { requireUserId } from "@/app/lib/auth/helpers";
 import { fetchRecipesPages } from "@/app/lib/recipes/data";
-import { RecipesTableSkeleton } from "@/app/ui/dashboard/dashboard-skeletons";
 import RecipesFiltersToolbar from "@/app/ui/filters/filters-toolbar";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { CreateRecipe } from "@/app/ui/recipes/recipes-buttons";
-import Pagination from "@/app/ui/recipes/recipes-pagination";
 import RecipesTable from "@/app/ui/recipes/recipes-table";
 import type { Metadata } from "next";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Recipes",
@@ -16,7 +13,14 @@ export const metadata: Metadata = {
 type SearchParams = {
   query?: string;
   page?: string;
-  sort?: "name" | "date" | "type";
+  sort?:
+    | "name"
+    | "date"
+    | "type"
+    | "difficulty"
+    | "time"
+    | "visibility"
+    | "owner";
   order?: "asc" | "desc";
   type?: string;
   difficulty?: string;
@@ -36,12 +40,14 @@ export default async function Page(props: {
   ).toString();
 
   const callbackUrl = `/recipes${qs ? `?${qs}` : ""}`;
-
   const userId = await requireUserId({ callbackUrl });
 
   const query = searchParams.query ?? "";
   const pageFromUrl = Math.max(1, Number(searchParams.page) || 1);
-  const sort: "name" | "date" | "type" = searchParams.sort || "date";
+
+  // Keep your existing defaults
+  const sort: "name" | "date" | "type" =
+    (searchParams.sort as "name" | "date" | "type") || "date";
   const order: "asc" | "desc" = searchParams.order || "desc";
 
   const rawType = searchParams.type;
@@ -59,29 +65,22 @@ export default async function Page(props: {
   });
 
   const safePage = totalPages === 0 ? 1 : Math.min(pageFromUrl, totalPages);
-
   const hasFilters = !!query || !!type || !!difficultyRaw || !!maxPrepRaw;
 
   return (
-    <div className="w-full min-h-0">
+    <main className="flex h-full min-h-0 flex-col">
       <Breadcrumbs
         breadcrumbs={[{ label: "Recipes", href: "/recipes", active: true }]}
       />
 
-      {/* Header row: title is in breadcrumbs; keep only Create button here */}
-      <div className="mt-4 flex items-center px-2 justify-end gap-2 md:mt-8 lg:px-0">
-        <CreateRecipe />
-      </div>
-
-      {/* Filters toolbar – same layout as Discover */}
-      <section className="mt-4">
+      <section className="my-5">
         <RecipesFiltersToolbar
           basePath="/recipes"
           query={query}
           type={rawType ?? ""}
           difficultyRaw={difficultyRaw}
           maxPrepRaw={maxPrepRaw}
-          sort="newest" // sort dropdown hidden, table headers handle sorting
+          sort="newest"
           hasFilters={hasFilters}
           title="Your recipes"
           contextLabel="recipes"
@@ -93,10 +92,7 @@ export default async function Page(props: {
         />
       </section>
 
-      <Suspense
-        key={`${query}|${type}|${difficultyRaw}|${maxPrepRaw}|${sort}|${order}|${safePage}`}
-        fallback={<RecipesTableSkeleton />}
-      >
+      <div className="flex-1 min-h-0 lg:p-0">
         <RecipesTable
           userId={userId}
           query={query}
@@ -104,12 +100,13 @@ export default async function Page(props: {
           sort={sort}
           order={order}
           type={type}
+          searchParams={searchParams}
         />
-      </Suspense>
-
-      <div className="mt-5 flex w-full justify-center">
-        <Pagination totalPages={totalPages} currentPage={safePage} />
       </div>
-    </div>
+
+      <div className="mt-4 flex items-center px-2 justify-end gap-2 md:mt-8 lg:px-0">
+        <CreateRecipe />
+      </div>
+    </main>
   );
 }

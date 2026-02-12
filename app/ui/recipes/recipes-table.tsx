@@ -1,20 +1,21 @@
 import {
   fetchFilteredRecipes,
-  SortKey,
   type RecipeListItem,
+  type SortKey,
 } from "@/app/lib/recipes/data";
 import { formatDate } from "@/app/lib/utils/format-date";
-import clsx from "clsx";
-import PrepTimePill from "../general/time-pill";
 import {
   DeleteRecipe,
   RemoveImportedRecipe,
   UpdateRecipe,
   ViewRecipe,
 } from "./recipes-buttons";
-import RecipesDifficulty from "./recipes-difficulty";
+import RecipesDifficulty from "./recipes-difficulty-badge";
+import OwnershipBadge from "./recipes-ownership-badge";
 import SortButton from "./recipes-sort-button";
-import RecipesType from "./recipes-status";
+import RecipesTimeBadge from "./recipes-time-badge";
+import RecipesType from "./recipes-type-badge";
+import { VisibilityBadge } from "./recipes-visibility-badge";
 
 type RecipesTableProps = {
   userId: string;
@@ -23,50 +24,55 @@ type RecipesTableProps = {
   sort: SortKey;
   order: "asc" | "desc";
   type: string | null;
+
+  searchParams: Record<string, string | string[] | undefined>;
 };
 
 function safeIso(value?: string | null) {
-  if (!value) return undefined;
+  if (!value) return null;
   const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return undefined;
+  if (Number.isNaN(d.getTime())) return null;
   return d.toISOString();
 }
 
-function OwnershipBadge({ owner }: { owner: "owned" | "imported" }) {
-  const label = owner === "owned" ? "Created by you" : "Imported";
-  const style =
-    owner === "owned"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-      : "border-blue-200 bg-blue-50 text-blue-700";
-
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
-        style,
-      )}
-    >
-      {label}
-    </span>
-  );
+function ingredientsPreview(ingredients?: string[] | null, maxItems = 5) {
+  if (!ingredients?.length) return "—";
+  const clean = ingredients.map((x) => String(x).trim()).filter(Boolean);
+  if (clean.length <= maxItems) return clean.join(", ");
+  return `${clean.slice(0, maxItems).join(", ")}…`;
 }
 
-function VisibilityBadge({ status }: { status: "public" | "private" }) {
-  const isPublic = status === "public";
-  const label = isPublic ? "Public" : "Private";
-  const style = isPublic
-    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-    : "border-gray-200 bg-gray-100 text-gray-600";
+function stepsPreview(steps?: string[] | null, maxChars = 200) {
+  if (!steps?.length) return "—";
 
+  const full = steps
+    .map((s) =>
+      String(s)
+        .replace(/[^\p{L}\p{N}\s]/gu, "")
+        .replace(/\s+/g, " ")
+        .trim(),
+    )
+    .filter(Boolean)
+    .join(". ");
+
+  if (!full) return "—";
+  if (full.length <= maxChars) return `${full}.`;
+  return `${full.slice(0, maxChars).trimEnd()}…`;
+}
+
+function Actions({ id, owner }: { id: string; owner: "owned" | "imported" }) {
   return (
-    <span
-      className={clsx(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
-        style,
+    <div className="flex justify-end gap-2">
+      <ViewRecipe id={id} />
+      {owner === "owned" ? (
+        <>
+          <UpdateRecipe id={id} />
+          <DeleteRecipe id={id} />
+        </>
+      ) : (
+        <RemoveImportedRecipe id={id} />
       )}
-    >
-      {label}
-    </span>
+    </div>
   );
 }
 
@@ -77,248 +83,237 @@ export default async function RecipesTable({
   sort,
   order,
   type,
+  searchParams,
 }: RecipesTableProps) {
   const recipes: RecipeListItem[] = await fetchFilteredRecipes(
     query,
     currentPage,
-    {
-      sort,
-      order,
-      type,
-      userId,
-    },
+    { sort, order, type, userId },
   );
 
-  const isEmpty = !recipes || recipes.length === 0;
+  if (!recipes?.length) {
+    return (
+      <div className="mt-6 rounded-md border border-gray-200 bg-white px-4 py-10 text-center text-sm text-gray-600">
+        No recipes found.
+      </div>
+    );
+  }
 
   return (
-    <div className="mt-6 flow-root">
-      <div className="inline-block min-w-full align-middle">
-        <div className="rounded-lg bg-gray-50 p-2 md:pt-0">
-          {/* ============== Mobile cards ============== */}
-          <div className="md:hidden">
-            {isEmpty ? (
-              <div className="w-full rounded-md bg-white p-4 text-gray-500">
-                No recipes found.
+    <>
+      {/* Mobile */}
+      <div className="md:hidden space-y-3">
+        {recipes.map((recipe) => {
+          const createdIso = safeIso(recipe.recipe_created_at);
+          const updatedIso = safeIso(recipe.recipe_updated_at);
+
+          return (
+            <div
+              key={recipe.id}
+              className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-gray-900">
+                    {recipe.recipe_name}
+                  </p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {ingredientsPreview(recipe.recipe_ingredients, 7)}
+                  </p>
+                </div>
+
+                <div className="flex shrink-0 flex-col items-end gap-2">
+                  <VisibilityBadge status={recipe.status} />
+                  <OwnershipBadge owner={recipe.owner_relationship} />
+                </div>
               </div>
-            ) : (
-              recipes.map((recipe) => {
-                const createdIso = safeIso(recipe.recipe_created_at);
-                const updatedIso = safeIso(recipe.recipe_updated_at);
 
-                return (
-                  <div
-                    key={recipe.id}
-                    className="mb-2 w-full rounded-md bg-white p-4"
-                  >
-                    <div className="flex flex-col place-items-start justify-between gap-1 border-b pb-2">
-                      <p className="font-medium">{recipe.recipe_name}</p>
-                      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <span>Type:</span>
-                          <RecipesType type={recipe.recipe_type} />
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <span>Difficulty:</span>
-                          <RecipesDifficulty type={recipe.difficulty} />
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <span>Owner:</span>
-                          <OwnershipBadge owner={recipe.owner_relationship} />
-                        </span>
-                      </div>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                    Meta
+                  </p>
+                  <div className="mt-2 space-y-2 text-xs text-gray-600">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-gray-500">Type</span>
+                      <RecipesType type={recipe.recipe_type} />
                     </div>
-
-                    <div className="mt-3 space-y-2 text-sm text-gray-700">
-                      <div>
-                        <span className="font-medium">Ingredients: </span>
-                        <span>
-                          {recipe.recipe_ingredients?.length
-                            ? recipe.recipe_ingredients.join(", ")
-                            : "—"}
-                        </span>
-                      </div>
-
-                      <div>
-                        <span className="font-medium">Steps: </span>
-                        <span>
-                          {recipe.recipe_steps?.length
-                            ? (() => {
-                                const fullText =
-                                  recipe.recipe_steps
-                                    .map((step: string) =>
-                                      step
-                                        .replace(/[^\p{L}\p{N}\s]/gu, "")
-                                        .replace(/\s+/g, " ")
-                                        .trim(),
-                                    )
-                                    .join(". ") + ".";
-                                const MAX_CHARS = 200;
-                                if (fullText.length <= MAX_CHARS)
-                                  return fullText;
-                                return (
-                                  fullText.slice(0, MAX_CHARS).trimEnd() + "…"
-                                );
-                              })()
-                            : "—"}
-                        </span>
-                      </div>
-
-                      <div className="flex flex-col gap-1 text-gray-500">
-                        <div className="flex flex-row">
-                          <p className="pr-1">Created at -</p>
-                          {createdIso ? (
-                            <time dateTime={createdIso}>
-                              {formatDate(recipe.recipe_created_at!)}
-                            </time>
-                          ) : (
-                            <span>—</span>
-                          )}
-                        </div>
-
-                        <div className="flex flex-row">
-                          <p className="pr-1">Last update at -</p>
-                          {updatedIso ? (
-                            <time dateTime={updatedIso}>
-                              {formatDate(recipe.recipe_updated_at!)}
-                            </time>
-                          ) : (
-                            <span>—</span>
-                          )}
-                        </div>
-                      </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-gray-500">Difficulty</span>
+                      <RecipesDifficulty type={recipe.difficulty} />
                     </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-gray-500">Time</span>
+                      <RecipesTimeBadge minutes={recipe.prep_time_min} />
+                    </div>
+                  </div>
+                </div>
 
-                    <div className="mt-4 flex justify-end gap-2 border-t pt-3">
-                      <ViewRecipe id={recipe.id} />
-                      {recipe.owner_relationship === "owned" ? (
-                        <>
-                          <UpdateRecipe id={recipe.id} />
-                          <DeleteRecipe id={recipe.id} />
-                        </>
+                <div className="rounded-lg border border-gray-100 bg-gray-50 p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                    Dates
+                  </p>
+                  <div className="mt-2 space-y-1 text-xs text-gray-600">
+                    <div>
+                      <span className="text-gray-500">Created:</span>{" "}
+                      {createdIso ? (
+                        <time dateTime={createdIso}>
+                          {formatDate(recipe.recipe_created_at!)}
+                        </time>
                       ) : (
-                        <RemoveImportedRecipe id={recipe.id} />
+                        "—"
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Updated:</span>{" "}
+                      {updatedIso ? (
+                        <time dateTime={updatedIso}>
+                          {formatDate(recipe.recipe_updated_at!)}
+                        </time>
+                      ) : (
+                        "—"
                       )}
                     </div>
                   </div>
-                );
-              })
-            )}
-          </div>
+                </div>
+              </div>
 
-          {/* ============== Desktop table ============== */}
-          <table className="mt-4 hidden w-full table-auto text-gray-900 md:table">
-            <thead className="text-left text-sm font-normal">
+              <div className="mt-4 space-y-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-500">
+                    Steps
+                  </p>
+                  <p className="mt-1 text-sm text-gray-700">
+                    {stepsPreview(recipe.recipe_steps)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center justify-end gap-2">
+                <Actions id={recipe.id} owner={recipe.owner_relationship} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop */}
+      <div className="hidden md:block rounded-md border border-gray-200 bg-white h-full">
+        <div className="w-full h-full overflow-x-auto overflow-y-auto">
+          <table className="min-w-[950px] w-full text-sm">
+            <thead className="sticky top-0 z-10 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-600">
               <tr>
-                <th className="px-4 py-5 sm:pl-6">
-                  <SortButton column="name" label="Recipe" />
+                <th className="px-4 py-3 text-left">
+                  <SortButton
+                    column="name"
+                    label="Recipe"
+                    searchParams={searchParams}
+                  />
                 </th>
-                <th className="px-3 py-5 font-medium">
-                  <SortButton column="type" label="Type" />
+                <th className="px-4 py-3 text-left">
+                  <SortButton
+                    column="type"
+                    label="Type"
+                    searchParams={searchParams}
+                  />
                 </th>
-                <th className="px-3 py-5 font-medium">
-                  <SortButton column="difficulty" label="Difficulty" />
+                <th className="px-4 py-3 text-left">
+                  <SortButton
+                    column="difficulty"
+                    label="Difficulty"
+                    searchParams={searchParams}
+                  />
                 </th>
-                <th className="whitespace-nowrap px-3 py-5 font-medium">
-                  <SortButton column="time" label="Time" />
+                <th className="px-4 py-3 text-left">
+                  <SortButton
+                    column="time"
+                    label="Time"
+                    searchParams={searchParams}
+                  />
                 </th>
-                <th className="whitespace-nowrap px-3 py-5 font-medium">
-                  <SortButton column="date" label="Creation date" />
+                <th className="px-4 py-3 text-left">
+                  <SortButton
+                    column="date"
+                    label="Creation date"
+                    searchParams={searchParams}
+                  />
                 </th>
-                <th className="whitespace-nowrap px-3 py-5 font-medium">
-                  <SortButton column="visibility" label="Visibility" />
+                <th className="px-4 py-3 text-left">
+                  <SortButton
+                    column="visibility"
+                    label="Visibility"
+                    searchParams={searchParams}
+                  />
                 </th>
-                <th className="px-3 py-5 font-medium">
-                  <SortButton column="owner" label="Owner" />
+                <th className="px-4 py-3 text-left">
+                  <SortButton
+                    column="owner"
+                    label="Owner"
+                    searchParams={searchParams}
+                  />
                 </th>
-                <th className="px-3 py-5 text-right text-sm font-medium">
-                  Actions
-                </th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
 
-            <tbody className="bg-white">
-              {isEmpty ? (
-                <tr>
-                  <td
-                    colSpan={8}
-                    className="px-6 py-10 text-center text-sm text-gray-500"
-                  >
-                    No recipes found.
-                  </td>
-                </tr>
-              ) : (
-                recipes.map((recipe) => {
-                  const createdIso = safeIso(recipe.recipe_created_at);
+            <tbody className="divide-y divide-gray-100">
+              {recipes.map((recipe) => {
+                const createdIso = safeIso(recipe.recipe_created_at);
 
-                  return (
-                    <tr
-                      key={recipe.id}
-                      className="w-full border-b py-3 text-sm last-of-type:border-none"
-                    >
-                      {/* Recipe name */}
-                      <td className="whitespace-normal py-3 pl-6 pr-3 align-middle">
-                        <p className="font-medium">{recipe.recipe_name}</p>
-                      </td>
+                return (
+                  <tr key={recipe.id} className="hover:bg-gray-50/70">
+                    <td className="px-4 py-3 align-middle text-gray-600">
+                      <div className="font-medium text-gray-900">
+                        {recipe.recipe_name}
+                      </div>
+                      <div className="mt-1 text-xs text-gray-500">
+                        {ingredientsPreview(recipe.recipe_ingredients, 4)}
+                      </div>
+                    </td>
 
-                      {/* Type */}
-                      <td className="whitespace-nowrap px-3 py-3 align-middle">
-                        <RecipesType type={recipe.recipe_type} />
-                      </td>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle text-gray-600">
+                      <RecipesType type={recipe.recipe_type} />
+                    </td>
 
-                      {/* Difficulty */}
-                      <td className="whitespace-nowrap px-3 py-3 align-middle">
-                        <RecipesDifficulty type={recipe.difficulty} />
-                      </td>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle text-gray-600">
+                      <RecipesDifficulty type={recipe.difficulty} />
+                    </td>
 
-                      {/* Time */}
-                      <td className="whitespace-nowrap px-3 py-3 align-middle">
-                        <PrepTimePill minutes={recipe.prep_time_min} />
-                      </td>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle text-gray-600">
+                      <RecipesTimeBadge minutes={recipe.prep_time_min} />
+                    </td>
 
-                      {/* Created at */}
-                      <td className="whitespace-nowrap px-3 py-3 text-gray-600 align-middle">
-                        {createdIso ? (
-                          <time dateTime={createdIso}>
-                            {formatDate(recipe.recipe_created_at!)}
-                          </time>
-                        ) : (
-                          <span>—</span>
-                        )}
-                      </td>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle text-gray-600">
+                      {createdIso ? (
+                        <time dateTime={createdIso}>
+                          {formatDate(recipe.recipe_created_at!)}
+                        </time>
+                      ) : (
+                        <span>—</span>
+                      )}
+                    </td>
 
-                      {/* Visibility */}
-                      <td className="whitespace-nowrap px-3 py-3 align-middle">
-                        <VisibilityBadge status={recipe.status} />
-                      </td>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle text-gray-600">
+                      <VisibilityBadge status={recipe.status} />
+                    </td>
 
-                      {/* Owner */}
-                      <td className="whitespace-nowrap px-3 py-3 align-middle">
-                        <OwnershipBadge owner={recipe.owner_relationship} />
-                      </td>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle text-gray-600">
+                      <OwnershipBadge owner={recipe.owner_relationship} />
+                    </td>
 
-                      {/* Actions */}
-                      <td className="whitespace-nowrap py-3 pl-3 pr-6 align-middle">
-                        <div className="flex justify-end gap-2">
-                          <ViewRecipe id={recipe.id} />
-                          {recipe.owner_relationship === "owned" ? (
-                            <>
-                              <UpdateRecipe id={recipe.id} />
-                              <DeleteRecipe id={recipe.id} />
-                            </>
-                          ) : (
-                            <RemoveImportedRecipe id={recipe.id} />
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
+                    <td className="whitespace-nowrap px-4 py-3 align-middle text-gray-600">
+                      <Actions
+                        id={recipe.id}
+                        owner={recipe.owner_relationship}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
-    </div>
+    </>
   );
 }

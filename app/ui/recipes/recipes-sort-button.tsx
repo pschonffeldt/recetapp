@@ -1,83 +1,93 @@
-"use client";
+import type { SortKey } from "@/app/lib/recipes/data";
+import clsx from "clsx";
+import Link from "next/link";
 
-import { useSearchParams, useRouter } from "next/navigation";
-import { setParams } from "./recipes-url";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/solid";
+type Props = {
+  column: SortKey;
+  label: string;
 
-// Server-side sort keys supported by your list query
-type SortCol =
-  | "name"
-  | "date"
-  | "type"
-  | "difficulty"
-  | "owner"
-  | "time"
-  | "visibility";
+  // Pass through the current params so we can preserve them.
+  // This avoids losing query/type/page/etc.
+  searchParams: Record<string, string | string[] | undefined>;
+
+  // Optional: if you want to force page reset on sort
+  resetPage?: boolean;
+};
+
+function getParam(
+  searchParams: Record<string, string | string[] | undefined>,
+  key: string,
+) {
+  const v = searchParams[key];
+  return Array.isArray(v) ? v[0] : (v ?? "");
+}
+
+function Arrow({ active, order }: { active: boolean; order: "asc" | "desc" }) {
+  return (
+    <span className="inline-flex w-3 justify-center" aria-hidden="true">
+      <span
+        className={clsx(
+          "inline-block text-[10px] leading-none translate-y-[0.5px] opacity-70",
+          active ? "opacity-90" : "opacity-0",
+          active && order === "asc" && "rotate-180",
+        )}
+      >
+        ▼
+      </span>
+    </span>
+  );
+}
 
 export default function SortButton({
   column,
   label,
-}: {
-  column: SortCol;
-  label: string;
-}) {
-  // Read the current URL query parameters
-  const searchParams = useSearchParams();
-  const router = useRouter();
+  searchParams,
+  resetPage = true,
+}: Props) {
+  const currentSort = (getParam(searchParams, "sort") || "") as SortKey | "";
+  const currentOrder = (getParam(searchParams, "order") || "desc") as
+    | "asc"
+    | "desc";
 
-  // Is this column currently active in the URL?
-  // Default to "date" when ?sort is missing.
-  const active = (searchParams.get("sort") ?? "date") === column;
-
-  // Current sort direction for the active column (defaults to "desc")
-  const order = (searchParams.get("order") ?? "desc") as "asc" | "desc";
-
-  // Compute the *next* order to apply when the button is clicked:
-  // - If this column is already active, flip the direction.
-  // - If switching to a new column, start with "asc".
-  const nextOrder: "asc" | "desc" = active
-    ? order === "asc"
+  const isActive = currentSort === column;
+  const nextOrder: "asc" | "desc" = isActive
+    ? currentOrder === "asc"
       ? "desc"
       : "asc"
-    : "asc";
+    : "desc";
 
-  // Update the URL with the next sort state.
-  // NOTE: setParams() clones the read-only URLSearchParams and:
-  // - sets sort/order
-  // - resets page=1 when sort/order change (to avoid empty pages)
-  const onClick = () => {
-    router.replace(setParams(searchParams, { sort: column, order: nextOrder }));
-  };
+  const params = new URLSearchParams();
+
+  // preserve existing params
+  for (const [k, v] of Object.entries(searchParams)) {
+    if (v == null) continue;
+    if (Array.isArray(v)) v.forEach((x) => params.append(k, x));
+    else params.set(k, v);
+  }
+
+  params.set("sort", column);
+  params.set("order", nextOrder);
+  if (resetPage) params.set("page", "1");
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      // Visual hint for active column; underline on hover for affordance
-      className={`inline-flex items-center gap-1 font-medium hover:underline ${
-        active ? "text-gray-900" : "text-gray-600"
-      }`}
-      // Programmatic name reflects the *action* that will happen on click
-      // (Screen readers announce “Sort by X asc/desc”)
-      aria-label={`Sort by ${label} ${nextOrder}`}
-      // If you want a native tooltip like your pagination buttons, you can add:
-      // title={`Sort by ${label} ${nextOrder}`}
-    >
-      {/* Column label */}
-      {label}
-
-      {/* Indicator icon:
-         - Active column: up/down chevron matches current order
-         - Inactive column: faint down chevron as a generic hint */}
-      {active ? (
-        order === "asc" ? (
-          <ChevronUpIcon className="h-4 w-4" />
-        ) : (
-          <ChevronDownIcon className="h-4 w-4" />
-        )
-      ) : (
-        <ChevronDownIcon className="h-4 w-4 opacity-30" />
+    <Link
+      href={`?${params.toString()}`}
+      className={clsx(
+        "inline-flex items-center gap-1 select-none",
+        "hover:text-gray-900",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2",
       )}
-    </button>
+      aria-sort={
+        isActive
+          ? currentOrder === "asc"
+            ? "ascending"
+            : "descending"
+          : "none"
+      }
+      title={`Sort by ${label}`}
+    >
+      <span>{label}</span>
+      <Arrow active={isActive} order={currentOrder} />
+    </Link>
   );
 }
