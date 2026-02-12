@@ -35,7 +35,7 @@ export default async function Page({ params }: PageProps) {
         breadcrumbs={[
           { label: "Admin", href: "/admin", clickable: false },
           {
-            label: "Public inbox",
+            label: "Support inbox",
             href: "/admin/support",
           },
           {

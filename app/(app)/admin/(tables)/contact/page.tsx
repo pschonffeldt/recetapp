@@ -2,10 +2,13 @@ import { requireAdmin } from "@/app/lib/auth/helpers";
 import { fetchContactInbox } from "@/app/lib/contact/contact-data";
 import ContactInboxTable from "@/app/ui/contact/admin/contact-inbox-table";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
+import { Metadata } from "next";
 
-export const metadata = { title: "Public inbox" };
+export const metadata: Metadata = {
+  title: "Public inbox",
+};
 
-export default async function Page() {
+export default async function PublicInboxPage() {
   await requireAdmin({
     callbackUrl: "/admin/contact",
     redirectTo: "/dashboard",

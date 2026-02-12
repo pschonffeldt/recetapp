@@ -53,7 +53,6 @@ export default function RecipesFiltersToolbar(props: Props) {
     title = "Discover",
     contextLabel = "community recipes",
     totalCount,
-
     showSearch = true,
     showType = true,
     showDifficulty = true,
@@ -185,7 +184,7 @@ export default function RecipesFiltersToolbar(props: Props) {
         <div
           className={clsx(
             "flex flex-wrap items-center gap-2",
-            !hasFilters && "opacity-0 pointer-events-none"
+            !hasFilters && "opacity-0 pointer-events-none",
           )}
         >
           {/* Active filter chips */}

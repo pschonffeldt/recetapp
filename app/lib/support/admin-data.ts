@@ -26,7 +26,8 @@ export type SupportInboxRow = {
   minutes_ago: number; // computed server-side
 };
 
-export async function fetchSupportInbox(): Promise<SupportInboxRow[]> {
+// OLD!
+export async function fetchSupportInboxs(): Promise<SupportInboxRow[]> {
   const rows = await sql<SupportInboxRow[]>`
     SELECT
       sr.id::text,
@@ -79,6 +80,106 @@ export async function fetchSupportInbox(): Promise<SupportInboxRow[]> {
   return rows;
 }
 
+export type SupportInboxFilters = {
+  query?: string | null;
+  status?: "open" | "solved" | null;
+  topic?: string | null; // same values as sr.category
+  limit?: number;
+};
+
+export async function fetchSupportInbox(
+  filters: SupportInboxFilters = {},
+): Promise<{ rows: SupportInboxRow[]; totalCount: number }> {
+  const { query = null, status = null, topic = null, limit = 200 } = filters;
+
+  const q = query?.trim() ? `%${query.trim()}%` : null;
+
+  // Count (same WHERE as rows)
+  const countRes = await sql<{ count: number }[]>`
+    SELECT COUNT(*)::int AS count
+    FROM public.support_requests sr
+    JOIN public.users u ON u.id = sr.user_id
+    WHERE 1=1
+      AND (${topic}::text IS NULL OR sr.category::text = ${topic}::text)
+      AND (
+        ${status}::text IS NULL
+        OR (${status}::text = 'solved' AND sr.solved_at IS NOT NULL)
+        OR (${status}::text = 'open'   AND sr.solved_at IS NULL)
+      )
+      AND (
+        ${q}::text IS NULL
+        OR sr.subject ILIKE ${q}
+        OR COALESCE(u.user_name, '') ILIKE ${q}
+        OR u.email ILIKE ${q}
+      )
+  `;
+
+  const rows = await sql<SupportInboxRow[]>`
+    SELECT
+      sr.id::text,
+      sr.user_id::text,
+      sr.category,
+      sr.subject,
+
+      -- enum -> text for TS
+      COALESCE(
+        sr.status::text,
+        CASE WHEN sr.solved_at IS NOT NULL THEN 'solved' ELSE 'open' END
+      ) AS status,
+
+      (sr.created_at AT TIME ZONE 'UTC')::timestamptz::text AS created_at,
+
+      CASE
+        WHEN sr.solved_at IS NULL THEN NULL
+        ELSE (sr.solved_at AT TIME ZONE 'UTC')::timestamptz::text
+      END AS solved_at,
+
+      u.user_name,
+      u.email,
+
+      -- minutes since created
+      GREATEST(
+        0,
+        FLOOR(EXTRACT(EPOCH FROM (NOW() - sr.created_at)) / 60)::int
+      ) AS minutes_ago,
+
+      -- minutes since solved (nullable)
+      CASE
+        WHEN sr.solved_at IS NULL THEN NULL
+        ELSE GREATEST(
+          0,
+          FLOOR(EXTRACT(EPOCH FROM (NOW() - sr.solved_at)) / 60)::int
+        )
+      END AS solved_minutes_ago
+
+    FROM public.support_requests sr
+    JOIN public.users u ON u.id = sr.user_id
+
+    WHERE 1=1
+      AND (${topic}::text IS NULL OR sr.category::text = ${topic}::text)
+      AND (
+        ${status}::text IS NULL
+        OR (${status}::text = 'solved' AND sr.solved_at IS NOT NULL)
+        OR (${status}::text = 'open'   AND sr.solved_at IS NULL)
+      )
+      AND (
+        ${q}::text IS NULL
+        OR sr.subject ILIKE ${q}
+        OR COALESCE(u.user_name, '') ILIKE ${q}
+        OR u.email ILIKE ${q}
+      )
+
+    ORDER BY
+      -- open first
+      (COALESCE(sr.status, 'open'::support_status) = 'solved'::support_status) ASC,
+      sr.created_at DESC
+
+    LIMIT ${limit}
+  `;
+
+  return { rows, totalCount: countRes[0]?.count ?? 0 };
+}
+
 export type SupportMessageDetail = {
   id: string;
   category: SupportCategory;
@@ -104,7 +205,7 @@ export type SupportMessageDetail = {
 };
 
 export async function fetchSupportMessageById(
-  id: string
+  id: string,
 ): Promise<SupportMessageDetail | null> {
   const rows = await sql<SupportMessageDetail[]>`
     SELECT
