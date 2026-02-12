@@ -144,11 +144,31 @@ export async function fetchUserByIdForAdmin(
   return rows[0] ?? null;
 }
 
-/**
- * Fetch all users for the admin users table.
- * (Authorization is enforced at the route level.)
- */
-export async function fetchAdminUsers(): Promise<AdminUserListItem[]> {
+type Filters = {
+  query?: string;
+  role?: "admin" | "user" | null;
+  tier?: "free" | "tier1" | "tier2" | null;
+  country?: string | null; // exact match for now (or you can use ILIKE with wildcards)
+  language?: string | null; // IMPORTANT: keep as string, do NOT cast user input to enum
+};
+
+function clean(v?: string | null) {
+  const s = (v ?? "").trim();
+  return s.length ? s : null;
+}
+
+export async function fetchAdminUsers(filters: Filters): Promise<{
+  rows: AdminUserListItem[];
+  total: number;
+}> {
+  const qRaw = clean(filters.query);
+  const q = qRaw ? `%${qRaw.toLowerCase()}%` : null;
+
+  const role = filters.role ?? null;
+  const tier = filters.tier ?? null;
+  const country = clean(filters.country);
+  const language = clean(filters.language);
+
   const rows = await sql<AdminUserListItem[]> /* sql */ `
     SELECT
       u.id,
@@ -164,25 +184,37 @@ export async function fetchAdminUsers(): Promise<AdminUserListItem[]> {
       (u.updated_at AT TIME ZONE 'UTC')::timestamptz::text          AS updated_at,
       (u.password_changed_at AT TIME ZONE 'UTC')::timestamptz::text AS password_changed_at,
       (u.profile_updated_at AT TIME ZONE 'UTC')::timestamptz::text  AS profile_updated_at,
-      (u.last_login_at AT TIME ZONE 'UTC')::timestamptz::text AS last_login_at,
+      (u.last_login_at AT TIME ZONE 'UTC')::timestamptz::text       AS last_login_at,
       COALESCE(owned.count, 0)::int    AS owned_recipes_count,
       COALESCE(imported.count, 0)::int AS imported_recipes_count,
       (COALESCE(owned.count, 0) + COALESCE(imported.count, 0))::int AS total_recipes_count
     FROM public.users u
-    -- Owned recipes per user
     LEFT JOIN LATERAL (
       SELECT COUNT(*)::int AS count
       FROM public.recipes r
       WHERE r.user_id = u.id
     ) AS owned ON TRUE
-    -- Imported/saved recipes per user
     LEFT JOIN LATERAL (
       SELECT COUNT(*)::int AS count
       FROM public.recipes r
       WHERE u.id = ANY(r.saved_by_user_ids)
     ) AS imported ON TRUE
+    WHERE
+      (${q}::text IS NULL OR (
+        LOWER(COALESCE(u.name, '')) LIKE ${q}
+        OR LOWER(COALESCE(u.last_name, '')) LIKE ${q}
+        OR LOWER(COALESCE(u.user_name, '')) LIKE ${q}
+        OR LOWER(u.email) LIKE ${q}
+      ))
+      AND (${role}::text IS NULL OR u.user_role::text = ${role})
+      AND (${tier}::text IS NULL OR COALESCE(u.membership_tier::text, '') = ${tier})
+      -- Country: safe text compare (case-insensitive)
+AND (${country}::text IS NULL OR LOWER(COALESCE(u.country, '')) LIKE LOWER('%' || ${country} || '%'))
+      -- Language: DO NOT cast user input to enum. Compare text-to-text.
+      AND (${language}::text IS NULL OR COALESCE(u.language::text, '') = ${language})
     ORDER BY u.created_at DESC
+    LIMIT 200
   `;
 
-  return rows;
+  return { rows, total: rows.length };
 }

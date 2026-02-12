@@ -1,6 +1,8 @@
 import { requireAdmin } from "@/app/lib/auth/helpers";
 import { fetchSupportInbox } from "@/app/lib/support/admin-data";
+import SupportInboxFiltersToolbar from "@/app/ui/filters/support-inbox-filters-toolbar";
 import SupportFiltersToolbar from "@/app/ui/filters/support-inbox-filters-toolbar";
+import UsersFiltersToolbar from "@/app/ui/filters/users-filters-toolbar";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import SupportInboxTable from "@/app/ui/support/admin/support-inbox-table";
 import type { Metadata } from "next";
@@ -44,7 +46,7 @@ export default async function SupportInboxPage(props: {
       />
 
       <section className="my-5">
-        <SupportFiltersToolbar
+        <SupportInboxFiltersToolbar
           basePath="/admin/support"
           query={query}
           status={status}
