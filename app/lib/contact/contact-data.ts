@@ -4,19 +4,19 @@ import "server-only";
 import { sql } from "@/app/lib/db";
 
 export type ContactCategory =
-  | "bug"
   | "billing"
+  | "bug"
   | "feature"
   | "account"
   | "other";
 
 export type ContactInboxRow = {
   id: string;
-  category: ContactCategory | string; // keep flexible since DB column is TEXT
+  category: ContactCategory | string;
   subject: string;
 
   status: "open" | "solved";
-  created_at: string; // ISO-ish text
+  created_at: string;
   solved_at: string | null;
 
   contact_name: string;

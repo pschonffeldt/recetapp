@@ -15,7 +15,7 @@ export type SupportInboxRow = {
   user_id: string;
   category: SupportCategory;
   subject: string;
-  created_at: string; // ISO string
+  created_at: string;
   solved_at: string | null;
   status: "open" | "solved";
   solved_minutes_ago: number | null;
@@ -23,67 +23,13 @@ export type SupportInboxRow = {
   // helpful for list UI
   user_name: string | null;
   email: string;
-  minutes_ago: number; // computed server-side
+  minutes_ago: number;
 };
-
-// OLD!
-export async function fetchSupportInboxs(): Promise<SupportInboxRow[]> {
-  const rows = await sql<SupportInboxRow[]>`
-    SELECT
-      sr.id::text,
-      sr.user_id::text,
-      sr.category,
-      sr.subject,
-
-      -- enum -> text for TS
-      COALESCE(
-        sr.status::text,
-        CASE WHEN sr.solved_at IS NOT NULL THEN 'solved' ELSE 'open' END
-      ) AS status,
-
-      (sr.created_at AT TIME ZONE 'UTC')::timestamptz::text AS created_at,
-
-      CASE
-        WHEN sr.solved_at IS NULL THEN NULL
-        ELSE (sr.solved_at AT TIME ZONE 'UTC')::timestamptz::text
-      END AS solved_at,
-
-      u.user_name,
-      u.email,
-
-      -- minutes since created
-      GREATEST(
-        0,
-        FLOOR(EXTRACT(EPOCH FROM (NOW() - sr.created_at)) / 60)::int
-      ) AS minutes_ago,
-
-      -- minutes since solved (nullable)
-      CASE
-        WHEN sr.solved_at IS NULL THEN NULL
-        ELSE GREATEST(
-          0,
-          FLOOR(EXTRACT(EPOCH FROM (NOW() - sr.solved_at)) / 60)::int
-        )
-      END AS solved_minutes_ago
-
-    FROM public.support_requests sr
-    JOIN public.users u ON u.id = sr.user_id
-
-    ORDER BY
-      -- open first
-      (COALESCE(sr.status, 'open'::support_status) = 'solved'::support_status) ASC,
-      sr.created_at DESC
-
-    LIMIT 200
-  `;
-
-  return rows;
-}
 
 export type SupportInboxFilters = {
   query?: string | null;
   status?: "open" | "solved" | null;
-  topic?: string | null; // same values as sr.category
+  topic?: string | null;
   limit?: number;
 };
 
