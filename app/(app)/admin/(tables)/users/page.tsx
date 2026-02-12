@@ -23,7 +23,7 @@ export default async function AdminUsersTable() {
           { label: "Users", href: "/admin/users", active: true },
         ]}
       />
-      <AdminUsersTableView users={users} />;{/* <AdminUsersTable /> */}
+      <AdminUsersTableView users={users} />
     </main>
   );
 }
