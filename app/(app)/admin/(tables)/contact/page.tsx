@@ -48,7 +48,7 @@ export default async function PublicInboxPage(props: {
         ]}
       />
 
-      <section className="my-10">
+      <section className="my-5">
         <ContactInboxFiltersToolbar
           basePath="/admin/contact"
           query={query}
@@ -63,7 +63,7 @@ export default async function PublicInboxPage(props: {
         />
       </section>
 
-      <div className="p-4 flex-1 min-h-0 lg:p-0">
+      <div className="flex-1 min-h-0 lg:p-0">
         <ContactInboxTable rows={rows} />
       </div>
     </main>
