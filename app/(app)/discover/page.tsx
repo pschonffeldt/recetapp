@@ -5,7 +5,7 @@ import {
 } from "@/app/lib/discover/data";
 import type { Difficulty, RecipeForm } from "@/app/lib/types/definitions";
 import DiscoverGrid from "@/app/ui/discover/discover-grid";
-import RecipesFiltersToolbar from "@/app/ui/filters/filters-toolbar";
+import RecipesFiltersToolbar from "@/app/ui/filters/recipes-filters-toolbar";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import Pagination from "@/app/ui/recipes/recipes-pagination";
 import { Metadata } from "next";

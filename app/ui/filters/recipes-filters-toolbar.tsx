@@ -2,12 +2,13 @@
 
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Button } from "../general/button";
 
 type Props = {
   basePath: string;
 
-  // Core filter values (all optional so pages can opt-out)
+  // Current values (from URL)
   query?: string;
   type?: string;
   difficultyRaw?: string;
@@ -17,11 +18,11 @@ type Props = {
   hasFilters: boolean;
 
   // UX / text
-  title?: string; // e.g. "Discover" / "Your recipes"
-  contextLabel?: string; // e.g. "community recipes" / "recipes"
-  totalCount?: number; // optional – if absent, we show text without a number
+  title?: string;
+  contextLabel?: string;
+  totalCount?: number;
 
-  // Feature flags – turn fields on/off per page
+  // Feature flags
   showSearch?: boolean;
   showType?: boolean;
   showDifficulty?: boolean;
@@ -41,24 +42,35 @@ function prettyLabel(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-export default function RecipesFiltersToolbar(props: Props) {
-  const {
-    basePath,
-    query = "",
-    type = "",
-    difficultyRaw = "",
-    maxPrepRaw = "",
-    sort = "newest",
-    hasFilters,
-    title = "Discover",
-    contextLabel = "community recipes",
-    totalCount,
-    showSearch = true,
-    showType = true,
-    showDifficulty = true,
-    showMaxPrep = true,
-    // showSort = true,
-  } = props;
+export default function RecipesFiltersToolbar({
+  basePath,
+  query = "",
+  type = "",
+  difficultyRaw = "",
+  maxPrepRaw = "",
+  // sort = "newest",
+  hasFilters,
+  // title = "Discover",
+  contextLabel = "community recipes",
+  totalCount,
+  showSearch = true,
+  showType = true,
+  showDifficulty = true,
+  showMaxPrep = true,
+}: Props) {
+  const router = useRouter();
+
+  // Controlled UI state
+  const [queryValue, setQueryValue] = useState(query);
+  const [typeValue, setTypeValue] = useState(type);
+  const [difficultyValue, setDifficultyValue] = useState(difficultyRaw);
+  const [maxPrepValue, setMaxPrepValue] = useState(maxPrepRaw);
+
+  // Keep inputs in sync when navigation updates URL/searchParams
+  useEffect(() => setQueryValue(query), [query]);
+  useEffect(() => setTypeValue(type), [type]);
+  useEffect(() => setDifficultyValue(difficultyRaw), [difficultyRaw]);
+  useEffect(() => setMaxPrepValue(maxPrepRaw), [maxPrepRaw]);
 
   const countText = (() => {
     if (totalCount == null) {
@@ -67,7 +79,6 @@ export default function RecipesFiltersToolbar(props: Props) {
         : `Showing ${contextLabel}`;
     }
 
-    // If your label already includes "recipes", swap it for "recipe" when needed.
     const label =
       totalCount === 1
         ? contextLabel.replace(/\brecipes\b/i, "recipe")
@@ -78,25 +89,55 @@ export default function RecipesFiltersToolbar(props: Props) {
       : `Showing ${totalCount} ${label}`;
   })();
 
-  const router = useRouter();
+  function buildUrl() {
+    const sp = new URLSearchParams();
+
+    if (queryValue.trim()) sp.set("query", queryValue.trim());
+    if (typeValue) sp.set("type", typeValue);
+    if (difficultyValue) sp.set("difficulty", difficultyValue);
+    if (maxPrepValue !== "" && String(maxPrepValue).trim() !== "") {
+      sp.set("maxPrep", String(maxPrepValue).trim());
+    }
+
+    const qs = sp.toString();
+    return qs ? `${basePath}?${qs}` : basePath;
+  }
+
+  function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    router.push(buildUrl());
+  }
+
+  function onClear() {
+    // Reset UI state
+    setQueryValue("");
+    setTypeValue("");
+    setDifficultyValue("");
+    setMaxPrepValue("");
+
+    // Reset URL
+    router.push(basePath);
+  }
 
   return (
     <section className="mt-4 rounded-md bg-gray-50 p-4 md:p-6">
-      <form className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end">
+      <form
+        onSubmit={onSubmit}
+        className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-end"
+      >
         {/* Search */}
         {showSearch && (
           <div className="flex-1 min-w-[200px]">
             <label
-              htmlFor="discover-query"
+              htmlFor="recipes-query"
               className="block text-xs font-medium text-gray-700"
             >
               Search recipes
             </label>
             <input
-              id="discover-query"
-              name="query"
-              type="text"
-              defaultValue={query}
+              id="recipes-query"
+              value={queryValue}
+              onChange={(e) => setQueryValue(e.target.value)}
               placeholder="Search by recipe name..."
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
@@ -107,15 +148,15 @@ export default function RecipesFiltersToolbar(props: Props) {
         {showType && (
           <div className="w-full min-w-[140px] md:w-auto">
             <label
-              htmlFor="discover-type"
+              htmlFor="recipes-type"
               className="block text-xs font-medium text-gray-700"
             >
               Type
             </label>
             <select
-              id="discover-type"
-              name="type"
-              defaultValue={type}
+              id="recipes-type"
+              value={typeValue}
+              onChange={(e) => setTypeValue(e.target.value)}
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="">All types</option>
@@ -132,15 +173,15 @@ export default function RecipesFiltersToolbar(props: Props) {
         {showDifficulty && (
           <div className="w-full min-w-[140px] md:w-auto">
             <label
-              htmlFor="discover-difficulty"
+              htmlFor="recipes-difficulty"
               className="block text-xs font-medium text-gray-700"
             >
               Difficulty
             </label>
             <select
-              id="discover-difficulty"
-              name="difficulty"
-              defaultValue={difficultyRaw}
+              id="recipes-difficulty"
+              value={difficultyValue}
+              onChange={(e) => setDifficultyValue(e.target.value)}
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="">All levels</option>
@@ -155,40 +196,39 @@ export default function RecipesFiltersToolbar(props: Props) {
         {showMaxPrep && (
           <div className="w-full min-w-[140px] md:w-auto">
             <label
-              htmlFor="discover-maxPrep"
+              htmlFor="recipes-maxPrep"
               className="block text-xs font-medium text-gray-700"
             >
               Max prep time (min)
             </label>
             <input
-              id="discover-maxPrep"
-              name="maxPrep"
+              id="recipes-maxPrep"
               type="number"
               min={0}
-              defaultValue={maxPrepRaw}
+              value={maxPrepValue}
+              onChange={(e) => setMaxPrepValue(e.target.value)}
               placeholder="e.g. 30"
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
         )}
 
-        {/* Actions (Apply) */}
         <div className="flex w-full items-center justify-end gap-2 md:w-auto md:self-end">
           <Button type="submit">Apply filters</Button>
         </div>
       </form>
 
-      {/* Summary + chips (always rendered to avoid layout jump) */}
+      {/* Summary + chips */}
       <div className="mt-2 flex min-h-[28px] flex-wrap items-center justify-between gap-2 text-xs text-gray-500">
         <p>{countText}</p>
+
         <div
           className={clsx(
             "flex flex-wrap items-center gap-2",
             !hasFilters && "opacity-0 pointer-events-none",
           )}
         >
-          {/* Active filter chips */}
-          {hasFilters && (
+          {hasFilters ? (
             <>
               {query && <FilterChip label={`Search: "${query}"`} />}
               {type && <FilterChip label={`Type: ${prettyLabel(type)}`} />}
@@ -199,15 +239,11 @@ export default function RecipesFiltersToolbar(props: Props) {
               )}
               {maxPrepRaw && <FilterChip label={`Max ${maxPrepRaw} min`} />}
 
-              <Button
-                type="button"
-                onClick={() => router.push(basePath)}
-                className="h-8"
-              >
+              <Button type="button" onClick={onClear} className="h-8">
                 Clear filters
               </Button>
             </>
-          )}
+          ) : null}
         </div>
       </div>
     </section>

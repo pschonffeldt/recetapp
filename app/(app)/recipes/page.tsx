@@ -1,6 +1,6 @@
 import { requireUserId } from "@/app/lib/auth/helpers";
 import { fetchRecipesPages } from "@/app/lib/recipes/data";
-import RecipesFiltersToolbar from "@/app/ui/filters/filters-toolbar";
+import RecipesFiltersToolbar from "@/app/ui/filters/recipes-filters-toolbar";
 import Breadcrumbs from "@/app/ui/general/breadcrumbs";
 import { CreateRecipe } from "@/app/ui/recipes/recipes-buttons";
 import RecipesTable from "@/app/ui/recipes/recipes-table";
